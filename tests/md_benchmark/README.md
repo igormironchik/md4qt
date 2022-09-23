@@ -130,9 +130,3 @@ Java: 85103451 ns.
 $ java JavaProgram 
 Java: 96809767 ns.
 ```
-
-# Why don't I use `md4c` for Markdown parsing?
-
-`md4c` completely wrong with complex footnotes, that is needed for `md-pdf` render.
-Ok, I don't support `LaTeX` math expressions yet. But this is because I don't
-need it yet. If you need something that is not implemented yet - just create an issue.
