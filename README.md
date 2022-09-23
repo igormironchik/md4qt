@@ -27,3 +27,21 @@ int main()
 Approximate benchmark with `md4c` says, that `md4qt` is slower only in 10 times.
 But you will get complete tree structure of the Markdown document with all
 major extensions.
+
+# Q/A
+
+**What should I know about links in the document?**
+
+ * In some cases in Markdown link's URL is something document related. So, when
+you got a `MD::Link` in the document check if the labeled links of the
+document contains key with URL in the link, and if so, use URL from
+labeled links, look:
+
+   ```cpp
+   MD::Link * item = ...;
+
+   QString url = item->url();
+
+   if( doc->labeledLinks().contains( url ) )
+       url = doc->labeledLinks()[ url ]->url();
+   ```
