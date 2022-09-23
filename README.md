@@ -21,3 +21,9 @@ int main()
     return 0;
 }
 ```
+
+# Benchmark
+
+Approximate benchmark with `md4c` says, that `md4qt` is slower only in 10 times.
+But you will get complete tree structure of the Markdown document with all
+major extensions.
