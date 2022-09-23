@@ -22,14 +22,10 @@ set( CMAKE_CXX_STANDARD 14 )
 
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
 
-if( ${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME} )
+add_subdirectory( src )
 
-	add_subdirectory( src )
+if( BUILD_MD4QT_TESTS )
+	enable_testing()
 
-	if( BUILD_MD4QT_TESTS )
-		enable_testing()
-
-		add_subdirectory( tests )
-	endif()
-
-endif( ${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME} )
+	add_subdirectory( tests )
+endif()
