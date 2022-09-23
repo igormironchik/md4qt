@@ -46,6 +46,10 @@ jobs:
       with:
         version: '6.3.1'
 
+    - run: sudo apt update
+
+    - run: sudo apt install lcov
+
     # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
     # If this step fails, then you should remove it and run the build manually (see below)
     #- name: Autobuild
