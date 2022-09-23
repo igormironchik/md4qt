@@ -1,0 +1,7 @@
+@PACKAGE_INIT@
+
+set( CMAKE_CXX_STANDARD 14 )
+
+set( md4qt_INCLUDE_DIRECTORIES "@CMAKE_INSTALL_PREFIX@/include" )
+
+include( "${CMAKE_CURRENT_LIST_DIR}/md4qt-targets.cmake" )
