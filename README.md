@@ -3,6 +3,21 @@
 `md4qt` is a static C++ library for parsing Markdown with Qt.
 
 `md4qt` supports CommonMark 0.30 Spec, and some GitHub extensions, such as
-tables, footnotes, tasks lists, strikethroughs.
+tables, footnotes, tasks lists, strikethroughs, LaTeX Math injections.
 
 This library parses Markdown into tree structure.
+
+# Example
+
+```cpp
+#include <md4qt/md_parser.hpp>
+
+int main()
+{
+    MD::Parser p;
+
+    auto doc = p.parse( QStringLiteral( "your_markdown.md" ) );
+
+    return 0;
+}
+```
