@@ -45,3 +45,10 @@ labeled links, look:
    if( doc->labeledLinks().contains( url ) )
        url = doc->labeledLinks()[ url ]->url();
    ```
+
+**What is an `MD::Anchor`?**
+
+ * As `md4qt` supports recursive Markdown parsing, then in the resulting
+document can be represented more then one Markdown file. Each file in the
+document starts with `MD::Anchor`, it's just show that during traverse through
+the document you reached new file.
