@@ -46,6 +46,58 @@
 
 namespace MD {
 
+static const QChar c_35 = QLatin1Char( '#' );
+static const QChar c_46 = QLatin1Char( '.' );
+static const QChar c_41 = QLatin1Char( ')' );
+static const QChar c_96 = QLatin1Char( '`' );
+static const QChar c_126 = QLatin1Char( '~' );
+static const QChar c_9 = QLatin1Char( '\t' );
+static const QChar c_62 = QLatin1Char( '>' );
+static const QChar c_45 = QLatin1Char( '-' );
+static const QChar c_43 = QLatin1Char( '+' );
+static const QChar c_42 = QLatin1Char( '*' );
+static const QChar c_91 = QLatin1Char( '[' );
+static const QChar c_94 = QLatin1Char( '^' );
+static const QChar c_93 = QLatin1Char( ']' );
+static const QChar c_58 = QLatin1Char( ':' );
+static const QChar c_124 = QLatin1Char( '|' );
+static const QChar c_92 = QLatin1Char( '\\' );
+static const QChar c_125 = QLatin1Char( '}' );
+static const QChar c_61 = QLatin1Char( '=' );
+static const QChar c_95 = QLatin1Char( '_' );
+static const QChar c_34 = QLatin1Char( '"' );
+static const QChar c_40 = QLatin1Char( '(' );
+static const QChar c_33 = QLatin1Char( '!' );
+static const QChar c_60 = QLatin1Char( '<' );
+static const QChar c_10 = QLatin1Char( '\n' );
+static const QChar c_13 = QLatin1Char( '\r' );
+static const QChar c_39 = QLatin1Char( '\'' );
+static const QChar c_47 = QLatin1Char( '/' );
+static const QChar c_63 = QLatin1Char( '?' );
+static const QChar c_38 = QLatin1Char( '&' );
+static const QChar c_59 = QLatin1Char( ';' );
+static const QChar c_120 = QLatin1Char( 'x' );
+static const QChar c_36 = QLatin1Char( '$' );
+
+static const QString c_startComment = QLatin1String( "<!--" );
+static const QString c_endComment = QLatin1String( "-->" );
+
+//! \return Is file exist?
+bool
+fileExists( const QString & fileName, const QString & workingPath )
+{
+	return QFileInfo::exists( workingPath + fileName );
+}
+
+inline bool
+indentInList( const std::set< qsizetype > * indents, qsizetype indent )
+{
+	if( indents )
+		return ( indents->find( indent ) != indents->cend() );
+	else
+		return false;
+};
+
 // Skip spaces in line from pos \a i.
 qsizetype
 skipSpaces( qsizetype i, QStringView line )
@@ -97,6 +149,7 @@ isFootnote( const QString & s )
 		return false;
 }
 
+//! \return Starting sequence of the same characters.
 QString
 startSequence( const QString & line )
 {
@@ -172,9 +225,10 @@ isCodeFences( const QString & s, bool closing )
 	return true;
 }
 
+//! \return Is string an ordered list.
 bool
-isOrderedList( const QString & s, int * num, int * len,
-	QChar * delim, bool * isFirstLineEmpty )
+isOrderedList( const QString & s, int * num = nullptr, int * len = nullptr,
+	QChar * delim = nullptr, bool * isFirstLineEmpty = nullptr )
 {
 	qsizetype p = skipSpaces( 0, s );
 
@@ -476,11 +530,23 @@ isTableAlignment( const QString & s )
 //
 
 QSharedPointer< Document >
-Parser::parse( const QString & fileName, bool recursive )
+Parser::parse( const QString & fileName, bool recursive, const QStringList & ext )
 {
 	QSharedPointer< Document > doc( new Document );
 
-	parseFile( fileName, recursive, doc );
+	parseFile( fileName, recursive, doc, ext );
+
+	clearCache();
+
+	return doc;
+}
+
+QSharedPointer< Document >
+Parser::parse( QTextStream & stream, const QString & fileName )
+{
+	QSharedPointer< Document > doc( new Document );
+
+	parseStream( stream, QStringLiteral( "." ), fileName, false, doc, QStringList() );
 
 	clearCache();
 
@@ -1034,95 +1100,104 @@ Parser::parse( StringListStream & stream, QSharedPointer< Block > parent,
 
 void
 Parser::parseFile( const QString & fileName, bool recursive, QSharedPointer< Document > doc,
-	QStringList * parentLinks )
+	const QStringList & ext, QStringList * parentLinks )
 {
 	QFileInfo fi( fileName );
 
-	if( fi.exists() && ( fi.suffix().toLower() == QLatin1String( "md" ) ||
-		fi.suffix().toLower() == QLatin1String( "markdown" ) ) )
+	if( fi.exists() && ext.contains( fi.suffix().toLower() ) )
 	{
 		QFile f( fileName );
 
 		if( f.open( QIODevice::ReadOnly ) )
 		{
-			QStringList linksToParse;
+			QTextStream s( f.readAll() );
+			f.close();
 
-			doc->appendItem( QSharedPointer< Anchor > ( new Anchor( fi.absoluteFilePath() ) ) );
+			parseStream( s, fi.absolutePath(), fi.fileName(), recursive, doc, ext, parentLinks );
+		}
+	}
+}
 
-			MdBlock::Data data;
+void
+Parser::parseStream( QTextStream & s,
+	const QString & workingPath, const QString & fileName,
+	bool recursive, QSharedPointer< Document > doc,
+	const QStringList & ext, QStringList * parentLinks )
+{
+	QStringList linksToParse;
 
+	doc->appendItem( QSharedPointer< Anchor > (
+		new Anchor( workingPath + QDir::separator() + fileName ) ) );
+
+	MdBlock::Data data;
+
+	{
+		TextStream stream( s );
+
+		qsizetype i = 0;
+
+		while( !stream.atEnd() )
+		{
+			data << QPair< QString, MdLineData >( stream.readLine(), { i } );
+			++i;
+		}
+	}
+
+	StringListStream stream( data );
+
+	parse( stream, doc, doc, linksToParse,
+		workingPath + QStringLiteral( "/" ), fileName, true, true );
+
+	m_parsedFiles.append( workingPath + QDir::separator() + fileName );
+
+	// Resolve links.
+	for( auto it = linksToParse.begin(), last = linksToParse.end(); it != last; ++it )
+	{
+		auto nextFileName = *it;
+
+		if( nextFileName.startsWith( c_35 ) )
+		{
+			if( doc->labeledLinks().contains( nextFileName ) )
+				nextFileName = doc->labeledLinks()[ nextFileName ]->url();
+			else
+				continue;
+		}
+
+		QFileInfo nextFile( nextFileName );
+
+		*it = nextFile.absoluteFilePath();
+	}
+
+	// Parse all links if parsing is recursive.
+	if( recursive && !linksToParse.isEmpty() )
+	{
+		const auto tmpLinks = linksToParse;
+
+		while( !linksToParse.isEmpty() )
+		{
+			auto nextFileName = linksToParse.first();
+			linksToParse.removeFirst();
+
+			if( parentLinks )
 			{
-				QTextStream s( f.readAll() );
-				f.close();
-
-				TextStream stream( s );
-
-				qsizetype i = 0;
-
-				while( !stream.atEnd() )
-				{
-					data << QPair< QString, MdLineData >( stream.readLine(), { i } );
-					++i;
-				}
+				if( parentLinks->contains( nextFileName ) )
+					continue;
 			}
 
-			StringListStream stream( data );
+			if( nextFileName.startsWith( c_35 ) )
+				continue;
 
-			parse( stream, doc, doc, linksToParse,
-				fi.absolutePath() + QStringLiteral( "/" ), fi.fileName(), true, true );
-
-			m_parsedFiles.append( fi.absoluteFilePath() );
-
-			// Resolve links.
-			for( auto it = linksToParse.begin(), last = linksToParse.end(); it != last; ++it )
+			if( !m_parsedFiles.contains( nextFileName ) )
 			{
-				auto nextFileName = *it;
+				if( !doc->isEmpty() && doc->items().last()->type() != ItemType::PageBreak )
+					doc->appendItem( QSharedPointer< PageBreak > ( new PageBreak() ) );
 
-				if( nextFileName.startsWith( c_35 ) )
-				{
-					if( doc->labeledLinks().contains( nextFileName ) )
-						nextFileName = doc->labeledLinks()[ nextFileName ]->url();
-					else
-						continue;
-				}
-
-				QFileInfo nextFile( nextFileName );
-
-				*it = nextFile.absoluteFilePath();
-			}
-
-			// Parse all links if parsing is recursive.
-			if( recursive && !linksToParse.isEmpty() )
-			{
-				const auto tmpLinks = linksToParse;
-
-				while( !linksToParse.isEmpty() )
-				{
-					auto nextFileName = linksToParse.first();
-					linksToParse.removeFirst();
-
-					if( parentLinks )
-					{
-						if( parentLinks->contains( nextFileName ) )
-							continue;
-					}
-
-					if( nextFileName.startsWith( c_35 ) )
-						continue;
-
-					if( !m_parsedFiles.contains( nextFileName ) )
-					{
-						if( !doc->isEmpty() && doc->items().last()->type() != ItemType::PageBreak )
-							doc->appendItem( QSharedPointer< PageBreak > ( new PageBreak() ) );
-
-						parseFile( nextFileName, recursive, doc, &linksToParse );
-					}
-				}
-
-				if( parentLinks )
-					parentLinks->append( tmpLinks );
+				parseFile( nextFileName, recursive, doc, ext, &linksToParse );
 			}
 		}
+
+		if( parentLinks )
+			parentLinks->append( tmpLinks );
 	}
 }
 
@@ -5930,12 +6005,6 @@ Parser::parseCodeIndentedBySpaces( MdBlock & fr, QSharedPointer< Block > parent,
 		codeItem->setSyntax( syntax );
 		parent->appendItem( codeItem );
 	}
-}
-
-bool
-fileExists( const QString & fileName, const QString & workingPath )
-{
-	return QFileInfo::exists( workingPath + fileName );
 }
 
 } /* namespace MD */

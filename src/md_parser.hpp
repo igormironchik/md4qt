@@ -44,98 +44,14 @@
 
 namespace MD {
 
-static const QChar c_35 = QLatin1Char( '#' );
-static const QChar c_46 = QLatin1Char( '.' );
-static const QChar c_41 = QLatin1Char( ')' );
-static const QChar c_96 = QLatin1Char( '`' );
-static const QChar c_126 = QLatin1Char( '~' );
-static const QChar c_9 = QLatin1Char( '\t' );
 static const QChar c_32 = QLatin1Char( ' ' );
-static const QChar c_62 = QLatin1Char( '>' );
-static const QChar c_45 = QLatin1Char( '-' );
-static const QChar c_43 = QLatin1Char( '+' );
-static const QChar c_42 = QLatin1Char( '*' );
-static const QChar c_91 = QLatin1Char( '[' );
-static const QChar c_94 = QLatin1Char( '^' );
-static const QChar c_93 = QLatin1Char( ']' );
-static const QChar c_58 = QLatin1Char( ':' );
-static const QChar c_124 = QLatin1Char( '|' );
-static const QChar c_92 = QLatin1Char( '\\' );
-static const QChar c_125 = QLatin1Char( '}' );
-static const QChar c_61 = QLatin1Char( '=' );
-static const QChar c_95 = QLatin1Char( '_' );
-static const QChar c_34 = QLatin1Char( '"' );
-static const QChar c_40 = QLatin1Char( '(' );
-static const QChar c_33 = QLatin1Char( '!' );
-static const QChar c_60 = QLatin1Char( '<' );
-static const QChar c_10 = QLatin1Char( '\n' );
-static const QChar c_13 = QLatin1Char( '\r' );
-static const QChar c_39 = QLatin1Char( '\'' );
-static const QChar c_47 = QLatin1Char( '/' );
-static const QChar c_63 = QLatin1Char( '?' );
-static const QChar c_38 = QLatin1Char( '&' );
-static const QChar c_59 = QLatin1Char( ';' );
-static const QChar c_120 = QLatin1Char( 'x' );
-static const QChar c_36 = QLatin1Char( '$' );
-
-static const QString c_startComment = QLatin1String( "<!--" );
-static const QString c_endComment = QLatin1String( "-->" );
 
 
-//! Skip spaces in line from pos \a i.
-qsizetype
-skipSpaces( qsizetype i, QStringView line );
+//
+// RawHtmlBlock
+//
 
-//! \return Is string a footnote?
-bool
-isFootnote( const QString & s );
-
-//! \return Starting sequence of the same characters.
-QString
-startSequence( const QString & line );
-
-//! \return Is string a code fences?
-bool
-isCodeFences( const QString & s, bool closing = false );
-
-//! \return Is file exist?
-bool
-fileExists( const QString & fileName, const QString & workingPath );
-
-//! \return Is string an ordered list.
-bool
-isOrderedList( const QString & s, int * num = nullptr, int * len = nullptr,
-	QChar * delim = nullptr, bool * isFirstLineEmpty = nullptr );
-
-inline bool
-indentInList( const std::set< qsizetype > * indents, qsizetype indent )
-{
-	if( indents )
-		return ( indents->find( indent ) != indents->cend() );
-	else
-		return false;
-};
-
-// \return Is sequence of emphasis closed, and closing index of the sequence?
-std::pair< bool, size_t >
-checkEmphasisSequence( const std::vector< std::pair< qsizetype, int > > & s, size_t idx );
-
-//! \return Is string a start of code?
-bool
-isStartOfCode( QStringView str, QString * syntax = nullptr );
-
-//! \return Is string a horizontal line?
-bool
-isHorizontalLine( QStringView s );
-
-//! \return Is string a column alignment?
-bool
-isColumnAlignment( const QString & s );
-
-//! \return Number of columns?
-int
-isTableAlignment( const QString & s );
-
+//! Internal structure.
 struct RawHtmlBlock {
 	QSharedPointer< RawHtml > html = {};
 	int htmlBlockType = -1;
@@ -143,11 +59,23 @@ struct RawHtmlBlock {
 	bool onLine = false;
 }; // struct RawHtmlBlock
 
+
+//
+// MdLineData
+//
+
+//! Internal structure.
 struct MdLineData {
 	qsizetype lineNumber = -1;
 	std::vector< bool > htmlCommentClosed = {};
 }; // struct MdLineData
 
+
+//
+// MdBlock
+//
+
+//! Internal structure.
 struct MdBlock {
 	using Data = QVector< QPair< QString, MdLineData > >;
 
@@ -155,6 +83,11 @@ struct MdBlock {
 	qsizetype emptyLinesBefore = 0;
 	bool emptyLineAfter = true;
 }; // struct MdBlock
+
+
+//
+// StringListStream
+//
 
 //! Wrapper for QStringList to be behaved like a stream.
 class StringListStream final
@@ -179,6 +112,35 @@ private:
 }; // class StringListStream
 
 
+// \return Is sequence of emphasis closed, and closing index of the sequence?
+std::pair< bool, size_t >
+checkEmphasisSequence( const std::vector< std::pair< qsizetype, int > > & s, size_t idx );
+
+//! \return Is string a footnote?
+bool
+isFootnote( const QString & s );
+
+//! \return Is string a code fences?
+bool
+isCodeFences( const QString & s, bool closing = false );
+
+//! \return Is string a start of code?
+bool
+isStartOfCode( QStringView str, QString * syntax = nullptr );
+
+//! \return Is string a horizontal line?
+bool
+isHorizontalLine( QStringView s );
+
+//! \return Is string a column alignment?
+bool
+isColumnAlignment( const QString & s );
+
+//! \return Number of columns?
+int
+isTableAlignment( const QString & s );
+
+
 //
 // Parser
 //
@@ -191,11 +153,31 @@ public:
 	~Parser() = default;
 
 	//! \return Parsed Markdown document.
-	QSharedPointer< Document > parse( const QString & fileName, bool recursive = true );
+	QSharedPointer< Document > parse(
+		//! File name of the Markdown document.
+		const QString & fileName,
+		//! Should parsing be recursive? If recursive all links to existing Markdown
+		//! files will be parsed and presented in the returned document.
+		bool recursive = true,
+		//! Allowed extensions for Markdonw document files. If Markdown file doesn't
+		//! have given extension it will be ignored.
+		const QStringList & ext =
+			QStringList() << QStringLiteral( "md" ) << QStringLiteral( "markdown" ) );
+
+	//! \return Parsed Markdown document.
+	QSharedPointer< Document > parse(
+		//! Stream to parse.
+		QTextStream & stream,
+		//! This argument needed only for anchor.
+		const QString & fileName );
 
 private:
 	void parseFile( const QString & fileName, bool recursive, QSharedPointer< Document > doc,
-		QStringList * parentLinks = nullptr );
+		const QStringList & ext, QStringList * parentLinks = nullptr );
+	void parseStream( QTextStream & stream,
+		const QString & workingPath, const QString & fileName,
+		bool recursive, QSharedPointer< Document > doc,
+		const QStringList & ext, QStringList * parentLinks = nullptr );
 	void clearCache();
 
 	enum class BlockType {
