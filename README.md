@@ -46,6 +46,13 @@ labeled links, look:
        url = doc->labeledLinks()[ url ]->url();
    ```
 
+**What is the second argument of `MD::Parser::parse()`?**
+
+ * Second argument of `MD::Parser::parse()` is a flag that tells to the
+parser to process Markdown files recursively or not. If parsing is recursive
+then if in the targeted Markdown file exist links to other Markdown files,
+then they will be parsed too and will exist in the resulting document.
+
 **What is an `MD::Anchor`?**
 
  * As `md4qt` supports recursive Markdown parsing, then in the resulting
