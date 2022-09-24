@@ -1127,7 +1127,7 @@ Parser::parseStream( QTextStream & s,
 	QStringList linksToParse;
 
 	doc->appendItem( QSharedPointer< Anchor > (
-		new Anchor( workingPath + QDir::separator() + fileName ) ) );
+		new Anchor( workingPath + QStringLiteral( "/" ) + fileName ) ) );
 
 	MdBlock::Data data;
 
@@ -1148,7 +1148,7 @@ Parser::parseStream( QTextStream & s,
 	parse( stream, doc, doc, linksToParse,
 		workingPath + QStringLiteral( "/" ), fileName, true, true );
 
-	m_parsedFiles.append( workingPath + QDir::separator() + fileName );
+	m_parsedFiles.append( workingPath + QStringLiteral( "/" ) + fileName );
 
 	// Resolve links.
 	for( auto it = linksToParse.begin(), last = linksToParse.end(); it != last; ++it )
