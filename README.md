@@ -24,9 +24,14 @@ int main()
 
 # Benchmark
 
-Approximate benchmark with `md4c` says, that `md4qt` is slower only in 10 times.
+Approximate benchmark with `md4c` says, that `md4qt` is slower only in 5.5 times.
 But you will get complete tree structure of the Markdown document with all
 major extensions. Conclusion why it's so you can read [here](tests/md_benchmark/README.md).
+
+Is it so important to you and you don't want to pay extra ~1500 microseconds?
+Is it valuable to you to parse with `md4c` by 365 microseonds, enstead of
+1970 microseconds with `md4qt`? Yes? And it's not a problem for you that,
+for example, complex footnotes will be wrongly parsed? Then `md4c` is better for you.
 
 # Q/A
 
