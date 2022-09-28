@@ -3059,3 +3059,21 @@ TEST_CASE( "067" )
 		REQUIRE( c->text() == QStringLiteral( "Code" ) );
 	}
 }
+
+TEST_CASE( "068" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/068.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+	REQUIRE( t->opts() == MD::TextWithoutFormat );
+	REQUIRE( t->text() == QStringLiteral( "<!-- Not finished HTML comment" ) );
+}
