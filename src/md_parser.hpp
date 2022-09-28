@@ -140,6 +140,10 @@ isColumnAlignment( const QString & s );
 int
 isTableAlignment( const QString & s );
 
+//! \return Is given string a HTML comment.
+bool
+isHtmlComment( const QString & s );
+
 
 //
 // Parser

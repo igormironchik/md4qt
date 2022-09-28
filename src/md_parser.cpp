@@ -513,6 +513,35 @@ isTableAlignment( const QString & s )
 	return columns.size();
 }
 
+bool
+isHtmlComment( const QString & s )
+{
+	auto c = s;
+
+	if( s.startsWith( c_startComment ) )
+		c.remove( 0, 4 );
+	else
+		return false;
+
+	if( c.startsWith( c_62 ) )
+		return false;
+
+	if( c.startsWith( QStringLiteral( "->" ) ) )
+		return false;
+
+	const auto p = c.indexOf( QStringLiteral( "--" ) );
+
+	if( p > -1 )
+	{
+		if( c.size() > p + 2 )
+			return c[ p + 2 ] == c_62;
+		else
+			return false;
+	}
+	else
+		return false;
+}
+
 
 //
 // Parser
@@ -620,35 +649,6 @@ private:
 	bool m_lastBuf;
 	qsizetype m_pos;
 }; // class TextStream
-
-inline bool
-isHtmlComment( const QString & s )
-{
-	auto c = s;
-
-	if( s.startsWith( c_startComment ) )
-		c.remove( 0, 4 );
-	else
-		return false;
-
-	if( c.startsWith( c_62 ) )
-		return false;
-
-	if( c.startsWith( QStringLiteral( "->" ) ) )
-		return false;
-
-	const auto p = c.indexOf( QStringLiteral( "--" ) );
-
-	if( p > -1 )
-	{
-		if( c.size() > p + 2 )
-			return c[ p + 2 ] == c_62;
-		else
-			return false;
-	}
-	else
-		return false;
-}
 
 inline bool
 checkForEndHtmlComments( const QString & line, qsizetype pos,

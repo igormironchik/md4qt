@@ -240,3 +240,13 @@ TEST_CASE( "is_table_alignmnet" )
 {
 	REQUIRE( !MD::isTableAlignment( QStringLiteral( "|aaa|bbb|" ) ) );
 }
+
+TEST_CASE( "is_html_comment" )
+{
+	REQUIRE( MD::isHtmlComment( QStringLiteral( "<!-- -->" ) ) );
+	REQUIRE( !MD::isHtmlComment( QStringLiteral( "<-- -->" ) ) );
+	REQUIRE( !MD::isHtmlComment( QStringLiteral( "<!-->" ) ) );
+	REQUIRE( !MD::isHtmlComment( QStringLiteral( "<!--->" ) ) );
+	REQUIRE( !MD::isHtmlComment( QStringLiteral( "<!-- --" ) ) );
+	REQUIRE( !MD::isHtmlComment( QStringLiteral( "<!-- -" ) ) );
+}
