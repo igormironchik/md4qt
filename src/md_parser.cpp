@@ -476,16 +476,11 @@ isColumnAlignment( const QString & s )
 	if( s[ p ] == c_58 )
 		++p;
 
-	const auto a = p;
-
 	for( ; p < s.size(); ++p )
 	{
 		if( s[ p ] != c_45 )
 			break;
 	}
-
-	if( a != p && p - a < 1 )
-		return false;
 
 	if( p == s.size() )
 		return true;
