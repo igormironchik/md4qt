@@ -460,13 +460,7 @@ isHorizontalLine( QStringView s )
 	if( p == s.size() )
 		return true;
 
-	for( ; p < s.size(); ++p )
-	{
-		if( !s[ p ].isSpace() )
-			return false;
-	}
-
-	return true;
+	return false;
 }
 
 bool
