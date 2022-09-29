@@ -62,5 +62,5 @@ then they will be parsed too and will exist in the resulting document.
 
  * As `md4qt` supports recursive Markdown parsing, then in the resulting
 document can be represented more then one Markdown file. Each file in the
-document starts with `MD::Anchor`, it's just show that during traverse through
+document starts with `MD::Anchor`, it just shows that during traverse through
 the document you reached new file.
