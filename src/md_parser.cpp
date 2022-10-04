@@ -3082,7 +3082,7 @@ eatRawHtml( qsizetype line, qsizetype pos, qsizetype toLine, qsizetype toPos,
 
 	if( finish )
 	{
-		if( po.html.onLine || htmlRule == 7 )
+		if( po.html.onLine || htmlRule == 7 || po.line < po.fr.data.size() )
 		{
 			if( !po.collectRefLinks )
 				po.parent->appendItem( po.html.html );
