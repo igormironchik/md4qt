@@ -3101,10 +3101,10 @@ finishRule1HtmlTag( Delims::const_iterator it, Delims::const_iterator last,
 	TextParsingOpts & po, bool skipFirst )
 {
 	static const std::set< QString > finish = {
-		QStringLiteral( "</pre>" ),
-		QStringLiteral( "</script>" ),
-		QStringLiteral( "</style>" ),
-		QStringLiteral( "</textarea>" )
+		QStringLiteral( "/pre" ),
+		QStringLiteral( "/script" ),
+		QStringLiteral( "/style" ),
+		QStringLiteral( "/textarea" )
 	};
 
 	if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less && skipFirst )
@@ -3124,12 +3124,7 @@ finishRule1HtmlTag( Delims::const_iterator it, Delims::const_iterator last,
 
 			if( closed )
 			{
-				tag.prepend( c_60 );
-				tag.append( c_62 );
-
-				tag = tag.toLower();
-
-				if( finish.find( tag ) != finish.cend() )
+				if( finish.find( tag.toLower() ) != finish.cend() )
 				{		
 					eatRawHtml( po.line, po.pos, it->m_line, -1, po, true, 1, false,
 						po.html.onLine );
