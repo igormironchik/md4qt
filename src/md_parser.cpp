@@ -1952,7 +1952,26 @@ Parser::parseParagraph( MdBlock & fr, QSharedPointer< Block > parent,
 						}
 
 						if( !pp->isEmpty() )
-							parent->appendItem( pp );
+						{
+							MD::Paragraph * prevP = nullptr;
+
+							if( pp->items().at( 0 )->type() == MD::ItemType::RawHtml &&
+								parent->items().size() &&
+								parent->items().back()->type() == MD::ItemType::Paragraph )
+									prevP = static_cast< MD::Paragraph* >
+										( parent->items().back().data() );
+
+							if( prevP && prevP->isDirty() )
+							{
+								for( auto it = pp->items().cbegin(), last = pp->items().cend();
+									it != last; ++it )
+										prevP->appendItem( (*it) );
+
+								prevP->setDirty( false );
+							}
+							else
+								parent->appendItem( pp );
+						}
 					}
 					else
 						parent->appendItem( (*it) );
@@ -3041,6 +3060,9 @@ eatRawHtml( qsizetype line, qsizetype pos, qsizetype toLine, qsizetype toPos,
 	TextParsingOpts & po, bool finish, int htmlRule, bool skipLineEnds = false,
 	bool onLine = true )
 {
+	if( line > toLine )
+		return;
+
 	QString h = po.html.html->text();
 
 	if( !h.isEmpty() && !skipLineEnds )
@@ -3076,6 +3098,12 @@ eatRawHtml( qsizetype line, qsizetype pos, qsizetype toLine, qsizetype toPos,
 
 	po.line = ( toPos >= 0 ? toLine : toLine + 1 );
 	po.pos = ( toPos >= 0 ? toPos : 0 );
+
+	if( po.line < po.fr.data.size() && po.pos >= po.fr.data.at( po.line ).first.size() )
+	{
+		++po.line;
+		po.pos = 0;
+	}
 
 	po.html.html->setText( h );
 	UnprotectedDocsMethods::setFreeTag( po.html.html, onLine );
@@ -3227,7 +3255,7 @@ finishRule3HtmlTag( Delims::const_iterator it, Delims::const_iterator last,
 		}
 	}
 
-	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 3 );
+	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 3, false, onLine );
 }
 
 inline void
@@ -3514,7 +3542,7 @@ finishRule7HtmlTag( Delims::const_iterator it, Delims::const_iterator last,
 			}
 
 			eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 7,
-				true, onLine );
+				false, onLine );
 
 			return std::prev( last );
 		}
