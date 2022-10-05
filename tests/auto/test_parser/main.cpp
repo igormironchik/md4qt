@@ -36,6 +36,7 @@
 
 #include <QFile>
 #include <QDir>
+#include <QTextStream>
 
 
 TEST_CASE( "001" )
@@ -4337,4 +4338,63 @@ TEST_CASE( "118" )
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QStringLiteral( "Text" ) );
 	}
+}
+
+TEST_CASE( "118-1" )
+{
+	const auto fileName = QStringLiteral( "tests/parser/data/118.md" );
+
+	QFile file( fileName );
+
+	if( file.open( QIODeviceBase::ReadOnly ) )
+	{
+		QTextStream stream( file.readAll() );
+		file.close();
+
+		MD::Parser parser;
+
+		auto doc = parser.parse( stream, fileName );
+
+		REQUIRE( doc->isEmpty() == false );
+		REQUIRE( doc->items().size() == 2 );
+
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+		auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+		REQUIRE( p->items().size() == 5 );
+
+		{
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == QStringLiteral( "Text" ) );
+		}
+
+		{
+			REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
+			auto h = static_cast< MD::RawHtml* > ( p->items().at( 1 ).data() );
+			REQUIRE( h->text() == QStringLiteral( "<a href=\"www.google.com\">" ) );
+		}
+
+		{
+			REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text* > ( p->items().at( 2 ).data() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == QStringLiteral( "Google" ) );
+		}
+
+		{
+			REQUIRE( p->items().at( 3 )->type() == MD::ItemType::RawHtml );
+			auto h = static_cast< MD::RawHtml* > ( p->items().at( 3 ).data() );
+			REQUIRE( h->text() == QStringLiteral( "</a>" ) );
+		}
+
+		{
+			REQUIRE( p->items().at( 4 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text* > ( p->items().at( 4 ).data() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == QStringLiteral( "Text" ) );
+		}
+	}
+	else
+		REQUIRE( false );
 }
