@@ -3000,7 +3000,7 @@ isHtmlTag( qsizetype line, qsizetype pos, TextParsingOpts & po, int rule )
 		skipSpacesInHtml( l, p, po.fr.data );
 
 		if( l >= po.fr.data.size() )
-			return { false, -1, -1, false, tag };
+			return { false, line, pos, false, tag };
 	}
 
 	if( po.fr.data[ l ].first[ p ] == c_62 )
