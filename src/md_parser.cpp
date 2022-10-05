@@ -956,10 +956,12 @@ Parser::parse( StringListStream & stream, QSharedPointer< Block > parent,
 			}
 			else
 			{
+				const auto empty = emptyLinesCount;
+
 				pf();
 
 				if( html.htmlBlockType >= 6 )
-					html.continueHtml = ( emptyLinesCount <= 0 );
+					html.continueHtml = ( empty <= 0 );
 
 				type = lineType;
 
@@ -998,10 +1000,12 @@ Parser::parse( StringListStream & stream, QSharedPointer< Block > parent,
 					}
 				}
 
+				const auto empty = emptyLinesCount;
+
 				pf();
 
 				if( html.htmlBlockType >= 6 )
-					html.continueHtml = ( emptyLinesCount <= 0 );
+					html.continueHtml = ( empty <= 0 );
 
 				type = lineType;
 
@@ -3333,8 +3337,11 @@ inline void
 finishRule6HtmlTag( Delims::const_iterator it, Delims::const_iterator last,
 	TextParsingOpts & po )
 {
+	po.html.onLine = ( it != last ? it->m_pos == skipSpaces( 0, po.fr.data[ it->m_line ].first ) :
+		true );
+
 	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 6, false,
-		it->m_pos == skipSpaces( 0, po.fr.data[ it->m_line ].first ) );
+		po.html.onLine );
 }
 
 inline Delims::const_iterator
