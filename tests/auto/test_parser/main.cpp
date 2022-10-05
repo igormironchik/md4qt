@@ -3962,3 +3962,138 @@ TEST_CASE( "104" )
 		REQUIRE( t->text() == QStringLiteral( "Text" ) );
 	}
 }
+
+TEST_CASE( "105" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/105.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml* > ( doc->items().at( 1 ).data() );
+	REQUIRE( h->text() == QStringLiteral( "<form>" ) );
+}
+
+TEST_CASE( "106" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/106.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	REQUIRE( p->items().size() == 2 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+	REQUIRE( t->opts() == MD::TextWithoutFormat );
+	REQUIRE( t->text() == QStringLiteral( "Text" ) );
+
+	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml* > ( p->items().at( 1 ).data() );
+	REQUIRE( h->text() == QStringLiteral( "<form>" ) );
+}
+
+TEST_CASE( "107" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/107.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml* > ( doc->items().at( 1 ).data() );
+	REQUIRE( h->text() == QStringLiteral( "<form> Text" ) );
+}
+
+TEST_CASE( "108" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/108.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml* > ( doc->items().at( 1 ).data() );
+	REQUIRE( h->text() == QStringLiteral( "<form>\nText" ) );
+}
+
+TEST_CASE( "109" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/109.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 3 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+	REQUIRE( t->opts() == MD::TextWithoutFormat );
+	REQUIRE( t->text() == QStringLiteral( "Text" ) );
+
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml* > ( doc->items().at( 2 ).data() );
+	REQUIRE( h->text() == QStringLiteral( "<form>" ) );
+}
+
+TEST_CASE( "110" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/110.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	REQUIRE( p->items().size() == 2 );
+
+	{
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == QStringLiteral( "Text" ) );
+	}
+
+	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml* > ( p->items().at( 1 ).data() );
+	REQUIRE( h->text() == QStringLiteral( "<form>\nText" ) );
+}
+
+TEST_CASE( "111" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/111.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 3 );
+
+	{
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+		auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == QStringLiteral( "Text" ) );
+	}
+
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml* > ( doc->items().at( 2 ).data() );
+	REQUIRE( h->text() == QStringLiteral( "<form>\nText" ) );
+}

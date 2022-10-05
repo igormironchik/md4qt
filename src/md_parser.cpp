@@ -3333,7 +3333,8 @@ inline void
 finishRule6HtmlTag( Delims::const_iterator it, Delims::const_iterator last,
 	TextParsingOpts & po )
 {
-	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 6, false, true );
+	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 6, false,
+		it->m_pos == skipSpaces( 0, po.fr.data[ it->m_line ].first ) );
 }
 
 inline Delims::const_iterator
