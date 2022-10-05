@@ -3739,3 +3739,226 @@ TEST_CASE( "097" )
 		REQUIRE( t->text() == QStringLiteral( "Text" ) );
 	}
 }
+
+TEST_CASE( "098" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/098.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml* > ( doc->items().at( 1 ).data() );
+	REQUIRE( h->text() == QStringLiteral( "<![CDATA[\n"
+										  "function matchwo(a,b)\n"
+										  "{\n"
+										  "  if (a < b && a < 0) then {\n"
+										  "    return 1;\n\n"
+										  "  } else {\n\n"
+										  "    return 0;\n"
+										  "  }\n"
+										  "}\n"
+										  "]]>" ) );
+}
+
+TEST_CASE( "099" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/099.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	REQUIRE( p->items().size() == 2 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+	REQUIRE( t->opts() == MD::TextWithoutFormat );
+	REQUIRE( t->text() == QStringLiteral( "Text" ) );
+
+	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml* > ( p->items().at( 1 ).data() );
+	REQUIRE( h->text() == QStringLiteral( "<![CDATA[\n"
+										  "function matchwo(a,b)\n"
+										  "{\n"
+										  "  if (a < b && a < 0) then {\n"
+										  "    return 1;\n\n"
+										  "  } else {\n\n"
+										  "    return 0;\n"
+										  "  }\n"
+										  "}\n"
+										  "]]>" ) );
+}
+
+TEST_CASE( "100" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/100.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml* > ( doc->items().at( 1 ).data() );
+	REQUIRE( h->text() == QStringLiteral( "<![CDATA[\n"
+										  "function matchwo(a,b)\n"
+										  "{\n"
+										  "  if (a < b && a < 0) then {\n"
+										  "    return 1;\n\n"
+										  "  } else {\n\n"
+										  "    return 0;\n"
+										  "  }\n"
+										  "}\n"
+										  "]]> Text" ) );
+}
+
+TEST_CASE( "101" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/101.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 3 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml* > ( doc->items().at( 1 ).data() );
+	REQUIRE( h->text() == QStringLiteral( "<![CDATA[\n"
+										  "function matchwo(a,b)\n"
+										  "{\n"
+										  "  if (a < b && a < 0) then {\n"
+										  "    return 1;\n\n"
+										  "  } else {\n\n"
+										  "    return 0;\n"
+										  "  }\n"
+										  "}\n"
+										  "]]>" ) );
+
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 2 ).data() );
+	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+	REQUIRE( t->opts() == MD::TextWithoutFormat );
+	REQUIRE( t->text() == QStringLiteral( "Text" ) );
+}
+
+TEST_CASE( "102" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/102.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 3 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+	REQUIRE( t->opts() == MD::TextWithoutFormat );
+	REQUIRE( t->text() == QStringLiteral( "Text" ) );
+
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml* > ( doc->items().at( 2 ).data() );
+	REQUIRE( h->text() == QStringLiteral( "<![CDATA[\n"
+										  "function matchwo(a,b)\n"
+										  "{\n"
+										  "  if (a < b && a < 0) then {\n"
+										  "    return 1;\n\n"
+										  "  } else {\n\n"
+										  "    return 0;\n"
+										  "  }\n"
+										  "}\n"
+										  "]]>" ) );
+}
+
+TEST_CASE( "103" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/103.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	REQUIRE( p->items().size() == 3 );
+
+	{
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == QStringLiteral( "Text" ) );
+	}
+
+	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml* > ( p->items().at( 1 ).data() );
+	REQUIRE( h->text() == QStringLiteral( "<![CDATA[\n"
+										  "function matchwo(a,b)\n"
+										  "{\n"
+										  "  if (a < b && a < 0) then {\n"
+										  "    return 1;\n\n"
+										  "  } else {\n\n"
+										  "    return 0;\n"
+										  "  }\n"
+										  "}\n"
+										  "]]>" ) );
+
+	{
+		REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text* > ( p->items().at( 2 ).data() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == QStringLiteral( "Text" ) );
+	}
+}
+
+TEST_CASE( "104" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/104.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 4 );
+
+	{
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+		auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == QStringLiteral( "Text" ) );
+	}
+
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml* > ( doc->items().at( 2 ).data() );
+	REQUIRE( h->text() == QStringLiteral( "<![CDATA[\n"
+										  "function matchwo(a,b)\n"
+										  "{\n"
+										  "  if (a < b && a < 0) then {\n"
+										  "    return 1;\n\n"
+										  "  } else {\n\n"
+										  "    return 0;\n"
+										  "  }\n"
+										  "}\n"
+										  "]]>" ) );
+
+	{
+		REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Paragraph );
+		auto p = static_cast< MD::Paragraph* > ( doc->items().at( 3 ).data() );
+		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == QStringLiteral( "Text" ) );
+	}
+}
