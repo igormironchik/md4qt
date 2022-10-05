@@ -3060,52 +3060,53 @@ eatRawHtml( qsizetype line, qsizetype pos, qsizetype toLine, qsizetype toPos,
 	TextParsingOpts & po, bool finish, int htmlRule, bool skipLineEnds = false,
 	bool onLine = true )
 {
-	if( line > toLine )
-		return;
-
-	QString h = po.html.html->text();
-
-	if( !h.isEmpty() && !skipLineEnds )
+	if( line <= toLine )
 	{
-		for( qsizetype i = 0; i < po.fr.emptyLinesBefore; ++i )
+		QString h = po.html.html->text();
+
+		if( !h.isEmpty() && !skipLineEnds )
+		{
+			for( qsizetype i = 0; i < po.fr.emptyLinesBefore; ++i )
+				h.append( c_10 );
+		}
+
+		const auto first = po.fr.data[ line ].first.sliced( pos,
+			( line == toLine ? ( toPos >= 0 ? toPos - pos : po.fr.data[ line ].first.size() - pos ) :
+				po.fr.data[ line ].first.size() - pos ) );
+
+		if( !h.isEmpty() && !first.isEmpty() && !skipLineEnds )
 			h.append( c_10 );
+
+		if( !first.isEmpty() )
+			h.append( first );
+
+		++line;
+
+		for( ; line < toLine; ++line )
+		{
+			h.append( c_10 );
+			h.append( po.fr.data[ line ].first );
+		}
+
+		if( line == toLine && toPos != 0 )
+		{
+			h.append( c_10 );
+			h.append( po.fr.data[ line ].first.sliced( 0,
+				toPos > 0 ? toPos : po.fr.data[ line ].first.size() ) );
+		}
+
+		po.line = ( toPos >= 0 ? toLine : toLine + 1 );
+		po.pos = ( toPos >= 0 ? toPos : 0 );
+
+		if( po.line < po.fr.data.size() && po.pos >= po.fr.data.at( po.line ).first.size() )
+		{
+			++po.line;
+			po.pos = 0;
+		}
+
+		po.html.html->setText( h );
 	}
 
-	const auto first = po.fr.data[ line ].first.sliced( pos,
-		( line == toLine ? ( toPos >= 0 ? toPos - pos : po.fr.data[ line ].first.size() - pos ) :
-			po.fr.data[ line ].first.size() - pos ) );
-
-	if( !h.isEmpty() && !first.isEmpty() && !skipLineEnds )
-		h.append( c_10 );
-
-	if( !first.isEmpty() )
-		h.append( first );
-
-	++line;
-
-	for( ; line < toLine; ++line )
-	{
-		h.append( c_10 );
-		h.append( po.fr.data[ line ].first );
-	}
-
-	if( line == toLine && toPos != 0 )
-	{
-		h.append( c_10 );
-		h.append( po.fr.data[ line ].first.sliced( 0,
-			toPos > 0 ? toPos : po.fr.data[ line ].first.size() ) );
-	}
-
-	po.line = ( toPos >= 0 ? toLine : toLine + 1 );
-	po.pos = ( toPos >= 0 ? toPos : 0 );
-
-	if( po.line < po.fr.data.size() && po.pos >= po.fr.data.at( po.line ).first.size() )
-	{
-		++po.line;
-		po.pos = 0;
-	}
-
-	po.html.html->setText( h );
 	UnprotectedDocsMethods::setFreeTag( po.html.html, onLine );
 
 	if( finish )
