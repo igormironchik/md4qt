@@ -4097,3 +4097,244 @@ TEST_CASE( "111" )
 	auto h = static_cast< MD::RawHtml* > ( doc->items().at( 2 ).data() );
 	REQUIRE( h->text() == QStringLiteral( "<form>\nText" ) );
 }
+
+TEST_CASE( "112" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/112.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml* > ( doc->items().at( 1 ).data() );
+	REQUIRE( h->text() == QStringLiteral( "<a href=\"www.google.com\">\nGoogle\n</a>" ) );
+}
+
+TEST_CASE( "113" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/113.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	REQUIRE( p->items().size() == 4 );
+
+	{
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == QStringLiteral( "Text" ) );
+	}
+
+	{
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml* > ( p->items().at( 1 ).data() );
+		REQUIRE( h->text() == QStringLiteral( "<a href=\"www.google.com\">" ) );
+	}
+
+	{
+		REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text* > ( p->items().at( 2 ).data() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == QStringLiteral( "Google" ) );
+	}
+
+	{
+		REQUIRE( p->items().at( 3 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml* > ( p->items().at( 3 ).data() );
+		REQUIRE( h->text() == QStringLiteral( "</a>" ) );
+	}
+}
+
+TEST_CASE( "114" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/114.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	REQUIRE( p->items().size() == 4 );
+
+	{
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml* > ( p->items().at( 0 ).data() );
+		REQUIRE( h->text() == QStringLiteral( "<a href=\"www.google.com\">" ) );
+	}
+
+	{
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text* > ( p->items().at( 1 ).data() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == QStringLiteral( "Google" ) );
+	}
+
+	{
+		REQUIRE( p->items().at( 2 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml* > ( p->items().at( 2 ).data() );
+		REQUIRE( h->text() == QStringLiteral( "</a>" ) );
+	}
+
+	{
+		REQUIRE( p->items().at( 3 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text* > ( p->items().at( 3 ).data() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == QStringLiteral( "Text" ) );
+	}
+}
+
+TEST_CASE( "115" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/115.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml* > ( doc->items().at( 1 ).data() );
+	REQUIRE( h->text() == QStringLiteral( "<a href=\"www.google.com\">\nGoogle\n</a>\nText" ) );
+}
+
+TEST_CASE( "116" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/116.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	REQUIRE( p->items().size() == 4 );
+
+	{
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == QStringLiteral( "Text" ) );
+	}
+
+	{
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml* > ( p->items().at( 1 ).data() );
+		REQUIRE( h->text() == QStringLiteral( "<a href=\"www.google.com\">" ) );
+	}
+
+	{
+		REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text* > ( p->items().at( 2 ).data() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == QStringLiteral( "Google" ) );
+	}
+
+	{
+		REQUIRE( p->items().at( 3 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml* > ( p->items().at( 3 ).data() );
+		REQUIRE( h->text() == QStringLiteral( "</a>" ) );
+	}
+}
+
+TEST_CASE( "117" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/117.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	REQUIRE( p->items().size() == 5 );
+
+	{
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == QStringLiteral( "Text" ) );
+	}
+
+	{
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml* > ( p->items().at( 1 ).data() );
+		REQUIRE( h->text() == QStringLiteral( "<a href=\"www.google.com\">" ) );
+	}
+
+	{
+		REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text* > ( p->items().at( 2 ).data() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == QStringLiteral( "Google" ) );
+	}
+
+	{
+		REQUIRE( p->items().at( 3 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml* > ( p->items().at( 3 ).data() );
+		REQUIRE( h->text() == QStringLiteral( "</a>" ) );
+	}
+
+	{
+		REQUIRE( p->items().at( 4 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text* > ( p->items().at( 4 ).data() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == QStringLiteral( "Text" ) );
+	}
+}
+TEST_CASE( "118" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/118.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	REQUIRE( p->items().size() == 5 );
+
+	{
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == QStringLiteral( "Text" ) );
+	}
+
+	{
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml* > ( p->items().at( 1 ).data() );
+		REQUIRE( h->text() == QStringLiteral( "<a href=\"www.google.com\">" ) );
+	}
+
+	{
+		REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text* > ( p->items().at( 2 ).data() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == QStringLiteral( "Google" ) );
+	}
+
+	{
+		REQUIRE( p->items().at( 3 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml* > ( p->items().at( 3 ).data() );
+		REQUIRE( h->text() == QStringLiteral( "</a>" ) );
+	}
+
+	{
+		REQUIRE( p->items().at( 4 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text* > ( p->items().at( 4 ).data() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == QStringLiteral( "Text" ) );
+	}
+}
