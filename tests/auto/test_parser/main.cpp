@@ -4420,3 +4420,36 @@ TEST_CASE( "119" )
 		REQUIRE( h->text() == QStringLiteral( "<pre>\n</pre>" ) );
 	}
 }
+
+TEST_CASE( "120" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/120.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	REQUIRE( p->items().size() == 1 );
+
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Math );
+	auto m = static_cast< MD::Math* > ( p->items().at( 0 ).data() );
+	REQUIRE( !m->isInline() );
+	REQUIRE( m->expr() == QStringLiteral( "\n\\[\\mathrm{\\mathbf{M}}(\\alpha) =\n"
+		"   \\left(\n"
+		"      \\begin{matrix}\n"
+		"         \\cos(\\alpha)+n_x^2\\cdot (1-\\cos(\\alpha))  &  "
+		"n_x\\cdot n_y\\cdot (1-\\cos(\\alpha))-n_z\\cdot \\sin(\\alpha) &  "
+		"n_x\\cdot n_z\\cdot (1-\\cos(\\alpha))+n_y\\cdot \\sin(\\alpha)\\\\\n"
+		"         n_x\\cdot n_y\\cdot (1-\\cos(\\alpha))+n_z\\cdot \\sin(\\alpha) & "
+		"\\cos(\\alpha)+n_y^2\\cdot (1-\\cos(\\alpha))  &   "
+		"n_y\\cdot n_z\\cdot (1-\\cos(\\alpha))-n_x\\cdot \\sin(\\alpha)\\\\\n"
+		"         n_z\\cdot n_x\\cdot (1-\\cos(\\alpha))-n_y\\cdot \\sin(\\alpha) & "
+		"n_z\\cdot n_y\\cdot (1-\\cos(\\alpha))+n_x\\cdot \\sin(\\alpha)  & "
+		"\\cos(\\alpha)+n_z^2\\cdot (1-\\cos(\\alpha))\n"
+		"      \\end{matrix}\n"
+		"   \\right)\n"
+		"\\]\n" ) );
+}
