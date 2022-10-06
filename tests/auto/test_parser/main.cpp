@@ -4398,3 +4398,25 @@ TEST_CASE( "118-1" )
 	else
 		REQUIRE( false );
 }
+
+TEST_CASE( "119" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/119.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 3 );
+
+	{
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml* > ( doc->items().at( 1 ).data() );
+		REQUIRE( h->text() == QStringLiteral( "<a href=\"www.google.com\">\nGoogle\n</a>" ) );
+	}
+
+	{
+		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml* > ( doc->items().at( 2 ).data() );
+		REQUIRE( h->text() == QStringLiteral( "<pre>\n</pre>" ) );
+	}
+}

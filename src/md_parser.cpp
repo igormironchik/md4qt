@@ -3061,14 +3061,13 @@ findIt( Delims::const_iterator it, Delims::const_iterator last,
 
 inline void
 eatRawHtml( qsizetype line, qsizetype pos, qsizetype toLine, qsizetype toPos,
-	TextParsingOpts & po, bool finish, int htmlRule, bool skipLineEnds = false,
-	bool onLine = true )
+	TextParsingOpts & po, bool finish, int htmlRule, bool onLine )
 {
 	if( line <= toLine )
 	{
 		QString h = po.html.html->text();
 
-		if( !h.isEmpty() && !skipLineEnds )
+		if( !h.isEmpty() )
 		{
 			for( qsizetype i = 0; i < po.fr.emptyLinesBefore; ++i )
 				h.append( c_10 );
@@ -3078,7 +3077,7 @@ eatRawHtml( qsizetype line, qsizetype pos, qsizetype toLine, qsizetype toPos,
 			( line == toLine ? ( toPos >= 0 ? toPos - pos : po.fr.data[ line ].first.size() - pos ) :
 				po.fr.data[ line ].first.size() - pos ) );
 
-		if( !h.isEmpty() && !first.isEmpty() && !skipLineEnds )
+		if( !h.isEmpty() && !first.isEmpty() )
 			h.append( c_10 );
 
 		if( !first.isEmpty() )
@@ -3159,8 +3158,7 @@ finishRule1HtmlTag( Delims::const_iterator it, Delims::const_iterator last,
 			{
 				if( finish.find( tag.toLower() ) != finish.cend() )
 				{		
-					eatRawHtml( po.line, po.pos, it->m_line, -1, po, true, 1, false,
-						po.html.onLine );
+					eatRawHtml( po.line, po.pos, it->m_line, -1, po, true, 1, po.html.onLine );
 
 					return;
 				}
@@ -3168,8 +3166,7 @@ finishRule1HtmlTag( Delims::const_iterator it, Delims::const_iterator last,
 		}
 	}
 
-	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 1, false,
-		po.html.onLine );
+	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 1, po.html.onLine );
 }
 
 inline void
@@ -3209,14 +3206,14 @@ finishRule2HtmlTag( Delims::const_iterator it, Delims::const_iterator last,
 					po.fr.data[ it->m_line ].first[ it->m_pos - 2 ] == c_45 )
 				{
 					eatRawHtml( po.line, po.pos, it->m_line, po.fr.data[ it->m_line ].first.size(),
-						po, true, 2, false, onLine );
+						po, true, 2, onLine );
 
 					return;
 				}
 			}
 		}
 
-		eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 2, false, onLine );
+		eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 2, onLine );
 	}
 	else
 	{
@@ -3253,14 +3250,14 @@ finishRule3HtmlTag( Delims::const_iterator it, Delims::const_iterator last,
 						break;
 				}
 
-				eatRawHtml( po.line, po.pos, it->m_line, i , po, true, 3, false, onLine );
+				eatRawHtml( po.line, po.pos, it->m_line, i , po, true, 3, onLine );
 
 				return;
 			}
 		}
 	}
 
-	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 3, false, onLine );
+	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 3, onLine );
 }
 
 inline void
@@ -3287,13 +3284,13 @@ finishRule4HtmlTag( Delims::const_iterator it, Delims::const_iterator last,
 					break;
 			}
 
-			eatRawHtml( po.line, po.pos, it->m_line, i , po, true, 4, false, onLine );
+			eatRawHtml( po.line, po.pos, it->m_line, i , po, true, 4, onLine );
 
 			return;
 		}
 	}
 
-	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 4 );
+	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 4, true );
 }
 
 inline void
@@ -3323,14 +3320,14 @@ finishRule5HtmlTag( Delims::const_iterator it, Delims::const_iterator last,
 						break;
 				}
 
-				eatRawHtml( po.line, po.pos, it->m_line, i , po, true, 5, false, onLine );
+				eatRawHtml( po.line, po.pos, it->m_line, i , po, true, 5, onLine );
 
 				return;
 			}
 		}
 	}
 
-	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 5 );
+	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 5, true );
 }
 
 inline void
@@ -3340,8 +3337,7 @@ finishRule6HtmlTag( Delims::const_iterator it, Delims::const_iterator last,
 	po.html.onLine = ( it != last ? it->m_pos == skipSpaces( 0, po.fr.data[ it->m_line ].first ) :
 		true );
 
-	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 6, false,
-		po.html.onLine );
+	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 6, po.html.onLine );
 }
 
 inline Delims::const_iterator
@@ -3526,7 +3522,7 @@ finishRule7HtmlTag( Delims::const_iterator it, Delims::const_iterator last,
 
 	if( ok )
 	{
-		eatRawHtml( po.line, po.pos, l, ++p, po, !onLine, 7, false, onLine );
+		eatRawHtml( po.line, po.pos, l, ++p, po, !onLine, 7, onLine );
 
 		po.html.onLine = onLine;
 
@@ -3542,16 +3538,14 @@ finishRule7HtmlTag( Delims::const_iterator it, Delims::const_iterator last,
 
 					if( rule != -1 && rule != 7 )
 					{
-						eatRawHtml( po.line, po.pos, it->m_line, it->m_pos, po, true, 7,
-							true, onLine );
+						eatRawHtml( po.line, po.pos, it->m_line, it->m_pos, po, true, 7, onLine );
 
 						return std::prev( it );
 					}
 				}
 			}
 
-			eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 7,
-				false, onLine );
+			eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 7, onLine );
 
 			return std::prev( last );
 		}
