@@ -250,3 +250,16 @@ TEST_CASE( "is_html_comment" )
 	REQUIRE( !MD::isHtmlComment( QStringLiteral( "<!-- --" ) ) );
 	REQUIRE( !MD::isHtmlComment( QStringLiteral( "<!-- -" ) ) );
 }
+
+TEST_CASE( "test_column_alignment" )
+{
+	MD::Table t;
+
+	t.setColumnAlignment( 0, MD::Table::AlignLeft );
+
+	REQUIRE( t.columnAlignment( 0 ) == MD::Table::AlignLeft );
+
+	t.setColumnAlignment( 0, MD::Table::AlignRight );
+
+	REQUIRE( t.columnAlignment( 0 ) == MD::Table::AlignRight );
+}
