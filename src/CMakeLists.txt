@@ -1,10 +1,6 @@
 
 project( md4qt )
 
-set( CMAKE_AUTOMOC ON )
-set( CMAKE_AUTORCC ON )
-set( CMAKE_AUTOUIC ON )
-
 set( MD4QT_VERSION "1.0.0" )
 
 find_package( Qt6Core REQUIRED )
