@@ -1009,7 +1009,7 @@ Parser::parse( StringListStream & stream, QSharedPointer< Block > parent,
 
 				type = lineType;
 
-				if( !line.isEmpty() )
+				if( !line.isEmpty() && ns < line.size() )
 					fragment.append( { line, { currentLineNumber, htmlCommentClosed } } );
 			}
 		}

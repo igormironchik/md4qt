@@ -4510,3 +4510,51 @@ TEST_CASE( "122" )
 		"   \\right)\n"
 		"\\]" ) );
 }
+
+TEST_CASE( "123" )
+{
+	MD::Parser parser;
+
+	auto doc = parser.parse( QStringLiteral( "tests/parser/data/123.md" ) );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 4 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	REQUIRE( p->items().size() == 1 );
+
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+	REQUIRE( t->text() == QStringLiteral( "Text" ) );
+
+	{
+		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Heading );
+		auto h = static_cast< MD::Heading* > ( doc->items().at( 2 ).data() );
+
+		auto p = h->text().data();
+		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		REQUIRE( t->text() == QString::fromLatin1( "Heading" ) );
+	}
+
+	{
+		REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::List );
+		auto l = static_cast< MD::List* > ( doc->items().at( 3 ).data() );
+
+		REQUIRE( l->items().size() == 1 );
+
+		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+		auto item = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+		REQUIRE( item->listType() == MD::ListItem::Unordered );
+		REQUIRE( item->items().size() == 1 );
+		REQUIRE( item->items().at( 0 )->type() == MD::ItemType::Paragraph );
+		auto p = static_cast< MD::Paragraph* > ( item->items().at( 0 ).data() );
+		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
+		REQUIRE( t->text() == QString::fromLatin1( "List" ) );
+	}
+}
