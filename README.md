@@ -42,6 +42,9 @@ major extensions. Conclusion why it's so you can read [here](tests/md_benchmark/
    easier to use C++ code instead of C with freeing memory by hands. Qt do things
    easier by handling text encoding... So let it be, guys.
 
+   And one more cherry on the cake - `md4qt` can parse Markdown recursively.
+   What is it described bellow.
+
 **Why this library tied to Qt? I want to see STL only in dependencies.**
 
  * This library was born in the Qt based project. Long time the library
