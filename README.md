@@ -84,3 +84,10 @@ then they will be parsed too and will exist in the resulting document.
 document can be represented more then one Markdown file. Each file in the
 document starts with `MD::Anchor`, it just shows that during traverse through
 the document you reached new file.
+
+**Does the library throw exceptions?**
+
+ * No. This library doesn't use exceptions. Any text is a valid Markdown, so I
+don't need to inform user about errors. Qt itself doesn't use exceptions too.
+So you can caught only standard C++ exceptions, like `std::bad_alloc`, for
+example.
