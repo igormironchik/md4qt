@@ -35,6 +35,19 @@ for example, complex footnotes will be wrongly parsed? Then `md4c` is better for
 
 # Q/A
 
+**Why this library tied to Qt? I want to see STL only in dependencies.**
+
+ * This library was born in the Qt based project. Long time the library
+ was not in separate project, and the code was under the GPL license.
+ I decied to weak restrictions for the possible users, and separated code
+ into this library, and gave it MIT license. Ok, I can template the code,
+ make Qt dependency as optional, and make library header-only. Yes, it's
+ not so big effort, I guess a week or two. But I don't need it. I don't
+ believe that this library will become very popular and will has a lot
+ of users, so I don't see a need for this job. But if you need pure STL
+ solution for `std::wstring` and `std::wistream`, just let me know. Submit an
+ issue, and we'll discuss.
+
 **What should I know about links in the document?**
 
  * In some cases in Markdown link's URL is something document related. So, when
