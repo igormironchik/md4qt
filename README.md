@@ -43,7 +43,7 @@ major extensions. Conclusion why it's so you can read [here](tests/md_benchmark/
    easier by handling text encoding... So let it be, guys.
 
    And one more cherry on the cake - `md4qt` can parse Markdown recursively.
-   What is it described bellow.
+   What it is described bellow.
 
 **Why this library tied to Qt? I want to see STL only in dependencies.**
 
