@@ -24,16 +24,23 @@ int main()
 
 # Benchmark
 
-Approximate benchmark with `md4c` says, that `md4qt` is slower only in 5.5 times.
-But you will get complete tree structure of the Markdown document with all
+Approximate benchmark with [md4c](https://github.com/mity/md4c) and
+[cmark-gfm](https://github.com/github/cmark-gfm) says, that `md4qt` is slower ~5 times.
+But you will get complete C++ tree structure of the Markdown document with all
 major extensions. Conclusion why it's so you can read [here](tests/md_benchmark/README.md).
 
-Is it so important to you and you don't want to pay extra ~1500 microseconds?
-Is it valuable to you to parse with `md4c` by 365 microseonds, instead of
-1970 microseconds with `md4qt`? Yes? And it's not a problem for you that,
-for example, complex footnotes will be wrongly parsed? Then `md4c` is better for you.
-
 # Q/A
+
+**Why another AST Markdown parser?**
+
+ * When I wrote this library I knew about `md4c` parser, but not about `cmark-gfm`.
+ `md4c` was not suitable for my purposes, whereas `cmark-gfm` could do
+ everything I needed. But God did it so, so I wrote `md4qt` and only later
+ knew about `cmark-gfm`. Ok, code is written and tested. Let it be.
+
+   What I can say yet, is that this library is C++. And for some people can be
+   easier to use C++ code instead of C with freeing memory by hands. Qt do things
+   easier by handling text encoding... So let it be, guys.
 
 **Why this library tied to Qt? I want to see STL only in dependencies.**
 

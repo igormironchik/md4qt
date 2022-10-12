@@ -39,6 +39,8 @@
 
 #include <QFile>
 
+#include <cmark-gfm.h>
+
 
 struct DATA {
 	QSharedPointer< MD::Document > * doc;
@@ -371,6 +373,32 @@ int main( int argc, char ** argv )
 		const auto d = std::chrono::duration_cast< std::chrono::microseconds > ( end - start );
 
 		std::cout << "md4qt parsing: " << d.count() << " us" << std::endl;
+	}
+
+	// cmark-gfm
+	{
+		const auto start = std::chrono::high_resolution_clock::now();
+
+		QFile file( QStringLiteral( "tests/manual/complex.md" ) );
+
+		if( file.open( QIODevice::ReadOnly ) )
+		{
+			const auto md = file.readAll();
+
+			file.close();
+
+			auto doc = cmark_parse_document( md.constData(), md.size(), CMARK_OPT_FOOTNOTES );
+
+			cmark_node_free( doc );
+		}
+		else
+			std::cout << "failed to open complex.md" << std::endl;
+
+		const auto end = std::chrono::high_resolution_clock::now();
+
+		const auto d = std::chrono::duration_cast< std::chrono::microseconds > ( end - start );
+
+		std::cout << "cmark-gfm parsing: " << d.count() << " us" << std::endl;
 	}
 
 	return 0;
