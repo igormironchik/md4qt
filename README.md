@@ -17,6 +17,22 @@ int main()
     MD::Parser p;
 
     auto doc = p.parse( QStringLiteral( "your_markdown.md" ) );
+	
+    for( auto it = doc->items().cbegin(), last = doc->items().cend(); it != last; ++it )
+    {
+        switch( (*it)->type() )
+        {
+            case MD::ItemType::Anchor :
+            {
+                auto a = static_cast< MD::Anchor* > ( it->data() );
+                qDebug() << a->label();
+            }
+                break;
+
+            default :
+                break;
+        }
+    }
 
     return 0;
 }
