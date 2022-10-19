@@ -41,7 +41,7 @@ int main()
 # Benchmark
 
 Approximate benchmark with [md4c](https://github.com/mity/md4c) and
-[cmark-gfm](https://github.com/github/cmark-gfm) says, that `md4qt` is slower ~5 times.
+[cmark-gfm](https://github.com/github/cmark-gfm) says, that `md4qt` is slower ~5-7 times.
 But you will get complete C++ tree structure of the Markdown document with all
 major extensions. Conclusion why it's so you can read [here](tests/md_benchmark/README.md).
 
