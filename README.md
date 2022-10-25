@@ -65,7 +65,7 @@ major extensions. Conclusion why it's so you can read [here](tests/md_benchmark/
 
  * This library was born in the Qt based project. Long time the library
  was not in separate project, and the code was under the GPL license.
- I decied to weak restrictions for the possible users, and separated code
+ I decided to weak restrictions for the possible users, and separated code
  into this library, and gave it MIT license. Ok, I can template the code,
  make Qt dependency as optional, and make library header-only. Yes, it's
  not so big effort, I guess a week or two. But I don't need it. I don't
