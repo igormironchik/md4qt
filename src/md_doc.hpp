@@ -371,7 +371,7 @@ class Heading final
 	:	public Item
 {
 public:
-	Heading() = default;
+	Heading();
 	~Heading() override = default;
 
 	ItemType type() const override;
@@ -493,7 +493,7 @@ class Image final
 	:	public Item
 {
 public:
-	Image() = default;
+	Image();
 	~Image() override = default;
 
 	ItemType type() const override;

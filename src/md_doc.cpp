@@ -82,6 +82,11 @@ Anchor::label() const
 // Heading
 //
 
+Heading::Heading()
+	:	m_text( new Paragraph )
+{
+}
+
 ItemType
 Heading::type() const
 {
@@ -420,6 +425,11 @@ List::type() const
 // Image
 //
 
+Image::Image()
+	:	m_p( new Paragraph )
+{
+}
+
 ItemType
 Image::type() const
 {
@@ -474,7 +484,8 @@ Image::setP( QSharedPointer< Paragraph > v )
 //
 
 Link::Link()
-	:	m_img( new Image() )
+	:	m_img( new Image )
+	,	m_p( new Paragraph )
 {
 
 }
