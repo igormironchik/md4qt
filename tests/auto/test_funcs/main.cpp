@@ -41,7 +41,7 @@
 // C++ Include.
 #include <vector>
 
-using data_t = std::vector< std::pair< ssize_t, int > >;
+using data_t = std::vector< std::pair< long long int, int > >;
 
 TEST_CASE( "emphasis_sequence" )
 {

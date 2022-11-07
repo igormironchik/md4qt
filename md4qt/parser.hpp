@@ -99,7 +99,7 @@ fileExists( const QString & fileName, const QString & workingPath )
 }
 
 inline bool
-indentInList( const std::set< ssize_t > * indents, ssize_t indent )
+indentInList( const std::set< long long int > * indents, long long int indent )
 {
 	if( indents )
 		return ( indents->find( indent ) != indents->cend() );
@@ -108,8 +108,8 @@ indentInList( const std::set< ssize_t > * indents, ssize_t indent )
 };
 
 // Skip spaces in line from pos \a i.
-inline ssize_t
-skipSpaces( ssize_t i, QStringView line )
+inline long long int
+skipSpaces( long long int i, QStringView line )
 {
 	const auto length = line.length();
 
@@ -150,9 +150,9 @@ inline bool
 isOrderedList( const QString & s, int * num = nullptr, int * len = nullptr,
 	QChar * delim = nullptr, bool * isFirstLineEmpty = nullptr )
 {
-	ssize_t p = skipSpaces( 0, s );
+	long long int p = skipSpaces( 0, s );
 
-	ssize_t dp = p;
+	long long int dp = p;
 
 	for( ; p < s.size(); ++p )
 	{
@@ -182,7 +182,7 @@ isOrderedList( const QString & s, int * num = nullptr, int * len = nullptr,
 
 			++p;
 
-			ssize_t tmp = skipSpaces( p, s );
+			long long int tmp = skipSpaces( p, s );
 
 			if( isFirstLineEmpty )
 				*isFirstLineEmpty = ( tmp == s.size() );
@@ -216,7 +216,7 @@ struct RawHtmlBlock {
 
 //! Internal structure.
 struct MdLineData {
-	ssize_t lineNumber = -1;
+	long long int lineNumber = -1;
 	std::vector< bool > htmlCommentClosed = {};
 }; // struct MdLineData
 
@@ -231,7 +231,7 @@ struct MdBlock {
 	using Data = typename Trait::template Vector< std::pair< typename Trait::String, MdLineData > >;
 
 	Data data;
-	ssize_t emptyLinesBefore = 0;
+	long long int emptyLinesBefore = 0;
 	bool emptyLineAfter = true;
 }; // struct MdBlock
 
@@ -253,10 +253,10 @@ public:
 
 	bool atEnd() const { return ( m_pos >= m_stream.size() ); }
 	typename Trait::String readLine() { return m_stream.at( m_pos++ ).first; }
-	ssize_t currentLineNumber() const
+	long long int currentLineNumber() const
 		{ return ( m_pos < size() ? m_stream.at( m_pos ).second.lineNumber : size() ); }
-	typename Trait::String lineAt( ssize_t pos ) { return m_stream.at( pos ).first; }
-	ssize_t size() const { return m_stream.size(); }
+	typename Trait::String lineAt( long long int pos ) { return m_stream.at( pos ).first; }
+	long long int size() const { return m_stream.size(); }
 
 private:
 	typename MdBlock< Trait >::Data & m_stream;
@@ -265,8 +265,8 @@ private:
 
 
 inline void
-collapseStack( std::stack< std::pair< ssize_t, int > > & st, ssize_t v, int type,
-	ssize_t idx )
+collapseStack( std::stack< std::pair< long long int, int > > & st, long long int v, int type,
+	long long int idx )
 {
 	while( !st.empty() && v > 0 )
 	{
@@ -286,16 +286,16 @@ collapseStack( std::stack< std::pair< ssize_t, int > > & st, ssize_t v, int type
 
 // \return Is sequence of emphasis closed, and closing index of the sequence?
 inline std::pair< bool, size_t >
-checkEmphasisSequence( const std::vector< std::pair< ssize_t, int > > & s, size_t idx )
+checkEmphasisSequence( const std::vector< std::pair< long long int, int > > & s, size_t idx )
 {
-	std::stack< std::pair< ssize_t, int > > st;
+	std::stack< std::pair< long long int, int > > st;
 
 	for( size_t i = 0; i <= idx; ++i )
 		st.push( s[ i ] );
 
 	size_t ret = 0;
 	bool retInit = false;
-	ssize_t ii = idx;
+	long long int ii = idx;
 
 	for( size_t i = idx + 1; i < s.size(); ++i )
 	{
@@ -347,7 +347,7 @@ template< class Trait >
 inline bool
 isFootnote( const typename Trait::String & s )
 {
-	ssize_t p = 0;
+	long long int p = 0;
 
 	for( ; p < s.size(); ++p )
 	{
@@ -400,7 +400,7 @@ isCodeFences( const typename Trait::String & s, bool closing = false )
 
 	bool space = false;
 
-	ssize_t c = 1;
+	long long int c = 1;
 	++p;
 
 	for( ; p < s.length(); ++p )
@@ -437,7 +437,7 @@ isCodeFences( const typename Trait::String & s, bool closing = false )
 }
 
 inline QString
-readEscapedSequence( ssize_t i, QStringView str )
+readEscapedSequence( long long int i, QStringView str )
 {
 	QString ret;
 	bool backslash = false;
@@ -478,8 +478,8 @@ isStartOfCode( typename Trait::StringView str, typename Trait::String * syntax =
 
 	if( c96 || c126 )
 	{
-		ssize_t p = 1;
-		ssize_t c = 1;
+		long long int p = 1;
+		long long int c = 1;
 
 		while( p < str.length() )
 		{
@@ -527,8 +527,8 @@ isHorizontalLine( typename Trait::StringView s )
 	else
 		return false;
 
-	ssize_t p = 1;
-	ssize_t count = 1;
+	long long int p = 1;
+	long long int count = 1;
 
 	for( ; p < s.size(); ++p )
 	{
@@ -552,7 +552,7 @@ template< class Trait >
 inline bool
 isColumnAlignment( const typename Trait::String & s )
 {
-	ssize_t p = skipSpaces( 0, s );
+	long long int p = skipSpaces( 0, s );
 
 	static const auto c_legitime = QStringLiteral( ":-" );
 
@@ -686,8 +686,8 @@ private:
 		Heading
 	}; // enum BlockType
 
-	BlockType whatIsTheLine( typename Trait::String & str, bool inList = false, ssize_t * indent = nullptr,
-		bool calcIndent = false, const std::set< ssize_t > * indents = nullptr ) const;
+	BlockType whatIsTheLine( typename Trait::String & str, bool inList = false, long long int * indent = nullptr,
+		bool calcIndent = false, const std::set< long long int > * indents = nullptr ) const;
 	void parseFragment( MdBlock< Trait > & fr, typename Trait::template SharedPointer< Block< Trait > > parent,
 		typename Trait::template SharedPointer< Document< Trait > > doc,
 		typename Trait::StringList & linksToParse, const typename Trait::String & workingPath,
@@ -877,15 +877,15 @@ private:
 	QTextStream & m_stream;
 	QString m_buf;
 	bool m_lastBuf;
-	ssize_t m_pos;
+	long long int m_pos;
 }; // class TextStream
 
 template< class Trait >
 inline bool
-checkForEndHtmlComments( const typename Trait::String & line, ssize_t pos,
+checkForEndHtmlComments( const typename Trait::String & line, long long int pos,
 	std::vector< bool > & res )
 {
-	ssize_t e = line.indexOf( QStringLiteral( "--" ), pos );
+	long long int e = line.indexOf( QStringLiteral( "--" ), pos );
 
 	if( e != -1 )
 	{
@@ -905,7 +905,7 @@ inline void
 checkForHtmlComments( const typename Trait::String & line, StringListStream< Trait > & stream,
 	std::vector< bool > & res )
 {
-	ssize_t p = 0, l = stream.currentLineNumber();
+	long long int p = 0, l = stream.currentLineNumber();
 
 	bool addFalse = false;
 
@@ -956,14 +956,14 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 	BlockType type = BlockType::Unknown;
 	bool emptyLineInList = false;
-	ssize_t emptyLinesCount = 0;
+	long long int emptyLinesCount = 0;
 	bool firstLine = true;
-	ssize_t spaces = 0;
-	ssize_t lineCounter = 0;
-	std::set< ssize_t > indents;
-	ssize_t indent = 0;
+	long long int spaces = 0;
+	long long int lineCounter = 0;
+	std::set< long long int > indents;
+	long long int indent = 0;
 	RawHtmlBlock< Trait > html;
-	ssize_t emptyLinesBefore = 0;
+	long long int emptyLinesBefore = 0;
 	std::vector< bool > htmlCommentClosed;
 
 	// Parse fragment and clear internal cache.
@@ -1033,7 +1033,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 		checkForHtmlComments( line, stream, htmlCommentClosed );
 
-		const ssize_t prevIndent = indent;
+		const long long int prevIndent = indent;
 
 		BlockType lineType = whatIsTheLine( line, emptyLineInList, &indent,
 			true, &indents );
@@ -1041,7 +1041,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 		if( prevIndent != indent )
 			indents.insert( indent );
 
-		const ssize_t currentIndent = indent;
+		const long long int currentIndent = indent;
 
 		const auto ns = skipSpaces( 0, line );
 
@@ -1157,7 +1157,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			if( indentInList( &indents, ns ) || lineType == BlockType::List ||
 				lineType == BlockType::CodeIndentedBySpaces )
 			{
-				for( ssize_t i = 0; i < emptyLinesCount; ++i )
+				for( long long int i = 0; i < emptyLinesCount; ++i )
 					fragment.append( { QString(),
 						{ currentLineNumber - emptyLinesCount + i, {} } } );
 
@@ -1186,7 +1186,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			{
 				const auto indent = skipSpaces( 0, fragment.first().first );
 
-				for( ssize_t i = 0; i < emptyLinesCount; ++i )
+				for( long long int i = 0; i < emptyLinesCount; ++i )
 					fragment.append( { QString( indent, c_32 ),
 						{ currentLineNumber - emptyLinesCount + i, {} } } );
 			}
@@ -1312,7 +1312,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 		html.htmlBlockType = -1;
 		html.continueHtml = false;
 
-		for( ssize_t i = 0; i < splitted.size(); ++i )
+		for( long long int i = 0; i < splitted.size(); ++i )
 		{
 			parseFragment( splitted[ i ], parent, doc, linksToParse,
 				workingPath, fileName, false, html );
@@ -1371,7 +1371,7 @@ Parser< Trait >::parseStream( typename Trait::TextStream & s,
 	{
 		TextStream stream( s );
 
-		ssize_t i = 0;
+		long long int i = 0;
 
 		while( !stream.atEnd() )
 		{
@@ -1440,10 +1440,10 @@ Parser< Trait >::parseStream( typename Trait::TextStream & s,
 
 namespace /* anonymous */ {
 
-inline ssize_t
+inline long long int
 posOfListItem( const QString & s, bool ordered )
 {
-	ssize_t p = 0;
+	long long int p = 0;
 
 	for( ; p < s.size(); ++p )
 	{
@@ -1462,7 +1462,7 @@ posOfListItem( const QString & s, bool ordered )
 
 	++p;
 
-	ssize_t sc = 0;
+	long long int sc = 0;
 
 	for( ; p < s.size(); ++p )
 	{
@@ -1483,8 +1483,8 @@ posOfListItem( const QString & s, bool ordered )
 template< class Trait >
 inline typename Parser< Trait >::BlockType
 Parser< Trait >::whatIsTheLine( typename Trait::String & str,
-	bool inList, ssize_t * indent, bool calcIndent,
-	const std::set< ssize_t > * indents ) const
+	bool inList, long long int * indent, bool calcIndent,
+	const std::set< long long int > * indents ) const
 {
 	str.replace( c_9, QString( 4, c_32 ) );
 
@@ -1498,7 +1498,7 @@ Parser< Trait >::whatIsTheLine( typename Trait::String & str,
 			return BlockType::Blockquote;
 		else if( s.startsWith( c_35 ) && first < 4 )
 		{
-			ssize_t c = 0;
+			long long int c = 0;
 
 			while( c < s.length() && s[ c ] == c_35 )
 				++c;
@@ -1659,7 +1659,7 @@ isTableHeader( const QString & s )
 
 		bool backslash = false;
 
-		for( ssize_t i = 0; i < v.size(); ++i )
+		for( long long int i = 0; i < v.size(); ++i )
 		{
 			bool now = false;
 
@@ -1717,7 +1717,7 @@ findAndRemoveHeaderLabel( QString & s )
 
 	if( start >= 0 )
 	{
-		ssize_t p = start + 2;
+		long long int p = start + 2;
 
 		for( ; p < s.size(); ++p )
 		{
@@ -1770,10 +1770,10 @@ paragraphToLabel( Paragraph< Trait > * p )
 inline void
 findAndRemoveClosingSequence( QString & s )
 {
-	ssize_t end = -1;
-	ssize_t start = -1;
+	long long int end = -1;
+	long long int start = -1;
 
-	for( ssize_t i = s.length() - 1; i >= 0 ; --i )
+	for( long long int i = s.length() - 1; i >= 0 ; --i )
 	{
 		if( !s[ i ].isSpace() && s[ i ] != c_35 && end == -1 )
 			return;
@@ -1817,7 +1817,7 @@ Parser< Trait >::parseHeading( MdBlock< Trait > & fr,
 	if( !fr.data.isEmpty() && !collectRefLinks )
 	{
 		auto line = fr.data.first().first;
-		ssize_t pos = 0;
+		long long int pos = 0;
 		pos = skipSpaces( pos, line );
 
 		if( pos > 0  )
@@ -1894,7 +1894,7 @@ splitTableRow( const QString & s )
 
 	bool backslash = false;
 
-	for( ssize_t i = 0; i < s.size(); ++i )
+	for( long long int i = 0; i < s.size(); ++i )
 	{
 		bool now = false;
 
@@ -2035,7 +2035,7 @@ namespace /* anonymous */ {
 inline bool
 isH( const QString & s, const QChar & c )
 {
-	ssize_t p = skipSpaces( 0, s );
+	long long int p = skipSpaces( 0, s );
 
 	if( p > 3 )
 		return false;
@@ -2089,9 +2089,9 @@ Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
 	// Check for alternative syntax of H1 and H2 headings.
 	if( fr.data.size() >= 2 )
 	{
-		ssize_t i = 1;
+		long long int i = 1;
 		int lvl = 0;
-		ssize_t horLines = 0;
+		long long int horLines = 0;
 
 		for( ; i < fr.data.size(); ++i )
 		{
@@ -2123,7 +2123,7 @@ Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
 		if( heading )
 		{
 			if( !collectRefLinks )
-				for( ssize_t j = 0; j < horLines; ++j )
+				for( long long int j = 0; j < horLines; ++j )
 					parent->appendItem( QSharedPointer< Item< Trait > > ( new HorizontalLine< Trait > ) );
 
 			fr.data.remove( 0, horLines );
@@ -2140,9 +2140,9 @@ Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
 			if( ns1 > 0 && ns1 < tmp.first().first.length() )
 				tmp.first().first = tmp.first().first.sliced( ns1 );
 
-			ssize_t ns2 = tmp.back().first.length();
+			long long int ns2 = tmp.back().first.length();
 
-			for( ssize_t i = tmp.back().first.length() - 1; i >= 0; --i )
+			for( long long int i = tmp.back().first.length() - 1; i >= 0; --i )
 			{
 				if( tmp.back().first[ i ].isSpace() )
 					ns2 = i;
@@ -2301,9 +2301,9 @@ struct Delimiter {
 	}; // enum DelimiterType
 
 	DelimiterType m_type = Unknown;
-	ssize_t m_line = -1;
-	ssize_t m_pos = -1;
-	ssize_t m_len = 0;
+	long long int m_line = -1;
+	long long int m_pos = -1;
+	long long int m_len = 0;
 	bool m_spaceBefore = false;
 	bool m_spaceAfter = false;
 	bool m_isWordBefore = false;
@@ -2329,7 +2329,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 {
 	Delims d;
 
-	for( ssize_t line = 0; line < fr.size(); ++line )
+	for( long long int line = 0; line < fr.size(); ++line )
 	{
 		const QString & str = fr.at( line ).first;
 		const auto p = skipSpaces( 0, str );
@@ -2343,7 +2343,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 			bool space = true;
 			bool word = false;
 
-			for( ssize_t i = 0; i < str.size(); ++i )
+			for( long long int i = 0; i < str.size(); ++i )
 			{
 				bool now = false;
 
@@ -2633,10 +2633,10 @@ struct TextParsingOpts {
 	RawHtmlBlock< Trait > & html;
 
 	bool wasRefLink = false;
-	ssize_t line = 0;
-	ssize_t pos = 0;
+	long long int line = 0;
+	long long int pos = 0;
 	int opts = TextWithoutFormat;
-	std::vector< std::pair< Style, ssize_t > > styles = {};
+	std::vector< std::pair< Style, long long int > > styles = {};
 }; // struct TextParsingOpts
 
 template< class Trait >
@@ -2668,10 +2668,10 @@ template< class Trait >
 inline typename Trait::String
 replaceEntity( const typename Trait::String & s )
 {
-	ssize_t p1 = 0;
+	long long int p1 = 0;
 
 	QString res;
-	ssize_t i = 0;
+	long long int i = 0;
 
 	while( ( p1 = s.indexOf( c_38, p1 ) ) != -1 )
 	{
@@ -2766,7 +2766,7 @@ removeBackslashes( const QString & s )
 	QString r;
 	bool backslash = false;
 
-	for( ssize_t i = 0; i < s.size(); ++i )
+	for( long long int i = 0; i < s.size(); ++i )
 	{
 		bool now = false;
 
@@ -2839,9 +2839,9 @@ template< class Trait >
 inline void
 makeText(
 	// Inclusive.
-	ssize_t lastLine,
+	long long int lastLine,
 	// Not inclusive
-	ssize_t lastPos,
+	long long int lastPos,
 	TextParsingOpts< Trait > & po,
 	bool doNotEscape = false )
 {
@@ -2935,7 +2935,7 @@ makeText(
 
 template< class Trait >
 inline void
-skipSpacesInHtml( ssize_t & l, ssize_t & p, const typename MdBlock< Trait >::Data & fr )
+skipSpacesInHtml( long long int & l, long long int & p, const typename MdBlock< Trait >::Data & fr )
 {
 	while( l < fr.size() )
 	{
@@ -2954,7 +2954,7 @@ skipSpacesInHtml( ssize_t & l, ssize_t & p, const typename MdBlock< Trait >::Dat
 
 template< class Trait >
 inline std::pair< bool, bool >
-readUnquotedHtmlAttrValue( ssize_t & l, ssize_t & p, const typename MdBlock< Trait >::Data & fr )
+readUnquotedHtmlAttrValue( long long int & l, long long int & p, const typename MdBlock< Trait >::Data & fr )
 {
 	static const QString notAllowed = QStringLiteral( "\"`=<'" );
 
@@ -2980,7 +2980,7 @@ readUnquotedHtmlAttrValue( ssize_t & l, ssize_t & p, const typename MdBlock< Tra
 
 template< class Trait >
 inline std::pair< bool, bool >
-readHtmlAttrValue( ssize_t & l, ssize_t & p, const typename MdBlock< Trait >::Data & fr )
+readHtmlAttrValue( long long int & l, long long int & p, const typename MdBlock< Trait >::Data & fr )
 {
 	if( p < fr[ l ].first.size() && fr[ l ].first[ p ] != c_34 && fr[ l ].first[ p ] != c_39 )
 		return readUnquotedHtmlAttrValue< Trait >( l, p, fr );
@@ -3030,10 +3030,10 @@ readHtmlAttrValue( ssize_t & l, ssize_t & p, const typename MdBlock< Trait >::Da
 
 template< class Trait >
 inline std::pair< bool, bool >
-readHtmlAttr( ssize_t & l, ssize_t & p, const typename MdBlock< Trait >::Data & fr,
+readHtmlAttr( long long int & l, long long int & p, const typename MdBlock< Trait >::Data & fr,
 	bool checkForSpace )
 {
-	ssize_t tl = l, tp = p;
+	long long int tl = l, tp = p;
 
 	skipSpacesInHtml< Trait >( l, p, fr );
 
@@ -3078,7 +3078,7 @@ readHtmlAttr( ssize_t & l, ssize_t & p, const typename MdBlock< Trait >::Data & 
 	static const QString allowedInName =
 		QStringLiteral( "abcdefghijklmnopqrstuvwxyz0123456789_.:-" );
 
-	for( ssize_t i = 1; i < name.length(); ++i )
+	for( long long int i = 1; i < name.length(); ++i )
 	{
 		if( !allowedInName.contains( name[ i ] ) )
 			return { false, false };
@@ -3121,12 +3121,12 @@ readHtmlAttr( ssize_t & l, ssize_t & p, const typename MdBlock< Trait >::Data & 
 }
 
 template< class Trait >
-inline std::tuple< bool, ssize_t, ssize_t, bool, QString >
-isHtmlTag( ssize_t line, ssize_t pos, TextParsingOpts< Trait > & po, int rule );
+inline std::tuple< bool, long long int, long long int, bool, QString >
+isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po, int rule );
 
 template< class Trait >
 inline bool
-isOnlyHtmlTagsAfterOrClosedRule1( ssize_t line, ssize_t pos,
+isOnlyHtmlTagsAfterOrClosedRule1( long long int line, long long int pos,
 	TextParsingOpts< Trait > & po, int rule )
 {
 	static const std::set< QString > rule1Finish = {
@@ -3142,7 +3142,7 @@ isOnlyHtmlTagsAfterOrClosedRule1( ssize_t line, ssize_t pos,
 	{
 		bool ok = false;
 
-		ssize_t l;
+		long long int l;
 		QString tag;
 
 		std::tie( ok, l, p, std::ignore, tag ) =
@@ -3177,16 +3177,16 @@ isOnlyHtmlTagsAfterOrClosedRule1( ssize_t line, ssize_t pos,
 }
 
 template< class Trait >
-inline std::tuple< bool, ssize_t, ssize_t, bool, QString >
-isHtmlTag( ssize_t line, ssize_t pos, TextParsingOpts< Trait > & po, int rule )
+inline std::tuple< bool, long long int, long long int, bool, QString >
+isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po, int rule )
 {
 	if( po.fr.data[ line ].first[ pos ] != c_60 )
 		return { false, line, pos, false, {} };
 
 	QString tag;
 
-	ssize_t l = line;
-	ssize_t p = pos + 1;
+	long long int l = line;
+	long long int p = pos + 1;
 	bool first = false;
 
 	{
@@ -3223,7 +3223,7 @@ isHtmlTag( ssize_t line, ssize_t pos, TextParsingOpts< Trait > & po, int rule )
 	{
 		if( p + 1 < po.fr.data[ l ].first.size() && po.fr.data[ l ].first[ p + 1 ] == c_62 )
 		{
-			ssize_t tmp = 0;
+			long long int tmp = 0;
 
 			if( rule == 7 )
 				tmp = skipSpaces( p + 2, po.fr.data[ l ].first );
@@ -3239,7 +3239,7 @@ isHtmlTag( ssize_t line, ssize_t pos, TextParsingOpts< Trait > & po, int rule )
 
 	if( p < po.fr.data[ l ].first.size() && po.fr.data[ l ].first[ p ] == c_62 )
 	{
-		ssize_t tmp = 0;
+		long long int tmp = 0;
 
 		if( rule == 7 )
 			tmp = skipSpaces( p + 1, po.fr.data[ l ].first );
@@ -3257,7 +3257,7 @@ isHtmlTag( ssize_t line, ssize_t pos, TextParsingOpts< Trait > & po, int rule )
 
 	if( po.fr.data[ l ].first[ p ] == c_62 )
 	{
-		ssize_t tmp = 0;
+		long long int tmp = 0;
 
 		if( rule == 7 )
 			tmp = skipSpaces( p + 1, po.fr.data[ l ].first );
@@ -3298,7 +3298,7 @@ isHtmlTag( ssize_t line, ssize_t pos, TextParsingOpts< Trait > & po, int rule )
 
 	if( po.fr.data[ l ].first[ p ] == c_62 )
 	{
-		ssize_t tmp = 0;
+		long long int tmp = 0;
 
 		if( rule == 7 )
 			tmp = skipSpaces( p + 1, po.fr.data[ l ].first );
@@ -3318,7 +3318,7 @@ readHtmlTag( Delims::const_iterator it, TextParsingOpts< Trait > & po )
 {
 	QString tag;
 
-	ssize_t i = it->m_pos + 1;
+	long long int i = it->m_pos + 1;
 
 	for( ; i < po.fr.data[ it->m_line ].first.size(); ++i )
 	{
@@ -3352,7 +3352,7 @@ findIt( Delims::const_iterator it, Delims::const_iterator last,
 
 template< class Trait >
 inline void
-eatRawHtml( ssize_t line, ssize_t pos, ssize_t toLine, ssize_t toPos,
+eatRawHtml( long long int line, long long int pos, long long int toLine, long long int toPos,
 	TextParsingOpts< Trait > & po, bool finish, int htmlRule, bool onLine )
 {
 	if( line <= toLine )
@@ -3361,7 +3361,7 @@ eatRawHtml( ssize_t line, ssize_t pos, ssize_t toLine, ssize_t toPos,
 
 		if( !h.isEmpty() )
 		{
-			for( ssize_t i = 0; i < po.fr.emptyLinesBefore; ++i )
+			for( long long int i = 0; i < po.fr.emptyLinesBefore; ++i )
 				h.append( c_10 );
 		}
 
@@ -3476,7 +3476,7 @@ finishRule2HtmlTag( Delims::const_iterator it, Delims::const_iterator last,
 
 		const auto & s = po.fr.data[ it->m_line ].first;
 
-		ssize_t p = 0;
+		long long int p = 0;
 
 		while( ( p = s.indexOf( c_startComment, p ) ) != it->m_pos )
 		{
@@ -3537,7 +3537,7 @@ finishRule3HtmlTag( Delims::const_iterator it, Delims::const_iterator last,
 		{
 			if( it->m_pos > 0 && po.fr.data[ it->m_line ].first[ it->m_pos - 1 ] == c_63 )
 			{
-				ssize_t i = it->m_pos + 1;
+				long long int i = it->m_pos + 1;
 
 				for( ; i < po.fr.data[ it->m_line ].first.size(); ++i )
 				{
@@ -3572,7 +3572,7 @@ finishRule4HtmlTag( Delims::const_iterator it, Delims::const_iterator last,
 	{
 		if( it->m_type == Delimiter::Greater )
 		{
-			ssize_t i = it->m_pos + 1;
+			long long int i = it->m_pos + 1;
 
 			for( ; i < po.fr.data[ it->m_line ].first.size(); ++i )
 			{
@@ -3609,7 +3609,7 @@ finishRule5HtmlTag( Delims::const_iterator it, Delims::const_iterator last,
 			if( it->m_pos > 1 && po.fr.data[ it->m_line ].first[ it->m_pos - 1 ] == c_93 &&
 				po.fr.data[ it->m_line ].first[ it->m_pos - 2 ] == c_93 )
 			{
-				ssize_t i = it->m_pos + 1;
+				long long int i = it->m_pos + 1;
 
 				for( ; i < po.fr.data[ it->m_line ].first.size(); ++i )
 				{
@@ -3719,7 +3719,7 @@ htmlTagRule( Delims::const_iterator it, Delims::const_iterator last,
 		!( tag[ 0 ].unicode() >= 97 && tag[ 0 ].unicode() <= 122 ) )
 			return -1;
 
-	for( ssize_t i = 1; i < tag.size(); ++i )
+	for( long long int i = 1; i < tag.size(); ++i )
 	{
 		if( !c_validHtmlTagLetters.contains( tag[ i ] ) )
 			return -1;
@@ -3814,7 +3814,7 @@ finishRule7HtmlTag( Delims::const_iterator it, Delims::const_iterator last,
 	TextParsingOpts< Trait > & po )
 {
 	const auto start = it;
-	ssize_t l = -1, p = -1;
+	long long int l = -1, p = -1;
 	bool onLine = false;
 	bool ok = false;
 
@@ -3882,7 +3882,7 @@ checkForMath( Delims::const_iterator it, Delims::const_iterator last,
 		{
 			math = po.fr.data[ it->m_line ].first.sliced( it->m_pos + it->m_len );
 
-			for( ssize_t i = it->m_line + 1; i < end->m_line; ++i )
+			for( long long int i = it->m_line + 1; i < end->m_line; ++i )
 			{
 				math.append( c_10 );
 				math.append( po.fr.data[ i ].first );
@@ -3983,7 +3983,7 @@ checkForAutolinkHtml( Delims::const_iterator it, Delims::const_iterator last,
 
 template< class Trait >
 inline void
-makeInlineCode( ssize_t lastLine, ssize_t lastPos,
+makeInlineCode( long long int lastLine, long long int lastPos,
 	TextParsingOpts< Trait > & po )
 {
 	QString c;
@@ -4079,7 +4079,7 @@ readTextBetweenSquareBrackets( Delims::const_iterator start,
 				auto text = po.fr.data.at( start->m_line ).first
 					.sliced( start->m_pos + start->m_len );
 
-				ssize_t i = start->m_line + 1;
+				long long int i = start->m_line + 1;
 
 				for( ; i <= it->m_line; ++i )
 				{
@@ -4118,11 +4118,11 @@ checkForLinkText( Delims::const_iterator it, Delims::const_iterator last,
 {
 	const auto start = it;
 
-	ssize_t brackets = 0;
+	long long int brackets = 0;
 
 	const bool collectRefLinks = po.collectRefLinks;
 	po.collectRefLinks = true;
-	ssize_t l = po.line, p = po.pos;
+	long long int l = po.line, p = po.pos;
 
 	for( it = std::next( it ); it != last; ++it )
 	{
@@ -4216,7 +4216,7 @@ inline typename Trait::template SharedPointer< Link< Trait > >
 makeLink( const typename Trait::String & url, const typename Trait::String & text,
 	TextParsingOpts< Trait > & po,
 	bool doNotCreateTextOnFail,
-	ssize_t lastLine, ssize_t lastPos )
+	long long int lastLine, long long int lastPos )
 {
 	QString u = ( url.startsWith( c_35 ) ? url : removeBackslashes(
 		replaceEntity< Trait >( url ) ) );
@@ -4297,7 +4297,7 @@ template< class Trait >
 inline bool
 createShortcutLink( const typename Trait::String & text,
 	TextParsingOpts< Trait > & po,
-	ssize_t lastLine, ssize_t lastPos,
+	long long int lastLine, long long int lastPos,
 	Delims::const_iterator lastIt,
 	const typename Trait::String & linkText,
 	bool doNotCreateTextOnFail )
@@ -4345,7 +4345,7 @@ inline typename Trait::template SharedPointer< Image< Trait > >
 makeImage( const typename Trait::String & url, const typename Trait::String & text,
 	TextParsingOpts< Trait > & po,
 	bool doNotCreateTextOnFail,
-	ssize_t lastLine, ssize_t lastPos )
+	long long int lastLine, long long int lastPos )
 {
 	QSharedPointer< Image< Trait > > img( new Image< Trait > );
 
@@ -4384,7 +4384,7 @@ template< class Trait >
 inline bool
 createShortcutImage( const typename Trait::String & text,
 	TextParsingOpts< Trait > & po,
-	ssize_t lastLine, ssize_t lastPos,
+	long long int lastLine, long long int lastPos,
 	Delims::const_iterator lastIt,
 	const typename Trait::String & linkText,
 	bool doNotCreateTextOnFail )
@@ -4418,7 +4418,7 @@ createShortcutImage( const typename Trait::String & text,
 
 template< class Trait >
 inline void
-skipSpacesUpTo1Line( ssize_t & line, ssize_t & pos, const typename MdBlock< Trait >::Data & fr )
+skipSpacesUpTo1Line( long long int & line, long long int & pos, const typename MdBlock< Trait >::Data & fr )
 {
 	pos = skipSpaces( pos, fr.at( line ).first );
 
@@ -4430,8 +4430,8 @@ skipSpacesUpTo1Line( ssize_t & line, ssize_t & pos, const typename MdBlock< Trai
 }
 
 template< class Trait >
-inline std::tuple< ssize_t, ssize_t, bool, QString, ssize_t >
-readLinkDestination( ssize_t line, ssize_t pos, const typename MdBlock< Trait >::Data & fr )
+inline std::tuple< long long int, long long int, bool, QString, long long int >
+readLinkDestination( long long int line, long long int pos, const typename MdBlock< Trait >::Data & fr )
 {
 	skipSpacesUpTo1Line< Trait >( line, pos, fr );
 
@@ -4480,7 +4480,7 @@ readLinkDestination( ssize_t line, ssize_t pos, const typename MdBlock< Trait >:
 		}
 		else
 		{
-			ssize_t pc = 0;
+			long long int pc = 0;
 
 			while( pos < s.size() )
 			{
@@ -4535,8 +4535,8 @@ readLinkDestination( ssize_t line, ssize_t pos, const typename MdBlock< Trait >:
 }
 
 template< class Trait >
-inline std::tuple< ssize_t, ssize_t, bool, QString, ssize_t >
-readLinkTitle( ssize_t line, ssize_t pos, const typename MdBlock< Trait >::Data & fr )
+inline std::tuple< long long int, long long int, bool, QString, long long int >
+readLinkTitle( long long int line, long long int pos, const typename MdBlock< Trait >::Data & fr )
 {
 	const auto space = ( pos < fr.at( line ).first.size() ?
 		fr.at( line ).first[ pos ].isSpace() : true );
@@ -4603,18 +4603,18 @@ inline std::tuple< typename Trait::String, typename Trait::String, Delims::const
 checkForInlineLink( Delims::const_iterator it, Delims::const_iterator last,
 	TextParsingOpts< Trait > & po )
 {
-	ssize_t p = it->m_pos + it->m_len;
-	ssize_t l = it->m_line;
+	long long int p = it->m_pos + it->m_len;
+	long long int l = it->m_line;
 	bool ok = false;
 	QString dest, title;
-	ssize_t destStartLine = 0;
+	long long int destStartLine = 0;
 
 	std::tie( l, p, ok, dest, destStartLine ) = readLinkDestination< Trait >( l, p, po.fr.data );
 
 	if( !ok )
 		return { {}, {}, it, false };
 
-	ssize_t s = 0;
+	long long int s = 0;
 
 	std::tie( l, p, ok, title, s ) = readLinkTitle< Trait >( l, p, po.fr.data );
 
@@ -4638,11 +4638,11 @@ inline std::tuple< typename Trait::String, typename Trait::String, Delims::const
 checkForRefLink( Delims::const_iterator it, Delims::const_iterator last,
 	TextParsingOpts< Trait > & po )
 {
-	ssize_t p = it->m_pos + it->m_len + 1;
-	ssize_t l = it->m_line;
+	long long int p = it->m_pos + it->m_len + 1;
+	long long int l = it->m_line;
 	bool ok = false;
 	QString dest, title;
-	ssize_t destStartLine = 0;
+	long long int destStartLine = 0;
 
 	std::tie( l, p, ok, dest, destStartLine ) = readLinkDestination< Trait >( l, p, po.fr.data );
 
@@ -4650,7 +4650,7 @@ checkForRefLink( Delims::const_iterator it, Delims::const_iterator last,
 		return { {}, {}, it, false };
 
 	const auto dp = p, dl = l;
-	ssize_t titleStartLine = 0;
+	long long int titleStartLine = 0;
 
 	std::tie( l, p, ok, title, titleStartLine ) = readLinkTitle< Trait >( l, p, po.fr.data );
 
@@ -5007,7 +5007,7 @@ checkForLink( Delims::const_iterator it, Delims::const_iterator last,
 }
 
 inline bool
-isClosingStyle( const std::vector< std::pair< Style, ssize_t > > & styles, Style s )
+isClosingStyle( const std::vector< std::pair< Style, long long int > > & styles, Style s )
 {
 	const auto it = std::find_if( styles.cbegin(), styles.cend(),
 		[&] ( const auto & p ) { return ( p.first == s ); } );
@@ -5016,7 +5016,7 @@ isClosingStyle( const std::vector< std::pair< Style, ssize_t > > & styles, Style
 }
 
 inline void
-closeStyle( std::vector< std::pair< Style, ssize_t > > & styles, Style s )
+closeStyle( std::vector< std::pair< Style, long long int > > & styles, Style s )
 {
 	const auto it = std::find_if( styles.crbegin(), styles.crend(),
 		[&] ( const auto & p ) { return ( p.first == s ); } );
@@ -5051,16 +5051,16 @@ setStyle( int & opts, Style s, bool on )
 }
 
 inline void
-appendPossibleDelimiter( std::vector< std::vector< std::pair< ssize_t, int > > > & vars,
-	ssize_t len, int type )
+appendPossibleDelimiter( std::vector< std::vector< std::pair< long long int, int > > > & vars,
+	long long int len, int type )
 {
 	for( auto & v : vars )
 		v.push_back( { len, type } );
 }
 
-inline std::vector< std::pair< ssize_t, int > >
+inline std::vector< std::pair< long long int, int > >
 longestSequenceWithMoreOpeningsAtStart(
-	const std::vector< std::vector< std::pair< ssize_t, int > > > & vars )
+	const std::vector< std::vector< std::pair< long long int, int > > > & vars )
 {
 	size_t max = 0;
 
@@ -5070,7 +5070,7 @@ longestSequenceWithMoreOpeningsAtStart(
 			max = s.size();
 	}
 
-	std::vector< std::pair< ssize_t, int > > ret;
+	std::vector< std::pair< long long int, int > > ret;
 
 	size_t maxOp = 0;
 
@@ -5099,11 +5099,11 @@ longestSequenceWithMoreOpeningsAtStart(
 	return ret;
 }
 
-inline std::vector< std::vector< std::pair< ssize_t, int > > >
-closedSequences( const std::vector< std::vector< std::pair< ssize_t, int > > > & vars,
+inline std::vector< std::vector< std::pair< long long int, int > > >
+closedSequences( const std::vector< std::vector< std::pair< long long int, int > > > & vars,
 	size_t idx )
 {
-	std::vector< std::vector< std::pair< ssize_t, int > > > tmp;
+	std::vector< std::vector< std::pair< long long int, int > > > tmp;
 
 	const auto longest = longestSequenceWithMoreOpeningsAtStart( vars );
 
@@ -5123,8 +5123,8 @@ closedSequences( const std::vector< std::vector< std::pair< ssize_t, int > > > &
 }
 
 inline void
-collectDelimiterVariants( std::vector< std::vector< std::pair< ssize_t, int > > > & vars,
-	ssize_t itLength, int type, bool leftFlanking, bool rightFlanking )
+collectDelimiterVariants( std::vector< std::vector< std::pair< long long int, int > > > & vars,
+	long long int itLength, int type, bool leftFlanking, bool rightFlanking )
 {
 	{
 		auto vars1 = vars;
@@ -5147,8 +5147,8 @@ collectDelimiterVariants( std::vector< std::vector< std::pair< ssize_t, int > > 
 }
 
 inline void
-createStyles( std::vector< std::pair< Style, ssize_t > > & s, ssize_t l,
-	Delimiter::DelimiterType t, ssize_t & count )
+createStyles( std::vector< std::pair< Style, long long int > > & s, long long int l,
+	Delimiter::DelimiterType t, long long int & count )
 {
 	if( t != Delimiter::Strikethrough )
 	{
@@ -5173,14 +5173,14 @@ createStyles( std::vector< std::pair< Style, ssize_t > > & s, ssize_t l,
 	}
 }
 
-inline std::vector< std::pair< Style, ssize_t > >
-createStyles( const std::vector< std::pair< ssize_t, int > > & s, size_t i,
-	Delimiter::DelimiterType t, ssize_t & count )
+inline std::vector< std::pair< Style, long long int > >
+createStyles( const std::vector< std::pair< long long int, int > > & s, size_t i,
+	Delimiter::DelimiterType t, long long int & count )
 {
-	std::vector< std::pair< Style, ssize_t > > styles;
+	std::vector< std::pair< Style, long long int > > styles;
 
 	const size_t idx = i;
-	ssize_t len = s.at( i ).first;
+	long long int len = s.at( i ).first;
 
 	size_t closeIdx = 0;
 	std::tie( std::ignore, closeIdx ) = checkEmphasisSequence( s, i );
@@ -5204,7 +5204,7 @@ createStyles( const std::vector< std::pair< ssize_t, int > > & s, size_t i,
 }
 
 inline bool
-isSequence( Delims::const_iterator it, ssize_t itLine, ssize_t itPos,
+isSequence( Delims::const_iterator it, long long int itLine, long long int itPos,
 	Delimiter::DelimiterType t )
 {
 	return ( itLine == it->m_line &&
@@ -5214,7 +5214,7 @@ isSequence( Delims::const_iterator it, ssize_t itLine, ssize_t itPos,
 
 inline Delims::const_iterator
 readSequence( Delims::const_iterator it, Delims::const_iterator last,
-	ssize_t & line, ssize_t & pos, ssize_t & len,
+	long long int & line, long long int & pos, long long int & len,
 	Delims::const_iterator & current )
 {
 	line = it->m_line;
@@ -5266,20 +5266,20 @@ emphasisToInt( Delimiter::DelimiterType t )
 }
 
 template< class Trait >
-inline std::tuple< bool, std::vector< std::pair< Style, ssize_t > >, ssize_t, ssize_t >
+inline std::tuple< bool, std::vector< std::pair< Style, long long int > >, long long int, long long int >
 isStyleClosed( Delims::const_iterator it, Delims::const_iterator last,
 	TextParsingOpts< Trait > & po )
 {
 	const auto open = it;
 	auto current =  it;
 
-	std::vector< std::vector< std::pair< ssize_t, int > > > vars, closed;
+	std::vector< std::vector< std::pair< long long int, int > > > vars, closed;
 	vars.push_back( {} );
 
-	ssize_t itLine = open->m_line, itPos = open->m_pos,
+	long long int itLine = open->m_line, itPos = open->m_pos,
 		itLength = ( open->m_type != Delimiter::Strikethrough ? 1 : 2 );
 
-	const ssize_t line = po.line, pos = po.pos;
+	const long long int line = po.line, pos = po.pos;
 	const bool collectRefLinks = po.collectRefLinks;
 
 	po.collectRefLinks = true;
@@ -5378,7 +5378,7 @@ isStyleClosed( Delims::const_iterator it, Delims::const_iterator last,
 
 	if( !closed.empty() )
 	{
-		ssize_t itCount = 0;
+		long long int itCount = 0;
 
 		return { true, createStyles(
 			longestSequenceWithMoreOpeningsAtStart( closed ), idx, open->m_type, itCount ),
@@ -5394,15 +5394,15 @@ inline Delims::const_iterator
 checkForStyle( Delims::const_iterator first, Delims::const_iterator it,
 	Delims::const_iterator last, TextParsingOpts< Trait > & po )
 {
-	ssize_t count = 1;
+	long long int count = 1;
 
 	po.wasRefLink = false;
 
 	if( it->m_rightFlanking )
 	{
-		ssize_t line = it->m_line, pos = it->m_pos + it->m_len, ppos = it->m_pos;
+		long long int line = it->m_line, pos = it->m_pos + it->m_len, ppos = it->m_pos;
 		const auto t = it->m_type;
-		ssize_t len = it->m_len;
+		long long int len = it->m_len;
 
 		for( auto j = std::next( it ); j != last; ++j )
 		{
@@ -5434,7 +5434,7 @@ checkForStyle( Delims::const_iterator first, Delims::const_iterator it,
 			}
 		}
 
-		ssize_t opened = 0;
+		long long int opened = 0;
 
 		for( auto it = po.styles.crbegin(), last = po.styles.crend(); it != last; ++it )
 		{
@@ -5547,8 +5547,8 @@ checkForStyle( Delims::const_iterator first, Delims::const_iterator it,
 			case Delimiter::Emphasis2 :
 			{
 				bool closed = false;
-				std::vector< std::pair< Style, ssize_t > > styles;
-				ssize_t len = 0;
+				std::vector< std::pair< Style, long long int > > styles;
+				long long int len = 0;
 
 				std::tie( closed, styles, len, count ) = isStyleClosed( it, last, po );
 
@@ -5558,7 +5558,7 @@ checkForStyle( Delims::const_iterator first, Delims::const_iterator it,
 					{
 						setStyle< Trait >( po.opts, p.first, true );
 
-						for( ssize_t i = 0; i < p.second; ++i )
+						for( long long int i = 0; i < p.second; ++i )
 							po.styles.push_back( { p.first, len } );
 					}
 
@@ -5907,7 +5907,7 @@ Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
 
 	if( pos > -1 )
 	{
-		ssize_t i = 0, j = 0;
+		long long int i = 0, j = 0;
 
 		bool horLine = false;
 
@@ -5991,9 +5991,9 @@ Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
 namespace /* anonymous */ {
 
 inline bool
-isListItemAndNotNested( const QString & s, ssize_t indent )
+isListItemAndNotNested( const QString & s, long long int indent )
 {
-	ssize_t p = skipSpaces( 0, s );
+	long long int p = skipSpaces( 0, s );
 
 	if( p >= indent || p == s.size() )
 		return false;
@@ -6020,16 +6020,16 @@ isListItemAndNotNested( const QString & s, ssize_t indent )
 		return false;
 }
 
-inline std::pair< ssize_t, ssize_t >
-calculateIndent( const QString & s, ssize_t p )
+inline std::pair< long long int, long long int >
+calculateIndent( const QString & s, long long int p )
 {
 	return { 0, skipSpaces( p, s ) };
 }
 
-inline std::tuple< bool, ssize_t, QChar >
+inline std::tuple< bool, long long int, QChar >
 listItemData( const QString & s )
 {
-	ssize_t p = skipSpaces( 0, s );
+	long long int p = skipSpaces( 0, s );
 
 	if( p == s.size() )
 		return { false, 0, QChar() };
@@ -6091,7 +6091,7 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 		++it;
 
 		bool ok = false;
-		ssize_t indent = 0;
+		long long int indent = 0;
 		QChar marker;
 
 		std::tie( ok, indent, marker ) = listItemData( listItem.first().first );
@@ -6199,7 +6199,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 
 	int pos = 1;
 
-	ssize_t indent = 0;
+	long long int indent = 0;
 	bool ok = false;
 
 	std::tie( ok, indent, std::ignore ) = listItemData( fr.data.first().first );
