@@ -11,12 +11,12 @@ endif( ENABLE_COVERAGE )
 set( SRC main.cpp )
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}
-	${CMAKE_CURRENT_SOURCE_DIR}/../../../src
+	${CMAKE_CURRENT_SOURCE_DIR}/../../..
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../3rdparty )
 
 add_executable( test.funcs ${SRC} )
 
-target_link_libraries( test.funcs md4qt Qt6::Core )
+target_link_libraries( test.funcs Qt6::Core )
 
 add_test( NAME test.funcs
 	COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.funcs

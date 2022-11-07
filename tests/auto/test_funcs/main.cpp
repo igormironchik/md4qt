@@ -28,7 +28,11 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <md_parser.hpp>
+#define MD4QT_QT_SUPPORT
+#define TRAIT MD::QStringTrait
+
+#include <md4qt/parser.hpp>
+#include <md4qt/traits.hpp>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 // doctest include.
@@ -37,7 +41,7 @@
 // C++ Include.
 #include <vector>
 
-using data_t = std::vector< std::pair< qsizetype, int > >;
+using data_t = std::vector< std::pair< ssize_t, int > >;
 
 TEST_CASE( "emphasis_sequence" )
 {
@@ -202,64 +206,64 @@ TEST_CASE( "emphasis_sequence" )
 
 TEST_CASE( "is_footnote" )
 {
-	REQUIRE( !MD::isFootnote( QStringLiteral( "[^]:" ) ) );
-	REQUIRE( !MD::isFootnote( QStringLiteral( "[^ a]:" ) ) );
-	REQUIRE( !MD::isFootnote( QStringLiteral( "[^  a]:" ) ) );
-	REQUIRE( !MD::isFootnote( QStringLiteral( "[^ a a]:" ) ) );
-	REQUIRE( !MD::isFootnote( QStringLiteral( "[^a a]:" ) ) );
+	REQUIRE( !MD::isFootnote< TRAIT >( QStringLiteral( "[^]:" ) ) );
+	REQUIRE( !MD::isFootnote< TRAIT >( QStringLiteral( "[^ a]:" ) ) );
+	REQUIRE( !MD::isFootnote< TRAIT >( QStringLiteral( "[^  a]:" ) ) );
+	REQUIRE( !MD::isFootnote< TRAIT >( QStringLiteral( "[^ a a]:" ) ) );
+	REQUIRE( !MD::isFootnote< TRAIT >( QStringLiteral( "[^a a]:" ) ) );
 }
 
 TEST_CASE( "is_code_fences" )
 {
-	REQUIRE( !MD::isCodeFences( QStringLiteral( "    ~~~" ) ) );
-	REQUIRE( !MD::isCodeFences( QStringLiteral( "aaa" ) ) );
-	REQUIRE( !MD::isCodeFences( QStringLiteral( "~~" ) ) );
+	REQUIRE( !MD::isCodeFences< TRAIT >( QStringLiteral( "    ~~~" ) ) );
+	REQUIRE( !MD::isCodeFences< TRAIT >( QStringLiteral( "aaa" ) ) );
+	REQUIRE( !MD::isCodeFences< TRAIT >( QStringLiteral( "~~" ) ) );
 }
 
 TEST_CASE( "is_start_of_code" )
 {
-	REQUIRE( !MD::isStartOfCode( QStringLiteral( "~~" ) ) );
-	REQUIRE( !MD::isStartOfCode( QStringLiteral( "~~`" ) ) );
+	REQUIRE( !MD::isStartOfCode< TRAIT >( QStringLiteral( "~~" ) ) );
+	REQUIRE( !MD::isStartOfCode< TRAIT >( QStringLiteral( "~~`" ) ) );
 }
 
 TEST_CASE( "is_horizontal_line" )
 {
-	REQUIRE( MD::isHorizontalLine( QStringLiteral( "---   " ) ) );
-	REQUIRE( !MD::isHorizontalLine( QStringLiteral( "---   =" ) ) );
+	REQUIRE( MD::isHorizontalLine< TRAIT >( QStringLiteral( "---   " ) ) );
+	REQUIRE( !MD::isHorizontalLine< TRAIT >( QStringLiteral( "---   =" ) ) );
 }
 
 TEST_CASE( "is_column_alignment" )
 {
-	REQUIRE( !MD::isColumnAlignment( QStringLiteral( "a" ) ) );
-	REQUIRE( MD::isColumnAlignment( QStringLiteral( ":-" ) ) );
-	REQUIRE( !MD::isColumnAlignment( QStringLiteral( ":---a" ) ) );
-	REQUIRE( !MD::isColumnAlignment( QStringLiteral( ":--- a" ) ) );
+	REQUIRE( !MD::isColumnAlignment< TRAIT >( QStringLiteral( "a" ) ) );
+	REQUIRE( MD::isColumnAlignment< TRAIT >( QStringLiteral( ":-" ) ) );
+	REQUIRE( !MD::isColumnAlignment< TRAIT >( QStringLiteral( ":---a" ) ) );
+	REQUIRE( !MD::isColumnAlignment< TRAIT >( QStringLiteral( ":--- a" ) ) );
 }
 
 TEST_CASE( "is_table_alignmnet" )
 {
-	REQUIRE( !MD::isTableAlignment( QStringLiteral( "|aaa|bbb|" ) ) );
+	REQUIRE( !MD::isTableAlignment< TRAIT >( QStringLiteral( "|aaa|bbb|" ) ) );
 }
 
 TEST_CASE( "is_html_comment" )
 {
-	REQUIRE( MD::isHtmlComment( QStringLiteral( "<!-- -->" ) ) );
-	REQUIRE( !MD::isHtmlComment( QStringLiteral( "<-- -->" ) ) );
-	REQUIRE( !MD::isHtmlComment( QStringLiteral( "<!-->" ) ) );
-	REQUIRE( !MD::isHtmlComment( QStringLiteral( "<!--->" ) ) );
-	REQUIRE( !MD::isHtmlComment( QStringLiteral( "<!-- --" ) ) );
-	REQUIRE( !MD::isHtmlComment( QStringLiteral( "<!-- -" ) ) );
+	REQUIRE( MD::isHtmlComment< TRAIT >( QStringLiteral( "<!-- -->" ) ) );
+	REQUIRE( !MD::isHtmlComment< TRAIT >( QStringLiteral( "<-- -->" ) ) );
+	REQUIRE( !MD::isHtmlComment< TRAIT >( QStringLiteral( "<!-->" ) ) );
+	REQUIRE( !MD::isHtmlComment< TRAIT >( QStringLiteral( "<!--->" ) ) );
+	REQUIRE( !MD::isHtmlComment< TRAIT >( QStringLiteral( "<!-- --" ) ) );
+	REQUIRE( !MD::isHtmlComment< TRAIT >( QStringLiteral( "<!-- -" ) ) );
 }
 
 TEST_CASE( "test_column_alignment" )
 {
-	MD::Table t;
+	MD::Table< TRAIT > t;
 
-	t.setColumnAlignment( 0, MD::Table::AlignLeft );
+	t.setColumnAlignment( 0, MD::Table< TRAIT >::AlignLeft );
 
-	REQUIRE( t.columnAlignment( 0 ) == MD::Table::AlignLeft );
+	REQUIRE( t.columnAlignment( 0 ) == MD::Table< TRAIT >::AlignLeft );
 
-	t.setColumnAlignment( 0, MD::Table::AlignRight );
+	t.setColumnAlignment( 0, MD::Table< TRAIT >::AlignRight );
 
-	REQUIRE( t.columnAlignment( 0 ) == MD::Table::AlignRight );
+	REQUIRE( t.columnAlignment( 0 ) == MD::Table< TRAIT >::AlignRight );
 }

@@ -1,4 +1,5 @@
 
+
 /*!
 	\file
 
@@ -28,29 +29,20 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#pragma once
+#ifndef MD4QT_MD_UTILS_HPP_INCLUDED
+#define MD4QT_MD_UTILS_HPP_INCLUDED
 
-#define MD4QT_QT_SUPPORT
-#define TRAIT MD::QStringTrait
+namespace MD {
 
-#include <md4qt/parser.hpp>
-#include <md4qt/traits.hpp>
+//
+// DISABLE_COPY
+//
 
-#include <QDir>
+//! Macro for disabling copy.
+#define DISABLE_COPY( Class ) \
+	Class( const Class & ) = delete; \
+	Class & operator= ( const Class & ) = delete;
 
+} /* namespace MD */
 
-inline typename TRAIT::template SharedPointer< MD::Document< TRAIT > >
-load_test( int n )
-{
-	auto fileName = QString::number( n );
-
-	if( fileName.size() < 3 )
-		fileName.prepend( QString( 3 - fileName.size(), QLatin1Char( '0' ) ) );
-
-	fileName.prepend( QStringLiteral( "tests/commonmark/0.30/" ) );
-	fileName.append( QStringLiteral( ".md" ) );
-
-	MD::Parser< TRAIT > p;
-
-	return p.parse( fileName, false );
-}
+#endif // MD4QT_MD_UTILS_HPP_INCLUDED

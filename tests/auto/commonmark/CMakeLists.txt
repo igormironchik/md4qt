@@ -20,12 +20,12 @@ file( GLOB INL *.inl )
 set( SRC main.cpp ${HPP} ${INL} )
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}
-	${CMAKE_CURRENT_SOURCE_DIR}/../../../src
+	${CMAKE_CURRENT_SOURCE_DIR}/../../..
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../3rdparty )
 
 add_executable( test.md_parser.commonmark ${SRC} )
 
-target_link_libraries( test.md_parser.commonmark md4qt Qt6::Core )
+target_link_libraries( test.md_parser.commonmark Qt6::Core )
 
 add_test( NAME test.md_parser.commonmark
 	COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.commonmark

@@ -14,12 +14,12 @@ file( COPY ${MD_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test
 set( SRC main.cpp )
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}
-	${CMAKE_CURRENT_SOURCE_DIR}/../../../src
+	${CMAKE_CURRENT_SOURCE_DIR}/../../..
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../3rdparty )
 
 add_executable( test.md_parser.gfm ${SRC} )
 
-target_link_libraries( test.md_parser.gfm md4qt Qt6::Core )
+target_link_libraries( test.md_parser.gfm Qt6::Core )
 
 add_test( NAME test.md_parser.gfm
 	COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.gfm

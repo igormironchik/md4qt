@@ -21,12 +21,12 @@ file( COPY data/b.png
 	DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/tests/parser/data )
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}
-	${CMAKE_CURRENT_SOURCE_DIR}/../../../src
+	${CMAKE_CURRENT_SOURCE_DIR}/../../..
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../3rdparty )
 
 add_executable( test.md_parser ${SRC} )
 
-target_link_libraries( test.md_parser md4qt Qt6::Core )
+target_link_libraries( test.md_parser Qt6::Core )
 
 add_test( NAME test.md_parser
 	COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser

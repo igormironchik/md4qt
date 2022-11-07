@@ -42,33 +42,33 @@ TEST_CASE( "301" )
 
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-		auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+		auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 		REQUIRE( l->items().size() == 2 );
 
 		{
 			REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-			auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 			REQUIRE( li->items().size() == 1 );
-			REQUIRE( li->listType() == MD::ListItem::Unordered );
+			REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "foo" ) );
 		}
 
 		{
 			REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
-			auto li = static_cast< MD::ListItem* > ( l->items().at( 1 ).data() );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).data() );
 			REQUIRE( li->items().size() == 1 );
-			REQUIRE( li->listType() == MD::ListItem::Unordered );
+			REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "bar" ) );
 		}
@@ -76,19 +76,19 @@ TEST_CASE( "301" )
 
 	{
 		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::List );
-		auto l = static_cast< MD::List* > ( doc->items().at( 2 ).data() );
+		auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 2 ).data() );
 		REQUIRE( l->items().size() == 1 );
 
 		{
 			REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-			auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 			REQUIRE( li->items().size() == 1 );
-			REQUIRE( li->listType() == MD::ListItem::Unordered );
+			REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "baz" ) );
 		}
@@ -103,34 +103,34 @@ TEST_CASE( "302" )
 
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-		auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+		auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 		REQUIRE( l->items().size() == 2 );
 
 		{
 			REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-			auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 			REQUIRE( li->items().size() == 1 );
-			REQUIRE( li->listType() == MD::ListItem::Ordered );
+			REQUIRE( li->listType() == MD::ListItem< TRAIT >::Ordered );
 			REQUIRE( li->startNumber() == 1 );
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "foo" ) );
 		}
 
 		{
 			REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
-			auto li = static_cast< MD::ListItem* > ( l->items().at( 1 ).data() );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).data() );
 			REQUIRE( li->items().size() == 1 );
-			REQUIRE( li->listType() == MD::ListItem::Ordered );
+			REQUIRE( li->listType() == MD::ListItem< TRAIT >::Ordered );
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "bar" ) );
 		}
@@ -138,20 +138,20 @@ TEST_CASE( "302" )
 
 	{
 		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::List );
-		auto l = static_cast< MD::List* > ( doc->items().at( 2 ).data() );
+		auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 2 ).data() );
 		REQUIRE( l->items().size() == 1 );
 
 		{
 			REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-			auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 			REQUIRE( li->items().size() == 1 );
-			REQUIRE( li->listType() == MD::ListItem::Ordered );
+			REQUIRE( li->listType() == MD::ListItem< TRAIT >::Ordered );
 			REQUIRE( li->startNumber() == 3 );
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "baz" ) );
 		}
@@ -166,43 +166,43 @@ TEST_CASE( "303" )
 
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QStringLiteral( "Foo" ) );
 	}
 
 	{
 		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::List );
-		auto l = static_cast< MD::List* > ( doc->items().at( 2 ).data() );
+		auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 2 ).data() );
 		REQUIRE( l->items().size() == 2 );
 
 		{
 			REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-			auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 			REQUIRE( li->items().size() == 1 );
-			REQUIRE( li->listType() == MD::ListItem::Unordered );
+			REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "bar" ) );
 		}
 
 		{
 			REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
-			auto li = static_cast< MD::ListItem* > ( l->items().at( 1 ).data() );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).data() );
 			REQUIRE( li->items().size() == 1 );
-			REQUIRE( li->listType() == MD::ListItem::Unordered );
+			REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "baz" ) );
 		}
@@ -216,10 +216,10 @@ TEST_CASE( "304" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).data() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
 	REQUIRE( t->text() == QStringLiteral( "The number of windows in my house is 14. "
 		"The number of doors is 6." ) );
@@ -233,30 +233,30 @@ TEST_CASE( "305" )
 
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QStringLiteral( "The number of windows in my house is" ) );
 	}
 
 	{
 		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::List );
-		auto l = static_cast< MD::List* > ( doc->items().at( 2 ).data() );
+		auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 2 ).data() );
 		REQUIRE( l->items().size() == 1 );
 
 		{
 			REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-			auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 			REQUIRE( li->items().size() == 1 );
-			REQUIRE( li->listType() == MD::ListItem::Ordered );
+			REQUIRE( li->listType() == MD::ListItem< TRAIT >::Ordered );
 			REQUIRE( li->startNumber() == 1 );
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "The number of doors is 6." ) );
 		}
@@ -270,47 +270,47 @@ TEST_CASE( "306" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-	auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 	REQUIRE( l->items().size() == 3 );
 
 	{
 		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QStringLiteral( "foo" ) );
 	}
 
 	{
 		REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( 1 ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).data() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QStringLiteral( "bar" ) );
 	}
 
 	{
 		REQUIRE( l->items().at( 2 )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( 2 ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 2 ).data() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QStringLiteral( "baz" ) );
 	}
@@ -324,65 +324,65 @@ TEST_CASE( "307" )
 
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-		auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+		auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 		REQUIRE( l->items().size() == 1 );
 
 		{
 			REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-			auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 			REQUIRE( li->items().size() == 2 );
-			REQUIRE( li->listType() == MD::ListItem::Unordered );
+			REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "foo" ) );
 
 			REQUIRE( li->items().at( 1 )->type() == MD::ItemType::List );
-			auto l = static_cast< MD::List* > ( li->items().at( 1 ).data() );
+			auto l = static_cast< MD::List< TRAIT >* > ( li->items().at( 1 ).data() );
 			REQUIRE( l->items().size() == 1 );
 
 			{
 				REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-				auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+				auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 				REQUIRE( li->items().size() == 2 );
-				REQUIRE( li->listType() == MD::ListItem::Unordered );
+				REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 				REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-				auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+				auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 				REQUIRE( p->items().size() == 1 );
 				REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-				auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+				auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 				REQUIRE( t->opts() == MD::TextWithoutFormat );
 				REQUIRE( t->text() == QStringLiteral( "bar" ) );
 
 				REQUIRE( li->items().at( 1 )->type() == MD::ItemType::List );
-				auto l = static_cast< MD::List* > ( li->items().at( 1 ).data() );
+				auto l = static_cast< MD::List< TRAIT >* > ( li->items().at( 1 ).data() );
 				REQUIRE( l->items().size() == 1 );
 
 				{
 					REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-					auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+					auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 					REQUIRE( li->items().size() == 2 );
-					REQUIRE( li->listType() == MD::ListItem::Unordered );
+					REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 
 					{
 						REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-						auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+						auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 						REQUIRE( p->items().size() == 1 );
 						REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-						auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+						auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 						REQUIRE( t->opts() == MD::TextWithoutFormat );
 						REQUIRE( t->text() == QStringLiteral( "baz" ) );
 					}
 
 					{
 						REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Paragraph );
-						auto p = static_cast< MD::Paragraph* > ( li->items().at( 1 ).data() );
+						auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 1 ).data() );
 						REQUIRE( p->items().size() == 1 );
 						REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-						auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+						auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 						REQUIRE( t->opts() == MD::TextWithoutFormat );
 						REQUIRE( t->text() == QStringLiteral( "bim" ) );
 					}
@@ -400,71 +400,71 @@ TEST_CASE( "308" )
 
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-		auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+		auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 		REQUIRE( l->items().size() == 2 );
 
 		{
 			REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-			auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 			REQUIRE( li->items().size() == 1 );
-			REQUIRE( li->listType() == MD::ListItem::Unordered );
+			REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "foo" ) );
 		}
 
 		{
 			REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
-			auto li = static_cast< MD::ListItem* > ( l->items().at( 1 ).data() );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).data() );
 			REQUIRE( li->items().size() == 1 );
-			REQUIRE( li->listType() == MD::ListItem::Unordered );
+			REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "bar" ) );
 		}
 	}
 
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::RawHtml );
-	auto h = static_cast< MD::RawHtml* > ( doc->items().at( 2 ).data() );
+	auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 2 ).data() );
 	REQUIRE( h->text() == QStringLiteral( "<!-- -->" ) );
 
 	{
 		REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::List );
-		auto l = static_cast< MD::List* > ( doc->items().at( 3 ).data() );
+		auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 3 ).data() );
 		REQUIRE( l->items().size() == 2 );
 
 		{
 			REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-			auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 			REQUIRE( li->items().size() == 1 );
-			REQUIRE( li->listType() == MD::ListItem::Unordered );
+			REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "baz" ) );
 		}
 
 		{
 			REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
-			auto li = static_cast< MD::ListItem* > ( l->items().at( 1 ).data() );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).data() );
 			REQUIRE( li->items().size() == 1 );
-			REQUIRE( li->listType() == MD::ListItem::Unordered );
+			REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "bim" ) );
 		}
@@ -479,31 +479,31 @@ TEST_CASE( "309" )
 
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-		auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+		auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 		REQUIRE( l->items().size() == 2 );
 
 		{
 			REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-			auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 			REQUIRE( li->items().size() == 2 );
-			REQUIRE( li->listType() == MD::ListItem::Unordered );
+			REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 
 			{
 				REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-				auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+				auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 				REQUIRE( p->items().size() == 1 );
 				REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-				auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+				auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 				REQUIRE( t->opts() == MD::TextWithoutFormat );
 				REQUIRE( t->text() == QStringLiteral( "foo" ) );
 			}
 
 			{
 				REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Paragraph );
-				auto p = static_cast< MD::Paragraph* > ( li->items().at( 1 ).data() );
+				auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 1 ).data() );
 				REQUIRE( p->items().size() == 1 );
 				REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-				auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+				auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 				REQUIRE( t->opts() == MD::TextWithoutFormat );
 				REQUIRE( t->text() == QStringLiteral( "notcode" ) );
 			}
@@ -511,25 +511,25 @@ TEST_CASE( "309" )
 
 		{
 			REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
-			auto li = static_cast< MD::ListItem* > ( l->items().at( 1 ).data() );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).data() );
 			REQUIRE( li->items().size() == 1 );
-			REQUIRE( li->listType() == MD::ListItem::Unordered );
+			REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "foo" ) );
 		}
 	}
 
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::RawHtml );
-	auto h = static_cast< MD::RawHtml* > ( doc->items().at( 2 ).data() );
+	auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 2 ).data() );
 	REQUIRE( h->text() == QStringLiteral( "<!-- -->" ) );
 
 	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Code );
-	auto c = static_cast< MD::Code* > ( doc->items().at( 3 ).data() );
+	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 3 ).data() );
 	REQUIRE( !c->isInlined() );
 	REQUIRE( c->text() == QStringLiteral( "code" ) );
 }
@@ -541,20 +541,20 @@ TEST_CASE( "310" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-	auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 	REQUIRE( l->items().size() == 7 );
 
 	for( int i = 0; i < 7; ++i )
 	{
 		REQUIRE( l->items().at( i )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( i ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( i ).data() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QString( ( char ) ( 97 + i ) ) );
 	}
@@ -567,21 +567,21 @@ TEST_CASE( "311" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-	auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 	REQUIRE( l->items().size() == 3 );
 
 	for( int i = 0; i < 3; ++i )
 	{
 		REQUIRE( l->items().at( i )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( i ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( i ).data() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->listType() == MD::ListItem::Ordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Ordered );
 		REQUIRE( li->startNumber() == 1 + i );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QString( ( char ) ( 97 + i ) ) );
 	}
@@ -594,33 +594,33 @@ TEST_CASE( "312" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-	auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 	REQUIRE( l->items().size() == 4 );
 
 	for( int i = 0; i < 3; ++i )
 	{
 		REQUIRE( l->items().at( i )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( i ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( i ).data() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QString( ( char ) ( 97 + i ) ) );
 	}
 
 	REQUIRE( l->items().at( 3 )->type() == MD::ItemType::ListItem );
-	auto li = static_cast< MD::ListItem* > ( l->items().at( 3 ).data() );
+	auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 3 ).data() );
 	REQUIRE( li->items().size() == 1 );
-	REQUIRE( li->listType() == MD::ListItem::Unordered );
+	REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 	REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
 	REQUIRE( t->text() == QStringLiteral( "d - e" ) );
 }
@@ -632,27 +632,27 @@ TEST_CASE( "313" )
 	REQUIRE( doc->items().size() == 3 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-	auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 	REQUIRE( l->items().size() == 2 );
 
 	for( int i = 0; i < 2; ++i )
 	{
 		REQUIRE( l->items().at( i )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( i ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( i ).data() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->listType() == MD::ListItem::Ordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Ordered );
 		REQUIRE( li->startNumber() == i + 1 );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QString( ( char ) ( 97 + i ) ) );
 	}
 
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Code );
-	auto c = static_cast< MD::Code* > ( doc->items().at( 2 ).data() );
+	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 2 ).data() );
 	REQUIRE( !c->isInlined() );
 	REQUIRE( c->text() == QStringLiteral( "3. c" ) );
 }
@@ -664,20 +664,20 @@ TEST_CASE( "314" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-	auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 	REQUIRE( l->items().size() == 3 );
 
 	for( int i = 0; i < 3; ++i )
 	{
 		REQUIRE( l->items().at( i )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( i ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( i ).data() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QString( ( char ) ( 97 + i ) ) );
 	}
@@ -690,20 +690,20 @@ TEST_CASE( "315" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-	auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 	REQUIRE( l->items().size() == 2 );
 
 	for( int i = 0; i < 2; ++i )
 	{
 		REQUIRE( l->items().at( i )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( i ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( i ).data() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QString( ( char ) ( 97 + i + ( i % 2 > 0 ? 1 : 0 ) ) ) );
 	}
@@ -716,46 +716,46 @@ TEST_CASE( "316" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-	auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 	REQUIRE( l->items().size() == 3 );
 
 	for( int i = 0; i < 3; i += 2 )
 	{
 		REQUIRE( l->items().at( i )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( i ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( i ).data() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QString( ( char ) ( 97 + i + ( i > 0 ? 1 : 0 ) ) ) );
 	}
 
 	{
 		REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( 1 ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).data() );
 		REQUIRE( li->items().size() == 2 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 
 		{
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "b" ) );
 		}
 
 		{
 			REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 1 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 1 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "c" ) );
 		}
@@ -769,47 +769,47 @@ TEST_CASE( "317" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-	auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 	REQUIRE( l->items().size() == 3 );
 
 	{
 		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QStringLiteral( "a" ) );
 	}
 
 	{
 		REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( 1 ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).data() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QStringLiteral( "b" ) );
 	}
 
 	{
 		REQUIRE( l->items().at( 2 )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( 2 ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 2 ).data() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QStringLiteral( "d" ) );
 	}
@@ -824,43 +824,43 @@ TEST_CASE( "318" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-	auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 	REQUIRE( l->items().size() == 3 );
 
 	{
 		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QStringLiteral( "a" ) );
 	}
 
 	{
 		REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( 1 ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).data() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Code );
-		auto c = static_cast< MD::Code* > ( li->items().at( 0 ).data() );
+		auto c = static_cast< MD::Code< TRAIT >* > ( li->items().at( 0 ).data() );
 		REQUIRE( c->text() == QStringLiteral( "b\n\n" ) );
 	}
 
 	{
 		REQUIRE( l->items().at( 2 )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( 2 ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 2 ).data() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QStringLiteral( "c" ) );
 	}
@@ -873,48 +873,48 @@ TEST_CASE( "319" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-	auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 	REQUIRE( l->items().size() == 2 );
 
 	{
 		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 		REQUIRE( li->items().size() == 2 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QStringLiteral( "a" ) );
 
 		REQUIRE( li->items().at( 1 )->type() == MD::ItemType::List );
-		auto l = static_cast< MD::List* > ( li->items().at( 1 ).data() );
+		auto l = static_cast< MD::List< TRAIT >* > ( li->items().at( 1 ).data() );
 		REQUIRE( l->items().size() == 1 );
 
 		{
 			REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-			auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 			REQUIRE( li->items().size() == 2 );
-			REQUIRE( li->listType() == MD::ListItem::Unordered );
+			REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 
 			{
 				REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-				auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+				auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 				REQUIRE( p->items().size() == 1 );
 				REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-				auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+				auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 				REQUIRE( t->opts() == MD::TextWithoutFormat );
 				REQUIRE( t->text() == QStringLiteral( "b" ) );
 			}
 
 			{
 				REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Paragraph );
-				auto p = static_cast< MD::Paragraph* > ( li->items().at( 1 ).data() );
+				auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 1 ).data() );
 				REQUIRE( p->items().size() == 1 );
 				REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-				auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+				auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 				REQUIRE( t->opts() == MD::TextWithoutFormat );
 				REQUIRE( t->text() == QStringLiteral( "c" ) );
 			}
@@ -923,14 +923,14 @@ TEST_CASE( "319" )
 
 	{
 		REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( 1 ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).data() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QStringLiteral( "d" ) );
 	}
@@ -943,49 +943,49 @@ TEST_CASE( "320" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-	auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 	REQUIRE( l->items().size() == 2 );
 
 	{
 		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 		REQUIRE( li->items().size() == 2 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 
 		{
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "a" ) );
 		}
 
 		REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Blockquote );
-		auto b = static_cast< MD::Blockquote* > ( li->items().at( 1 ).data() );
+		auto b = static_cast< MD::Blockquote< TRAIT >* > ( li->items().at( 1 ).data() );
 		REQUIRE( b->items().size() == 1 );
 		REQUIRE( b->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( b->items().at( 0 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( b->items().at( 0 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QStringLiteral( "b" ) );
 	}
 
 	{
 		REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( 1 ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).data() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 
 		{
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "c" ) );
 		}
@@ -999,53 +999,53 @@ TEST_CASE( "321" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-	auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 	REQUIRE( l->items().size() == 2 );
 
 	{
 		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 		REQUIRE( li->items().size() == 3 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 
 		{
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "a" ) );
 		}
 
 		REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Blockquote );
-		auto b = static_cast< MD::Blockquote* > ( li->items().at( 1 ).data() );
+		auto b = static_cast< MD::Blockquote< TRAIT >* > ( li->items().at( 1 ).data() );
 		REQUIRE( b->items().size() == 1 );
 		REQUIRE( b->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( b->items().at( 0 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( b->items().at( 0 ).data() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == QStringLiteral( "b" ) );
 
 		REQUIRE( li->items().at( 2 )->type() == MD::ItemType::Code );
-		auto c = static_cast< MD::Code* > ( li->items().at( 2 ).data() );
+		auto c = static_cast< MD::Code< TRAIT >* > ( li->items().at( 2 ).data() );
 		REQUIRE( c->text() == QStringLiteral( "c" ) );
 	}
 
 	{
 		REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( 1 ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).data() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 
 		{
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "d" ) );
 		}
@@ -1059,21 +1059,21 @@ TEST_CASE( "322" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-	auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 	REQUIRE( l->items().size() == 1 );
 
 	{
 		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 
 		{
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "a" ) );
 		}
@@ -1087,41 +1087,41 @@ TEST_CASE( "323" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-	auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 	REQUIRE( l->items().size() == 1 );
 
 	{
 		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 		REQUIRE( li->items().size() == 2 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 
 		{
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "a" ) );
 		}
 
 		REQUIRE( li->items().at( 1 )->type() == MD::ItemType::List );
-		auto l = static_cast< MD::List* > ( li->items().at( 1 ).data() );
+		auto l = static_cast< MD::List< TRAIT >* > ( li->items().at( 1 ).data() );
 		REQUIRE( l->items().size() == 1 );
 
 		{
 			REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-			auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 			REQUIRE( li->items().size() == 1 );
-			REQUIRE( li->listType() == MD::ListItem::Unordered );
+			REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 
 			{
 				REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-				auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+				auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 				REQUIRE( p->items().size() == 1 );
 				REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-				auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+				auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 				REQUIRE( t->opts() == MD::TextWithoutFormat );
 				REQUIRE( t->text() == QStringLiteral( "b" ) );
 			}
@@ -1136,26 +1136,26 @@ TEST_CASE( "324" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-	auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 	REQUIRE( l->items().size() == 1 );
 
 	{
 		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 		REQUIRE( li->items().size() == 2 );
-		REQUIRE( li->listType() == MD::ListItem::Ordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Ordered );
 		REQUIRE( li->startNumber() == 1 );
 
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Code );
-		auto c = static_cast< MD::Code* > ( li->items().at( 0 ).data() );
+		auto c = static_cast< MD::Code< TRAIT >* > ( li->items().at( 0 ).data() );
 		REQUIRE( c->text() == QStringLiteral( "foo" ) );
 
 		{
 			REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 1 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 1 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "bar" ) );
 		}
@@ -1169,42 +1169,42 @@ TEST_CASE( "325" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-	auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 	REQUIRE( l->items().size() == 1 );
 
 	{
 		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 		REQUIRE( li->items().size() == 3 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 
 		{
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "foo" ) );
 		}
 
 		{
 			REQUIRE( li->items().at( 1 )->type() == MD::ItemType::List );
-			auto l = static_cast< MD::List* > ( li->items().at( 1 ).data() );
+			auto l = static_cast< MD::List< TRAIT >* > ( li->items().at( 1 ).data() );
 			REQUIRE( l->items().size() == 1 );
 
 			{
 				REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-				auto li = static_cast< MD::ListItem* > ( l->items().at( 0 ).data() );
+				auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
 				REQUIRE( li->items().size() == 1 );
-				REQUIRE( li->listType() == MD::ListItem::Unordered );
+				REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 
 				{
 					REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-					auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+					auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 					REQUIRE( p->items().size() == 1 );
 					REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-					auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+					auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 					REQUIRE( t->opts() == MD::TextWithoutFormat );
 					REQUIRE( t->text() == QStringLiteral( "bar" ) );
 				}
@@ -1213,10 +1213,10 @@ TEST_CASE( "325" )
 
 		{
 			REQUIRE( li->items().at( 2 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 2 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 2 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QStringLiteral( "baz" ) );
 		}
@@ -1230,44 +1230,44 @@ TEST_CASE( "326" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-	auto l = static_cast< MD::List* > ( doc->items().at( 1 ).data() );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
 	REQUIRE( l->items().size() == 2 );
 
 	for( int i = 0; i < 2; ++i )
 	{
 		REQUIRE( l->items().at( i )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem* > ( l->items().at( i ).data() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( i ).data() );
 		REQUIRE( li->items().size() == 2 );
-		REQUIRE( li->listType() == MD::ListItem::Unordered );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 
 		{
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-			auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == QString( (char) ( 97 + i * 3 ) ) );
 		}
 
 		{
 			REQUIRE( li->items().at( 1 )->type() == MD::ItemType::List );
-			auto l = static_cast< MD::List* > ( li->items().at( 1 ).data() );
+			auto l = static_cast< MD::List< TRAIT >* > ( li->items().at( 1 ).data() );
 			REQUIRE( l->items().size() == 2 );
 
 			for( int j = 0; j < 2; ++j )
 			{
 				REQUIRE( l->items().at( j )->type() == MD::ItemType::ListItem );
-				auto li = static_cast< MD::ListItem* > ( l->items().at( j ).data() );
+				auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( j ).data() );
 				REQUIRE( li->items().size() == 1 );
-				REQUIRE( li->listType() == MD::ListItem::Unordered );
+				REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 
 				{
 					REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-					auto p = static_cast< MD::Paragraph* > ( li->items().at( 0 ).data() );
+					auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
 					REQUIRE( p->items().size() == 1 );
 					REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-					auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+					auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
 					REQUIRE( t->opts() == MD::TextWithoutFormat );
 					REQUIRE( t->text() == QString( (char) ( 98 + i * 3 + j ) ) );
 				}
