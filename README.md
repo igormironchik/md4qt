@@ -1,6 +1,6 @@
-[![Build](https://github.com/igormironchik/md4qt/workflows/build/badge.svg)](https://github.com/igormironchik/md4qt/actions)[![codecov](https://codecov.io/gh/igormironchik/md4qt/branch/main/graph/badge.svg)](https://codecov.io/gh/igormironchik/md4qt)[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Build](https://github.com/igormironchik/md4qt/workflows/build/badge.svg)](https://github.com/igormironchik/md4qt/actions)[![codecov](https://codecov.io/gh/igormironchik/md4qt/branch/dev/graph/badge.svg)](https://codecov.io/gh/igormironchik/md4qt)[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-`md4qt` is a static C++ library for parsing Markdown with Qt.
+`md4qt` is a header-only C++ library for parsing Markdown.
 
 `md4qt` supports CommonMark 0.30 Spec, and some GitHub extensions, such as
 tables, footnotes, tasks lists, strikethroughs, LaTeX Math injections.
@@ -10,11 +10,13 @@ This library parses Markdown into tree structure.
 # Example
 
 ```cpp
-#include <md4qt/md_parser.hpp>
+#define MD4QT_QT_SUPPORT
+#include <md4qt/parser.hpp>
+#include <md4qt/traits.hpp>
 
 int main()
 {
-    MD::Parser p;
+    MD::Parser< MD::QStringTrait > p;
 
     auto doc = p.parse( QStringLiteral( "your_markdown.md" ) );
 	
@@ -24,7 +26,7 @@ int main()
         {
             case MD::ItemType::Anchor :
             {
-                auto a = static_cast< MD::Anchor* > ( it->data() );
+                auto a = static_cast< MD::Anchor< MD::QStringTrait >* > ( it->data() );
                 qDebug() << a->label();
             }
                 break;
@@ -61,19 +63,6 @@ major extensions. Conclusion why it's so you can read [here](tests/md_benchmark/
    And one more cherry on the cake - `md4qt` can parse Markdown recursively.
    What it is described bellow.
 
-**Why this library tied to Qt? I want to see STL only in dependencies.**
-
- * This library was born in the Qt based project. Long time the library
- was not in separate project, and the code was under the GPL license.
- I decided to weak restrictions for the possible users, and separated code
- into this library, and gave it MIT license. Ok, I can template the code,
- make Qt dependency as optional, and make library header-only. Yes, it's
- not so big effort, I guess a week or two. But I don't need it. I don't
- believe that this library will become very popular and will has a lot
- of users, so I don't see a need for this job. But if you need pure STL
- solution for `std::wstring` and `std::wistream`, just let me know. Submit an
- issue, and we'll discuss.
-
 **What should I know about links in the document?**
 
  * In some cases in Markdown link's URL is something document related. So, when
@@ -82,7 +71,7 @@ document contains key with URL in the link, and if so, use URL from
 labeled links, look:
 
    ```cpp
-   MD::Link * item = ...;
+   MD::Link< MD::QStringTrait > * item = ...;
 
    QString url = item->url();
 
