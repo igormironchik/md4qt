@@ -48,8 +48,9 @@ TEST_CASE( "25" )
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == TRAIT::utf16ToString( u"\x0026\x0020\x00A9\x0020\x00C6\x0020\x010E\x0020"
-		"\x00BE\x0020\x210B\x0020\x2146\x0020\x2232\x0020\x2267\x0338" ) );
+	static const char16_t str[ 19 ] = { 0x0026, 0x0020, 0x00A9, 0x0020, 0x00C6, 0x0020, 0x010E,
+		0x0020, 0x00BE, 0x0020, 0x210B, 0x0020, 0x2146, 0x0020, 0x2232, 0x0020, 0x2267, 0x0338, 0 };
+	REQUIRE( t->text() == TRAIT::utf16ToString( &str[ 0 ] ) );
 }
 
 TEST_CASE( "26" )
