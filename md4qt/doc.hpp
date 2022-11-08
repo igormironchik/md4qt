@@ -33,7 +33,6 @@
 
 // md4qt include.
 #include "utils.hpp"
-#include "traits.hpp"
 
 
 namespace MD {

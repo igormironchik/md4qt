@@ -35,6 +35,7 @@
 #include "doc.hpp"
 #include "entities_map.hpp"
 
+#ifdef MD4QT_QT_SUPPORT
 // Qt include.
 #include <QTextStream>
 #include <QFileInfo>
@@ -42,6 +43,7 @@
 #include <QDir>
 #include <QRegularExpression>
 #include <QUrl>
+#endif
 
 // C++ include.
 #include <set>

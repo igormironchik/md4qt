@@ -30,27 +30,34 @@
 
 #pragma once
 
-#define MD4QT_QT_SUPPORT
-#define TRAIT MD::QStringTrait
-
 #include <md4qt/parser.hpp>
 #include <md4qt/traits.hpp>
 
-#include <QDir>
+#include <string>
+
+#ifdef MD4QT_QT_SUPPORT
+#include <QString>
+#endif
 
 
 inline typename TRAIT::template SharedPointer< MD::Document< TRAIT > >
 load_test( int n )
 {
-	auto fileName = QString::number( n );
+	auto fileName = std::to_string( n );
 
 	if( fileName.size() < 3 )
-		fileName.prepend( QString( 3 - fileName.size(), QLatin1Char( '0' ) ) );
+		fileName.insert( 0, 3 - fileName.size(), '0' );
 
-	fileName.prepend( QStringLiteral( "tests/commonmark/0.30/" ) );
-	fileName.append( QStringLiteral( ".md" ) );
+	fileName.insert( 0, "tests/commonmark/0.30/" );
+	fileName.append( ".md" );
 
 	MD::Parser< TRAIT > p;
 
-	return p.parse( fileName, false );
+	return p.parse(
+#ifdef MD4QT_QT_SUPPORT
+		QString::fromStdString( fileName ),
+#else
+		fileName,
+#endif
+		false );
 }

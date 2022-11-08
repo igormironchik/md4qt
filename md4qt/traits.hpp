@@ -77,6 +77,11 @@ struct StdStringTrait {
 	using StringList = std::vector< String >;
 
 	using StringView = std::string_view;
+
+	static String utf16ToString( const char16_t * u16 )
+	{
+		return String();
+	}
 }; // struct StdStringTrait
 
 
@@ -104,6 +109,11 @@ struct QStringTrait {
 	using StringList = QStringList;
 
 	using StringView = QStringView;
+
+	static String utf16ToString( const char16_t * u16 )
+	{
+		return QString::fromUtf16( u16 );
+	}
 }; // struct QStringTrait
 
 #endif

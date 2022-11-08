@@ -7,6 +7,8 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
 
 option( BUILD_MD4QT_BENCHMARK "Build benchmark? Default OFF." OFF )
 option( BUILD_MD4QT_TESTS "Build tests? Default ON." ON )
+option( BUILD_MD4QT_QT_TESTS "Build tests with Qt support? Default ON." ON )
+option( BUILD_MD4QT_STL_TESTS "Build tests with STL support? Default OFF." OFF )
 
 if( NOT CMAKE_BUILD_TYPE )
 	set( CMAKE_BUILD_TYPE "Release"
@@ -22,7 +24,7 @@ project( md4qt )
 
 if( ${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME} )
 
-	if( BUILD_MD4QT_TESTS )
+	if( ( BUILD_MD4QT_TESTS AND ( BUILD_MD4QT_QT_TESTS OR BUILD_MD4QT_STL_TESTS ) ) )
 		enable_testing()
 
 		add_subdirectory( tests )
