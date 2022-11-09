@@ -72,6 +72,8 @@ struct StdStringTrait {
 
 	using String = std::string;
 
+	using Char = char;
+
 	using TextStream = std::istream;
 
 	using StringList = std::vector< String >;
@@ -103,6 +105,8 @@ struct QStringTrait {
 	using Map = QHash< T, U >;
 
 	using String = QString;
+
+	using Char = QChar;
 
 	using TextStream = QTextStream;
 

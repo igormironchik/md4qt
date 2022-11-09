@@ -56,42 +56,42 @@
 
 namespace MD {
 
-static const QChar c_32 = QLatin1Char( ' ' );
-static const QChar c_35 = QLatin1Char( '#' );
-static const QChar c_46 = QLatin1Char( '.' );
-static const QChar c_41 = QLatin1Char( ')' );
-static const QChar c_96 = QLatin1Char( '`' );
-static const QChar c_126 = QLatin1Char( '~' );
-static const QChar c_9 = QLatin1Char( '\t' );
-static const QChar c_62 = QLatin1Char( '>' );
-static const QChar c_45 = QLatin1Char( '-' );
-static const QChar c_43 = QLatin1Char( '+' );
-static const QChar c_42 = QLatin1Char( '*' );
-static const QChar c_91 = QLatin1Char( '[' );
-static const QChar c_94 = QLatin1Char( '^' );
-static const QChar c_93 = QLatin1Char( ']' );
-static const QChar c_58 = QLatin1Char( ':' );
-static const QChar c_124 = QLatin1Char( '|' );
-static const QChar c_92 = QLatin1Char( '\\' );
-static const QChar c_125 = QLatin1Char( '}' );
-static const QChar c_61 = QLatin1Char( '=' );
-static const QChar c_95 = QLatin1Char( '_' );
-static const QChar c_34 = QLatin1Char( '"' );
-static const QChar c_40 = QLatin1Char( '(' );
-static const QChar c_33 = QLatin1Char( '!' );
-static const QChar c_60 = QLatin1Char( '<' );
-static const QChar c_10 = QLatin1Char( '\n' );
-static const QChar c_13 = QLatin1Char( '\r' );
-static const QChar c_39 = QLatin1Char( '\'' );
-static const QChar c_47 = QLatin1Char( '/' );
-static const QChar c_63 = QLatin1Char( '?' );
-static const QChar c_38 = QLatin1Char( '&' );
-static const QChar c_59 = QLatin1Char( ';' );
-static const QChar c_120 = QLatin1Char( 'x' );
-static const QChar c_36 = QLatin1Char( '$' );
+static const char c_32 = ' ';
+static const char c_35 = '#';
+static const char c_46 = '.';
+static const char c_41 = ')';
+static const char c_96 = '`';
+static const char c_126 = '~';
+static const char c_9 = '\t';
+static const char c_62 = '>';
+static const char c_45 = '-';
+static const char c_43 = '+';
+static const char c_42 = '*';
+static const char c_91 = '[';
+static const char c_94 = '^';
+static const char c_93 = ']';
+static const char c_58 = ':';
+static const char c_124 = '|';
+static const char c_92 = '\\';
+static const char c_125 = '}';
+static const char c_61 = '=';
+static const char c_95 = '_';
+static const char c_34 = '"';
+static const char c_40 = '(';
+static const char c_33 = '!';
+static const char c_60 = '<';
+static const char c_10 = '\n';
+static const char c_13 = '\r';
+static const char c_39 = '\'';
+static const char c_47 = '/';
+static const char c_63 = '?';
+static const char c_38 = '&';
+static const char c_59 = ';';
+static const char c_120 = 'x';
+static const char c_36 = '$';
 
-static const QString c_startComment = QLatin1String( "<!--" );
-static const QString c_endComment = QLatin1String( "-->" );
+static const char * c_startComment = "<!--";
+static const char * c_endComment = "-->";
 
 //! \return Is file exist?
 inline bool
