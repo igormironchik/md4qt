@@ -28,9 +28,6 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#define MD4QT_QT_SUPPORT
-#define TRAIT MD::QStringTrait
-
 #include <md4qt/parser.hpp>
 #include <md4qt/traits.hpp>
 
@@ -38,7 +35,7 @@
 // doctest include.
 #include <doctest/doctest.h>
 
-// C++ Include.
+// C++ include.
 #include <vector>
 
 using data_t = std::vector< std::pair< long long int, int > >;
@@ -206,53 +203,53 @@ TEST_CASE( "emphasis_sequence" )
 
 TEST_CASE( "is_footnote" )
 {
-	REQUIRE( !MD::isFootnote< TRAIT >( QStringLiteral( "[^]:" ) ) );
-	REQUIRE( !MD::isFootnote< TRAIT >( QStringLiteral( "[^ a]:" ) ) );
-	REQUIRE( !MD::isFootnote< TRAIT >( QStringLiteral( "[^  a]:" ) ) );
-	REQUIRE( !MD::isFootnote< TRAIT >( QStringLiteral( "[^ a a]:" ) ) );
-	REQUIRE( !MD::isFootnote< TRAIT >( QStringLiteral( "[^a a]:" ) ) );
+	REQUIRE( !MD::isFootnote< TRAIT >( u8"[^]:" ) );
+	REQUIRE( !MD::isFootnote< TRAIT >( u8"[^ a]:" ) );
+	REQUIRE( !MD::isFootnote< TRAIT >( u8"[^  a]:" ) );
+	REQUIRE( !MD::isFootnote< TRAIT >( u8"[^ a a]:" ) );
+	REQUIRE( !MD::isFootnote< TRAIT >( u8"[^a a]:" ) );
 }
 
 TEST_CASE( "is_code_fences" )
 {
-	REQUIRE( !MD::isCodeFences< TRAIT >( QStringLiteral( "    ~~~" ) ) );
-	REQUIRE( !MD::isCodeFences< TRAIT >( QStringLiteral( "aaa" ) ) );
-	REQUIRE( !MD::isCodeFences< TRAIT >( QStringLiteral( "~~" ) ) );
+	REQUIRE( !MD::isCodeFences< TRAIT >( u8"    ~~~" ) );
+	REQUIRE( !MD::isCodeFences< TRAIT >( u8"aaa" ) );
+	REQUIRE( !MD::isCodeFences< TRAIT >( u8"~~" ) );
 }
 
 TEST_CASE( "is_start_of_code" )
 {
-	REQUIRE( !MD::isStartOfCode< TRAIT >( QStringLiteral( "~~" ) ) );
-	REQUIRE( !MD::isStartOfCode< TRAIT >( QStringLiteral( "~~`" ) ) );
+	REQUIRE( !MD::isStartOfCode< TRAIT >( u8"~~" ) );
+	REQUIRE( !MD::isStartOfCode< TRAIT >( u8"~~`" ) );
 }
 
 TEST_CASE( "is_horizontal_line" )
 {
-	REQUIRE( MD::isHorizontalLine< TRAIT >( QStringLiteral( "---   " ) ) );
-	REQUIRE( !MD::isHorizontalLine< TRAIT >( QStringLiteral( "---   =" ) ) );
+	REQUIRE( MD::isHorizontalLine< TRAIT >( u8"---   " ) );
+	REQUIRE( !MD::isHorizontalLine< TRAIT >( u8"---   =" ) );
 }
 
 TEST_CASE( "is_column_alignment" )
 {
-	REQUIRE( !MD::isColumnAlignment< TRAIT >( QStringLiteral( "a" ) ) );
-	REQUIRE( MD::isColumnAlignment< TRAIT >( QStringLiteral( ":-" ) ) );
-	REQUIRE( !MD::isColumnAlignment< TRAIT >( QStringLiteral( ":---a" ) ) );
-	REQUIRE( !MD::isColumnAlignment< TRAIT >( QStringLiteral( ":--- a" ) ) );
+	REQUIRE( !MD::isColumnAlignment< TRAIT >( u8"a" ) );
+	REQUIRE( MD::isColumnAlignment< TRAIT >( u8":-" ) );
+	REQUIRE( !MD::isColumnAlignment< TRAIT >( u8":---a" ) );
+	REQUIRE( !MD::isColumnAlignment< TRAIT >( u8":--- a" ) );
 }
 
 TEST_CASE( "is_table_alignmnet" )
 {
-	REQUIRE( !MD::isTableAlignment< TRAIT >( QStringLiteral( "|aaa|bbb|" ) ) );
+	REQUIRE( !MD::isTableAlignment< TRAIT >( u8"|aaa|bbb|" ) );
 }
 
 TEST_CASE( "is_html_comment" )
 {
-	REQUIRE( MD::isHtmlComment< TRAIT >( QStringLiteral( "<!-- -->" ) ) );
-	REQUIRE( !MD::isHtmlComment< TRAIT >( QStringLiteral( "<-- -->" ) ) );
-	REQUIRE( !MD::isHtmlComment< TRAIT >( QStringLiteral( "<!-->" ) ) );
-	REQUIRE( !MD::isHtmlComment< TRAIT >( QStringLiteral( "<!--->" ) ) );
-	REQUIRE( !MD::isHtmlComment< TRAIT >( QStringLiteral( "<!-- --" ) ) );
-	REQUIRE( !MD::isHtmlComment< TRAIT >( QStringLiteral( "<!-- -" ) ) );
+	REQUIRE( MD::isHtmlComment< TRAIT >( u8"<!-- -->" ) );
+	REQUIRE( !MD::isHtmlComment< TRAIT >( u8"<-- -->" ) );
+	REQUIRE( !MD::isHtmlComment< TRAIT >( u8"<!-->" ) );
+	REQUIRE( !MD::isHtmlComment< TRAIT >( u8"<!--->" ) );
+	REQUIRE( !MD::isHtmlComment< TRAIT >( u8"<!-- --" ) );
+	REQUIRE( !MD::isHtmlComment< TRAIT >( u8"<!-- -" ) );
 }
 
 TEST_CASE( "test_column_alignment" )

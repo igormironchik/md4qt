@@ -470,7 +470,7 @@ readEscapedSequence( long long int i, QStringView str )
 //! \return Is string a start of code?
 template< class Trait >
 inline bool
-isStartOfCode( typename Trait::StringView str, typename Trait::String * syntax = nullptr )
+isStartOfCode( const typename Trait::String & str, typename Trait::String * syntax = nullptr )
 {
 	if( str.size() < 3 )
 		return false;
@@ -512,7 +512,7 @@ isStartOfCode( typename Trait::StringView str, typename Trait::String * syntax =
 //! \return Is string a horizontal line?
 template< class Trait >
 inline bool
-isHorizontalLine( typename Trait::StringView s )
+isHorizontalLine( const typename Trait::String & s )
 {
 
 	if( s.size() < 3 )
@@ -1494,7 +1494,7 @@ Parser< Trait >::whatIsTheLine( typename Trait::String & str,
 
 	if( first < str.length() )
 	{
-		auto s = QStringView( str ).sliced( first );
+		auto s = str.sliced( first );
 
 		if( s.startsWith( c_62 ) && first < 4 )
 			return BlockType::Blockquote;
@@ -2099,7 +2099,7 @@ Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
 		{
 			const auto first = skipSpaces( 0, fr.data.at( i - 1 ).first );
 
-			auto s = QStringView( fr.data.at( i - 1 ).first ).sliced( first );
+			auto s = fr.data.at( i - 1 ).first.sliced( first );
 
 			const bool prevHorLine = ( first < 4 && isHorizontalLine< Trait >( s ) );
 

@@ -14,10 +14,23 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/../../..
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../3rdparty )
 
-add_executable( test.funcs ${SRC} )
+if( BUILD_MD4QT_QT_TESTS )
+	add_executable( test.funcs.qt ${SRC} )
+	target_compile_definitions( test.funcs.qt PUBLIC TRAIT=MD::QStringTrait )
+	target_compile_definitions( test.funcs.qt PUBLIC MD4QT_QT_SUPPORT )
 
-target_link_libraries( test.funcs Qt6::Core )
+	target_link_libraries( test.funcs.qt Qt6::Core )
 
-add_test( NAME test.funcs
-	COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.funcs
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../bin )
+	add_test( NAME test.funcs.qt
+		COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.funcs.qt
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../bin )
+endif()
+
+if( BUILD_MD4QT_STL_TESTS )
+	add_executable( test.funcs.stl ${SRC} )
+	target_compile_definitions( test.funcs.stl PUBLIC TRAIT=MD::StdStringTrait )
+
+	add_test( NAME test.funcs.stl
+		COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.funcs.stl
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../bin )
+endif()
