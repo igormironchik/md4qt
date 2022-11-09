@@ -97,6 +97,16 @@ public:
 		return m_ch == other.m_ch;
 	}
 
+	bool operator == ( char ch ) const
+	{
+		return m_ch == ch;
+	}
+
+	bool operator != ( char ch ) const
+	{
+		return m_ch != ch;
+	}
+
 private:
 	char m_ch;
 }; // class StdChar
@@ -168,6 +178,87 @@ public:
 
 		return n > 0 ? StdString( std::string( m_str.c_str() + position,
 			static_cast< size_t > ( n ) ) ) : StdString();
+	}
+
+	int toInt() const
+	{
+		try {
+			return std::stoi( m_str );
+		}
+		catch( const std::invalid_argument & )
+		{
+		}
+		catch( const std::out_of_range & )
+		{
+		}
+
+		return 0;
+	}
+
+	bool contains( const StdChar & ch ) const
+	{
+		return m_str.find( (char) ch ) != std::string::npos;
+	}
+
+	StdString simplified() const
+	{
+		if( m_str.empty() )
+			return m_str;
+
+		std::string result;
+		size_t i = 0;
+
+		while( true )
+		{
+			while( i < m_str.size() &&
+				std::isspace( static_cast< unsigned char > ( m_str[ i ] ) ) )
+					++i;
+
+			while( i != m_str.size() &&
+				!std::isspace( static_cast< unsigned char > ( m_str[ i ] ) ) )
+			{
+				result.push_back( m_str[ i ] );
+				++i;
+			}
+
+			if( i == m_str.size() )
+				break;
+
+			result.push_back( ' ' );
+		}
+
+		if( !result.empty() && result.back() == ' ' )
+			result.pop_back();
+
+		return result;
+	}
+
+	std::vector< StdString > split( char ch ) const
+	{
+		std::vector< StdString > result;
+
+		size_t pos = 0;
+
+		while( pos < m_str.size() )
+		{
+			const auto fpos = m_str.find( ch, pos );
+
+			if( fpos != std::string::npos )
+			{
+				if( fpos - pos > 0 )
+					result.push_back( m_str.substr( pos, fpos - pos ) );
+
+				pos = fpos + 1;
+			}
+			else if( pos < m_str.size() )
+			{
+				result.push_back( m_str.substr( pos, m_str.size() - pos ) );
+
+				break;
+			}
+		}
+
+		return result;
 	}
 
 	friend StdString operator + ( const StdString & s1, const StdString & s2 );

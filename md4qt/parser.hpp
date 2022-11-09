@@ -34,6 +34,7 @@
 // md4qt include.
 #include "doc.hpp"
 #include "entities_map.hpp"
+#include "traits.hpp"
 
 #ifdef MD4QT_QT_SUPPORT
 // Qt include.
@@ -514,7 +515,7 @@ isHorizontalLine( const typename Trait::String & s )
 	if( s.size() < 3 )
 		return false;
 
-	QChar c;
+	typename Trait::Char c;
 
 	if( s[ 0 ] == c_42 )
 		c = c_42;
@@ -552,7 +553,7 @@ isColumnAlignment( const typename Trait::String & s )
 {
 	long long int p = skipSpaces< Trait >( 0, s );
 
-	static const auto c_legitime = QStringLiteral( ":-" );
+	static const typename Trait::String c_legitime = ":-";
 
 	if( !c_legitime.contains( s[ p ] ) )
 		return false;
@@ -583,12 +584,35 @@ isColumnAlignment( const typename Trait::String & s )
 	return true;
 }
 
+template< class Trait >
+typename Trait::StringList
+splitString( const typename Trait::String & str, const typename Trait::Char & ch );
+
+template<>
+typename StdStringTrait::StringList
+splitString< StdStringTrait >( const StdString & str, const StdChar & ch )
+{
+	return str.split( ch );
+}
+
+#ifdef MD4QT_QT_SUPPORT
+
+template<>
+typename QStringTrait::StringList
+splitString< QStringTrait >( const QString & str, const QChar & ch )
+{
+	return str.split( ch, Qt::SkipEmptyParts );
+}
+
+#endif
+
+
 //! \return Number of columns?
 template< class Trait >
 inline int
 isTableAlignment( const typename Trait::String & s )
 {
-	const auto columns = s.simplified().split( c_124, Qt::SkipEmptyParts );
+	const auto columns = splitString< Trait >( s.simplified(), c_124 );
 
 	for( const auto & c : columns )
 	{
@@ -1937,7 +1961,7 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 	const typename Trait::String & fileName,
 	bool collectRefLinks, int columnsCount )
 {
-	static const QChar sep( '|' );
+	static const char sep = '|';
 
 	if( fr.data.size() >= 2 )
 	{
@@ -1968,7 +1992,7 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 
 				if( !it->isEmpty() )
 				{
-					it->replace( QLatin1String( "&#124;" ), sep );
+					it->replace( QLatin1String( "&#124;" ), typename Trait::Char( sep ) );
 
 					typename MdBlock< Trait >::Data fragment;
 					fragment.append( { *it, { -1 } } );
@@ -2003,7 +2027,7 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 		{
 			auto fmt = fr.data.at( 1 ).first;
 
-			auto columns = fmt.split( sep, Qt::SkipEmptyParts );
+			auto columns = splitString< Trait > ( fmt, sep );
 
 			for( auto it = columns.begin(), last = columns.end(); it != last; ++it )
 			{
