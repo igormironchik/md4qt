@@ -36,12 +36,10 @@ if( BUILD_MD4QT_QT_TESTS )
 endif()
 
 if( BUILD_MD4QT_STL_TESTS )
-	add_executable( test.md_parser.commonmark ${SRC} )
-	target_compile_definitions( test.md_parser.commonmark PUBLIC TRAIT=MD::StdStringTrait )
+	add_executable( test.md_parser.commonmark.stl ${SRC} )
+	target_compile_definitions( test.md_parser.commonmark.stl PUBLIC TRAIT=MD::StdStringTrait )
 
-	target_link_libraries( test.md_parser.commonmark Qt6::Core )
-
-	add_test( NAME test.md_parser.commonmark
-		COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.commonmark
+	add_test( NAME test.md_parser.commonmark.stl
+		COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.commonmark.stl
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../bin )
 endif()

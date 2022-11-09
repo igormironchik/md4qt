@@ -31,29 +31,30 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#define MD4QT_QT_SUPPORT
-#define TRAIT MD::QStringTrait
-
 #include <md4qt/parser.hpp>
 #include <md4qt/traits.hpp>
-
-#include <QDir>
 
 
 inline typename TRAIT::template SharedPointer< MD::Document< TRAIT > >
 load_test( int n )
 {
-	auto fileName = QString::number( n );
+	auto fileName = std::to_string( n );
 
 	if( fileName.size() < 3 )
-		fileName.prepend( QString( 3 - fileName.size(), QLatin1Char( '0' ) ) );
+		fileName.insert( 0, 3 - fileName.size(), '0' );
 
-	fileName.prepend( QStringLiteral( "tests/gfm/data/" ) );
-	fileName.append( QStringLiteral( ".md" ) );
+	fileName.insert( 0, "tests/gfm/data/" );
+	fileName.append( ".md" );
 
 	MD::Parser< TRAIT > p;
 
-	return p.parse( fileName, false );
+	return p.parse(
+#ifdef MD4QT_QT_SUPPORT
+		QString::fromStdString( fileName ),
+#else
+		fileName,
+#endif
+		false );
 }
 
 
@@ -63,7 +64,7 @@ TEST_CASE( "198" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Table );
-	const auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 1 ).data() );
+	const auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( t->columnsCount() == 2 );
 	REQUIRE( t->rows().size() == 2 );
 
@@ -72,53 +73,53 @@ TEST_CASE( "198" )
 
 	{
 		REQUIRE( t->rows().at( 0 )->type() == MD::ItemType::TableRow );
-		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 0 ).data() );
+		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 0 ).get() );
 		REQUIRE( r->cells().size() == 2 );
 
 		{
 			REQUIRE( r->cells().at( 0 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "foo" ) );
+			REQUIRE( t->text() == u8"foo" );
 		}
 
 		{
 			REQUIRE( r->cells().at( 1 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "bar" ) );
+			REQUIRE( t->text() == u8"bar" );
 		}
 	}
 
 	{
 		REQUIRE( t->rows().at( 1 )->type() == MD::ItemType::TableRow );
-		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 1 ).data() );
+		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 1 ).get() );
 		REQUIRE( r->cells().size() == 2 );
 
 		{
 			REQUIRE( r->cells().at( 0 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "baz" ) );
+			REQUIRE( t->text() == u8"baz" );
 		}
 
 		{
 			REQUIRE( r->cells().at( 1 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "bim" ) );
+			REQUIRE( t->text() == u8"bim" );
 		}
 	}
 }
@@ -129,7 +130,7 @@ TEST_CASE( "199" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Table );
-	const auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 1 ).data() );
+	const auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( t->columnsCount() == 2 );
 	REQUIRE( t->rows().size() == 2 );
 
@@ -138,53 +139,53 @@ TEST_CASE( "199" )
 
 	{
 		REQUIRE( t->rows().at( 0 )->type() == MD::ItemType::TableRow );
-		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 0 ).data() );
+		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 0 ).get() );
 		REQUIRE( r->cells().size() == 2 );
 
 		{
 			REQUIRE( r->cells().at( 0 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "abc" ) );
+			REQUIRE( t->text() == u8"abc" );
 		}
 
 		{
 			REQUIRE( r->cells().at( 1 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "defghi" ) );
+			REQUIRE( t->text() == u8"defghi" );
 		}
 	}
 
 	{
 		REQUIRE( t->rows().at( 1 )->type() == MD::ItemType::TableRow );
-		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 1 ).data() );
+		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 1 ).get() );
 		REQUIRE( r->cells().size() == 2 );
 
 		{
 			REQUIRE( r->cells().at( 0 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "bar" ) );
+			REQUIRE( t->text() == u8"bar" );
 		}
 
 		{
 			REQUIRE( r->cells().at( 1 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "baz" ) );
+			REQUIRE( t->text() == u8"baz" );
 		}
 	}
 }
@@ -195,7 +196,7 @@ TEST_CASE( "200" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Table );
-	const auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 1 ).data() );
+	const auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( t->columnsCount() == 1 );
 	REQUIRE( t->rows().size() == 3 );
 
@@ -203,76 +204,76 @@ TEST_CASE( "200" )
 
 	{
 		REQUIRE( t->rows().at( 0 )->type() == MD::ItemType::TableRow );
-		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 0 ).data() );
+		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 0 ).get() );
 		REQUIRE( r->cells().size() == 1 );
 
 		REQUIRE( r->cells().at( 0 )->type() == MD::ItemType::TableCell );
-		const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).data() );
+		const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).get() );
 		REQUIRE( c->items().size() == 1 );
 		REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-		const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+		const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == QStringLiteral( "f|oo" ) );
+		REQUIRE( t->text() == u8"f|oo" );
 	}
 
 	{
 		REQUIRE( t->rows().at( 1 )->type() == MD::ItemType::TableRow );
-		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 1 ).data() );
+		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 1 ).get() );
 		REQUIRE( r->cells().size() == 1 );
 
 		REQUIRE( r->cells().at( 0 )->type() == MD::ItemType::TableCell );
-		const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).data() );
+		const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).get() );
 		REQUIRE( c->items().size() == 3 );
 
 		{
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "b" ) );
+			REQUIRE( t->text() == u8"b" );
 		}
 
 		{
 			REQUIRE( c->items().at( 1 )->type() == MD::ItemType::Code );
-			const auto cc = static_cast< MD::Code< TRAIT >* > ( c->items().at( 1 ).data() );
-			REQUIRE( cc->text() == QStringLiteral( "\\|" ) );
+			const auto cc = static_cast< MD::Code< TRAIT >* > ( c->items().at( 1 ).get() );
+			REQUIRE( cc->text() == u8"\\|" );
 		}
 
 		{
 			REQUIRE( c->items().at( 2 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 2 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 2 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "az" ) );
+			REQUIRE( t->text() == u8"az" );
 		}
 	}
 
 	{
 		REQUIRE( t->rows().at( 2 )->type() == MD::ItemType::TableRow );
-		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 2 ).data() );
+		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 2 ).get() );
 		REQUIRE( r->cells().size() == 1 );
 
 		REQUIRE( r->cells().at( 0 )->type() == MD::ItemType::TableCell );
-		const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).data() );
+		const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).get() );
 		REQUIRE( c->items().size() == 3 );
 
 		{
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "b" ) );
+			REQUIRE( t->text() == u8"b" );
 		}
 
 		{
 			REQUIRE( c->items().at( 1 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 1 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 1 ).get() );
 			REQUIRE( t->opts() == MD::BoldText );
-			REQUIRE( t->text() == QStringLiteral( "|" ) );
+			REQUIRE( t->text() == u8"|" );
 		}
 
 		{
 			REQUIRE( c->items().at( 2 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 2 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 2 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "im" ) );
+			REQUIRE( t->text() == u8"im" );
 		}
 	}
 }
@@ -283,7 +284,7 @@ TEST_CASE( "201" )
 	REQUIRE( doc->items().size() == 3 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Table );
-	const auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 1 ).data() );
+	const auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( t->columnsCount() == 2 );
 	REQUIRE( t->rows().size() == 2 );
 
@@ -292,68 +293,68 @@ TEST_CASE( "201" )
 
 	{
 		REQUIRE( t->rows().at( 0 )->type() == MD::ItemType::TableRow );
-		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 0 ).data() );
+		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 0 ).get() );
 		REQUIRE( r->cells().size() == 2 );
 
 		{
 			REQUIRE( r->cells().at( 0 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "abc" ) );
+			REQUIRE( t->text() == u8"abc" );
 		}
 
 		{
 			REQUIRE( r->cells().at( 1 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "def" ) );
+			REQUIRE( t->text() == u8"def" );
 		}
 	}
 
 	{
 		REQUIRE( t->rows().at( 1 )->type() == MD::ItemType::TableRow );
-		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 1 ).data() );
+		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 1 ).get() );
 		REQUIRE( r->cells().size() == 2 );
 
 		{
 			REQUIRE( r->cells().at( 0 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "bar" ) );
+			REQUIRE( t->text() == u8"bar" );
 		}
 
 		{
 			REQUIRE( r->cells().at( 1 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "baz" ) );
+			REQUIRE( t->text() == u8"baz" );
 		}
 	}
 
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Blockquote );
-	const auto b = static_cast< MD::Blockquote< TRAIT >* > ( doc->items().at( 2 ).data() );
+	const auto b = static_cast< MD::Blockquote< TRAIT >* > ( doc->items().at( 2 ).get() );
 	REQUIRE( b->items().size() == 1 );
 	REQUIRE( b->items().at( 0 )->type() == MD::ItemType::Paragraph );
-	const auto p = static_cast< MD::Paragraph< TRAIT >* > ( b->items().at( 0 ).data() );
+	const auto p = static_cast< MD::Paragraph< TRAIT >* > ( b->items().at( 0 ).get() );
 	REQUIRE( p->items().size() == 1 );
 
 	{
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
+		const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == QStringLiteral( "bar" ) );
+		REQUIRE( t->text() == u8"bar" );
 	}
 }
 
@@ -363,7 +364,7 @@ TEST_CASE( "202" )
 	REQUIRE( doc->items().size() == 3 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Table );
-	const auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 1 ).data() );
+	const auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( t->columnsCount() == 2 );
 	REQUIRE( t->rows().size() == 3 );
 
@@ -372,81 +373,81 @@ TEST_CASE( "202" )
 
 	{
 		REQUIRE( t->rows().at( 0 )->type() == MD::ItemType::TableRow );
-		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 0 ).data() );
+		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 0 ).get() );
 		REQUIRE( r->cells().size() == 2 );
 
 		{
 			REQUIRE( r->cells().at( 0 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "abc" ) );
+			REQUIRE( t->text() == u8"abc" );
 		}
 
 		{
 			REQUIRE( r->cells().at( 1 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "def" ) );
+			REQUIRE( t->text() == u8"def" );
 		}
 	}
 
 	{
 		REQUIRE( t->rows().at( 1 )->type() == MD::ItemType::TableRow );
-		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 1 ).data() );
+		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 1 ).get() );
 		REQUIRE( r->cells().size() == 2 );
 
 		{
 			REQUIRE( r->cells().at( 0 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "bar" ) );
+			REQUIRE( t->text() == u8"bar" );
 		}
 
 		{
 			REQUIRE( r->cells().at( 1 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "baz" ) );
+			REQUIRE( t->text() == u8"baz" );
 		}
 	}
 
 	{
 		REQUIRE( t->rows().at( 2 )->type() == MD::ItemType::TableRow );
-		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 2 ).data() );
+		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 2 ).get() );
 		REQUIRE( r->cells().size() == 1 );
 
 		{
 			REQUIRE( r->cells().at( 0 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "bar" ) );
+			REQUIRE( t->text() == u8"bar" );
 		}
 	}
 
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
-	const auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).data() );
+	const auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
 	REQUIRE( p->items().size() == 1 );
 
 	{
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
+		const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == QStringLiteral( "bar" ) );
+		REQUIRE( t->text() == u8"bar" );
 	}
 }
 
@@ -456,13 +457,13 @@ TEST_CASE( "203" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	const auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).data() );
+	const auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
 
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
+	const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == QStringLiteral( "| abc | def | | --- | | bar |" ) );
+	REQUIRE( t->text() == u8"| abc | def | | --- | | bar |" );
 }
 
 TEST_CASE( "204" )
@@ -471,7 +472,7 @@ TEST_CASE( "204" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Table );
-	const auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 1 ).data() );
+	const auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( t->columnsCount() == 2 );
 	REQUIRE( t->rows().size() == 3 );
 
@@ -480,69 +481,69 @@ TEST_CASE( "204" )
 
 	{
 		REQUIRE( t->rows().at( 0 )->type() == MD::ItemType::TableRow );
-		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 0 ).data() );
+		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 0 ).get() );
 		REQUIRE( r->cells().size() == 2 );
 
 		{
 			REQUIRE( r->cells().at( 0 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "abc" ) );
+			REQUIRE( t->text() == u8"abc" );
 		}
 
 		{
 			REQUIRE( r->cells().at( 1 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "def" ) );
+			REQUIRE( t->text() == u8"def" );
 		}
 	}
 
 	{
 		REQUIRE( t->rows().at( 1 )->type() == MD::ItemType::TableRow );
-		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 1 ).data() );
+		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 1 ).get() );
 		REQUIRE( r->cells().size() == 1 );
 
 		{
 			REQUIRE( r->cells().at( 0 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "bar" ) );
+			REQUIRE( t->text() == u8"bar" );
 		}
 	}
 
 	{
 		REQUIRE( t->rows().at( 2 )->type() == MD::ItemType::TableRow );
-		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 2 ).data() );
+		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 2 ).get() );
 		REQUIRE( r->cells().size() == 2 );
 
 		{
 			REQUIRE( r->cells().at( 0 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "bar" ) );
+			REQUIRE( t->text() == u8"bar" );
 		}
 
 		{
 			REQUIRE( r->cells().at( 1 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "baz" ) );
+			REQUIRE( t->text() == u8"baz" );
 		}
 	}
 }
@@ -553,7 +554,7 @@ TEST_CASE( "205" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Table );
-	const auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 1 ).data() );
+	const auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( t->columnsCount() == 2 );
 	REQUIRE( t->rows().size() == 1 );
 
@@ -562,27 +563,27 @@ TEST_CASE( "205" )
 
 	{
 		REQUIRE( t->rows().at( 0 )->type() == MD::ItemType::TableRow );
-		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 0 ).data() );
+		const auto r = static_cast< MD::TableRow< TRAIT >* > ( t->rows().at( 0 ).get() );
 		REQUIRE( r->cells().size() == 2 );
 
 		{
 			REQUIRE( r->cells().at( 0 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 0 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "abc" ) );
+			REQUIRE( t->text() == u8"abc" );
 		}
 
 		{
 			REQUIRE( r->cells().at( 1 )->type() == MD::ItemType::TableCell );
-			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).data() );
+			const auto c = static_cast< MD::TableCell< TRAIT >* > ( r->cells().at( 1 ).get() );
 			REQUIRE( c->items().size() == 1 );
 			REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Text );
-			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).data() );
+			const auto t = static_cast< MD::Text< TRAIT >* > ( c->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
-			REQUIRE( t->text() == QStringLiteral( "def" ) );
+			REQUIRE( t->text() == u8"def" );
 		}
 	}
 }
@@ -593,37 +594,37 @@ TEST_CASE( "279" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-	const auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
+	const auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( l->items().size() == 2 );
 
 	{
 		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-		const auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
+		const auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
 		REQUIRE( li->isTaskList() );
 		REQUIRE( !li->isChecked() );
 		REQUIRE( li->items().size() == 1 );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		const auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
+		const auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).get() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
+		const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == QStringLiteral( "foo" ) );
+		REQUIRE( t->text() == u8"foo" );
 	}
 
 	{
 		REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
-		const auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).data() );
+		const auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).get() );
 		REQUIRE( li->isTaskList() );
 		REQUIRE( li->isChecked() );
 		REQUIRE( li->items().size() == 1 );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		const auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
+		const auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).get() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
+		const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == QStringLiteral( "bar" ) );
+		REQUIRE( t->text() == u8"bar" );
 	}
 }
 
@@ -633,73 +634,73 @@ TEST_CASE( "280" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
-	const auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).data() );
+	const auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( l->items().size() == 2 );
 
 	{
 		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-		const auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
+		const auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
 		REQUIRE( li->isTaskList() );
 		REQUIRE( li->isChecked() );
 		REQUIRE( li->items().size() == 2 );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		const auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
+		const auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).get() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
+		const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == QStringLiteral( "foo" ) );
+		REQUIRE( t->text() == u8"foo" );
 
 		{
 			REQUIRE( li->items().at( 1 )->type() == MD::ItemType::List );
-			const auto l = static_cast< MD::List< TRAIT >* > ( li->items().at( 1 ).data() );
+			const auto l = static_cast< MD::List< TRAIT >* > ( li->items().at( 1 ).get() );
 			REQUIRE( l->items().size() == 2 );
 
 			{
 				REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
-				const auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).data() );
+				const auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
 				REQUIRE( li->isTaskList() );
 				REQUIRE( !li->isChecked() );
 				REQUIRE( li->items().size() == 1 );
 				REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-				const auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
+				const auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).get() );
 				REQUIRE( p->items().size() == 1 );
 				REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-				const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
+				const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 				REQUIRE( t->opts() == MD::TextWithoutFormat );
-				REQUIRE( t->text() == QStringLiteral( "bar" ) );
+				REQUIRE( t->text() == u8"bar" );
 			}
 
 			{
 				REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
-				const auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).data() );
+				const auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).get() );
 				REQUIRE( li->isTaskList() );
 				REQUIRE( li->isChecked() );
 				REQUIRE( li->items().size() == 1 );
 				REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-				const auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
+				const auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).get() );
 				REQUIRE( p->items().size() == 1 );
 				REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-				const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
+				const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 				REQUIRE( t->opts() == MD::TextWithoutFormat );
-				REQUIRE( t->text() == QStringLiteral( "baz" ) );
+				REQUIRE( t->text() == u8"baz" );
 			}
 		}
 	}
 
 	{
 		REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
-		const auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).data() );
+		const auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).get() );
 		REQUIRE( li->isTaskList() );
 		REQUIRE( !li->isChecked() );
 		REQUIRE( li->items().size() == 1 );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
-		const auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).data() );
+		const auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).get() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
+		const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == QStringLiteral( "bim" ) );
+		REQUIRE( t->text() == u8"bim" );
 	}
 }
 
@@ -709,21 +710,21 @@ TEST_CASE( "491" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	const auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).data() );
+	const auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 2 );
 
 	{
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
+		const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->opts() == MD::StrikethroughText );
-		REQUIRE( t->text() == QStringLiteral( "Hi" ) );
+		REQUIRE( t->text() == u8"Hi" );
 	}
 
 	{
 		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
-		const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).data() );
+		const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == QStringLiteral( "Hello, world!" ) );
+		REQUIRE( t->text() == u8"Hello, world!" );
 	}
 }
 
@@ -734,23 +735,23 @@ TEST_CASE( "492" )
 
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-		const auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).data() );
+		const auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 		REQUIRE( p->items().size() == 1 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
+		const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == QStringLiteral( "This ~~has a" ) );
+		REQUIRE( t->text() == u8"This ~~has a" );
 	}
 
 	{
 		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
-		const auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).data() );
+		const auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
 		REQUIRE( p->items().size() == 1 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).data() );
+		const auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == QStringLiteral( "new paragraph~~." ) );
+		REQUIRE( t->text() == u8"new paragraph~~." );
 	}
 }
