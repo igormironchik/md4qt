@@ -36,6 +36,7 @@
 #include <doctest/doctest.h>
 
 #include <fstream>
+#include <cstring>
 
 #ifdef MD4QT_QT_SUPPORT
 #include <QDir>
@@ -416,11 +417,13 @@ TEST_CASE( "014" )
 {
 	MD::Parser< TRAIT > parser;
 
-	std::ofstream file( "tests/parser/data/014.md", std::ios::out | std::ios::trunc );
+	std::ofstream file( "tests/parser/data/014.md",
+		std::ios::out | std::ios::trunc | std::ios::binary );
 
 	if( file.good() )
 	{
-		file << "Line 1...\rLine 2...\r\nLine 3...\n";
+		const char * str = "Line 1...\rLine 2...\r\nLine 3...\n";
+		file.write( str, strlen( str ) );
 		file.close();
 
 		auto doc = parser.parse( "tests/parser/data/014.md" );
@@ -451,11 +454,13 @@ TEST_CASE( "015" )
 {
 	MD::Parser< TRAIT > parser;
 
-	std::ofstream file( "tests/parser/data/015.md", std::ios::out | std::ios::trunc );
+	std::ofstream file( "tests/parser/data/015.md",
+		std::ios::out | std::ios::trunc | std::ios::binary );
 
 	if( file.good() )
 	{
-		file << "Line 1...\r\rLine 2...\r\rLine 3...\r";
+		const char * str = "Line 1...\r\rLine 2...\r\rLine 3...\r";
+		file.write( str, strlen( str )  );
 		file.close();
 
 		auto doc = parser.parse( "tests/parser/data/015.md" );
@@ -516,11 +521,13 @@ TEST_CASE( "016" )
 {
 	MD::Parser< TRAIT > parser;
 
-	std::ofstream file( "tests/parser/data/016.md", std::ios::out | std::ios::trunc );
+	std::ofstream file( "tests/parser/data/016.md",
+		std::ios::out | std::ios::trunc | std::ios::binary );
 
 	if( file.good() )
 	{
-		file << "Line 1...\r\nLine 2...\r\nLine 3...\r\n";
+		const char * str = "Line 1...\r\nLine 2...\r\nLine 3...\r\n";
+		file.write( str, strlen( str ) );
 		file.close();
 
 		auto doc = parser.parse( "tests/parser/data/016.md" );
