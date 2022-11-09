@@ -24,10 +24,23 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/../../..
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../3rdparty )
 
-add_executable( test.md_parser ${SRC} )
+if( BUILD_MD4QT_QT_TESTS )
+	add_executable( test.md_parser.qt ${SRC} )
+	target_compile_definitions( test.md_parser.qt PUBLIC TRAIT=MD::QStringTrait )
+	target_compile_definitions( test.md_parser.qt PUBLIC MD4QT_QT_SUPPORT )
 
-target_link_libraries( test.md_parser Qt6::Core )
+	target_link_libraries( test.md_parser.qt Qt6::Core )
 
-add_test( NAME test.md_parser
-	COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../bin )
+	add_test( NAME test.md_parser.qt
+		COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.qt
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../bin )
+endif()
+
+if( BUILD_MD4QT_STL_TESTS )
+	add_executable( test.md_parser.stl ${SRC} )
+	target_compile_definitions( test.md_parser.stl PUBLIC TRAIT=MD::StdStringTrait )
+
+	add_test( NAME test.md_parser.stl
+		COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.stl
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../bin )
+endif()
