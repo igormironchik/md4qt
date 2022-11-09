@@ -37,6 +37,9 @@
 #include <vector>
 #include <unordered_map>
 #include <string_view>
+#include <filesystem>
+#include <locale>
+#include <cctype>
 
 
 #ifdef MD4QT_QT_SUPPORT
@@ -49,11 +52,134 @@
 #include <QTextStream>
 #include <QStringList>
 #include <QStringView>
+#include <QFileInfo>
 
 #endif
 
 
 namespace MD {
+
+//
+// StdChar
+//
+
+//! Wrapper for char to be used with MD::Parser.
+class StdChar {
+public:
+	StdChar()
+		:	m_ch( 0 )
+	{
+	}
+
+	StdChar( char ch )
+		:	m_ch( ch )
+	{
+	}
+
+	operator char () const
+	{
+		return m_ch;
+	}
+
+	inline bool isSpace() const
+	{
+		return std::isspace( static_cast< unsigned char > ( m_ch ) );
+	}
+
+	inline bool isDigit() const
+	{
+		return std::isdigit( static_cast< unsigned char > ( m_ch ) );
+	}
+
+	bool operator == ( const StdChar & other ) const
+	{
+		return m_ch == other.m_ch;
+	}
+
+private:
+	char m_ch;
+}; // class StdChar
+
+//
+// StdString
+//
+
+//! Wrapper for std::string to be used with MD::Parser.
+class StdString final {
+public:
+	StdString()
+	{
+	}
+
+	StdString( const std::string & str )
+		:	m_str( str )
+	{
+	}
+
+	StdString( const StdChar & ch )
+		:	m_str( 1, (char) ch )
+	{
+	}
+
+	operator std::string () const
+	{
+		return m_str;
+	}
+
+	StdChar operator [] ( long long int position ) const
+	{
+		return StdChar( m_str.at( static_cast< size_t > ( position ) ) );
+	}
+
+	void append( const StdChar & ch )
+	{
+		m_str.append( 1, (char) ch );
+	}
+
+	long long int size() const
+	{
+		return static_cast< long long int > ( m_str.size() );
+	}
+
+	StdString mid( long long int position, long long int n = -1 ) const
+	{
+		const auto originalLength = size();
+
+		if( position > originalLength )
+			return StdString();
+
+		if( position < 0 )
+		{
+			if( n < 0 || n + position >= originalLength )
+				return StdString( m_str );
+
+			if( n + position <= 0 )
+				return StdString();
+
+			n += position;
+			position = 0;
+		}
+		else if( static_cast< size_t > ( n ) > static_cast< size_t > ( originalLength - position ) )
+			n = originalLength - position;
+
+		if( position == 0 && n == originalLength )
+			return StdString( m_str );
+
+		return n > 0 ? StdString( std::string( m_str.c_str() + position,
+			static_cast< size_t > ( n ) ) ) : StdString();
+	}
+
+	friend StdString operator + ( const StdString & s1, const StdString & s2 );
+
+private:
+	std::string m_str;
+}; // class StdString
+
+StdString operator + ( const StdString & s1, const StdString & s2 )
+{
+	return StdString( s1.m_str + s2.m_str );
+}
+
 
 //
 // StdStringTrait
@@ -70,9 +196,9 @@ struct StdStringTrait {
 	template< class T, class U >
 	using Map = std::unordered_map< T, U >;
 
-	using String = std::string;
+	using String = StdString;
 
-	using Char = char;
+	using Char = StdChar;
 
 	using TextStream = std::istream;
 
@@ -80,9 +206,29 @@ struct StdStringTrait {
 
 	using StringView = std::string_view;
 
+	//! Convert UTF-16 into trait's string.
 	static String utf16ToString( const char16_t * u16 )
 	{
-		return String();
+		static std::wstring_convert< std::codecvt_utf8_utf16< char16_t >, char16_t > conv;
+		return conv.to_bytes( u16 );
+	}
+
+	//! \return Does file exist.
+	static bool fileExists( const String & fileName, const String & workingPath )
+	{
+		return std::filesystem::exists( (std::string) ( workingPath + fileName ) );
+	}
+
+	//! \return Is \p ch a space char.
+	static bool isSpace( Char ch )
+	{
+		return std::isspace( static_cast< unsigned char > ( ch ) );
+	}
+
+	//! \return Is \p ch a digit char.
+	static bool isDigit( Char ch )
+	{
+		return std::isdigit( static_cast< unsigned char > ( ch ) );
 	}
 }; // struct StdStringTrait
 
@@ -114,9 +260,16 @@ struct QStringTrait {
 
 	using StringView = QStringView;
 
+	//! Convert UTF-16 into trait's string.
 	static String utf16ToString( const char16_t * u16 )
 	{
 		return QString::fromUtf16( u16 );
+	}
+
+	//! \return Does file exist.
+	static bool fileExists( const String & fileName, const String & workingPath )
+	{
+		return QFileInfo::exists( workingPath + fileName );
 	}
 }; // struct QStringTrait
 
