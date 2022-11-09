@@ -40,6 +40,7 @@
 #include <filesystem>
 #include <locale>
 #include <cctype>
+#include <codecvt>
 
 
 #ifdef MD4QT_QT_SUPPORT
