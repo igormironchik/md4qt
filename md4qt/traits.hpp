@@ -218,18 +218,6 @@ struct StdStringTrait {
 	{
 		return std::filesystem::exists( (std::string) ( workingPath + fileName ) );
 	}
-
-	//! \return Is \p ch a space char.
-	static bool isSpace( Char ch )
-	{
-		return std::isspace( static_cast< unsigned char > ( ch ) );
-	}
-
-	//! \return Is \p ch a digit char.
-	static bool isDigit( Char ch )
-	{
-		return std::isdigit( static_cast< unsigned char > ( ch ) );
-	}
 }; // struct StdStringTrait
 
 
