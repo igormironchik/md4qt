@@ -35,6 +35,7 @@
 #include "doc.hpp"
 #include "entities_map.hpp"
 #include "traits.hpp"
+#include "utils.hpp"
 
 #ifdef MD4QT_QT_SUPPORT
 // Qt include.
@@ -52,6 +53,7 @@
 #include <tuple>
 #include <algorithm>
 #include <stack>
+#include <cmath>
 
 
 namespace MD {
@@ -303,7 +305,7 @@ checkEmphasisSequence( const std::vector< std::pair< long long int, int > > & s,
 		{
 			if( !st.empty() && st.top().second == s[ i ].second )
 			{
-				auto v = qAbs( s[ i ].first );
+				auto v = std::abs( s[ i ].first );
 
 				if( st.top().first <= v )
 					collapseStack( st, v, s[ i ].second, ii );
@@ -317,7 +319,7 @@ checkEmphasisSequence( const std::vector< std::pair< long long int, int > > & s,
 
 				if( !st.empty() && st.top().second == s[ i ].second )
 				{
-					auto v = qAbs( s[ i ].first );
+					auto v = std::abs( s[ i ].first );
 
 					if( st.top().first <= v )
 						collapseStack( st, v, s[ i ].second, ii );
@@ -638,10 +640,10 @@ isHtmlComment( const typename Trait::String & s )
 	if( c.startsWith( c_62 ) )
 		return false;
 
-	if( c.startsWith( QStringLiteral( "->" ) ) )
+	if( c.startsWith( "->" ) )
 		return false;
 
-	const auto p = c.indexOf( QStringLiteral( "--" ) );
+	const auto p = c.indexOf( "--" );
 
 	if( p > -1 )
 	{
@@ -786,7 +788,7 @@ private:
 private:
 	typename Trait::StringList m_parsedFiles;
 
-	Q_DISABLE_COPY( Parser )
+	DISABLE_COPY( Parser )
 }; // class Parser
 
 
@@ -824,6 +826,8 @@ Parser< Trait >::parse( typename Trait::TextStream & stream,
 }
 
 namespace /* anonymous */ {
+
+#ifdef MD4QT_QT_SUPPORT
 
 //! Wrapper for QTextStream.
 class TextStream final
@@ -902,12 +906,14 @@ private:
 	long long int m_pos;
 }; // class TextStream
 
+#endif
+
 template< class Trait >
 inline bool
 checkForEndHtmlComments( const typename Trait::String & line, long long int pos,
 	std::vector< bool > & res )
 {
-	long long int e = line.indexOf( QStringLiteral( "--" ), pos );
+	long long int e = line.indexOf( "--", pos );
 
 	if( e != -1 )
 	{
@@ -972,7 +978,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 	const typename Trait::String & fileName,
 	bool collectRefLinks, bool top )
 {
-	QVector< MdBlock< Trait > > splitted;
+	typename Trait::template Vector< MdBlock< Trait > > splitted;
 
 	typename MdBlock< Trait >::Data fragment;
 
@@ -1022,7 +1028,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 				auto line = stream.readLine();
 
-				if( line.isEmpty() || line.startsWith( QLatin1String( "    " ) ) ||
+				if( line.isEmpty() || line.startsWith( "    " ) ||
 					line.startsWith( c_9 ) )
 				{
 					fragment.append( { line, { currentLineNumber, htmlCommentClosed } } );
@@ -1042,7 +1048,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				pf();
 		};
 
-	QString startOfCode;
+	typename Trait::String startOfCode;
 
 	while( !stream.atEnd() )
 	{
@@ -1051,7 +1057,10 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 		const auto currentLineNumber = stream.currentLineNumber();
 
 		auto line = stream.readLine();
-		line.replace( QChar( 0 ), QChar( 0xFFFD ) );
+
+		static const char16_t c_zeroReplaceWith[ 2 ] = { 0xFFFD, 0 };
+
+		line.replace( typename Trait::Char( 0 ), Trait::utf16ToString( &c_zeroReplaceWith[ 0 ] ) );
 
 		checkForHtmlComments( line, stream, htmlCommentClosed );
 
@@ -1134,7 +1143,8 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				{
 					if( isFootnote< Trait >( fragment.first().first ) )
 					{
-						fragment.append( { QString(), { currentLineNumber, htmlCommentClosed } } );
+						fragment.append( { typename Trait::String(),
+							{ currentLineNumber, htmlCommentClosed } } );
 
 						eatFootnote();
 					}
@@ -1180,7 +1190,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				lineType == BlockType::CodeIndentedBySpaces )
 			{
 				for( long long int i = 0; i < emptyLinesCount; ++i )
-					fragment.append( { QString(),
+					fragment.append( { typename Trait::String(),
 						{ currentLineNumber - emptyLinesCount + i, {} } } );
 
 				fragment.append( { line, { currentLineNumber, htmlCommentClosed } } );

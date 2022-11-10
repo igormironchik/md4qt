@@ -132,6 +132,16 @@ public:
 	{
 	}
 
+	StdString( const char * str )
+		:	m_str( str )
+	{
+	}
+
+	StdString( char ch )
+		:	m_str( 1, ch )
+	{
+	}
+
 	operator std::string () const
 	{
 		return m_str;
@@ -150,6 +160,11 @@ public:
 	long long int size() const
 	{
 		return static_cast< long long int > ( m_str.size() );
+	}
+
+	long long int length() const
+	{
+		return size();
 	}
 
 	StdString mid( long long int position, long long int n = -1 ) const
@@ -261,6 +276,51 @@ public:
 		return result;
 	}
 
+	bool startsWith( const StdString & str ) const
+	{
+		return m_str.find( str.m_str ) == 0;
+	}
+
+	StdString & remove( long long int position, long long int n )
+	{
+		if( position < size() && n > 0 )
+		{
+			if( position + n > size() )
+				n = size() - position;
+
+			m_str.erase( static_cast< size_t > ( position ), static_cast< size_t > ( n ) );
+		}
+
+		return *this;
+	}
+
+	long long int indexOf( const StdString & str, long long int from = 0 ) const
+	{
+		if( from < 0 )
+			from = 0;
+
+		const auto pos = m_str.find( str.m_str, static_cast< size_t > ( from ) );
+
+		if( pos != std::string::npos )
+			return static_cast< long long int > ( pos );
+		else
+			return -1;
+	}
+
+	bool isEmpty() const
+	{
+		return m_str.empty();
+	}
+
+	StdString & replace( const StdChar & before, const StdString & after )
+	{
+		for( size_t pos = 0; ( pos = m_str.find( before, pos ) ) != std::string::npos;
+			pos += after.size() )
+				m_str.replace( pos, 1, after.m_str );
+
+		return *this;
+	}
+
 	friend StdString operator + ( const StdString & s1, const StdString & s2 );
 
 private:
@@ -295,8 +355,6 @@ struct StdStringTrait {
 	using TextStream = std::istream;
 
 	using StringList = std::vector< String >;
-
-	using StringView = std::string_view;
 
 	//! Convert UTF-16 into trait's string.
 	static String utf16ToString( const char16_t * u16 )
@@ -337,8 +395,6 @@ struct QStringTrait {
 	using TextStream = QTextStream;
 
 	using StringList = QStringList;
-
-	using StringView = QStringView;
 
 	//! Convert UTF-16 into trait's string.
 	static String utf16ToString( const char16_t * u16 )
