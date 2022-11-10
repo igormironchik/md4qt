@@ -27,7 +27,6 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}
 if( BUILD_MD4QT_QT_TESTS )
 	add_executable( test.md_parser.qt ${SRC} )
 	target_compile_definitions( test.md_parser.qt PUBLIC TRAIT=MD::QStringTrait )
-	target_compile_definitions( test.md_parser.qt PUBLIC MD4QT_QT_SUPPORT )
 
 	target_link_libraries( test.md_parser.qt Qt6::Core )
 
@@ -39,6 +38,8 @@ endif()
 if( BUILD_MD4QT_STL_TESTS )
 	add_executable( test.md_parser.stl ${SRC} )
 	target_compile_definitions( test.md_parser.stl PUBLIC TRAIT=MD::StdStringTrait )
+
+	target_link_libraries( test.md_parser.qt icu::icu )
 
 	add_test( NAME test.md_parser.stl
 		COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.stl

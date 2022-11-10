@@ -54,6 +54,7 @@
 #include <algorithm>
 #include <stack>
 #include <cmath>
+#include <fstream>
 
 
 namespace MD {
@@ -590,12 +591,16 @@ template< class Trait >
 typename Trait::StringList
 splitString( const typename Trait::String & str, const typename Trait::Char & ch );
 
+#ifdef MD4QT_ICU_STL_SUPPORT
+
 template<>
-typename StdStringTrait::StringList
-splitString< StdStringTrait >( const StdString & str, const StdChar & ch )
+typename UnicodeStringTrait::StringList
+splitString< UnicodeStringTrait >( const UnicodeString & str, const UnicodeChar & ch )
 {
 	return str.split( ch );
 }
+
+#endif
 
 #ifdef MD4QT_QT_SUPPORT
 
@@ -827,10 +832,14 @@ Parser< Trait >::parse( typename Trait::TextStream & stream,
 
 namespace /* anonymous */ {
 
+template< class Trait >
+class TextStream;
+
 #ifdef MD4QT_QT_SUPPORT
 
 //! Wrapper for QTextStream.
-class TextStream final
+template<>
+class TextStream< QStringTrait >
 {
 public:
 	TextStream( QTextStream & stream )
@@ -905,6 +914,78 @@ private:
 	bool m_lastBuf;
 	long long int m_pos;
 }; // class TextStream
+
+#endif
+
+#ifdef MD4QT_ICU_STL_SUPPORT
+
+//! Wrapper for std::istream.
+template<>
+class TextStream< UnicodeStringTrait >
+{
+public:
+	TextStream( std::istream & stream )
+		:	m_pos( 0 )
+	{
+		std::vector< char > content;
+
+		stream.seekg( 0, std::ios::end );
+		const auto ssize = stream.tellg();
+		content.reserve( ssize );
+		stream.seekg( 0, std::ios::beg );
+		stream.read( &content[ 0 ], ssize );
+
+		m_str = UnicodeString::fromUTF8( &content[ 0 ] );
+	}
+
+	bool atEnd() const { return m_pos == m_str.size(); }
+
+	UnicodeString readLine()
+	{
+		UnicodeString line;
+
+		bool rFound = false;
+
+		while( !atEnd() )
+		{
+			const auto c = getChar();
+
+			if( rFound && c != c_10 )
+			{
+				--m_pos;
+
+				return line;
+			}
+
+			if( c == c_13 )
+			{
+				rFound = true;
+
+				continue;
+			}
+			else if( c == c_10 )
+				return line;
+
+			if( !c.isNull() )
+				line.append( c );
+		}
+
+		return line;
+	}
+
+private:
+	UnicodeChar getChar()
+	{
+		if( !atEnd() )
+			return m_str[ m_pos++ ];
+		else
+			return UnicodeChar();
+	}
+
+private:
+	UnicodeString m_str;
+	long long int m_pos;
+};
 
 #endif
 
@@ -997,13 +1078,13 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 	// Parse fragment and clear internal cache.
 	auto pf = [&]()
 		{
-			if( !fragment.isEmpty() )
+			if( !fragment.empty() )
 			{
 				MdBlock< Trait > block = { fragment, emptyLinesBefore, emptyLinesCount > 0 };
 
 				emptyLinesBefore = emptyLinesCount;
 
-				splitted.append( block );
+				splitted.push_back( block );
 
 				parseFragment( block, parent, doc, linksToParse,
 					workingPath, fileName, collectRefLinks, html );
@@ -1031,20 +1112,20 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				if( line.isEmpty() || line.startsWith( "    " ) ||
 					line.startsWith( c_9 ) )
 				{
-					fragment.append( { line, { currentLineNumber, htmlCommentClosed } } );
+					fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 				}
 				else
 				{
 					pf();
 
 					type = whatIsTheLine( line );
-					fragment.append( { line, { currentLineNumber, htmlCommentClosed } } );
+					fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 
 					break;
 				}
 			}
 
-			if( stream.atEnd() && !fragment.isEmpty() )
+			if( stream.atEnd() && !fragment.empty() )
 				pf();
 		};
 
@@ -1086,7 +1167,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			{
 				pf();
 
-				fragment.append( { line, { currentLineNumber, htmlCommentClosed } } );
+				fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 				type = lineType;
 
 				continue;
@@ -1105,7 +1186,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 		{
 			type = lineType;
 			lineCounter = 1;
-			fragment.append( { line, { currentLineNumber, htmlCommentClosed } } );
+			fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 
 			continue;
 		}
@@ -1120,7 +1201,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			if( type == BlockType::Code )
 				startOfCode = startSequence< Trait >( line );
 
-			fragment.append( { line, { currentLineNumber, htmlCommentClosed } } );
+			fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 
 			if( type == BlockType::Heading )
 				pf();
@@ -1141,9 +1222,9 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			{
 				case BlockType::Text :
 				{
-					if( isFootnote< Trait >( fragment.first().first ) )
+					if( isFootnote< Trait >( fragment.front().first ) )
 					{
-						fragment.append( { typename Trait::String(),
+						fragment.push_back( { typename Trait::String(),
 							{ currentLineNumber, htmlCommentClosed } } );
 
 						eatFootnote();
@@ -1165,7 +1246,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 				case BlockType::Code :
 				{
-					fragment.append( { line, { currentLineNumber, htmlCommentClosed } } );
+					fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 					emptyLinesCount = 0;
 
 					continue;
@@ -1190,10 +1271,10 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				lineType == BlockType::CodeIndentedBySpaces )
 			{
 				for( long long int i = 0; i < emptyLinesCount; ++i )
-					fragment.append( { typename Trait::String(),
+					fragment.push_back( { typename Trait::String(),
 						{ currentLineNumber - emptyLinesCount + i, {} } } );
 
-				fragment.append( { line, { currentLineNumber, htmlCommentClosed } } );
+				fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 
 				emptyLineInList = false;
 				emptyLinesCount = 0;
@@ -1205,7 +1286,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				pf();
 
 				type = lineType;
-				fragment.append( { line, { currentLineNumber, htmlCommentClosed } } );
+				fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 				emptyLinesCount = 0;
 
 				continue;
@@ -1216,10 +1297,10 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			if( type == BlockType::CodeIndentedBySpaces &&
 				lineType == BlockType::CodeIndentedBySpaces )
 			{
-				const auto indent = skipSpaces< Trait >( 0, fragment.first().first );
+				const auto indent = skipSpaces< Trait >( 0, fragment.front().first );
 
 				for( long long int i = 0; i < emptyLinesCount; ++i )
-					fragment.append( { QString( indent, c_32 ),
+					fragment.push_back( { typename Trait::String( indent, c_32 ),
 						{ currentLineNumber - emptyLinesCount + i, {} } } );
 			}
 			else
@@ -1237,7 +1318,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 					indents.insert( currentIndent );
 			}
 
-			fragment.append( { line, { currentLineNumber, htmlCommentClosed } } );
+			fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 			emptyLinesCount = 0;
 
 			continue;
@@ -1248,7 +1329,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			type != BlockType::Blockquote && type != BlockType::ListWithFirstEmptyLine )
 		{
 			if( type == BlockType::Text && lineType == BlockType::CodeIndentedBySpaces )
-				fragment.append( { line, { currentLineNumber, htmlCommentClosed } } );
+				fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 			else
 			{
 				if( type == BlockType::Text &&
@@ -1261,7 +1342,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 					{
 						if( num > 1 )
 						{
-							fragment.append( { line, { currentLineNumber, htmlCommentClosed } } );
+							fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 
 							continue;
 						}
@@ -1278,7 +1359,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				type = lineType;
 
 				if( !line.isEmpty() && ns < line.size() )
-					fragment.append( { line, { currentLineNumber, htmlCommentClosed } } );
+					fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 			}
 		}
 		// End of code block.
@@ -1286,20 +1367,20 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			startSequence< Trait >( line ).contains( startOfCode ) &&
 			isCodeFences< Trait >( line, true ) )
 		{
-			fragment.append( { line, { currentLineNumber, htmlCommentClosed } } );
+			fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 
 			pf();
 		}
 		else
-			fragment.append( { line, { currentLineNumber, htmlCommentClosed } } );
+			fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 
 		emptyLinesCount = 0;
 	}
 
-	if( !fragment.isEmpty() )
+	if( !fragment.empty() )
 	{
 		if( type == BlockType::Code )
-			fragment.append( { startOfCode, { -1, {} } } );
+			fragment.push_back( { startOfCode, { -1, {} } } );
 
 		pf();
 	}
@@ -1312,7 +1393,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 		{
 			if( parent->items().back()->type() == ItemType::Paragraph )
 			{
-				auto p = static_cast< Paragraph< Trait >* > ( parent->items().back().data() );
+				auto p = static_cast< Paragraph< Trait >* > ( parent->items().back().get() );
 
 				if( p->isDirty() )
 					p->appendItem( html.html );
@@ -1333,14 +1414,14 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			}
 		}
 
-		html.html.reset( nullptr );
+		html.html.reset();
 		html.htmlBlockType = -1;
 		html.continueHtml = false;
 	};
 
 	if( top )
 	{
-		html.html.reset( nullptr );
+		html.html.reset();
 		html.htmlBlockType = -1;
 		html.continueHtml = false;
 
@@ -1352,20 +1433,22 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			if( html.htmlBlockType >= 6 )
 				html.continueHtml = ( !splitted[ i ].emptyLineAfter );
 
-			if( !html.html.isNull() && !html.continueHtml )
+			if( html.html.get() && !html.continueHtml )
 				finishHtml();
 		}
 	}
 
-	if( !html.html.isNull() )
+	if( html.html.get() )
 		finishHtml();
 }
 
-template< class Trait >
+#ifdef MD4QT_QT_SUPPORT
+
+template<>
 inline void
-Parser< Trait >::parseFile( const typename Trait::String & fileName,
-	bool recursive, typename Trait::template SharedPointer< Document< Trait > > doc,
-	const typename Trait::StringList & ext, typename Trait::StringList * parentLinks )
+Parser< QStringTrait >::parseFile( const QString & fileName,
+	bool recursive, QSharedPointer< Document< QStringTrait > > doc,
+	const QStringList & ext, QStringList * parentLinks )
 {
 	QFileInfo fi( fileName );
 
@@ -1383,6 +1466,114 @@ Parser< Trait >::parseFile( const typename Trait::String & fileName,
 	}
 }
 
+#endif
+
+#ifdef MD4QT_ICU_STL_SUPPORT
+
+template<>
+inline void
+Parser< UnicodeStringTrait >::parseFile( const UnicodeString & fileName,
+	bool recursive, std::shared_ptr< Document< UnicodeStringTrait > > doc,
+	const std::vector< UnicodeString > & ext, std::vector< UnicodeString > * parentLinks )
+{
+	if( UnicodeStringTrait::fileExists( fileName, "" ) )
+	{
+		std::string fn;
+		fileName.toUTF8String( fn );
+
+		auto e = UnicodeString::fromUTF8( std::filesystem::path( fn ).extension().u8string() );
+
+		if( !e.isEmpty() )
+			e.remove( 0, 1 );
+
+		if( std::find( ext.cbegin(), ext.cend(), e.toLower() ) != ext.cend() )
+		{
+			std::ifstream file( fn );
+
+			if( file.good() )
+			{
+				auto path = std::filesystem::path( fn, std::filesystem::path::generic_format );
+				auto workingDirectory = path.remove_filename().u8string();
+
+				if( !workingDirectory.empty() )
+					workingDirectory.erase( workingDirectory.size() - 1, 1 );
+
+				parseStream( file, UnicodeString::fromUTF8( workingDirectory ),
+					UnicodeString::fromUTF8( path.filename().u8string() ),
+					recursive, doc, ext, parentLinks );
+			}
+		}
+	}
+}
+
+#endif
+
+namespace /* anonymous */ {
+
+template< class Trait >
+void resolveLinks( typename Trait::StringList & linksToParse,
+	typename Trait::template SharedPointer< Document< Trait > > doc );
+
+#ifdef MD4QT_QT_SUPPORT
+
+template<>
+void resolveLinks< QStringTrait >( QStringList & linksToParse,
+	QSharedPointer< Document< QStringTrait > > doc )
+{
+	for( auto it = linksToParse.begin(), last = linksToParse.end(); it != last; ++it )
+	{
+		auto nextFileName = *it;
+
+		if( nextFileName.startsWith( c_35 ) )
+		{
+			const auto lit = doc->labeledLinks().find( nextFileName );
+
+			if( lit != doc->labeledLinks().cend() )
+				nextFileName = (*lit)->url();
+			else
+				continue;
+		}
+
+		QFileInfo nextFile( nextFileName );
+
+		*it = nextFile.absoluteFilePath();
+	}
+}
+
+#endif
+
+#ifdef MD4QT_ICU_STL_SUPPORT
+
+template<>
+void resolveLinks< UnicodeStringTrait >( std::vector< UnicodeString > & linksToParse,
+	std::shared_ptr< Document< UnicodeStringTrait > > doc )
+{
+	for( auto it = linksToParse.begin(), last = linksToParse.end(); it != last; ++it )
+	{
+		auto nextFileName = *it;
+
+		if( nextFileName.startsWith( c_35 ) )
+		{
+			const auto lit = doc->labeledLinks().find( nextFileName );
+
+			if( lit != doc->labeledLinks().cend() )
+				nextFileName = lit->second->url();
+			else
+				continue;
+		}
+
+		std::string tmp;
+		nextFileName.toUTF8String( tmp );
+		std::filesystem::path nextFile( tmp );
+
+		*it = UnicodeString::fromUTF8( nextFile.lexically_normal().u8string() );
+	}
+}
+
+#endif
+
+} /* namespace anonymous */
+
 template< class Trait >
 inline void
 Parser< Trait >::parseStream( typename Trait::TextStream & s,
@@ -1393,21 +1584,22 @@ Parser< Trait >::parseStream( typename Trait::TextStream & s,
 	const typename Trait::StringList & ext,
 	typename Trait::StringList * parentLinks )
 {
-	QStringList linksToParse;
+	typename Trait::StringList linksToParse;
 
-	doc->appendItem( QSharedPointer< Anchor< Trait > > (
-		new Anchor< Trait >( workingPath + QStringLiteral( "/" ) + fileName ) ) );
+	doc->appendItem( typename Trait::template SharedPointer< Anchor< Trait > > (
+		new Anchor< Trait >( workingPath + "/" + fileName ) ) );
 
 	typename MdBlock< Trait >::Data data;
 
 	{
-		TextStream stream( s );
+		TextStream< Trait > stream( s );
 
 		long long int i = 0;
 
 		while( !stream.atEnd() )
 		{
-			data << QPair< QString, MdLineData >( stream.readLine(), { i } );
+			data.push_back( std::pair< typename Trait::String, MdLineData >(
+				stream.readLine(), { i } ) );
 			++i;
 		}
 	}
@@ -1415,58 +1607,49 @@ Parser< Trait >::parseStream( typename Trait::TextStream & s,
 	StringListStream< Trait > stream( data );
 
 	parse( stream, doc, doc, linksToParse,
-		workingPath + QStringLiteral( "/" ), fileName, true, true );
+		workingPath + "/", fileName, true, true );
 
-	m_parsedFiles.append( workingPath + QStringLiteral( "/" ) + fileName );
+	m_parsedFiles.push_back( workingPath + "/" + fileName );
 
-	// Resolve links.
-	for( auto it = linksToParse.begin(), last = linksToParse.end(); it != last; ++it )
-	{
-		auto nextFileName = *it;
-
-		if( nextFileName.startsWith( c_35 ) )
-		{
-			if( doc->labeledLinks().contains( nextFileName ) )
-				nextFileName = doc->labeledLinks()[ nextFileName ]->url();
-			else
-				continue;
-		}
-
-		QFileInfo nextFile( nextFileName );
-
-		*it = nextFile.absoluteFilePath();
-	}
+	resolveLinks< Trait >( linksToParse, doc );
 
 	// Parse all links if parsing is recursive.
-	if( recursive && !linksToParse.isEmpty() )
+	if( recursive && !linksToParse.empty() )
 	{
 		const auto tmpLinks = linksToParse;
 
-		while( !linksToParse.isEmpty() )
+		while( !linksToParse.empty() )
 		{
-			auto nextFileName = linksToParse.first();
-			linksToParse.removeFirst();
+			auto nextFileName = linksToParse.front();
+			linksToParse.erase( linksToParse.cbegin() );
 
 			if( parentLinks )
 			{
-				if( parentLinks->contains( nextFileName ) )
+				const auto pit = std::find( parentLinks->cbegin(), parentLinks->cend(),
+					nextFileName );
+
+				if( pit != parentLinks->cend() )
 					continue;
 			}
 
 			if( nextFileName.startsWith( c_35 ) )
 				continue;
 
-			if( !m_parsedFiles.contains( nextFileName ) )
+			const auto pit = std::find( m_parsedFiles.cbegin(), m_parsedFiles.cend(),
+				nextFileName );
+
+			if( pit == m_parsedFiles.cend() )
 			{
-				if( !doc->isEmpty() && doc->items().last()->type() != ItemType::PageBreak )
-					doc->appendItem( QSharedPointer< PageBreak< Trait > > ( new PageBreak< Trait > ) );
+				if( !doc->isEmpty() && doc->items().back()->type() != ItemType::PageBreak )
+					doc->appendItem( typename Trait::template SharedPointer< PageBreak< Trait > > (
+						new PageBreak< Trait > ) );
 
 				parseFile( nextFileName, recursive, doc, ext, &linksToParse );
 			}
 		}
 
 		if( parentLinks )
-			parentLinks->append( tmpLinks );
+			std::copy( tmpLinks.cbegin(), tmpLinks.cend(), std::back_inserter( *parentLinks ) );
 	}
 }
 
@@ -1519,7 +1702,7 @@ Parser< Trait >::whatIsTheLine( typename Trait::String & str,
 	bool inList, long long int * indent, bool calcIndent,
 	const std::set< long long int > * indents ) const
 {
-	str.replace( c_9, QString( 4, c_32 ) );
+	str.replace( c_9, typename Trait::String( 4, c_32 ) );
 
 	const auto first = skipSpaces< Trait >( 0, str );
 
@@ -1563,9 +1746,9 @@ Parser< Trait >::whatIsTheLine( typename Trait::String & str,
 				else
 					return BlockType::List;
 			}
-			else if( str.startsWith( QString( ( indent ? *indent : 4 ), c_32 ) ) )
+			else if( str.startsWith( typename Trait::String( ( indent ? *indent : 4 ), c_32 ) ) )
 			{
-				if( str.startsWith( QStringLiteral( "    " ) ) )
+				if( str.startsWith( "    " ) )
 					return BlockType::CodeIndentedBySpaces;
 			}
 		}
@@ -1588,15 +1771,11 @@ Parser< Trait >::whatIsTheLine( typename Trait::String & str,
 				else
 					return BlockType::List;
 			}
-			else if( str.startsWith( QLatin1String( "    " ) ) ||
-				str.startsWith( c_9 ) )
-			{
+			else if( str.startsWith( "    " ) || str.startsWith( c_9 ) )
 				return BlockType::CodeIndentedBySpaces;
-			}
 		}
 
-		if( s.startsWith( QLatin1String( "```" ) ) ||
-			s.startsWith( QLatin1String( "~~~" ) ) )
+		if( s.startsWith( "```" ) || s.startsWith( "~~~" ) )
 		{
 			if( isCodeFences< Trait >( str ) )
 				return BlockType::Code;
@@ -1625,7 +1804,7 @@ Parser< Trait >::parseFragment( MdBlock< Trait > & fr,
 			workingPath, fileName, collectRefLinks, html );
 	else
 	{
-		switch( whatIsTheLine( fr.data.first().first ) )
+		switch( whatIsTheLine( fr.data.front().first ) )
 		{
 			case BlockType::Text :
 				parseText( fr, parent, doc, linksToParse,
@@ -1645,7 +1824,7 @@ Parser< Trait >::parseFragment( MdBlock< Trait > & fr,
 			{
 				int indent = 1;
 
-				if( fr.data.first().first.startsWith( QLatin1String( "    " ) ) )
+				if( fr.data.front().first.startsWith( "    " ) )
 					indent = 4;
 
 				parseCodeIndentedBySpaces( fr, parent, collectRefLinks, indent );

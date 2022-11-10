@@ -1,0 +1,6 @@
+[requires]
+icu/71.1
+
+[generators]
+CMakeDeps
+cmake

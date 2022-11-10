@@ -31,16 +31,20 @@
 #ifndef MD4QT_MD_TRAITS_HPP_INCLUDED
 #define MD4QT_MD_TRAITS_HPP_INCLUDED
 
+#ifdef MD4QT_ICU_STL_SUPPORT
+
 // C++ include.
-#include <string>
 #include <memory>
 #include <vector>
-#include <unordered_map>
-#include <string_view>
+#include <map>
 #include <filesystem>
-#include <locale>
 #include <cctype>
-#include <codecvt>
+#include <string>
+
+// ICU include.
+#include <unicode/unistr.h>
+
+#endif
 
 
 #ifdef MD4QT_QT_SUPPORT
@@ -60,24 +64,26 @@
 
 namespace MD {
 
+#ifdef MD4QT_ICU_STL_SUPPORT
+
 //
 // StdChar
 //
 
-//! Wrapper for char to be used with MD::Parser.
-class StdChar {
+//! Wrapper for UChar32 to be used with MD::Parser.
+class UnicodeChar {
 public:
-	StdChar()
+	UnicodeChar()
 		:	m_ch( 0 )
 	{
 	}
 
-	StdChar( char ch )
+	UnicodeChar( UChar32 ch )
 		:	m_ch( ch )
 	{
 	}
 
-	operator char () const
+	operator UChar32 () const
 	{
 		return m_ch;
 	}
@@ -92,95 +98,94 @@ public:
 		return std::isdigit( static_cast< unsigned char > ( m_ch ) );
 	}
 
-	bool operator == ( const StdChar & other ) const
+	inline bool isNull() const
+	{
+		return m_ch != 0;
+	}
+
+	bool operator == ( const UnicodeChar & other ) const
 	{
 		return m_ch == other.m_ch;
 	}
 
-	bool operator == ( char ch ) const
+	bool operator == ( UChar32 ch ) const
 	{
 		return m_ch == ch;
 	}
 
-	bool operator != ( char ch ) const
+	bool operator != ( UChar32 ch ) const
 	{
 		return m_ch != ch;
 	}
 
 private:
-	char m_ch;
+	UChar32 m_ch;
 }; // class StdChar
 
 //
 // StdString
 //
 
-//! Wrapper for std::string to be used with MD::Parser.
-class StdString final {
+//! Wrapper for icu::UnicodeString to be used with MD::Parser.
+class UnicodeString final
+	:	public icu::UnicodeString
+{
 public:
-	StdString()
+	UnicodeString()
 	{
 	}
 
-	StdString( const std::string & str )
-		:	m_str( str )
+	UnicodeString( const icu::UnicodeString & str )
+		:	icu::UnicodeString( str )
 	{
 	}
 
-	StdString( const StdChar & ch )
-		:	m_str( 1, (char) ch )
+	UnicodeString( char ch )
+		:	icu::UnicodeString( (char16_t) ch )
 	{
 	}
 
-	StdString( const char * str )
-		:	m_str( str )
+	UnicodeString( const char * str )
+		:	icu::UnicodeString( str )
 	{
 	}
 
-	StdString( char ch )
-		:	m_str( 1, ch )
+	UnicodeString( long long int count, char ch )
+		:	icu::UnicodeString( count, (UChar32) ch, count )
 	{
 	}
 
-	operator std::string () const
+	~UnicodeString() override = default;
+
+	UnicodeChar operator [] ( long long int position ) const
 	{
-		return m_str;
+		return UnicodeChar( char32At( position ) );
 	}
 
-	StdChar operator [] ( long long int position ) const
+	void append( const UnicodeChar & ch )
 	{
-		return StdChar( m_str.at( static_cast< size_t > ( position ) ) );
+		append( ch );
 	}
 
-	void append( const StdChar & ch )
+	int32_t size() const
 	{
-		m_str.append( 1, (char) ch );
+		return length();
 	}
 
-	long long int size() const
-	{
-		return static_cast< long long int > ( m_str.size() );
-	}
-
-	long long int length() const
-	{
-		return size();
-	}
-
-	StdString mid( long long int position, long long int n = -1 ) const
+	UnicodeString mid( long long int position, long long int n = -1 ) const
 	{
 		const auto originalLength = size();
 
 		if( position > originalLength )
-			return StdString();
+			return UnicodeString();
 
 		if( position < 0 )
 		{
 			if( n < 0 || n + position >= originalLength )
-				return StdString( m_str );
+				return *this;
 
 			if( n + position <= 0 )
-				return StdString();
+				return UnicodeString();
 
 			n += position;
 			position = 0;
@@ -189,16 +194,25 @@ public:
 			n = originalLength - position;
 
 		if( position == 0 && n == originalLength )
-			return StdString( m_str );
+			return *this;
 
-		return n > 0 ? StdString( std::string( m_str.c_str() + position,
-			static_cast< size_t > ( n ) ) ) : StdString();
+		if( n > 0 )
+		{
+			icu::UnicodeString result;
+			extract( position, n, result );
+
+			return result;
+		}
+		else
+			return UnicodeString();
 	}
 
 	int toInt() const
 	{
 		try {
-			return std::stoi( m_str );
+			std::string tmp;
+			toUTF8String( tmp );
+			return std::stoi( tmp );
 		}
 		catch( const std::invalid_argument & )
 		{
@@ -210,64 +224,75 @@ public:
 		return 0;
 	}
 
-	bool contains( const StdChar & ch ) const
+	bool contains( const UnicodeChar & ch ) const
 	{
-		return m_str.find( (char) ch ) != std::string::npos;
+		return ( icu::UnicodeString::indexOf( (UChar32) ch ) != -1 );
 	}
 
-	StdString simplified() const
+	bool contains( const UnicodeString & str ) const
 	{
-		if( m_str.empty() )
-			return m_str;
+		return ( icu::UnicodeString::indexOf( str ) != -1 );
+	}
 
-		std::string result;
-		size_t i = 0;
+	UnicodeString simplified() const
+	{
+		if( isEmpty() )
+			return *this;
+
+		UnicodeString result;
+		int32_t i = 0;
 
 		while( true )
 		{
-			while( i < m_str.size() &&
-				std::isspace( static_cast< unsigned char > ( m_str[ i ] ) ) )
+			while( i < length() &&
+				std::isspace( static_cast< unsigned char > ( char32At( i ) ) ) )
 					++i;
 
-			while( i != m_str.size() &&
-				!std::isspace( static_cast< unsigned char > ( m_str[ i ] ) ) )
+			while( i != length() &&
+				!std::isspace( static_cast< unsigned char > ( char32At( i ) ) ) )
 			{
-				result.push_back( m_str[ i ] );
+				result.append( char32At( i ) );
 				++i;
 			}
 
-			if( i == m_str.size() )
+			if( i == length() )
 				break;
 
-			result.push_back( ' ' );
+			result.append( ' ' );
 		}
 
-		if( !result.empty() && result.back() == ' ' )
-			result.pop_back();
+		if( !result.isEmpty() && result[ result.size() - 1 ] == ' ' )
+			result.remove( result.size() - 1, 1 );
 
 		return result;
 	}
 
-	std::vector< StdString > split( char ch ) const
+	std::vector< UnicodeString > split( char ch ) const
 	{
-		std::vector< StdString > result;
+		std::vector< UnicodeString > result;
 
-		size_t pos = 0;
+		int32_t pos = 0;
 
-		while( pos < m_str.size() )
+		while( pos < length() )
 		{
-			const auto fpos = m_str.find( ch, pos );
+			const auto fpos = indexOf( ch, pos );
 
-			if( fpos != std::string::npos )
+			if( fpos != -1 )
 			{
 				if( fpos - pos > 0 )
-					result.push_back( m_str.substr( pos, fpos - pos ) );
+				{
+					icu::UnicodeString tmp;
+					extract( pos, fpos - pos, tmp );
+					result.push_back( tmp );
+				}
 
 				pos = fpos + 1;
 			}
-			else if( pos < m_str.size() )
+			else if( pos < length() )
 			{
-				result.push_back( m_str.substr( pos, m_str.size() - pos ) );
+				icu::UnicodeString tmp;
+				extract( pos, length() - pos, tmp );
+				result.push_back( tmp );
 
 				break;
 			}
@@ -276,61 +301,14 @@ public:
 		return result;
 	}
 
-	bool startsWith( const StdString & str ) const
+	UnicodeString & replace( const UnicodeChar & before, const UnicodeString & after )
 	{
-		return m_str.find( str.m_str ) == 0;
-	}
-
-	StdString & remove( long long int position, long long int n )
-	{
-		if( position < size() && n > 0 )
-		{
-			if( position + n > size() )
-				n = size() - position;
-
-			m_str.erase( static_cast< size_t > ( position ), static_cast< size_t > ( n ) );
-		}
+		for( int32_t pos = 0; ( pos = indexOf( before, pos ) ) != -1; pos += after.size() )
+			icu::UnicodeString::replace( pos, 1, after );
 
 		return *this;
 	}
-
-	long long int indexOf( const StdString & str, long long int from = 0 ) const
-	{
-		if( from < 0 )
-			from = 0;
-
-		const auto pos = m_str.find( str.m_str, static_cast< size_t > ( from ) );
-
-		if( pos != std::string::npos )
-			return static_cast< long long int > ( pos );
-		else
-			return -1;
-	}
-
-	bool isEmpty() const
-	{
-		return m_str.empty();
-	}
-
-	StdString & replace( const StdChar & before, const StdString & after )
-	{
-		for( size_t pos = 0; ( pos = m_str.find( before, pos ) ) != std::string::npos;
-			pos += after.size() )
-				m_str.replace( pos, 1, after.m_str );
-
-		return *this;
-	}
-
-	friend StdString operator + ( const StdString & s1, const StdString & s2 );
-
-private:
-	std::string m_str;
 }; // class StdString
-
-StdString operator + ( const StdString & s1, const StdString & s2 )
-{
-	return StdString( s1.m_str + s2.m_str );
-}
 
 
 //
@@ -338,7 +316,7 @@ StdString operator + ( const StdString & s1, const StdString & s2 )
 //
 
 //! Trait to use this library with std::string.
-struct StdStringTrait {
+struct UnicodeStringTrait {
 	template< class T >
 	using SharedPointer = std::shared_ptr< T >;
 
@@ -346,11 +324,11 @@ struct StdStringTrait {
 	using Vector = std::vector< T >;
 
 	template< class T, class U >
-	using Map = std::unordered_map< T, U >;
+	using Map = std::map< T, U >;
 
-	using String = StdString;
+	using String = UnicodeString;
 
-	using Char = StdChar;
+	using Char = UnicodeChar;
 
 	using TextStream = std::istream;
 
@@ -359,17 +337,20 @@ struct StdStringTrait {
 	//! Convert UTF-16 into trait's string.
 	static String utf16ToString( const char16_t * u16 )
 	{
-		static std::wstring_convert< std::codecvt_utf8_utf16< char16_t >, char16_t > conv;
-		return conv.to_bytes( u16 );
+		return UnicodeString( u16 );
 	}
 
 	//! \return Does file exist.
 	static bool fileExists( const String & fileName, const String & workingPath )
 	{
-		return std::filesystem::exists( (std::string) ( workingPath + fileName ) );
-	}
-}; // struct StdStringTrait
+		std::string path;
+		( workingPath + fileName ).toUTF8String( path );
 
+		return std::filesystem::exists( path );
+	}
+}; // struct UnicodeStringTrait
+
+#endif
 
 #ifdef MD4QT_QT_SUPPORT
 
