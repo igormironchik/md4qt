@@ -187,11 +187,7 @@ TEST_CASE( "33" )
 	REQUIRE( l->text() == u8"foo" );
 	const auto lit = doc->labeledLinks().find( l->url() );
 	REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-	REQUIRE( (*lit)->url() == TRAIT::utf16ToString( u"/f\x00F6\x00F6" ) );
-#else
 	REQUIRE( lit->second->url() == TRAIT::utf16ToString( u"/f\x00F6\x00F6" ) );
-#endif
 }
 
 TEST_CASE( "34" )
@@ -283,7 +279,7 @@ TEST_CASE( "38" )
 		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::List );
 		auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 2 ).get() );
 		REQUIRE( l->items().size() == 1 );
-		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().first().get() );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().front().get() );
 		REQUIRE( li->items().size() == 1 );
 		REQUIRE( li->items().first()->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).get() );

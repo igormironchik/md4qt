@@ -45,6 +45,7 @@
 
 // ICU include.
 #include <unicode/unistr.h>
+#include <unicode/uchar.h>
 
 #endif
 
@@ -53,10 +54,10 @@
 
 // C++ include.
 #include <memory>
+#include <map>
 
 // Qt include.
 #include <QString>
-#include <QHash>
 #include <QVector>
 #include <QTextStream>
 #include <QStringList>
@@ -99,12 +100,60 @@ public:
 
 	inline bool isDigit() const
 	{
-		return std::isdigit( static_cast< unsigned char > ( m_ch ) );
+		return ( u_charType( m_ch ) == U_DECIMAL_DIGIT_NUMBER );
 	}
 
 	inline bool isNull() const
 	{
-		return m_ch != 0;
+		return m_ch == 0;
+	}
+
+	inline UChar32 unicode() const
+	{
+		return m_ch;
+	}
+
+	inline bool isLetter() const
+	{
+		const auto type = u_charType( m_ch );
+
+		switch( type )
+		{
+			case U_UPPERCASE_LETTER :
+			case U_LOWERCASE_LETTER :
+			case U_TITLECASE_LETTER :
+			case U_MODIFIER_LETTER :
+			case U_OTHER_LETTER :
+				return true;
+
+			default :
+				return false;
+		}
+	}
+
+	inline bool isLetterOrNumber() const
+	{
+		return isLetter() || isDigit();
+	}
+
+	inline bool isPunct() const
+	{
+		const auto type = u_charType( m_ch );
+
+		switch( type )
+		{
+			case U_DASH_PUNCTUATION :
+			case U_START_PUNCTUATION :
+			case U_END_PUNCTUATION :
+			case U_CONNECTOR_PUNCTUATION :
+			case U_OTHER_PUNCTUATION :
+			case U_INITIAL_PUNCTUATION :
+			case U_FINAL_PUNCTUATION :
+				return true;
+
+			default :
+				return false;
+		}
 	}
 
 	UnicodeChar toLower() const
@@ -161,6 +210,11 @@ public:
 
 	UnicodeString( const char * str )
 		:	icu::UnicodeString( str )
+	{
+	}
+
+	UnicodeString( const std::string & str )
+		:	icu::UnicodeString( icu::UnicodeString::fromUTF8( str ) )
 	{
 	}
 
@@ -349,6 +403,14 @@ public:
 		return *this;
 	}
 
+	UnicodeString & replace( const UnicodeString & before, const UnicodeString & after )
+	{
+		for( int32_t pos = 0; ( pos = indexOf( before, pos ) ) != -1; pos += after.size() )
+			icu::UnicodeString::replace( pos, before.length(), after );
+
+		return *this;
+	}
+
 	UnicodeString sliced( long long int pos ) const
 	{
 		icu::UnicodeString tmp;
@@ -371,6 +433,33 @@ public:
 		extract( length() - 1, n, tmp );
 
 		return tmp;
+	}
+
+	UnicodeString & toCaseFolded()
+	{
+		icu::UnicodeString::foldCase();
+
+		return *this;
+	}
+
+	UnicodeString toUpper()
+	{
+		icu::UnicodeString::toUpper();
+
+		return *this;
+	}
+
+	UnicodeString toLower() const
+	{
+		auto tmp = *this;
+		tmp.toLower();
+
+		return tmp;
+	}
+
+	void clear()
+	{
+		icu::UnicodeString::remove();
 	}
 }; // class StdString
 
@@ -431,7 +520,7 @@ struct QStringTrait {
 	using Vector = QVector< T >;
 
 	template< class T, class U >
-	using Map = QHash< T, U >;
+	using Map = std::map< T, U >;
 
 	using String = QString;
 

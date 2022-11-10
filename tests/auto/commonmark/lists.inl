@@ -828,7 +828,7 @@ TEST_CASE( "317" )
 		REQUIRE( t->text() == u8"d" );
 	}
 
-	REQUIRE( !doc->labeledLinks().isEmpty() );
+	REQUIRE( !doc->labeledLinks().empty() );
 }
 
 TEST_CASE( "318" )

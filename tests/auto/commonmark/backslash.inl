@@ -253,11 +253,7 @@ TEST_CASE( "023" )
 	REQUIRE( doc->labeledLinks().size() == 1 );
 	const auto lit = doc->labeledLinks().find( l->url() );
 	REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-	REQUIRE( (*lit)->url() == u8"/bar*" );
-#else
 	REQUIRE( lit->second->url() == u8"/bar*" );
-#endif
 }
 
 TEST_CASE( "024" )

@@ -444,9 +444,5 @@ TEST_CASE( "592" )
 	REQUIRE( l->text() == u8"foo" );
 	const auto lit = doc->labeledLinks().find( l->url() );
 	REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-	REQUIRE( (*lit)->url() == u8"/url" );
-#else
 	REQUIRE( lit->second->url() == u8"/url" );
-#endif
 }

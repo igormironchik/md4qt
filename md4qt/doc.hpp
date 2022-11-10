@@ -1118,7 +1118,7 @@ public:
 	void insertFootnote( const typename Trait::String & id,
 		FootnoteSharedPointer fn )
 	{
-		m_footnotes.insert( id, fn );
+		m_footnotes.insert( { id, fn } );
 	}
 
 	using LinkSharedPointer = typename Trait::template SharedPointer< Link< Trait > >;
@@ -1132,7 +1132,7 @@ public:
 
 	void insertLabeledLink( const typename Trait::String & label, LinkSharedPointer lnk )
 	{
-		m_labeledLinks.insert( label, lnk );
+		m_labeledLinks.insert( { label, lnk } );
 	}
 
 	using HeadingSharedPointer = typename Trait::template SharedPointer< Heading< Trait > >;
@@ -1146,7 +1146,7 @@ public:
 
 	void insertLabeledHeading( const typename Trait::String & label, HeadingSharedPointer h )
 	{
-		m_labeledHeadings.insert( label, h );
+		m_labeledHeadings.insert( { label, h } );
 	}
 
 private:

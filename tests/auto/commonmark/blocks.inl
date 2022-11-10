@@ -489,7 +489,7 @@ TEST_CASE( "062" )
 	REQUIRE( doc->isEmpty() == false );
 	REQUIRE( doc->items().size() == 7 );
 
-	for( qsizetype i = 1; i < 7; ++i )
+	for( long long int i = 1; i < 7; ++i )
 	{
 		REQUIRE( doc->items().at( i )->type() == MD::ItemType::Heading );
 		auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( i ).get() );
@@ -630,7 +630,7 @@ TEST_CASE( "068" )
 	REQUIRE( doc->isEmpty() == false );
 	REQUIRE( doc->items().size() == 4 );
 
-	for( qsizetype i = 1; i < 4; ++i )
+	for( long long int i = 1; i < 4; ++i )
 	{
 		REQUIRE( doc->items().at( i )->type() == MD::ItemType::Heading );
 		auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( i ).get() );

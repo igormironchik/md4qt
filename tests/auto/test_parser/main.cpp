@@ -78,9 +78,9 @@ TEST_CASE( "002" )
 	auto dp = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 
 	REQUIRE( dp->items().size() == 1 );
-	REQUIRE( dp->items().first()->type() == MD::ItemType::Text );
+	REQUIRE( dp->items().front()->type() == MD::ItemType::Text );
 
-	auto dt = static_cast< MD::Text< TRAIT >* > ( dp->items().first().get() );
+	auto dt = static_cast< MD::Text< TRAIT >* > ( dp->items().front().get() );
 
 	REQUIRE( dt->opts() == MD::TextOption::TextWithoutFormat );
 	REQUIRE( dt->text() == u8"This is just a text!" );
@@ -101,9 +101,9 @@ TEST_CASE( "003" )
 		auto dp = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 
 		REQUIRE( dp->items().size() == 1 );
-		REQUIRE( dp->items().first()->type() == MD::ItemType::Text );
+		REQUIRE( dp->items().front()->type() == MD::ItemType::Text );
 
-		auto dt = static_cast< MD::Text< TRAIT >* > ( dp->items().first().get() );
+		auto dt = static_cast< MD::Text< TRAIT >* > ( dp->items().front().get() );
 
 		REQUIRE( dt->opts() == MD::TextOption::TextWithoutFormat );
 		REQUIRE( dt->text() == u8"Paragraph 1." );
@@ -115,9 +115,9 @@ TEST_CASE( "003" )
 		auto dp = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
 
 		REQUIRE( dp->items().size() == 1 );
-		REQUIRE( dp->items().first()->type() == MD::ItemType::Text );
+		REQUIRE( dp->items().front()->type() == MD::ItemType::Text );
 
-		auto dt = static_cast< MD::Text< TRAIT >* > ( dp->items().first().get() );
+		auto dt = static_cast< MD::Text< TRAIT >* > ( dp->items().front().get() );
 
 		REQUIRE( dt->opts() == MD::TextOption::TextWithoutFormat );
 		REQUIRE( dt->text() == u8"Paragraph 2." );
@@ -1423,9 +1423,10 @@ TEST_CASE( "031" )
 
 	REQUIRE( f1->id() == u8"#^REF/" + wd + u8"/031.md" );
 
-	REQUIRE( !doc->labeledLinks().isEmpty() );
-	REQUIRE( doc->labeledLinks().contains( label ) );
-	REQUIRE( doc->labeledLinks()[ label ]->url() == u8"http://www.where.com/a.md" );
+	REQUIRE( !doc->labeledLinks().empty() );
+	const auto lit = doc->labeledLinks().find( label );
+	REQUIRE( lit != doc->labeledLinks().cend() );
+	REQUIRE( lit->second->url() == u8"http://www.where.com/a.md" );
 
 
 	{
@@ -1450,11 +1451,7 @@ TEST_CASE( "031" )
 		const auto lit = doc->labeledLinks().find( u8"#1/" + wd + u8"/031.md" );
 		REQUIRE( lit != doc->labeledLinks().cend() );
 
-#ifdef MD4QT_QT_SUPPORT
-		REQUIRE( (*lit)->url() == wd + u8"/a.md" );
-#else
 		REQUIRE( lit->second->url() == wd + u8"/a.md" );
-#endif
 	}
 
 	{
@@ -2325,9 +2322,11 @@ TEST_CASE( "045" )
 
 	const typename TRAIT::String label = u8"#^footnote/" + wd + u8"045.md";
 
-	REQUIRE( doc->footnotesMap().contains( label ) );
+	const auto fit = doc->footnotesMap().find( label );
 
-	auto f = doc->footnotesMap()[ label ];
+	REQUIRE( fit != doc->footnotesMap().cend() );
+
+	auto f = fit->second;
 
 	REQUIRE( f->items().size() == 3 );
 
@@ -2417,8 +2416,9 @@ TEST_CASE( "046" )
 	REQUIRE( h->label() == label );
 
 	REQUIRE( doc->labeledHeadings().size() == 3 );
-	REQUIRE( doc->labeledHeadings().contains( label ) );
-	REQUIRE( doc->labeledHeadings()[ label ].get() == h );
+	const auto hit = doc->labeledHeadings().find( label );
+	REQUIRE( hit != doc->labeledHeadings().cend() );
+	REQUIRE( hit->second.get() == h );
 }
 
 TEST_CASE( "047" )
@@ -2697,9 +2697,10 @@ TEST_CASE( "055" )
 
 	const typename TRAIT::String label = u8"#^footnote/" + wd + u8"055.md";
 
-	REQUIRE( doc->footnotesMap().contains( label ) );
+	const auto fit = doc->footnotesMap().find( label );
+	REQUIRE( fit != doc->footnotesMap().cend() );
 
-	auto f = doc->footnotesMap()[ label ];
+	auto f = fit->second;
 
 	REQUIRE( f->type() == MD::ItemType::Footnote );
 
@@ -4420,7 +4421,7 @@ TEST_CASE( "118-1" )
 		file.close();
 
 #else
-	std::ifstream stream( filename, std::ios::in );
+	std::ifstream stream( fileName, std::ios::in );
 
 	if( stream.good() )
 	{

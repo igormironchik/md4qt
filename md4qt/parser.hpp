@@ -1529,7 +1529,7 @@ void resolveLinks< QStringTrait >( QStringList & linksToParse,
 			const auto lit = doc->labeledLinks().find( nextFileName );
 
 			if( lit != doc->labeledLinks().cend() )
-				nextFileName = (*lit)->url();
+				nextFileName = lit->second->url();
 			else
 				continue;
 		}
@@ -1702,7 +1702,7 @@ Parser< Trait >::whatIsTheLine( typename Trait::String & str,
 	bool inList, long long int * indent, bool calcIndent,
 	const std::set< long long int > * indents ) const
 {
-	str.replace( c_9, typename Trait::String( 4, c_32 ) );
+	str.replace( typename Trait::Char( c_9 ), typename Trait::String( 4, c_32 ) );
 
 	const auto first = skipSpaces< Trait >( 0, str );
 
@@ -1968,8 +1968,12 @@ paragraphToLabel( Paragraph< Trait > * p )
 
 			auto t = static_cast< Text< Trait >* > ( it->get() );
 
-			for( const auto & c : t->text().simplified() )
+			const auto tmp = t->text().simplified();
+
+			for( long long int i = 0; i < tmp.length(); ++i )
 			{
+				const auto c = tmp[ i ];
+
 				if( c.isLetter() || c.isDigit() )
 					l.push_back( c.toLower() );
 				else if( c.isSpace() )
@@ -2238,7 +2242,7 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 			}
 		}
 
-		fr.data.removeAt( 1 );
+		fr.data.erase( fr.data.cbegin() + 1 );
 
 		for( const auto & line : std::as_const( fr.data ) )
 			parseTableRow( line.first );
@@ -3009,7 +3013,7 @@ removeBackslashes( const typename Trait::String & s )
 			r.push_back( s[ i ] );
 		else if( backslash )
 		{
-			r.push_back( c_92 );
+			r.push_back( typename Trait::Char( c_92 ) );
 			r.push_back( s[ i ] );
 		}
 		else
@@ -3034,8 +3038,8 @@ makeTextObject( const typename Trait::String & text, bool spaceBefore, bool spac
 
 	if( !s.isEmpty() )
 	{
-		spaceBefore = spaceBefore || s.at( 0 ).isSpace();
-		spaceAfter = spaceAfter || s.at( s.size() - 1 ).isSpace();
+		spaceBefore = spaceBefore || s[ 0 ].isSpace();
+		spaceAfter = spaceAfter || s[ s.size() - 1 ].isSpace();
 	}
 
 	s = s.simplified();
@@ -3121,7 +3125,7 @@ makeText(
 
 	if( po.line != lastLine )
 	{
-		text.push_back( c_32 );
+		text.push_back( typename Trait::Char( c_32 ) );
 		++po.line;
 
 		for( ; po.line < lastLine; ++po.line )
@@ -3133,7 +3137,7 @@ makeText(
 				removeLineBreak< Trait >( po.fr.data.at( po.line ).first ) : po.fr.data.at( po.line ).first );
 			text.push_back( s );
 
-			text.push_back( c_32 );
+			text.push_back( typename Trait::Char( c_32 ) );
 
 			if( lineBreak )
 				makeTOWLB();
@@ -3433,7 +3437,7 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 	{
 		closing = true;
 
-		tag.push_back( c_47 );
+		tag.push_back( typename Trait::Char( c_47 ) );
 
 		++p;
 	}
@@ -3592,7 +3596,7 @@ eatRawHtml( long long int line, long long int pos, long long int toLine, long lo
 		if( !h.isEmpty() )
 		{
 			for( long long int i = 0; i < po.fr.emptyLinesBefore; ++i )
-				h.push_back( c_10 );
+				h.push_back( typename Trait::Char( c_10 ) );
 		}
 
 		const auto first = po.fr.data[ line ].first.sliced( pos,
@@ -3600,7 +3604,7 @@ eatRawHtml( long long int line, long long int pos, long long int toLine, long lo
 				po.fr.data[ line ].first.size() - pos ) );
 
 		if( !h.isEmpty() && !first.isEmpty() )
-			h.push_back( c_10 );
+			h.push_back( typename Trait::Char( c_10 ) );
 
 		if( !first.isEmpty() )
 			h.push_back( first );
@@ -3609,13 +3613,13 @@ eatRawHtml( long long int line, long long int pos, long long int toLine, long lo
 
 		for( ; line < toLine; ++line )
 		{
-			h.push_back( c_10 );
+			h.push_back( typename Trait::Char( c_10 ) );
 			h.push_back( po.fr.data[ line ].first );
 		}
 
 		if( line == toLine && toPos != 0 )
 		{
-			h.push_back( c_10 );
+			h.push_back( typename Trait::Char( c_10 ) );
 			h.push_back( po.fr.data[ line ].first.sliced( 0,
 				toPos > 0 ? toPos : po.fr.data[ line ].first.size() ) );
 		}
@@ -4126,11 +4130,11 @@ checkForMath( typename Delims< Trait >::const_iterator it,
 
 			for( long long int i = it->m_line + 1; i < end->m_line; ++i )
 			{
-				math.push_back( c_10 );
+				math.push_back( typename Trait::Char( c_10 ) );
 				math.push_back( po.fr.data[ i ].first );
 			}
 
-			math.push_back( c_10 );
+			math.push_back( typename Trait::Char( c_10 ) );
 			math.push_back( po.fr.data[ end->m_line ].first.sliced( 0, end->m_pos ) );
 		}
 
@@ -4238,14 +4242,14 @@ makeInlineCode( long long int lastLine, long long int lastPos,
 				po.fr.data.at( po.line ).first.size() - po.pos ) ) );
 
 		if( po.line < lastLine )
-			c.push_back( c_32 );
+			c.push_back( typename Trait::Char( c_32 ) );
 
 		po.pos = 0;
 	}
 
 	po.line = lastLine;
 
-	if( c.front() == c_32 && c.back() == c_32 && skipSpaces< Trait >( 0, c ) < c.size() )
+	if( c[ 0 ] == c_32 && c[ c.size() - 1 ] == c_32 && skipSpaces< Trait >( 0, c ) < c.size() )
 	{
 		c.remove( 0, 1 );
 		c.remove( c.size() - 1, 1 );
@@ -4327,7 +4331,7 @@ readTextBetweenSquareBrackets( typename Delims< Trait >::const_iterator start,
 
 				for( ; i <= it->m_line; ++i )
 				{
-					text.push_back( c_32 );
+					text.push_back( typename Trait::Char( c_32 ) );
 
 					if( i == it->m_line )
 						text.push_back( po.fr.data.at( i ).first.sliced( 0, it->m_pos ) );
@@ -4553,7 +4557,7 @@ createShortcutLink( const typename Trait::String & text,
 
 	po.wasRefLink = false;
 
-	if( po.doc->labeledLinks().contains( url ) )
+	if( po.doc->labeledLinks().find( url ) != po.doc->labeledLinks().cend() )
 	{
 		if( !po.collectRefLinks )
 		{
@@ -4640,11 +4644,13 @@ createShortcutImage( const typename Trait::String & text,
 
 	po.wasRefLink = false;
 
-	if( po.doc->labeledLinks().contains( url ) )
+	const auto iit = po.doc->labeledLinks().find( url );
+
+	if( iit != po.doc->labeledLinks().cend() )
 	{
 		if( !po.collectRefLinks )
 		{
-			const auto img = makeImage( po.doc->labeledLinks()[ url ]->url(),
+			const auto img = makeImage( iit->second->url(),
 				( linkText.isEmpty() ? text : linkText ), po,
 				doNotCreateTextOnFail, lastLine, lastPos );
 
@@ -4708,7 +4714,7 @@ readLinkDestination( long long int line, long long int pos, const typename MdBlo
 				else
 				{
 					if( backslash )
-						dest.push_back( c_92 );
+						dest.push_back( typename Trait::Char( c_92 ) );
 
 					dest.push_back( s[ pos ] );
 				}
@@ -4762,7 +4768,7 @@ readLinkDestination( long long int line, long long int pos, const typename MdBlo
 				else
 				{
 					if( backslash )
-						dest.push_back( c_92 );
+						dest.push_back( typename Trait::Char( c_92 ) );
 
 					dest.push_back( s[ pos ] );
 				}
@@ -5124,7 +5130,7 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 
 							po.wasRefLink = true;
 
-							if( !po.doc->labeledLinks().contains( label ) )
+							if( po.doc->labeledLinks().find( label ) == po.doc->labeledLinks().cend() )
 								po.doc->insertLabeledLink( label, link );
 
 							return iit;
@@ -5861,12 +5867,12 @@ concatenateText( typename Block< Trait >::Items::const_iterator it,
 		const auto tt = std::static_pointer_cast< Text< Trait > >( *it );
 
 		if( tt->isSpaceBefore() )
-			data.push_back( c_32 );
+			data.push_back( typename Trait::Char( c_32 ) );
 
 		data.push_back( tt->text() );
 
 		if( tt->isSpaceAfter() )
-			data.push_back( c_32 );
+			data.push_back( typename Trait::Char( c_32 ) );
 	}
 
 	t->setText( data.simplified() );
@@ -6125,7 +6131,13 @@ Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
 				fr.data.at( it->m_line ).first.size() > it->m_pos + 1 &&
 				fr.data.at( it->m_line ).first[ it->m_pos + 1 ] == c_58 )
 			{
-				fr.data = fr.data.sliced( it->m_line );
+				{
+					typename MdBlock< Trait >::Data tmp;
+					std::copy( fr.data.cbegin() + it->m_line, fr.data.cend(),
+						std::back_inserter( tmp ) );
+					fr.data = tmp;
+				}
+
 				fr.data.front().first = fr.data.front().first.sliced( it->m_pos + 2 );
 
 				for( auto it = fr.data.begin(), last = fr.data.end(); it != last; ++it )
@@ -6336,7 +6348,7 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 	bool collectRefLinks, RawHtmlBlock< Trait > & html )
 {
 	for( auto it = fr.data.begin(), last = fr.data.end(); it != last; ++it )
-		it->first.replace( c_9, "    " );
+		it->first.replace( typename Trait::Char( c_9 ), typename Trait::String( "    " ) );
 
 	const auto p = skipSpaces< Trait >( 0, fr.data.front().first );
 
@@ -6473,7 +6485,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 	bool taskList = false;
 	bool checked = false;
 
-	if( !data.isEmpty() )
+	if( !data.empty() )
 	{
 		auto p = skipSpaces< Trait >( 0, data.front().first );
 
@@ -6537,7 +6549,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 				std::tie( ok, std::ignore, std::ignore ) = listItemData< Trait >( it->first );
 
 				if( ok || ns > indent || ns == it->first.length() )
-					nestedList << *it;
+					nestedList.push_back( *it );
 				else
 					break;
 			}
@@ -6572,7 +6584,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 		}
 	}
 
-	if( !data.isEmpty() )
+	if( !data.empty() )
 	{
 		StringListStream< Trait > stream( data );
 

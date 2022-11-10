@@ -51,11 +51,7 @@ TEST_CASE( "192" )
 	REQUIRE( l->text() == u8"foo" );
 	const auto lit = doc->labeledLinks().find( l->url() );
 	REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-	REQUIRE( (*lit)->url() == u8"/url" );
-#else
 	REQUIRE( lit->second->url() == u8"/url" );
-#endif
 }
 
 TEST_CASE( "193" )
@@ -75,11 +71,7 @@ TEST_CASE( "193" )
 	REQUIRE( l->text() == u8"foo" );
 	const auto lit = doc->labeledLinks().find( l->url() );
 	REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-	REQUIRE( (*lit)->url() == u8"/url" );
-#else
 	REQUIRE( lit->second->url() == u8"/url" );
-#endif
 }
 
 TEST_CASE( "194" )
@@ -99,11 +91,7 @@ TEST_CASE( "194" )
 	REQUIRE( l->text() == u8"Foo*bar]" );
 	const auto lit = doc->labeledLinks().find( l->url() );
 	REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-	REQUIRE( (*lit)->url() == u8"my_(url)" );
-#else
 	REQUIRE( lit->second->url() == u8"my_(url)" );
-#endif
 }
 
 TEST_CASE( "195" )
@@ -123,11 +111,7 @@ TEST_CASE( "195" )
 	REQUIRE( l->text() == u8"Foo bar" );
 	const auto lit = doc->labeledLinks().find( l->url() );
 	REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-	REQUIRE( (*lit)->url() == u8"my url" );
-#else
 	REQUIRE( lit->second->url() == u8"my url" );
-#endif
 }
 
 TEST_CASE( "196" )
@@ -147,11 +131,7 @@ TEST_CASE( "196" )
 	REQUIRE( l->text() == u8"foo" );
 	const auto lit = doc->labeledLinks().find( l->url() );
 	REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-	REQUIRE( (*lit)->url() == u8"/url" );
-#else
 	REQUIRE( lit->second->url() == u8"/url" );
-#endif
 }
 
 TEST_CASE( "197" )
@@ -209,11 +189,7 @@ TEST_CASE( "198" )
 	REQUIRE( l->text() == u8"foo" );
 	const auto lit = doc->labeledLinks().find( l->url() );
 	REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-	REQUIRE( (*lit)->url() == u8"/url" );
-#else
 	REQUIRE( lit->second->url() == u8"/url" );
-#endif
 }
 
 TEST_CASE( "199" )
@@ -261,11 +237,7 @@ TEST_CASE( "200" )
 	REQUIRE( l->text() == u8"foo" );
 	const auto lit = doc->labeledLinks().find( l->url() );
 	REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-	REQUIRE( (*lit)->url() == u8"" );
-#else
 	REQUIRE( lit->second->url() == u8"" );
-#endif
 }
 
 TEST_CASE( "201" )
@@ -327,11 +299,7 @@ TEST_CASE( "202" )
 	REQUIRE( l->text() == u8"foo" );
 	const auto lit = doc->labeledLinks().find( l->url() );
 	REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-	REQUIRE( (*lit)->url() == u8"/url\\bar*baz" );
-#else
 	REQUIRE( lit->second->url() == u8"/url\\bar*baz" );
-#endif
 }
 
 TEST_CASE( "203" )
@@ -351,11 +319,7 @@ TEST_CASE( "203" )
 	REQUIRE( l->text() == u8"foo" );
 	const auto lit = doc->labeledLinks().find( l->url() );
 	REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-	REQUIRE( (*lit)->url() == u8"url" );
-#else
 	REQUIRE( lit->second->url() == u8"url" );
-#endif
 }
 
 TEST_CASE( "204" )
@@ -375,11 +339,7 @@ TEST_CASE( "204" )
 	REQUIRE( l->text() == u8"foo" );
 	const auto lit = doc->labeledLinks().find( l->url() );
 	REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-	REQUIRE( (*lit)->url() == u8"first" );
-#else
 	REQUIRE( lit->second->url() == u8"first" );
-#endif
 }
 
 TEST_CASE( "205" )
@@ -399,11 +359,7 @@ TEST_CASE( "205" )
 	REQUIRE( l->text() == u8"Foo" );
 	const auto lit = doc->labeledLinks().find( l->url() );
 	REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-	REQUIRE( (*lit)->url() == u8"/url" );
-#else
 	REQUIRE( lit->second->url() == u8"/url" );
-#endif
 }
 
 TEST_CASE( "206" )
@@ -423,11 +379,7 @@ TEST_CASE( "206" )
 	REQUIRE( l->text() == u8"αγω" );
 	const auto lit = doc->labeledLinks().find( l->url() );
 	REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-	REQUIRE( (*lit)->url() == u8"/φου" );
-#else
 	REQUIRE( lit->second->url() == u8"/φου" );
-#endif
 }
 
 TEST_CASE( "207" )
@@ -579,11 +531,7 @@ TEST_CASE( "214" )
 		REQUIRE( l->text() == u8"Foo" );
 		const auto lit = doc->labeledLinks().find( l->url() );
 		REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-		REQUIRE( (*lit)->url() == u8"/url" );
-#else
 		REQUIRE( lit->second->url() == u8"/url" );
-#endif
 	}
 
 	{
@@ -628,11 +576,7 @@ TEST_CASE( "215" )
 		REQUIRE( l->text() == u8"foo" );
 		const auto lit = doc->labeledLinks().find( l->url() );
 		REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-		REQUIRE( (*lit)->url() == u8"/url" );
-#else
 		REQUIRE( lit->second->url() == u8"/url" );
-#endif
 	}
 }
 
@@ -657,11 +601,7 @@ TEST_CASE( "216" )
 		REQUIRE( l->text() == u8"foo" );
 		const auto lit = doc->labeledLinks().find( l->url() );
 		REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-		REQUIRE( (*lit)->url() == u8"/url" );
-#else
 		REQUIRE( lit->second->url() == u8"/url" );
-#endif
 	}
 }
 
@@ -682,11 +622,7 @@ TEST_CASE( "217" )
 		REQUIRE( l->text() == u8"foo" );
 		const auto lit = doc->labeledLinks().find( l->url() );
 		REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-		REQUIRE( (*lit)->url() == u8"/foo-url" );
-#else
 		REQUIRE( lit->second->url() == u8"/foo-url" );
-#endif
 	}
 
 	{
@@ -702,11 +638,7 @@ TEST_CASE( "217" )
 		REQUIRE( l->text() == u8"bar" );
 		const auto lit = doc->labeledLinks().find( l->url() );
 		REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-		REQUIRE( (*lit)->url() == u8"/bar-url" );
-#else
 		REQUIRE( lit->second->url() == u8"/bar-url" );
-#endif
 	}
 
 	{
@@ -722,11 +654,7 @@ TEST_CASE( "217" )
 		REQUIRE( l->text() == u8"baz" );
 		const auto lit = doc->labeledLinks().find( l->url() );
 		REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-		REQUIRE( (*lit)->url() == u8"/baz-url" );
-#else
 		REQUIRE( lit->second->url() == u8"/baz-url" );
-#endif
 	}
 }
 
@@ -745,11 +673,7 @@ TEST_CASE( "218" )
 	REQUIRE( l->text() == u8"foo" );
 	const auto lit = doc->labeledLinks().find( l->url() );
 	REQUIRE( lit != doc->labeledLinks().cend() );
-#ifdef MD4QT_QT_SUPPORT
-	REQUIRE( (*lit)->url() == u8"/url" );
-#else
 	REQUIRE( lit->second->url() == u8"/url" );
-#endif
 
 	// I don't add empty blockquote to the document...
 }
