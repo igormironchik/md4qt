@@ -176,12 +176,12 @@ public:
 		return UnicodeChar( char32At( position ) );
 	}
 
-	void append( const UnicodeChar & ch )
+	void push_back( const UnicodeChar & ch )
 	{
 		icu::UnicodeString::append( (UChar32) ch );
 	}
 
-	void append( const UnicodeString & str )
+	void push_back( const UnicodeString & str )
 	{
 		icu::UnicodeString::append( str );
 	}
