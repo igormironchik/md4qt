@@ -31,6 +31,8 @@
 #ifndef MD4QT_MD_TRAITS_HPP_INCLUDED
 #define MD4QT_MD_TRAITS_HPP_INCLUDED
 
+//#define MD4QT_ICU_STL_SUPPORT
+
 #ifdef MD4QT_ICU_STL_SUPPORT
 
 // C++ include.
@@ -49,9 +51,11 @@
 
 #ifdef MD4QT_QT_SUPPORT
 
+// C++ include.
+#include <memory>
+
 // Qt include.
 #include <QString>
-#include <QSharedPointer>
 #include <QHash>
 #include <QVector>
 #include <QTextStream>
@@ -103,6 +107,11 @@ public:
 		return m_ch != 0;
 	}
 
+	UnicodeChar toLower() const
+	{
+		return icu::UnicodeString( 1, m_ch, 1 ).toLower().char32At( 0 );
+	}
+
 	bool operator == ( const UnicodeChar & other ) const
 	{
 		return m_ch == other.m_ch;
@@ -145,6 +154,11 @@ public:
 	{
 	}
 
+	UnicodeString( const UnicodeChar & ch )
+		:	icu::UnicodeString( 1, (UChar32) ch, 1 )
+	{
+	}
+
 	UnicodeString( const char * str )
 		:	icu::UnicodeString( str )
 	{
@@ -164,7 +178,12 @@ public:
 
 	void append( const UnicodeChar & ch )
 	{
-		append( ch );
+		icu::UnicodeString::append( (UChar32) ch );
+	}
+
+	void append( const UnicodeString & str )
+	{
+		icu::UnicodeString::append( str );
 	}
 
 	int32_t size() const
@@ -224,6 +243,27 @@ public:
 		return 0;
 	}
 
+	int toInt( bool * ok, int base ) const
+	{
+		try {
+			std::string tmp;
+			toUTF8String( tmp );
+			const auto result = std::stoi( tmp, nullptr, base );
+			if( ok) *ok = true;
+			return result;
+		}
+		catch( const std::invalid_argument & )
+		{
+			if( ok ) *ok = false;
+		}
+		catch( const std::out_of_range & )
+		{
+			if( ok ) *ok = false;
+		}
+
+		return 0;
+	}
+
 	bool contains( const UnicodeChar & ch ) const
 	{
 		return ( icu::UnicodeString::indexOf( (UChar32) ch ) != -1 );
@@ -251,14 +291,14 @@ public:
 			while( i != length() &&
 				!std::isspace( static_cast< unsigned char > ( char32At( i ) ) ) )
 			{
-				result.append( char32At( i ) );
+				result.append( UnicodeChar( char32At( i ) ) );
 				++i;
 			}
 
 			if( i == length() )
 				break;
 
-			result.append( ' ' );
+			result.append( UnicodeChar( ' ' ) );
 		}
 
 		if( !result.isEmpty() && result[ result.size() - 1 ] == ' ' )
@@ -307,6 +347,30 @@ public:
 			icu::UnicodeString::replace( pos, 1, after );
 
 		return *this;
+	}
+
+	UnicodeString sliced( long long int pos ) const
+	{
+		icu::UnicodeString tmp;
+		extract( pos, length() - pos, tmp );
+
+		return tmp;
+	}
+
+	UnicodeString sliced( long long int pos, long long int length ) const
+	{
+		icu::UnicodeString tmp;
+		extract( pos, length, tmp );
+
+		return tmp;
+	}
+
+	UnicodeString right( long long int n ) const
+	{
+		icu::UnicodeString tmp;
+		extract( length() - 1, n, tmp );
+
+		return tmp;
 	}
 }; // class StdString
 
@@ -361,7 +425,7 @@ struct UnicodeStringTrait {
 //! Trait to use this library with QString.
 struct QStringTrait {
 	template< class T >
-	using SharedPointer = QSharedPointer< T >;
+	using SharedPointer = std::shared_ptr< T >;
 
 	template< class T >
 	using Vector = QVector< T >;

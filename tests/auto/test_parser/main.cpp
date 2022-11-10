@@ -1403,7 +1403,7 @@ TEST_CASE( "031" )
 	REQUIRE( l2->url() == wd + u8"/b.md" );
 	REQUIRE( l2->opts() == MD::TextOption::TextWithoutFormat );
 
-	REQUIRE( !l2->img().isNull() );
+	REQUIRE( l2->img().get() );
 	REQUIRE( l2->img()->text() == u8"image 1" );
 	REQUIRE( l2->img()->url() == wd + u8"/" + u8"a.png" );
 
@@ -2368,7 +2368,7 @@ TEST_CASE( "046" )
 
 			{
 				REQUIRE( h->level() == j );
-				REQUIRE( !h->text().isNull() );
+				REQUIRE( h->text().get() );
 				auto p = h->text().get();
 				REQUIRE( p->items().size() == 1 );
 				REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
@@ -2396,7 +2396,7 @@ TEST_CASE( "046" )
 	auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( idx ).get() );
 
 	REQUIRE( h->level() == 3 );
-	REQUIRE( !h->text().isNull() );
+	REQUIRE( h->text().get() );
 	auto p = h->text().get();
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
@@ -2517,7 +2517,7 @@ TEST_CASE( "048" )
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Heading );
 		auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 1 ).get() );
-		REQUIRE( !h->text().isNull() );
+		REQUIRE( h->text().get() );
 		auto p = h->text().get();
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
@@ -2536,7 +2536,7 @@ TEST_CASE( "048" )
 
 	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Heading );
 	auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( !h->text().isNull() );
+	REQUIRE( h->text().get() );
 	auto p = h->text().get();
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );

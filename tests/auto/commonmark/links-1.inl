@@ -762,7 +762,7 @@ TEST_CASE( "516" )
 	REQUIRE( l->opts() == MD::TextWithoutFormat );
 	REQUIRE( l->text() == u8"![moon](moon.jpg)" );
 	REQUIRE( l->url() == u8"/uri" );
-	REQUIRE( !l->img().isNull() );
+	REQUIRE( l->img().get() );
 	REQUIRE( !l->img()->isEmpty() );
 	REQUIRE( l->img()->text() == u8"moon" );
 	REQUIRE( l->img()->url() == u8"moon.jpg" );

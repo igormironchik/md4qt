@@ -1611,7 +1611,7 @@ TEST_CASE( "300" )
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Heading );
 		auto h = static_cast< MD::Heading< TRAIT >* > ( li->items().at( 0 ).get() );
 		REQUIRE( h->level() == 1 );
-		REQUIRE( !h->text().isNull() );
+		REQUIRE( h->text().get() );
 		auto p = h->text().get();
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
@@ -1629,7 +1629,7 @@ TEST_CASE( "300" )
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Heading );
 			auto h = static_cast< MD::Heading< TRAIT >* > ( li->items().at( 0 ).get() );
 			REQUIRE( h->level() == 2 );
-			REQUIRE( !h->text().isNull() );
+			REQUIRE( h->text().get() );
 			auto p = h->text().get();
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );

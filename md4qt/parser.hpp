@@ -1026,7 +1026,7 @@ checkForHtmlComments( const typename Trait::String & line, StringListStream< Tra
 		{
 			for( ; l < stream.size(); ++l )
 			{
-				c.append( c_32 );
+				c.append( typename Trait::Char( c_32 ) );
 				c.append( stream.lineAt( l ) );
 
 				if( checkForEndHtmlComments< Trait >( c, 4, res ) )
@@ -1447,7 +1447,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 template<>
 inline void
 Parser< QStringTrait >::parseFile( const QString & fileName,
-	bool recursive, QSharedPointer< Document< QStringTrait > > doc,
+	bool recursive, std::shared_ptr< Document< QStringTrait > > doc,
 	const QStringList & ext, QStringList * parentLinks )
 {
 	QFileInfo fi( fileName );
@@ -1518,7 +1518,7 @@ void resolveLinks( typename Trait::StringList & linksToParse,
 
 template<>
 void resolveLinks< QStringTrait >( QStringList & linksToParse,
-	QSharedPointer< Document< QStringTrait > > doc )
+	std::shared_ptr< Document< QStringTrait > > doc )
 {
 	for( auto it = linksToParse.begin(), last = linksToParse.end(); it != last; ++it )
 	{
@@ -1908,10 +1908,10 @@ Parser< Trait >::parseText( MdBlock< Trait > & fr,
 	const typename Trait::String & fileName,
 	bool collectRefLinks, RawHtmlBlock< Trait > & html )
 {
-	const auto h = isTableHeader< Trait >( fr.data.first().first );
+	const auto h = isTableHeader< Trait >( fr.data.front().first );
 	const auto c = fr.data.size() > 1 ? isTableAlignment< Trait >( fr.data[ 1 ].first ) : 0;
 
-	if( isFootnote< Trait >( fr.data.first().first ) )
+	if( isFootnote< Trait >( fr.data.front().first ) )
 		parseFootnote( fr, parent, doc, linksToParse, workingPath, fileName,
 			collectRefLinks );
 	else if( c && h && c == h )
@@ -1954,7 +1954,7 @@ template< class Trait >
 inline typename Trait::String
 paragraphToLabel( Paragraph< Trait > * p )
 {
-	QString l;
+	typename Trait::String l;
 
 	if( !p )
 		return l;
@@ -1964,16 +1964,16 @@ paragraphToLabel( Paragraph< Trait > * p )
 		if( (*it)->type() == ItemType::Text )
 		{
 			if( !l.isEmpty() )
-				l.append( QStringLiteral( "-" ) );
+				l.append( "-" );
 
-			auto t = static_cast< Text< Trait >* > ( it->data() );
+			auto t = static_cast< Text< Trait >* > ( it->get() );
 
 			for( const auto & c : t->text().simplified() )
 			{
 				if( c.isLetter() || c.isDigit() )
 					l.append( c.toLower() );
 				else if( c.isSpace() )
-					l.append( QStringLiteral( "-" ) );
+					l.append( "-" );
 			}
 		}
 	}
@@ -2031,7 +2031,7 @@ Parser< Trait >::parseHeading( MdBlock< Trait > & fr,
 {
 	if( !fr.data.isEmpty() && !collectRefLinks )
 	{
-		auto line = fr.data.first().first;
+		auto line = fr.data.front().first;
 		long long int pos = 0;
 		pos = skipSpaces< Trait >( pos, line );
 
@@ -2050,24 +2050,24 @@ Parser< Trait >::parseHeading( MdBlock< Trait > & fr,
 		pos = skipSpaces< Trait >( pos, line );
 
 		if( pos > 0 )
-			fr.data.first().first = line.sliced( pos );
+			fr.data.front().first = line.sliced( pos );
 
-		const auto label = findAndRemoveHeaderLabel< Trait >( fr.data.first().first );
+		const auto label = findAndRemoveHeaderLabel< Trait >( fr.data.front().first );
 
-		findAndRemoveClosingSequence< Trait >( fr.data.first().first );
+		findAndRemoveClosingSequence< Trait >( fr.data.front().first );
 
-		QSharedPointer< Heading< Trait > > h( new Heading< Trait > );
+		typename Trait::template SharedPointer< Heading< Trait > > h( new Heading< Trait > );
 		h->setLevel( lvl );
 
 		if( !label.isEmpty() )
-			h->setLabel( label.mid( 1, label.length() - 2 ) + QStringLiteral( "/" ) +
+			h->setLabel( label.mid( 1, label.length() - 2 ) + "/" +
 				workingPath + fileName );
 
-		QSharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
+		typename Trait::template SharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
 
 		typename MdBlock< Trait >::Data tmp;
-		tmp << fr.data.first();
-		tmp.first().first = tmp.first().first.simplified();
+		tmp.push_back( fr.data.front() );
+		tmp.front().first = tmp.front().first.simplified();
 		MdBlock< Trait > block = { tmp, 0 };
 
 		RawHtmlBlock< Trait > html;
@@ -2075,10 +2075,10 @@ Parser< Trait >::parseHeading( MdBlock< Trait > & fr,
 		parseFormattedTextLinksImages( block, p, doc, linksToParse, workingPath, fileName,
 			false, false, html );
 
-		fr.data.removeFirst();
+		fr.data.erase( fr.data.cbegin() );
 
 		if( p->items().size() && p->items().at( 0 )->type() == ItemType::Paragraph )
-			h->setText( p->items().at( 0 ).template staticCast< Paragraph< Trait > > () );
+			h->setText( std::static_pointer_cast< Paragraph< Trait > >( p->items().at( 0 ) ) );
 		else
 			h->setText( p );
 
@@ -2086,9 +2086,9 @@ Parser< Trait >::parseHeading( MdBlock< Trait > & fr,
 			doc->insertLabeledHeading( h->label(), h );
 		else
 		{
-			QString label = QStringLiteral( "#" ) + paragraphToLabel( h->text().data() );
+			typename Trait::String label = "#" + paragraphToLabel( h->text().get() );
 
-			label += QStringLiteral( "/" ) + workingPath + fileName;
+			label += "/" + workingPath + fileName;
 
 			h->setLabel( label );
 
@@ -2154,9 +2154,9 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 
 	if( fr.data.size() >= 2 )
 	{
-		QSharedPointer< Table< Trait > > table( new Table< Trait > );
+		typename Trait::template SharedPointer< Table< Trait > > table( new Table< Trait > );
 
-		auto parseTableRow = [&] ( const QString & row )
+		auto parseTableRow = [&] ( const typename Trait::String & row )
 		{
 			auto line = row.simplified();
 
@@ -2168,7 +2168,7 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 
 			auto columns = splitTableRow< Trait >( line );
 
-			QSharedPointer< TableRow< Trait > > tr( new TableRow< Trait > );
+			typename Trait::template SharedPointer< TableRow< Trait > > tr( new TableRow< Trait > );
 
 			int c = 0;
 
@@ -2177,17 +2177,18 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 				if( c == columnsCount )
 					break;
 
-				QSharedPointer< TableCell< Trait > > c( new TableCell< Trait > );
+				typename Trait::template SharedPointer< TableCell< Trait > > c(
+					new TableCell< Trait > );
 
 				if( !it->isEmpty() )
 				{
-					it->replace( QLatin1String( "&#124;" ), typename Trait::Char( sep ) );
+					it->replace( "&#124;", typename Trait::Char( sep ) );
 
 					typename MdBlock< Trait >::Data fragment;
 					fragment.append( { *it, { -1 } } );
 					MdBlock< Trait > block = { fragment, 0 };
 
-					QSharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
+					typename Trait::template SharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
 
 					RawHtmlBlock< Trait > html;
 
@@ -2196,7 +2197,8 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 
 					if( !p->isEmpty() && p->items().at( 0 )->type() == ItemType::Paragraph )
 					{
-						const auto pp = p->items().at( 0 ).template staticCast< Paragraph< Trait > > ();
+						const auto pp = std::static_pointer_cast< Paragraph< Trait > >(
+							p->items().at( 0 ) );
 
 						for( auto it = pp->items().cbegin(), last = pp->items().cend();
 							it != last; ++it )
@@ -2343,12 +2345,12 @@ Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
 		{
 			if( !collectRefLinks )
 				for( long long int j = 0; j < horLines; ++j )
-					parent->appendItem( QSharedPointer< Item< Trait > > ( new HorizontalLine< Trait > ) );
+					parent->appendItem( typename Trait::template SharedPointer< Item< Trait > > ( new HorizontalLine< Trait > ) );
 
 			fr.data.remove( 0, horLines );
 
-			QSharedPointer< Heading< Trait > > h( new Heading< Trait > );
-			QSharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
+			typename Trait::template SharedPointer< Heading< Trait > > h( new Heading< Trait > );
+			typename Trait::template SharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
 
 			h->setLevel( lvl );
 
@@ -2384,11 +2386,12 @@ Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
 			if( !collectRefLinks && !keepHeadingLine )
 			{
 				if( p->items().at( 0 )->type() == ItemType::Paragraph )
-					h->setText( p->items().at( 0 ).template staticCast< Paragraph< Trait > > () );
+					h->setText( std::static_pointer_cast< Paragraph< Trait > >(
+						p->items().at( 0 ) ) );
 
-				QString label = QStringLiteral( "#" ) + paragraphToLabel( h->text().data() );
+				typename Trait::String label = "#" + paragraphToLabel( h->text().get() );
 
-				label += QStringLiteral( "/" ) + workingPath + fileName;
+				label += "/" + workingPath + fileName;
 
 				h->setLabel( label );
 
@@ -2409,7 +2412,7 @@ Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
 		}
 		else
 		{
-			QSharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
+			typename Trait::template SharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
 
 			parseFormattedTextLinksImages( fr, p, doc, linksToParse, workingPath, fileName,
 				collectRefLinks, false, html );
@@ -2420,15 +2423,15 @@ Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
 				{
 					if( (*it)->type() == MD::ItemType::Paragraph )
 					{
-						auto p = static_cast< Paragraph< Trait >* > ( (*it).data() );
+						auto p = static_cast< Paragraph< Trait >* > ( (*it).get() );
 
-						QSharedPointer< Paragraph< Trait > > pp( new Paragraph< Trait > );
+						typename Trait::template SharedPointer< Paragraph< Trait > > pp( new Paragraph< Trait > );
 						pp->setDirty( p->isDirty() );
 
 						for( auto it = p->items().cbegin(), last = p->items().cend(); it != last; ++it )
 						{
 							if( (*it)->type() == MD::ItemType::RawHtml &&
-								(*it).template staticCast< RawHtml< Trait > > ()->isFreeTag() )
+								std::static_pointer_cast< RawHtml< Trait > >( *it )->isFreeTag() )
 							{
 								if( !pp->isEmpty() )
 								{
@@ -2451,7 +2454,7 @@ Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
 								parent->items().size() &&
 								parent->items().back()->type() == MD::ItemType::Paragraph )
 									prevP = static_cast< Paragraph< Trait >* >
-										( parent->items().back().data() );
+										( parent->items().back().get() );
 
 							if( prevP && prevP->isDirty() )
 							{
@@ -2551,7 +2554,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 
 	for( long long int line = 0; line < fr.size(); ++line )
 	{
-		const QString & str = fr.at( line ).first;
+		const typename Trait::String & str = fr.at( line ).first;
 		const auto p = skipSpaces< Trait >( 0, str );
 		const auto withoutSpaces = str.sliced( p );
 
@@ -2582,7 +2585,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 					// * or _
 					if( ( str[ i ] == c_95 || str[ i ] == c_42 ) && !backslash )
 					{
-						QString style;
+						typename Trait::String style;
 
 						const bool punctBefore = ( i > 0 ? str[ i - 1 ].isPunct() ||
 							str[ i - 1 ] == c_126 : false );
@@ -2638,7 +2641,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 					// ~
 					else if( str[ i ] == c_126 && !backslash )
 					{
-						QString style;
+						typename Trait::String style;
 
 						const bool punctBefore = ( i > 0 ? str[ i - 1 ].isPunct() ||
 							str[ i - 1 ] == c_126 : false );
@@ -2771,7 +2774,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 					// `
 					else if( str[ i ] == c_96 )
 					{
-						QString code;
+						typename Trait::String code;
 
 						while( i < str.length() && str[ i ] == c_96 )
 						{
@@ -2805,7 +2808,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 					// $
 					else if( str[ i ] == c_36 )
 					{
-						QString m;
+						typename Trait::String m;
 
 						while( i < str.length() && str[ i ] == c_36 )
 						{
@@ -2873,7 +2876,7 @@ template< class Trait >
 inline bool
 isLineBreak( const typename Trait::String & s )
 {
-	return ( s.endsWith( QStringLiteral( "  " ) ) || s.endsWith( c_92 ) );
+	return ( s.endsWith( "  " ) || s.endsWith( c_92 ) );
 }
 
 template< class Trait >
@@ -2892,7 +2895,7 @@ replaceEntity( const typename Trait::String & s )
 {
 	long long int p1 = 0;
 
-	QString res;
+	typename Trait::String res;
 	long long int i = 0;
 
 	while( ( p1 = s.indexOf( c_38, p1 ) ) != -1 )
@@ -2928,9 +2931,9 @@ replaceEntity( const typename Trait::String & s )
 							i = p2 + 1;
 
 							if( c )
-								res.append( QChar( c ) );
+								res.append( typename Trait::Char( c ) );
 							else
-								res.append( QChar( 0xFFFD ) );
+								res.append( typename Trait::Char( 0xFFFD ) );
 						}
 					}
 				}
@@ -2950,9 +2953,9 @@ replaceEntity( const typename Trait::String & s )
 							i = p2 + 1;
 
 							if( c )
-								res.append( QChar( c ) );
+								res.append( typename Trait::Char( c ) );
 							else
-								res.append( QChar( 0xFFFD ) );
+								res.append( typename Trait::Char( 0xFFFD ) );
 						}
 					}
 				}
@@ -2965,7 +2968,7 @@ replaceEntity( const typename Trait::String & s )
 				{
 					res.append( s.sliced( i, p1 - i ) );
 					i = p2 + 1;
-					res.append( QString::fromUtf16( it->second ) );
+					res.append( Trait::utf16ToString( it->second ) );
 				}
 			}
 		}
@@ -3036,7 +3039,7 @@ makeTextObject( const typename Trait::String & text, bool spaceBefore, bool spac
 
 	if( !s.isEmpty() )
 	{
-		QSharedPointer< Text< Trait > > t( new Text< Trait > );
+		typename Trait::template SharedPointer< Text< Trait > > t( new Text< Trait > );
 		t->setText( s );
 		t->setOpts( po.opts );
 		t->setSpaceBefore( spaceBefore );
@@ -3054,7 +3057,7 @@ makeTextObjectWithLineBreak( const typename Trait::String & text, bool spaceBefo
 {
 	makeTextObject( text, spaceBefore, true, po, doNotEscape );
 
-	QSharedPointer< Item< Trait > > hr( new LineBreak< Trait > );
+	typename Trait::template SharedPointer< Item< Trait > > hr( new LineBreak< Trait > );
 	po.wasRefLink = false;
 	po.parent->appendItem( hr );
 }
@@ -3074,7 +3077,7 @@ makeText(
 	else if( po.line == lastLine && po.pos >= lastPos )
 		return;
 
-	QString text;
+	typename Trait::String text;
 
 	bool spaceBefore = ( po.pos > 0 && po.pos < po.fr.data.at( po.line ).first.size() ?
 		po.fr.data.at( po.line ).first[ po.pos - 1 ].isSpace() ||
@@ -3180,9 +3183,9 @@ template< class Trait >
 inline std::pair< bool, bool >
 readUnquotedHtmlAttrValue( long long int & l, long long int & p, const typename MdBlock< Trait >::Data & fr )
 {
-	static const QString notAllowed = QStringLiteral( "\"`=<'" );
+	static const typename Trait::String notAllowed = "\"`=<'";
 
-	QString value;
+	typename Trait::String value;
 
 	for( ; p < fr[ l ].first.size(); ++p )
 	{
@@ -3278,7 +3281,7 @@ readHtmlAttr( long long int & l, long long int & p, const typename MdBlock< Trai
 			return { false, false };
 	}
 
-	QString name;
+	typename Trait::String name;
 
 	for( ; p < fr[ l ].first.size(); ++p )
 	{
@@ -3299,8 +3302,8 @@ readHtmlAttr( long long int & l, long long int & p, const typename MdBlock< Trai
 		return { false, false };
 	}
 
-	static const QString allowedInName =
-		QStringLiteral( "abcdefghijklmnopqrstuvwxyz0123456789_.:-" );
+	static const typename Trait::String allowedInName =
+		"abcdefghijklmnopqrstuvwxyz0123456789_.:-";
 
 	for( long long int i = 1; i < name.length(); ++i )
 	{
@@ -3345,7 +3348,7 @@ readHtmlAttr( long long int & l, long long int & p, const typename MdBlock< Trai
 }
 
 template< class Trait >
-inline std::tuple< bool, long long int, long long int, bool, QString >
+inline std::tuple< bool, long long int, long long int, bool, typename Trait::String >
 isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po, int rule );
 
 template< class Trait >
@@ -3353,11 +3356,11 @@ inline bool
 isOnlyHtmlTagsAfterOrClosedRule1( long long int line, long long int pos,
 	TextParsingOpts< Trait > & po, int rule )
 {
-	static const std::set< QString > rule1Finish = {
-		QStringLiteral( "/pre" ),
-		QStringLiteral( "/script" ),
-		QStringLiteral( "/style" ),
-		QStringLiteral( "/textarea" )
+	static const std::set< typename Trait::String > rule1Finish = {
+		"/pre",
+		"/script",
+		"/style",
+		"/textarea"
 	};
 
 	auto p = skipSpaces< Trait >( pos, po.fr.data[ line ].first );
@@ -3367,7 +3370,7 @@ isOnlyHtmlTagsAfterOrClosedRule1( long long int line, long long int pos,
 		bool ok = false;
 
 		long long int l;
-		QString tag;
+		typename Trait::String tag;
 
 		std::tie( ok, l, p, std::ignore, tag ) =
 			isHtmlTag( line, p, po, rule );
@@ -3401,13 +3404,13 @@ isOnlyHtmlTagsAfterOrClosedRule1( long long int line, long long int pos,
 }
 
 template< class Trait >
-inline std::tuple< bool, long long int, long long int, bool, QString >
+inline std::tuple< bool, long long int, long long int, bool, typename Trait::String >
 isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po, int rule )
 {
 	if( po.fr.data[ line ].first[ pos ] != c_60 )
 		return { false, line, pos, false, {} };
 
-	QString tag;
+	typename Trait::String tag;
 
 	long long int l = line;
 	long long int p = pos + 1;
@@ -3537,7 +3540,7 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 }
 
 template< class Trait >
-inline std::pair< QString, bool >
+inline std::pair< typename Trait::String, bool >
 readHtmlTag( typename Delims< Trait >::const_iterator it, TextParsingOpts< Trait > & po )
 {
 	typename Trait::String tag;
@@ -3581,7 +3584,7 @@ eatRawHtml( long long int line, long long int pos, long long int toLine, long lo
 {
 	if( line <= toLine )
 	{
-		QString h = po.html.html->text();
+		typename Trait::String h = po.html.html->text();
 
 		if( !h.isEmpty() )
 		{
@@ -3635,7 +3638,7 @@ eatRawHtml( long long int line, long long int pos, long long int toLine, long lo
 			if( !po.collectRefLinks )
 				po.parent->appendItem( po.html.html );
 
-			po.html.html.reset( nullptr );
+			po.html.html.reset();
 			po.html.htmlBlockType = -1;
 			po.html.continueHtml = false;
 		}
@@ -3667,7 +3670,7 @@ finishRule1HtmlTag( typename Delims< Trait >::const_iterator it,
 
 		if( it->m_type == Delimiter::Less )
 		{
-			QString tag;
+			typename Trait::String tag;
 			bool closed = false;
 
 			std::tie( tag, closed ) = readHtmlTag( it, po );
@@ -3737,7 +3740,7 @@ finishRule2HtmlTag( typename Delims< Trait >::const_iterator it,
 	}
 	else
 	{
-		po.html.html.reset( nullptr );
+		po.html.html.reset();
 		po.html.htmlBlockType = -1;
 		po.html.continueHtml = false;
 		po.html.onLine = false;
@@ -3926,7 +3929,7 @@ htmlTagRule( typename Delims< Trait >::const_iterator it,
 
 	std::tie( tag, std::ignore ) = readHtmlTag( it, po );
 
-	if( tag == QStringLiteral( "![CDATA[" ) )
+	if( tag == "![CDATA[" )
 		return 5;
 
 	tag = tag.toLower();
@@ -3934,8 +3937,8 @@ htmlTagRule( typename Delims< Trait >::const_iterator it,
 	if( tag.isEmpty() )
 		return -1;
 
-	static const QString c_validHtmlTagLetters =
-		QStringLiteral( "abcdefghijklmnopqrstuvwxyz0123456789-" );
+	static const typename Trait::String c_validHtmlTagLetters =
+		"abcdefghijklmnopqrstuvwxyz0123456789-";
 
 	bool closing = false;
 
@@ -3958,18 +3961,18 @@ htmlTagRule( typename Delims< Trait >::const_iterator it,
 			return -1;
 	}
 
-	static const std::set< QString > rule1 = {
-		QStringLiteral( "pre" ), QStringLiteral( "script" ),
-		QStringLiteral( "style" ), QStringLiteral( "textarea" )
+	static const std::set< typename Trait::String > rule1 = {
+		"pre", "script",
+		"style", "textarea"
 	};
 
 	if( !closing && rule1.find( tag ) != rule1.cend() )
 		return 1;
-	else if( tag == QStringLiteral( "!--" ) )
+	else if( tag == "!--" )
 		return 2;
-	else if( tag.startsWith( QStringLiteral( "?" ) ) )
+	else if( tag.startsWith( "?" ) )
 		return 3;
-	else if( tag.startsWith( QLatin1Char( '!' ) ) && tag.size() > 1 &&
+	else if( tag.startsWith( '!' ) && tag.size() > 1 &&
 		( ( tag[ 1 ].unicode() >= 65 && tag[ 1 ].unicode() <= 90 ) ||
 			tag[ 1 ].unicode() >= 97 && tag[ 1 ].unicode() <= 122 ) )
 	{
@@ -3978,27 +3981,27 @@ htmlTagRule( typename Delims< Trait >::const_iterator it,
 	else
 	{
 		static const std::set< typename Trait::String > rule6 = {
-			QStringLiteral( "address" ), QStringLiteral( "article" ), QStringLiteral( "aside" ),
-			QStringLiteral( "base" ), QStringLiteral( "basefont" ), QStringLiteral( "blockquote" ),
-			QStringLiteral( "body" ), QStringLiteral( "caption" ), QStringLiteral( "center" ),
-			QStringLiteral( "col" ), QStringLiteral( "colgroup" ), QStringLiteral( "dd" ),
-			QStringLiteral( "details" ), QStringLiteral( "dialog" ), QStringLiteral( "dir" ),
-			QStringLiteral( "div" ), QStringLiteral( "dl" ), QStringLiteral( "dt" ),
-			QStringLiteral( "fieldset" ), QStringLiteral( "figcaption" ), QStringLiteral( "figure" ),
-			QStringLiteral( "footer" ), QStringLiteral( "form" ), QStringLiteral( "frame" ),
-			QStringLiteral( "frameset" ), QStringLiteral( "h1" ), QStringLiteral( "h2" ),
-			QStringLiteral( "h3" ), QStringLiteral( "h4" ), QStringLiteral( "h5" ),
-			QStringLiteral( "h6" ), QStringLiteral( "head" ), QStringLiteral( "header" ),
-			QStringLiteral( "hr" ), QStringLiteral( "html" ), QStringLiteral( "iframe" ),
-			QStringLiteral( "legend" ), QStringLiteral( "li" ), QStringLiteral( "link" ),
-			QStringLiteral( "main" ), QStringLiteral( "menu" ), QStringLiteral( "menuitem" ),
-			QStringLiteral( "nav" ), QStringLiteral( "noframes" ), QStringLiteral( "ol" ),
-			QStringLiteral( "optgroup" ), QStringLiteral( "option" ), QStringLiteral( "p" ),
-			QStringLiteral( "param" ), QStringLiteral( "section" ), QStringLiteral( "source" ),
-			QStringLiteral( "summary" ), QStringLiteral( "table" ), QStringLiteral( "tbody" ),
-			QStringLiteral( "td" ), QStringLiteral( "tfoot" ), QStringLiteral( "th" ),
-			QStringLiteral( "thead" ), QStringLiteral( "title" ), QStringLiteral( "tr" ),
-			QStringLiteral( "track" ), QStringLiteral( "ul" )
+			"address", "article", "aside",
+			"base", "basefont", "blockquote",
+			"body", "caption", "center",
+			"col", "colgroup", "dd",
+			"details", "dialog", "dir",
+			"div", "dl", "dt",
+			"fieldset", "figcaption", "figure",
+			"footer", "form", "frame",
+			"frameset", "h1", "h2",
+			"h3", "h4", "h5",
+			"h6", "head", "header",
+			"hr", "html", "iframe",
+			"legend", "li", "link",
+			"main", "menu", "menuitem",
+			"nav", "noframes", "ol",
+			"optgroup", "option", "p",
+			"param", "section", "source",
+			"summary", "table", "tbody",
+			"td", "tfoot", "th",
+			"thead", "title", "tr",
+			"track", "ul"
 		};
 
 		if( rule6.find( tag ) != rule6.cend() )
@@ -4031,7 +4034,7 @@ checkForRawHtml( typename Delims< Trait >::const_iterator it,
 	if( rule == -1 )
 	{
 		po.html.htmlBlockType = -1;
-		po.html.html.reset( nullptr );
+		po.html.html.reset();
 
 		return it;
 	}
@@ -4109,7 +4112,7 @@ checkForMath( typename Delims< Trait >::const_iterator it,
 
 	if( end != last )
 	{
-		QString math;
+		typename Trait::String math;
 
 		if( it->m_line == end->m_line )
 			math = po.fr.data[ it->m_line ].first.sliced( it->m_pos + it->m_len,
@@ -4130,7 +4133,7 @@ checkForMath( typename Delims< Trait >::const_iterator it,
 
 		if( !po.collectRefLinks )
 		{
-			QSharedPointer< Math< Trait > > m( new Math< Trait > );
+			typename Trait::template SharedPointer< Math< Trait > > m( new Math< Trait > );
 			m->setInline( it->m_len == 1 );
 			m->setExpr( math );
 
@@ -4177,7 +4180,7 @@ checkForAutolinkHtml( typename Delims< Trait >::const_iterator it,
 
 				QRegularExpressionMatch erm;
 
-				if( url.startsWith( QStringLiteral( "mailto:" ), Qt::CaseInsensitive ) )
+				if( url.startsWith( "mailto:", Qt::CaseInsensitive ) )
 					erm = er.match( url.right( url.length() - 7 ) );
 				else
 					erm = er.match( url );
@@ -4192,7 +4195,7 @@ checkForAutolinkHtml( typename Delims< Trait >::const_iterator it,
 			{
 				if( !po.collectRefLinks )
 				{
-					QSharedPointer< Link< Trait > > lnk( new Link< Trait > );
+					typename Trait::template SharedPointer< Link< Trait > > lnk( new Link< Trait > );
 					lnk->setUrl( url.simplified() );
 					lnk->setOpts( po.opts );
 					po.parent->appendItem( lnk );
@@ -4223,7 +4226,7 @@ inline void
 makeInlineCode( long long int lastLine, long long int lastPos,
 	TextParsingOpts< Trait > & po )
 {
-	QString c;
+	typename Trait::String c;
 
 	for( ; po.line <= lastLine; ++po.line )
 	{
@@ -4246,7 +4249,7 @@ makeInlineCode( long long int lastLine, long long int lastPos,
 	}
 
 	if( !c.isEmpty() )
-		po.parent->appendItem( QSharedPointer< Code< Trait > >( new Code< Trait >( c, true ) ) );
+		po.parent->appendItem( typename Trait::template SharedPointer< Code< Trait > >( new Code< Trait >( c, true ) ) );
 
 	po.wasRefLink = false;
 }
@@ -4402,7 +4405,7 @@ checkForLinkText( typename Delims< Trait >::const_iterator it,
 	const auto r =  readTextBetweenSquareBrackets( start, it, last, po, false );
 
 	po.collectRefLinks = collectRefLinks;
-	po.html.html.reset( nullptr );
+	po.html.html.reset();
 	po.html.htmlBlockType = -1;
 	po.html.continueHtml = false;
 	po.html.onLine = false;
@@ -4458,7 +4461,7 @@ makeLink( const typename Trait::String & url, const typename Trait::String & tex
 	bool doNotCreateTextOnFail,
 	long long int lastLine, long long int lastPos )
 {
-	QString u = ( url.startsWith( c_35 ) ? url : removeBackslashes< Trait >(
+	typename Trait::String u = ( url.startsWith( c_35 ) ? url : removeBackslashes< Trait >(
 		replaceEntity< Trait >( url ) ) );
 
 	if( !u.isEmpty() )
@@ -4476,10 +4479,10 @@ makeLink( const typename Trait::String & url, const typename Trait::String & tex
 			}
 		}
 		else
-			u = u + QStringLiteral( "/" ) + po.workingPath + po.fileName;
+			u = u + "/" + po.workingPath + po.fileName;
 	}
 
-	QSharedPointer< Link< Trait > > link( new Link< Trait > );
+	typename Trait::template SharedPointer< Link< Trait > > link( new Link< Trait > );
 	link->setUrl( u );
 	link->setOpts( po.opts );
 
@@ -4487,7 +4490,7 @@ makeLink( const typename Trait::String & url, const typename Trait::String & tex
 	tmp.append( { text, { -1 } } );
 	MdBlock< Trait > block = { tmp, 0 };
 
-	QSharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
+	typename Trait::template SharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
 
 	RawHtmlBlock< Trait > html;
 
@@ -4497,11 +4500,11 @@ makeLink( const typename Trait::String & url, const typename Trait::String & tex
 
 	if( !p->isEmpty() )
 	{
-		QSharedPointer< Image< Trait > > img;
+		typename Trait::template SharedPointer< Image< Trait > > img;
 
 		if( p->items().size() == 1 && p->items().at( 0 )->type() == ItemType::Paragraph )
 		{
-			const auto ip = p->items().at( 0 ).template staticCast< Paragraph< Trait > > ();
+			const auto ip = std::static_pointer_cast< Paragraph< Trait > >( p->items().at( 0 ) );
 
 			for( auto it = ip->items().cbegin(), last = ip->items().cend(); it != last; ++it )
 			{
@@ -4512,7 +4515,7 @@ makeLink( const typename Trait::String & url, const typename Trait::String & tex
 
 					case ItemType::Image :
 					{
-						img = (*it).template staticCast< Image< Trait > > ();
+						img = std::static_pointer_cast< Image< Trait > >( *it );
 					}
 						break;
 
@@ -4521,7 +4524,7 @@ makeLink( const typename Trait::String & url, const typename Trait::String & tex
 				}
 			}
 
-			if( !img.isNull() )
+			if( img.get() )
 				link->setImg( img );
 
 			link->setP( ip );
@@ -4542,8 +4545,8 @@ createShortcutLink( const typename Trait::String & text,
 	const typename Trait::String & linkText,
 	bool doNotCreateTextOnFail )
 {
-	const auto u = QString::fromLatin1( "#" ) + text.simplified().toCaseFolded().toUpper();
-	const auto url = u + QStringLiteral( "/" ) + po.workingPath + po.fileName;
+	const auto u = "#" + text.simplified().toCaseFolded().toUpper();
+	const auto url = u + "/" + po.workingPath + po.fileName;
 
 	po.wasRefLink = false;
 
@@ -4555,7 +4558,7 @@ createShortcutLink( const typename Trait::String & text,
 				removeBackslashes< Trait >( linkText.isEmpty() ? text : linkText ), po,
 				doNotCreateTextOnFail, lastLine, lastPos );
 
-			if( !link.isNull() )
+			if( link.get() )
 			{
 				po.linksToParse.append( url );
 				po.parent->appendItem( link );
@@ -4587,9 +4590,9 @@ makeImage( const typename Trait::String & url, const typename Trait::String & te
 	bool doNotCreateTextOnFail,
 	long long int lastLine, long long int lastPos )
 {
-	QSharedPointer< Image< Trait > > img( new Image< Trait > );
+	typename Trait::template SharedPointer< Image< Trait > > img( new Image< Trait > );
 
-	QString u = ( url.startsWith( c_35 ) ? url : removeBackslashes< Trait >(
+	typename Trait::String u = ( url.startsWith( c_35 ) ? url : removeBackslashes< Trait >(
 		replaceEntity< Trait >( url ) ) );
 
 	if( !QUrl( u ).isRelative() )
@@ -4601,7 +4604,7 @@ makeImage( const typename Trait::String & url, const typename Trait::String & te
 	tmp.append( { text, { -1 } } );
 	MdBlock< Trait > block = { tmp, 0 };
 
-	QSharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
+	typename Trait::template SharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
 
 	RawHtmlBlock< Trait > html;
 
@@ -4612,7 +4615,7 @@ makeImage( const typename Trait::String & url, const typename Trait::String & te
 	if( !p->isEmpty() )
 	{
 		if( p->items().size() == 1 && p->items().at( 0 )->type() == ItemType::Paragraph )
-			img->setP( p->items().at( 0 ).template staticCast< Paragraph< Trait > > () );
+			img->setP( std::static_pointer_cast< Paragraph< Trait > >( p->items().at( 0 ) ) );
 	}
 
 	img->setText( removeBackslashes< Trait >( text ) );
@@ -4629,8 +4632,8 @@ createShortcutImage( const typename Trait::String & text,
 	const typename Trait::String & linkText,
 	bool doNotCreateTextOnFail )
 {
-	const auto url = QString::fromLatin1( "#" ) + text.simplified().toCaseFolded().toUpper() +
-		QStringLiteral( "/" ) + po.workingPath + po.fileName;
+	const auto url = "#" + text.simplified().toCaseFolded().toUpper() +
+		"/" + po.workingPath + po.fileName;
 
 	po.wasRefLink = false;
 
@@ -4670,14 +4673,14 @@ skipSpacesUpTo1Line( long long int & line, long long int & pos, const typename M
 }
 
 template< class Trait >
-inline std::tuple< long long int, long long int, bool, QString, long long int >
+inline std::tuple< long long int, long long int, bool, typename Trait::String, long long int >
 readLinkDestination( long long int line, long long int pos, const typename MdBlock< Trait >::Data & fr )
 {
 	skipSpacesUpTo1Line< Trait >( line, pos, fr );
 
 	const auto destLine = line;
 	const auto & s = fr.at( line ).first;
-	QString dest;
+	typename Trait::String dest;
 	bool backslash = false;
 
 	if( pos < s.size() )
@@ -4775,7 +4778,7 @@ readLinkDestination( long long int line, long long int pos, const typename MdBlo
 }
 
 template< class Trait >
-inline std::tuple< long long int, long long int, bool, QString, long long int >
+inline std::tuple< long long int, long long int, bool, typename Trait::String, long long int >
 readLinkTitle( long long int line, long long int pos, const typename MdBlock< Trait >::Data & fr )
 {
 	const auto space = ( pos < fr.at( line ).first.size() ?
@@ -4806,7 +4809,7 @@ readLinkTitle( long long int line, long long int pos, const typename MdBlock< Tr
 
 	skipSpacesUpTo1Line< Trait >( line, pos, fr );
 
-	QString title;
+	typename Trait::String title;
 
 	while( line < fr.size() && pos < fr.at( line ).first.size() )
 	{
@@ -4848,7 +4851,7 @@ checkForInlineLink( typename Delims< Trait >::const_iterator it,
 	long long int p = it->m_pos + it->m_len;
 	long long int l = it->m_line;
 	bool ok = false;
-	QString dest, title;
+	typename Trait::String dest, title;
 	long long int destStartLine = 0;
 
 	std::tie( l, p, ok, dest, destStartLine ) = readLinkDestination< Trait >( l, p, po.fr.data );
@@ -4885,7 +4888,7 @@ checkForRefLink( typename Delims< Trait >::const_iterator it,
 	long long int p = it->m_pos + it->m_len + 1;
 	long long int l = it->m_line;
 	bool ok = false;
-	QString dest, title;
+	typename Trait::String dest, title;
 	long long int destStartLine = 0;
 
 	std::tie( l, p, ok, dest, destStartLine ) = readLinkDestination< Trait >( l, p, po.fr.data );
@@ -4935,7 +4938,7 @@ checkForImage( typename Delims< Trait >::const_iterator it,
 {
 	const auto start = it;
 
-	QString text;
+	typename Trait::String text;
 
 	po.wasRefLink = false;
 
@@ -4948,7 +4951,7 @@ checkForImage( typename Delims< Trait >::const_iterator it,
 			// Inline -> (
 			if( po.fr.data.at( it->m_line ).first[ it->m_pos + it->m_len ] == c_40 )
 			{
-				QString url, title;
+				typename Trait::String url, title;
 				typename Delims< Trait >::const_iterator iit;
 				bool ok;
 
@@ -5065,10 +5068,10 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 		{
 			if( !po.collectRefLinks )
 			{
-				QSharedPointer< FootnoteRef< Trait > > fnr(
-					new FootnoteRef< Trait >( QStringLiteral( "#" ) +
+				typename Trait::template SharedPointer< FootnoteRef< Trait > > fnr(
+					new FootnoteRef< Trait >( "#" +
 						text.simplified().toCaseFolded().toUpper() +
-						QStringLiteral( "/" ) + po.workingPath + po.fileName ) );
+						"/" + po.workingPath + po.fileName ) );
 
 				po.parent->appendItem( fnr );
 			}
@@ -5086,7 +5089,7 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 				// Reference definitions allowed only at start of paragraph.
 				if( ( po.line == 0 || wasRefLink ) && ns < 4 && start->m_pos == ns )
 				{
-					QString url, title;
+					typename Trait::String url, title;
 					typename Delims< Trait >::const_iterator iit;
 					bool ok;
 
@@ -5098,11 +5101,10 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 
 						if( ok )
 						{
-							const auto label = QString::fromLatin1( "#" ) +
-								text.simplified().toCaseFolded().toUpper() +
-								QStringLiteral( "/" ) + po.workingPath + po.fileName;
+							const auto label = "#" + text.simplified().toCaseFolded().toUpper() +
+								"/" + po.workingPath + po.fileName;
 
-							QSharedPointer< Link< Trait > > link( new Link< Trait > );
+							typename Trait::template SharedPointer< Link< Trait > > link( new Link< Trait > );
 
 							url = removeBackslashes< Trait >( replaceEntity< Trait >( url ) );
 
@@ -5161,7 +5163,7 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 					const auto link = makeLink( url, removeBackslashes< Trait >( text ), po, false,
 						start->m_line, start->m_pos + start->m_len );
 
-					if( !link.isNull() )
+					if( link.get() )
 					{
 						if( !po.collectRefLinks )
 							po.parent->appendItem( link );
@@ -5184,7 +5186,7 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 			// Reference -> [
 			else if( po.fr.data.at( it->m_line ).first[ it->m_pos + it->m_len ] == c_91 )
 			{
-				QString label;
+				typename Trait::String label;
 				typename Delims< Trait >::const_iterator lit;
 
 				std::tie( label, lit ) = checkForLinkLabel( std::next( it ), last, po );
@@ -5434,11 +5436,11 @@ createStyles( const std::vector< std::pair< long long int, int > > & s, size_t i
 	{
 		if( s[ i ].second == s[ idx ].second && s[ i ].first < 0 )
 		{
-			auto l = qAbs( s[ i ].first );
+			auto l = std::abs( s[ i ].first );
 
-			createStyles( styles, qMin( l, len ), t, count );
+			createStyles( styles, std::min( l, len ), t, count );
 
-			len -= qMin( l, len );
+			len -= std::min( l, len );
 
 			if( !len )
 				break;
@@ -5832,7 +5834,7 @@ checkForStyle( typename Delims< Trait >::const_iterator first,
 	if( !count )
 		count = 1;
 
-	po.html.html.reset( nullptr );
+	po.html.html.reset();
 	po.html.htmlBlockType = -1;
 	po.html.continueHtml = false;
 	po.html.onLine = false;
@@ -5845,15 +5847,15 @@ inline typename Trait::template SharedPointer< Text< Trait > >
 concatenateText( typename Block< Trait >::Items::const_iterator it,
 	typename Block< Trait >::Items::const_iterator last )
 {
-	QSharedPointer< Text< Trait > > t( new Text< Trait > );
-	t->setOpts( (*it).template staticCast< Text< Trait > > ()->opts() );
-	t->setSpaceBefore( (*it).template staticCast< Text< Trait > > ()->isSpaceBefore() );
+	typename Trait::template SharedPointer< Text< Trait > > t( new Text< Trait > );
+	t->setOpts( std::static_pointer_cast< Text< Trait > >( *it )->opts() );
+	t->setSpaceBefore( std::static_pointer_cast< Text< Trait > >( *it )->isSpaceBefore() );
 
 	typename Trait::String data;
 
 	for( ; it != last; ++it )
 	{
-		const auto tt = (*it).template staticCast< Text< Trait > > ();
+		const auto tt = std::static_pointer_cast< Text< Trait > >( *it );
 
 		if( tt->isSpaceBefore() )
 			data.append( c_32 );
@@ -5866,7 +5868,7 @@ concatenateText( typename Block< Trait >::Items::const_iterator it,
 
 	t->setText( data.simplified() );
 
-	t->setSpaceAfter( ( *std::prev( it ) ).template staticCast< Text< Trait > > ()->isSpaceAfter() );
+	t->setSpaceAfter( std::static_pointer_cast< Text< Trait > >( *std::prev( it ) )->isSpaceAfter() );
 
 	return t;
 }
@@ -5875,7 +5877,7 @@ template< class Trait >
 inline void
 optimizeParagraph( typename Trait::template SharedPointer< Paragraph< Trait > > & p )
 {
-	QSharedPointer< Paragraph< Trait > > np( new Paragraph< Trait > );
+	typename Trait::template SharedPointer< Paragraph< Trait > > np( new Paragraph< Trait > );
 
 	int opts = TextWithoutFormat;
 
@@ -5885,7 +5887,7 @@ optimizeParagraph( typename Trait::template SharedPointer< Paragraph< Trait > > 
 	{
 		if( (*it)->type() == ItemType::Text )
 		{
-			const auto t = (*it).template staticCast< Text< Trait > > ();
+			const auto t = std::static_pointer_cast< Text< Trait > >( *it );
 
 			if( start == last )
 			{
@@ -5932,7 +5934,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 	if( fr.data.isEmpty() )
 		return;
 
-	QSharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
+	typename Trait::template SharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
 
 	const auto delims = collectDelimiters< Trait >( fr.data );
 
@@ -5943,16 +5945,16 @@ parseFormattedText( MdBlock< Trait > & fr,
 	{
 		for( auto it = delims.cbegin(), last = delims.cend(); it != last; ++it )
 		{
-			if( !html.html.isNull() && html.continueHtml )
+			if( html.html.get() && html.continueHtml )
 				it = finishRawHtmlTag( it, last, po, false );
 			else
 			{
-				if( !html.html.isNull() )
+				if( html.html.get() )
 				{
 					if( !collectRefLinks )
 						p->appendItem( html.html );
 
-					html.html.reset( nullptr );
+					html.html.reset();
 					html.htmlBlockType = -1;
 					html.continueHtml = false;
 					html.onLine = false;
@@ -6009,7 +6011,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 								parent->appendItem( p );
 							}
 
-							QSharedPointer< Item< Trait > > hr( new HorizontalLine< Trait > );
+							typename Trait::template SharedPointer< Item< Trait > > hr( new HorizontalLine< Trait > );
 							parent->appendItem( hr );
 
 							p.reset( new Paragraph< Trait > );
@@ -6038,16 +6040,16 @@ parseFormattedText( MdBlock< Trait > & fr,
 	}
 	else
 	{
-		if( !html.html.isNull() && html.continueHtml )
+		if( html.html.get() && html.continueHtml )
 			finishRawHtmlTag( delims.cend(), delims.cend(), po, false );
 	}
 
-	if( !html.html.isNull() && !html.continueHtml && html.onLine )
+	if( html.html.get() && !html.continueHtml && html.onLine )
 	{
 		if( !collectRefLinks )
 			p->appendItem( html.html );
 
-		html.html.reset( nullptr );
+		html.html.reset();
 		html.htmlBlockType = -1;
 		html.continueHtml = false;
 		html.onLine = false;
@@ -6060,7 +6062,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 	{
 		optimizeParagraph< Trait >( p );
 
-		if( !html.html.isNull() && !html.onLine )
+		if( html.html.get() && !html.onLine )
 			UnprotectedDocsMethods< Trait >::setDirty( p );
 
 		parent->appendItem( p );
@@ -6096,7 +6098,7 @@ Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
 {
 	if( !fr.data.isEmpty() )
 	{
-		QSharedPointer< Footnote< Trait > > f( new Footnote< Trait > );
+		typename Trait::template SharedPointer< Footnote< Trait > > f( new Footnote< Trait > );
 
 		const auto delims = collectDelimiters< Trait >( fr.data );
 
@@ -6108,7 +6110,7 @@ Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
 		if( !delims.isEmpty() && delims.cbegin()->m_type == Delimiter::SquareBracketsOpen &&
 			!delims.cbegin()->m_isWordBefore )
 		{
-			QString id;
+			typename Trait::String id;
 			typename Delims< Trait >::const_iterator it = delims.cend();
 
 			po.line = delims.cbegin()->m_line;
@@ -6121,11 +6123,11 @@ Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
 				fr.data.at( it->m_line ).first[ it->m_pos + 1 ] == c_58 )
 			{
 				fr.data = fr.data.sliced( it->m_line );
-				fr.data.first().first = fr.data.first().first.sliced( it->m_pos + 2 );
+				fr.data.front().first = fr.data.front().first.sliced( it->m_pos + 2 );
 
 				for( auto it = fr.data.begin(), last = fr.data.end(); it != last; ++it )
 				{
-					if( it->first.startsWith( QLatin1String( "    " ) ) )
+					if( it->first.startsWith( "    " ) )
 						it->first = it->first.mid( 4 );
 					else if( it->first.startsWith( c_9 ) )
 						it->first = it->first.mid( 1 );
@@ -6136,8 +6138,7 @@ Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
 				parse( stream, f, doc, linksToParse, workingPath, fileName, collectRefLinks );
 
 				if( !f->isEmpty() )
-					doc->insertFootnote( QString::fromLatin1( "#" ) + id +
-						QStringLiteral( "/" ) + workingPath + fileName, f );
+					doc->insertFootnote( "#" + id +	"/" + workingPath + fileName, f );
 			}
 		}
 	}
@@ -6153,7 +6154,7 @@ Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
 	const typename Trait::String & fileName,
 	bool collectRefLinks, RawHtmlBlock< Trait > & html )
 {
-	const int pos = fr.data.first().first.indexOf( c_62 );
+	const int pos = fr.data.front().first.indexOf( c_62 );
 
 	if( pos > -1 )
 	{
@@ -6215,11 +6216,11 @@ Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
 		typename MdBlock< Trait >::Data tmp;
 
 		for( ; j < i; ++j )
-			tmp.append( fr.data.at( j ) );
+			tmp.push_back( fr.data.at( j ) );
 
 		StringListStream< Trait > stream( tmp );
 
-		QSharedPointer< Blockquote< Trait > > bq( new Blockquote< Trait > );
+		typename Trait::template SharedPointer< Blockquote< Trait > > bq( new Blockquote< Trait > );
 
 		parse( stream, bq, doc, linksToParse, workingPath, fileName, collectRefLinks );
 
@@ -6228,7 +6229,9 @@ Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
 
 		if( i < fr.data.size() )
 		{
-			tmp = fr.data.sliced( i );
+			tmp.clear();
+
+			std::copy( fr.data.cbegin() + i, fr.data.cend(), std::back_inserter( tmp ) );
 
 			StringListStream< Trait > stream( tmp );
 
@@ -6285,7 +6288,7 @@ listItemData( const typename Trait::String & s )
 	long long int p = skipSpaces< Trait >( 0, s );
 
 	if( p == s.size() )
-		return { false, 0, QChar() };
+		return { false, 0, typename Trait::Char() };
 
 	bool space = false;
 
@@ -6305,16 +6308,16 @@ listItemData( const typename Trait::String & s )
 		else
 		{
 			int d = 0, l = 0;
-			QChar c;
+			typename Trait::Char c;
 
 			if( isOrderedList< Trait >( s, &d, &l, &c ) )
 				return { true, p + l + 2, c };
 			else
-				return { false, 0, QChar() };
+				return { false, 0, typename Trait::Char() };
 		}
 	}
 	else
-		return { false, 0, QChar() };
+		return { false, 0, typename Trait::Char() };
 }
 
 } /* namespace anonymous */
@@ -6330,13 +6333,13 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 	bool collectRefLinks, RawHtmlBlock< Trait > & html )
 {
 	for( auto it = fr.data.begin(), last = fr.data.end(); it != last; ++it )
-		it->first.replace( c_9, QLatin1String( "    " ) );
+		it->first.replace( c_9, "    " );
 
-	const auto p = skipSpaces< Trait >( 0, fr.data.first().first );
+	const auto p = skipSpaces< Trait >( 0, fr.data.front().first );
 
-	if( p != fr.data.first().first.length() )
+	if( p != fr.data.front().first.length() )
 	{
-		QSharedPointer< List< Trait > > list( new List< Trait > );
+		typename Trait::template SharedPointer< List< Trait > > list( new List< Trait > );
 
 		typename MdBlock< Trait >::Data listItem;
 		auto it = fr.data.begin();
@@ -6345,7 +6348,7 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 
 		bool ok = false;
 		long long int indent = 0;
-		QChar marker;
+		typename Trait::Char marker;
 
 		std::tie( ok, indent, marker ) = listItemData< Trait >( listItem.first().first );
 
@@ -6378,13 +6381,13 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 				list.reset( new List< Trait > );
 
 				if( !collectRefLinks )
-					doc->appendItem( QSharedPointer< Item< Trait > > ( new HorizontalLine< Trait > ) );
+					doc->appendItem( typename Trait::template SharedPointer< Item< Trait > > ( new HorizontalLine< Trait > ) );
 
 				continue;
 			}
 			else if( isListItemAndNotNested< Trait >( it->first, indent ) && !listItem.isEmpty() )
 			{
-				QChar tmpMarker;
+				typename Trait::Char tmpMarker;
 				std::tie( ok, indent, tmpMarker ) = listItemData< Trait >( it->first );
 
 				MdBlock< Trait > block = { listItem, 0 };
@@ -6429,11 +6432,11 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 	const typename Trait::String & fileName,
 	bool collectRefLinks, RawHtmlBlock< Trait > & html )
 {
-	QSharedPointer< ListItem< Trait > > item( new ListItem< Trait > );
+	typename Trait::template SharedPointer< ListItem< Trait > > item( new ListItem< Trait > );
 
 	int i = 0;
 
-	if( isOrderedList< Trait >( fr.data.first().first, &i ) )
+	if( isOrderedList< Trait >( fr.data.front().first, &i ) )
 	{
 		item->setListType( ListItem< Trait >::Ordered );
 		item->setStartNumber( i );
@@ -6455,41 +6458,41 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 	long long int indent = 0;
 	bool ok = false;
 
-	std::tie( ok, indent, std::ignore ) = listItemData< Trait >( fr.data.first().first );
+	std::tie( ok, indent, std::ignore ) = listItemData< Trait >( fr.data.front().first );
 
-	const auto firstNonSpacePos = calculateIndent< Trait >( fr.data.first().first, indent ).second;
+	const auto firstNonSpacePos = calculateIndent< Trait >( fr.data.front().first, indent ).second;
 	if( firstNonSpacePos - indent < 4 ) indent = firstNonSpacePos;
 
-	if( indent < fr.data.first().first.length() )
-		data.append( { fr.data.first().first.right( fr.data.first().first.length() - indent ),
-			fr.data.first().second } );
+	if( indent < fr.data.front().first.length() )
+		data.append( { fr.data.front().first.right( fr.data.front().first.length() - indent ),
+			fr.data.front().second } );
 
 	bool taskList = false;
 	bool checked = false;
 
 	if( !data.isEmpty() )
 	{
-		auto p = skipSpaces< Trait >( 0, data.first().first );
+		auto p = skipSpaces< Trait >( 0, data.front().first );
 
-		if( p < data.first().first.size() )
+		if( p < data.front().first.size() )
 		{
-			if( data.first().first[ p ] == c_91 )
+			if( data.front().first[ p ] == c_91 )
 			{
 				++p;
 
-				if( p < data.first().first.size() )
+				if( p < data.front().first.size() )
 				{
-					if( data.first().first[ p ] == c_32 ||
-						data.first().first[ p ].toLower() == c_120 )
+					if( data.front().first[ p ] == c_32 ||
+						data.front().first[ p ].toLower() == c_120 )
 					{
-						if( data.first().first[ p ].toLower() == c_120 )
+						if( data.front().first[ p ].toLower() == c_120 )
 							checked = true;
 
 						++p;
 
-						if( p < data.first().first.size() )
+						if( p < data.front().first.size() )
 						{
-							if( data.first().first[ p ] == c_93 )
+							if( data.front().first[ p ] == c_93 )
 							{
 								taskList = true;
 
@@ -6538,7 +6541,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 
 			for( auto it = nestedList.begin(), last = nestedList.end(); it != last; ++it )
 			{
-				if( it->first.startsWith( QString( indent, c_32 ) ) )
+				if( it->first.startsWith( typename Trait::String( indent, c_32 ) ) )
 					it->first = it->first.sliced( indent );
 			}
 
@@ -6549,7 +6552,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 
 			for( ; it != last; ++it )
 			{
-				if( it->first.startsWith( QString( indent, c_32 ) ) )
+				if( it->first.startsWith( typename Trait::String( indent, c_32 ) ) )
 					it->first = it->first.sliced( indent );
 
 				data.append( *it );
@@ -6559,7 +6562,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 		}
 		else
 		{
-			if( it->first.startsWith( QString( indent, c_32 ) ) )
+			if( it->first.startsWith( typename Trait::String( indent, c_32 ) ) )
 				it->first = it->first.sliced( indent );
 
 			data.append( *it );
@@ -6585,27 +6588,27 @@ Parser< Trait >::parseCode( MdBlock< Trait > & fr,
 {
 	if( !collectRefLinks )
 	{
-		const auto i = skipSpaces< Trait >( 0, fr.data.first().first );
+		const auto i = skipSpaces< Trait >( 0, fr.data.front().first );
 
-		if( i != fr.data.first().first.length() )
+		if( i != fr.data.front().first.length() )
 			indent += i;
 
-		QString syntax;
-		isStartOfCode< Trait >( fr.data.constFirst().first, &syntax );
+		typename Trait::String syntax;
+		isStartOfCode< Trait >( fr.data.front().first, &syntax );
 		syntax = replaceEntity< Trait >( syntax );
 
-		fr.data.removeFirst();
-		fr.data.removeLast();
+		fr.data.erase( fr.data.cbegin() );
+		fr.data.erase( std::prev( fr.data.cend() ) );
 
-		if( syntax.toLower() == QStringLiteral( "math" ) )
+		if( syntax.toLower() == "math" )
 		{
-			QString math;
+			typename Trait::String math;
 			bool first = true;
 
-			for( const auto & l : qAsConst( fr.data ) )
+			for( const auto & l : std::as_const( fr.data ) )
 			{
 				if( !first )
-					math.append( c_10 );
+					math.append( typename Trait::Char( c_10 ) );
 
 				math.append( l.first );
 
@@ -6614,8 +6617,8 @@ Parser< Trait >::parseCode( MdBlock< Trait > & fr,
 
 			if( !collectRefLinks )
 			{
-				QSharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
-				QSharedPointer< Math< Trait > > m( new Math< Trait > );
+				typename Trait::template SharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
+				typename Trait::template SharedPointer< Math< Trait > > m( new Math< Trait > );
 				m->setInline( false );
 				m->setExpr( math );
 				p->appendItem( m );
@@ -6637,7 +6640,7 @@ Parser< Trait >::parseCodeIndentedBySpaces( MdBlock< Trait > & fr,
 {
 	if( !collectRefLinks )
 	{
-		QString code;
+		typename Trait::String code;
 
 		for( const auto & l : qAsConst( fr.data ) )
 		{
@@ -6649,9 +6652,9 @@ Parser< Trait >::parseCodeIndentedBySpaces( MdBlock< Trait > & fr,
 		}
 
 		if( !code.isEmpty() )
-			code = code.left( code.length() - 1 );
+			code.remove( code.length() - 1, 1 );
 
-		QSharedPointer< Code< Trait > > codeItem( new Code< Trait >( code ) );
+		typename Trait::template SharedPointer< Code< Trait > > codeItem( new Code< Trait >( code ) );
 		codeItem->setSyntax( syntax );
 		parent->appendItem( codeItem );
 	}

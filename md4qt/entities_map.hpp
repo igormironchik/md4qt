@@ -3,13 +3,13 @@
 
 #pragma once
 
-#include <unordered_map>
+#include <map>
 #include <string>
 
 namespace MD {
 
 template< class Trait >
-static const std::unordered_map< typename Trait::String, const char16_t* > c_entityMap = {
+static const std::map< typename Trait::String, const char16_t* > c_entityMap = {
 	{ typename Trait::String( "&AElig" ), u"\x00C6" },
 	{ typename Trait::String( "&AElig;" ), u"\x00C6" },
 	{ typename Trait::String( "&AMP" ), u"\x0026" },

@@ -239,7 +239,7 @@ TEST_CASE( "227" )
 	{
 		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Heading );
 		auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 2 ).get() );
-		REQUIRE( !h->text().isNull() );
+		REQUIRE( h->text().get() );
 		auto p = h->text().get();
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );

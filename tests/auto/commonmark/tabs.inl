@@ -272,7 +272,7 @@ TEST_CASE( "010" )
 			std::filesystem::current_path().u8string()
 #endif
 			+ u8"/tests/commonmark/0.30/010.md";
-	REQUIRE( !h->text().isNull() );
+	REQUIRE( h->text().get() );
 	auto p = h->text().get();
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );

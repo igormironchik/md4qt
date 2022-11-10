@@ -50,7 +50,7 @@ TEST_CASE( "571" )
 	REQUIRE( i->text() == u8"foo" );
 	REQUIRE( i->url() == u8"/url" );
 
-	REQUIRE( !i->p().isNull() );
+	REQUIRE( i->p().get() );
 	REQUIRE( i->p()->items().size() == 1 );
 	REQUIRE( i->p()->items().at( 0 )->type() == MD::ItemType::Text );
 	auto t  = static_cast< MD::Text< TRAIT >* > ( i->p()->items().at( 0 ).get() );
