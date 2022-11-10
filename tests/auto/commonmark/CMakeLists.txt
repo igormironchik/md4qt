@@ -26,6 +26,7 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}
 if( BUILD_MD4QT_QT_TESTS )
 	add_executable( test.md_parser.commonmark.qt ${SRC} )
 	target_compile_definitions( test.md_parser.commonmark.qt PUBLIC TRAIT=MD::QStringTrait )
+	target_compile_definitions( test.md_parser.commonmark.qt PUBLIC MD4QT_QT_SUPPORT )
 
 	target_link_libraries( test.md_parser.commonmark.qt Qt6::Core )
 
@@ -35,8 +36,11 @@ if( BUILD_MD4QT_QT_TESTS )
 endif()
 
 if( BUILD_MD4QT_STL_TESTS )
+	find_package( ICU )
+
 	add_executable( test.md_parser.commonmark.stl ${SRC} )
-	target_compile_definitions( test.md_parser.commonmark.stl PUBLIC TRAIT=MD::StdStringTrait )
+	target_compile_definitions( test.md_parser.commonmark.stl PUBLIC TRAIT=MD::UnicodeStringTrait )
+	target_compile_definitions( test.md_parser.commonmark.stl PUBLIC MD4QT_ICU_STL_SUPPORT )
 
 	target_link_libraries( test.md_parser.commonmark.stl icu::icu )
 

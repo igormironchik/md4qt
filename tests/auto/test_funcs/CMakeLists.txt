@@ -17,6 +17,7 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}
 if( BUILD_MD4QT_QT_TESTS )
 	add_executable( test.funcs.qt ${SRC} )
 	target_compile_definitions( test.funcs.qt PUBLIC TRAIT=MD::QStringTrait )
+	target_compile_definitions( test.funcs.qt PUBLIC MD4QT_QT_SUPPORT )
 
 	target_link_libraries( test.funcs.qt Qt6::Core )
 
@@ -26,8 +27,11 @@ if( BUILD_MD4QT_QT_TESTS )
 endif()
 
 if( BUILD_MD4QT_STL_TESTS )
+	find_package( ICU )
+
 	add_executable( test.funcs.stl ${SRC} )
-	target_compile_definitions( test.funcs.stl PUBLIC TRAIT=MD::StdStringTrait )
+	target_compile_definitions( test.funcs.stl PUBLIC TRAIT=MD::UnicodeStringTrait )
+	target_compile_definitions( test.funcs.stl PUBLIC MD4QT_ICU_STL_SUPPORT )
 
 	target_link_libraries( test.funcs.stl icu::icu )
 

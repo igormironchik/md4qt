@@ -16,14 +16,6 @@ if( NOT CMAKE_BUILD_TYPE )
 		FORCE )
 endif( NOT CMAKE_BUILD_TYPE )
 
-if( BUILD_MD4QT_STL_TESTS )
-	add_definitions( -DMD4QT_ICU_STL_SUPPORT )
-endif()
-
-if( BUILD_MD4QT_QT_TESTS )
-	add_definitions( -DMD4QT_QT_SUPPORT )
-endif()
-
 set( CMAKE_CXX_STANDARD 17 )
 
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
@@ -33,10 +25,6 @@ project( md4qt )
 if( MD4QT_USE_CONAN )
 	include( ${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake )
 	conan_basic_setup()
-endif()
-
-if( MD4QT_ICU_STL_SUPPORT )
-	find_package( ICU )
 endif()
 
 if( ${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME} )
