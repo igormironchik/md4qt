@@ -31,8 +31,6 @@
 #ifndef MD4QT_MD_TRAITS_HPP_INCLUDED
 #define MD4QT_MD_TRAITS_HPP_INCLUDED
 
-//#define MD4QT_ICU_STL_SUPPORT
-
 #ifdef MD4QT_ICU_STL_SUPPORT
 
 // C++ include.
@@ -47,24 +45,27 @@
 #include <unicode/unistr.h>
 #include <unicode/uchar.h>
 
-#endif
+#endif // MD4QT_ICU_STL_SUPPORT
 
 
 #ifdef MD4QT_QT_SUPPORT
 
+#ifndef MD4QT_ICU_STL_SUPPORT
+
 // C++ include.
 #include <memory>
 #include <map>
+
+#endif // MD4QT_ICU_STL_SUPPORT
 
 // Qt include.
 #include <QString>
 #include <QVector>
 #include <QTextStream>
 #include <QStringList>
-#include <QStringView>
 #include <QFileInfo>
 
-#endif
+#endif // MD4QT_QT_SUPPORT
 
 
 namespace MD {
@@ -209,7 +210,7 @@ public:
 	}
 
 	UnicodeString( const char * str )
-		:	icu::UnicodeString( str )
+		:	icu::UnicodeString( icu::UnicodeString::fromUTF8( str ) )
 	{
 	}
 
@@ -471,9 +472,6 @@ public:
 //! Trait to use this library with std::string.
 struct UnicodeStringTrait {
 	template< class T >
-	using SharedPointer = std::shared_ptr< T >;
-
-	template< class T >
 	using Vector = std::vector< T >;
 
 	template< class T, class U >
@@ -503,7 +501,7 @@ struct UnicodeStringTrait {
 	}
 }; // struct UnicodeStringTrait
 
-#endif
+#endif // MD4QT_ICU_STL_SUPPORT
 
 #ifdef MD4QT_QT_SUPPORT
 
@@ -513,9 +511,6 @@ struct UnicodeStringTrait {
 
 //! Trait to use this library with QString.
 struct QStringTrait {
-	template< class T >
-	using SharedPointer = std::shared_ptr< T >;
-
 	template< class T >
 	using Vector = QVector< T >;
 
@@ -543,7 +538,7 @@ struct QStringTrait {
 	}
 }; // struct QStringTrait
 
-#endif
+#endif // MD4QT_QT_SUPPORT
 
 } /* namespace MD */
 

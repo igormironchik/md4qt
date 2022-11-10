@@ -38,13 +38,15 @@
 #include "utils.hpp"
 
 #ifdef MD4QT_QT_SUPPORT
+
 // Qt include.
 #include <QTextStream>
 #include <QFile>
 #include <QDir>
 #include <QRegularExpression>
 #include <QUrl>
-#endif
+
+#endif // MD4QT_QT_SUPPORT
 
 // C++ include.
 #include <set>
@@ -204,7 +206,7 @@ isOrderedList( const typename Trait::String & s, int * num = nullptr, int * len 
 //! Internal structure.
 template< class Trait >
 struct RawHtmlBlock {
-	typename Trait::template SharedPointer< RawHtml< Trait > > html = {};
+	std::shared_ptr< RawHtml< Trait > > html = {};
 	int htmlBlockType = -1;
 	bool continueHtml = false;
 	bool onLine = false;
@@ -675,7 +677,7 @@ public:
 	~Parser() = default;
 
 	//! \return Parsed Markdown document.
-	typename Trait::template SharedPointer< Document< Trait > > parse(
+	std::shared_ptr< Document< Trait > > parse(
 		//! File name of the Markdown document.
 		const typename Trait::String & fileName,
 		//! Should parsing be recursive? If recursive all links to existing Markdown
@@ -686,7 +688,7 @@ public:
 		const typename Trait::StringList & ext = { "md", "markdown" } );
 
 	//! \return Parsed Markdown document.
-	typename Trait::template SharedPointer< Document< Trait > > parse(
+	std::shared_ptr< Document< Trait > > parse(
 		//! Stream to parse.
 		typename Trait::TextStream & stream,
 		//! This argument needed only for anchor.
@@ -694,12 +696,12 @@ public:
 
 private:
 	void parseFile( const typename Trait::String & fileName, bool recursive,
-		typename Trait::template SharedPointer< Document< Trait > > doc,
+		std::shared_ptr< Document< Trait > > doc,
 		const typename Trait::StringList & ext,
 		typename Trait::StringList * parentLinks = nullptr );
 	void parseStream( typename Trait::TextStream & stream,
 		const typename Trait::String & workingPath, const typename Trait::String & fileName,
-		bool recursive, typename Trait::template SharedPointer< Document< Trait > > doc,
+		bool recursive, std::shared_ptr< Document< Trait > > doc,
 		const typename Trait::StringList & ext,
 		typename Trait::StringList * parentLinks = nullptr );
 	void clearCache();
@@ -717,73 +719,73 @@ private:
 
 	BlockType whatIsTheLine( typename Trait::String & str, bool inList = false, long long int * indent = nullptr,
 		bool calcIndent = false, const std::set< long long int > * indents = nullptr ) const;
-	void parseFragment( MdBlock< Trait > & fr, typename Trait::template SharedPointer< Block< Trait > > parent,
-		typename Trait::template SharedPointer< Document< Trait > > doc,
+	void parseFragment( MdBlock< Trait > & fr, std::shared_ptr< Block< Trait > > parent,
+		std::shared_ptr< Document< Trait > > doc,
 		typename Trait::StringList & linksToParse, const typename Trait::String & workingPath,
 		const typename Trait::String & fileName, bool collectRefLinks,
 		RawHtmlBlock< Trait > & html );
-	void parseText( MdBlock< Trait > & fr, typename Trait::template SharedPointer< Block< Trait > > parent,
-		typename Trait::template SharedPointer< Document< Trait > > doc,
+	void parseText( MdBlock< Trait > & fr, std::shared_ptr< Block< Trait > > parent,
+		std::shared_ptr< Document< Trait > > doc,
 		typename Trait::StringList & linksToParse, const typename Trait::String & workingPath,
 		const typename Trait::String & fileName, bool collectRefLinks,
 		RawHtmlBlock< Trait > & html );
 	void parseBlockquote( MdBlock< Trait > & fr,
-		typename Trait::template SharedPointer< Block< Trait > > parent,
-		typename Trait::template SharedPointer< Document< Trait > > doc,
+		std::shared_ptr< Block< Trait > > parent,
+		std::shared_ptr< Document< Trait > > doc,
 		typename Trait::StringList & linksToParse, const typename Trait::String & workingPath,
 		const typename Trait::String & fileName, bool collectRefLinks,
 		RawHtmlBlock< Trait > & html );
 	void parseList( MdBlock< Trait > & fr,
-		typename Trait::template SharedPointer< Block< Trait > > parent,
-		typename Trait::template SharedPointer< Document< Trait > > doc,
+		std::shared_ptr< Block< Trait > > parent,
+		std::shared_ptr< Document< Trait > > doc,
 		typename Trait::StringList & linksToParse, const typename Trait::String & workingPath,
 		const typename Trait::String & fileName, bool collectRefLinks,
 		RawHtmlBlock< Trait > & html );
 	void parseCode( MdBlock< Trait > & fr,
-		typename Trait::template SharedPointer< Block< Trait > > parent,
+		std::shared_ptr< Block< Trait > > parent,
 		bool collectRefLinks, int indent = 0 );
 	void parseCodeIndentedBySpaces( MdBlock< Trait > & fr,
-		typename Trait::template SharedPointer< Block< Trait > > parent,
+		std::shared_ptr< Block< Trait > > parent,
 		bool collectRefLinks,
 		int indent = 4, const typename Trait::String & syntax = typename Trait::String() );
 	void parseListItem( MdBlock< Trait > & fr,
-		typename Trait::template SharedPointer< Block< Trait > > parent,
-		typename Trait::template SharedPointer< Document< Trait > > doc,
+		std::shared_ptr< Block< Trait > > parent,
+		std::shared_ptr< Document< Trait > > doc,
 		typename Trait::StringList & linksToParse, const typename Trait::String & workingPath,
 		const typename Trait::String & fileName, bool collectRefLinks,
 		RawHtmlBlock< Trait > & html );
 	void parseHeading( MdBlock< Trait > & fr,
-		typename Trait::template SharedPointer< Block< Trait > > parent,
-		typename Trait::template SharedPointer< Document< Trait > > doc,
+		std::shared_ptr< Block< Trait > > parent,
+		std::shared_ptr< Document< Trait > > doc,
 		typename Trait::StringList & linksToParse, const typename Trait::String & workingPath,
 		const typename Trait::String & fileName,
 		bool collectRefLinks );
 	void parseFootnote( MdBlock< Trait > & fr,
-		typename Trait::template SharedPointer< Block< Trait > > parent,
-		typename Trait::template SharedPointer< Document< Trait > > doc,
+		std::shared_ptr< Block< Trait > > parent,
+		std::shared_ptr< Document< Trait > > doc,
 		typename Trait::StringList & linksToParse, const typename Trait::String & workingPath,
 		const typename Trait::String & fileName, bool collectRefLinks );
 	void parseTable( MdBlock< Trait > & fr,
-		typename Trait::template SharedPointer< Block< Trait > > parent,
-		typename Trait::template SharedPointer< Document< Trait > > doc,
+		std::shared_ptr< Block< Trait > > parent,
+		std::shared_ptr< Document< Trait > > doc,
 		typename Trait::StringList & linksToParse, const typename Trait::String & workingPath,
 		const typename Trait::String & fileName, bool collectRefLinks, int columnsCount );
 	void parseParagraph( MdBlock< Trait > & fr,
-		typename Trait::template SharedPointer< Block< Trait > > parent,
-		typename Trait::template SharedPointer< Document< Trait > > doc,
+		std::shared_ptr< Block< Trait > > parent,
+		std::shared_ptr< Document< Trait > > doc,
 		typename Trait::StringList & linksToParse, const typename Trait::String & workingPath,
 		const typename Trait::String & fileName, bool collectRefLinks,
 		RawHtmlBlock< Trait > & html );
 	void parseFormattedTextLinksImages( MdBlock< Trait > & fr,
-		typename Trait::template SharedPointer< Block< Trait > > parent,
-		typename Trait::template SharedPointer< Document< Trait > > doc,
+		std::shared_ptr< Block< Trait > > parent,
+		std::shared_ptr< Document< Trait > > doc,
 		typename Trait::StringList & linksToParse, const typename Trait::String & workingPath,
 		const typename Trait::String & fileName, bool collectRefLinks, bool ignoreLineBreak,
 		RawHtmlBlock< Trait > & html );
 
 	void parse( StringListStream< Trait> & stream,
-		typename Trait::template SharedPointer< Block< Trait > > parent,
-		typename Trait::template SharedPointer< Document< Trait > > doc,
+		std::shared_ptr< Block< Trait > > parent,
+		std::shared_ptr< Document< Trait > > doc,
 		typename Trait::StringList & linksToParse,
 		const typename Trait::String & workingPath,
 		const typename Trait::String & fileName,
@@ -802,11 +804,11 @@ private:
 //
 
 template< class Trait >
-inline typename Trait::template SharedPointer< Document< Trait > >
+inline std::shared_ptr< Document< Trait > >
 Parser< Trait >::parse( const typename Trait::String & fileName, bool recursive,
 	const typename Trait::StringList & ext )
 {
-	typename Trait::template SharedPointer< Document< Trait > > doc( new Document< Trait > );
+	std::shared_ptr< Document< Trait > > doc( new Document< Trait > );
 
 	parseFile( fileName, recursive, doc, ext );
 
@@ -816,11 +818,11 @@ Parser< Trait >::parse( const typename Trait::String & fileName, bool recursive,
 }
 
 template< class Trait >
-inline typename Trait::template SharedPointer< Document< Trait > >
+inline std::shared_ptr< Document< Trait > >
 Parser< Trait >::parse( typename Trait::TextStream & stream,
 	const typename Trait::String & fileName )
 {
-	typename Trait::template SharedPointer< Document< Trait > > doc( new Document< Trait > );
+	std::shared_ptr< Document< Trait > > doc( new Document< Trait > );
 
 	parseStream( stream, typename Trait::String( "." ), fileName, false, doc,
 		typename Trait::StringList() );
@@ -1052,8 +1054,8 @@ checkForHtmlComments( const typename Trait::String & line, StringListStream< Tra
 template< class Trait >
 inline void
 Parser< Trait >::parse( StringListStream< Trait > & stream,
-	typename Trait::template SharedPointer< Block< Trait > > parent,
-	typename Trait::template SharedPointer< Document< Trait > > doc,
+	std::shared_ptr< Block< Trait > > parent,
+	std::shared_ptr< Document< Trait > > doc,
 	typename Trait::StringList & linksToParse,
 	const typename Trait::String & workingPath,
 	const typename Trait::String & fileName,
@@ -1399,7 +1401,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 					p->appendItem( html.html );
 				else
 				{
-					typename Trait::template SharedPointer< Paragraph< Trait > > p(
+					std::shared_ptr< Paragraph< Trait > > p(
 						new Paragraph< Trait > );
 					p->appendItem( html.html );
 					doc->appendItem( p );
@@ -1407,7 +1409,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			}
 			else
 			{
-				typename Trait::template SharedPointer< Paragraph< Trait > > p(
+				std::shared_ptr< Paragraph< Trait > > p(
 					new Paragraph< Trait > );
 				p->appendItem( html.html );
 				doc->appendItem( p );
@@ -1512,7 +1514,7 @@ namespace /* anonymous */ {
 
 template< class Trait >
 void resolveLinks( typename Trait::StringList & linksToParse,
-	typename Trait::template SharedPointer< Document< Trait > > doc );
+	std::shared_ptr< Document< Trait > > doc );
 
 #ifdef MD4QT_QT_SUPPORT
 
@@ -1580,13 +1582,13 @@ Parser< Trait >::parseStream( typename Trait::TextStream & s,
 	const typename Trait::String & workingPath,
 	const typename Trait::String & fileName,
 	bool recursive,
-	typename Trait::template SharedPointer< Document< Trait > > doc,
+	std::shared_ptr< Document< Trait > > doc,
 	const typename Trait::StringList & ext,
 	typename Trait::StringList * parentLinks )
 {
 	typename Trait::StringList linksToParse;
 
-	doc->appendItem( typename Trait::template SharedPointer< Anchor< Trait > > (
+	doc->appendItem( std::shared_ptr< Anchor< Trait > > (
 		new Anchor< Trait >( workingPath + "/" + fileName ) ) );
 
 	typename MdBlock< Trait >::Data data;
@@ -1641,7 +1643,7 @@ Parser< Trait >::parseStream( typename Trait::TextStream & s,
 			if( pit == m_parsedFiles.cend() )
 			{
 				if( !doc->isEmpty() && doc->items().back()->type() != ItemType::PageBreak )
-					doc->appendItem( typename Trait::template SharedPointer< PageBreak< Trait > > (
+					doc->appendItem( std::shared_ptr< PageBreak< Trait > > (
 						new PageBreak< Trait > ) );
 
 				parseFile( nextFileName, recursive, doc, ext, &linksToParse );
@@ -1792,8 +1794,8 @@ Parser< Trait >::whatIsTheLine( typename Trait::String & str,
 template< class Trait >
 inline void
 Parser< Trait >::parseFragment( MdBlock< Trait > & fr,
-	typename Trait::template SharedPointer< Block< Trait > > parent,
-	typename Trait::template SharedPointer< Document< Trait > > doc,
+	std::shared_ptr< Block< Trait > > parent,
+	std::shared_ptr< Document< Trait > > doc,
 	typename Trait::StringList & linksToParse,
 	const typename Trait::String & workingPath,
 	const typename Trait::String & fileName, bool collectRefLinks,
@@ -1901,8 +1903,8 @@ isTableHeader( const typename Trait::String & s )
 template< class Trait >
 inline void
 Parser< Trait >::parseText( MdBlock< Trait > & fr,
-	typename Trait::template SharedPointer< Block< Trait > > parent,
-	typename Trait::template SharedPointer< Document< Trait > > doc,
+	std::shared_ptr< Block< Trait > > parent,
+	std::shared_ptr< Document< Trait > > doc,
 	typename Trait::StringList & linksToParse,
 	const typename Trait::String & workingPath,
 	const typename Trait::String & fileName,
@@ -2026,8 +2028,8 @@ findAndRemoveClosingSequence( typename Trait::String & s )
 template< class Trait >
 inline void
 Parser< Trait >::parseHeading( MdBlock< Trait > & fr,
-	typename Trait::template SharedPointer< Block< Trait > > parent,
-	typename Trait::template SharedPointer< Document< Trait > > doc,
+	std::shared_ptr< Block< Trait > > parent,
+	std::shared_ptr< Document< Trait > > doc,
 	typename Trait::StringList & linksToParse,
 	const typename Trait::String & workingPath,
 	const typename Trait::String & fileName,
@@ -2060,14 +2062,14 @@ Parser< Trait >::parseHeading( MdBlock< Trait > & fr,
 
 		findAndRemoveClosingSequence< Trait >( fr.data.front().first );
 
-		typename Trait::template SharedPointer< Heading< Trait > > h( new Heading< Trait > );
+		std::shared_ptr< Heading< Trait > > h( new Heading< Trait > );
 		h->setLevel( lvl );
 
 		if( !label.isEmpty() )
 			h->setLabel( label.mid( 1, label.length() - 2 ) + "/" +
 				workingPath + fileName );
 
-		typename Trait::template SharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
+		std::shared_ptr< Paragraph< Trait > > p( new Paragraph< Trait > );
 
 		typename MdBlock< Trait >::Data tmp;
 		tmp.push_back( fr.data.front() );
@@ -2147,8 +2149,8 @@ splitTableRow( const typename Trait::String & s )
 template< class Trait >
 inline void
 Parser< Trait >::parseTable( MdBlock< Trait > & fr,
-	typename Trait::template SharedPointer< Block< Trait > > parent,
-	typename Trait::template SharedPointer< Document< Trait > > doc,
+	std::shared_ptr< Block< Trait > > parent,
+	std::shared_ptr< Document< Trait > > doc,
 	typename Trait::StringList & linksToParse,
 	const typename Trait::String & workingPath,
 	const typename Trait::String & fileName,
@@ -2158,7 +2160,7 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 
 	if( fr.data.size() >= 2 )
 	{
-		typename Trait::template SharedPointer< Table< Trait > > table( new Table< Trait > );
+		std::shared_ptr< Table< Trait > > table( new Table< Trait > );
 
 		auto parseTableRow = [&] ( const typename Trait::String & row )
 		{
@@ -2172,7 +2174,7 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 
 			auto columns = splitTableRow< Trait >( line );
 
-			typename Trait::template SharedPointer< TableRow< Trait > > tr( new TableRow< Trait > );
+			std::shared_ptr< TableRow< Trait > > tr( new TableRow< Trait > );
 
 			int c = 0;
 
@@ -2181,7 +2183,7 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 				if( c == columnsCount )
 					break;
 
-				typename Trait::template SharedPointer< TableCell< Trait > > c(
+				std::shared_ptr< TableCell< Trait > > c(
 					new TableCell< Trait > );
 
 				if( !it->isEmpty() )
@@ -2192,7 +2194,7 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 					fragment.push_back( { *it, { -1 } } );
 					MdBlock< Trait > block = { fragment, 0 };
 
-					typename Trait::template SharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
+					std::shared_ptr< Paragraph< Trait > > p( new Paragraph< Trait > );
 
 					RawHtmlBlock< Trait > html;
 
@@ -2302,8 +2304,8 @@ isH2( const typename Trait::String & s )
 template < class Trait >
 inline void
 Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
-	typename Trait::template SharedPointer< Block< Trait > > parent,
-	typename Trait::template SharedPointer< Document< Trait > > doc,
+	std::shared_ptr< Block< Trait > > parent,
+	std::shared_ptr< Document< Trait > > doc,
 	typename Trait::StringList & linksToParse,
 	const typename Trait::String & workingPath,
 	const typename Trait::String & fileName,
@@ -2349,12 +2351,12 @@ Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
 		{
 			if( !collectRefLinks )
 				for( long long int j = 0; j < horLines; ++j )
-					parent->appendItem( typename Trait::template SharedPointer< Item< Trait > > ( new HorizontalLine< Trait > ) );
+					parent->appendItem( std::shared_ptr< Item< Trait > > ( new HorizontalLine< Trait > ) );
 
 			fr.data.erase( fr.data.cbegin(), fr.data.cbegin() + horLines );
 
-			typename Trait::template SharedPointer< Heading< Trait > > h( new Heading< Trait > );
-			typename Trait::template SharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
+			std::shared_ptr< Heading< Trait > > h( new Heading< Trait > );
+			std::shared_ptr< Paragraph< Trait > > p( new Paragraph< Trait > );
 
 			h->setLevel( lvl );
 
@@ -2419,7 +2421,7 @@ Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
 		}
 		else
 		{
-			typename Trait::template SharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
+			std::shared_ptr< Paragraph< Trait > > p( new Paragraph< Trait > );
 
 			parseFormattedTextLinksImages( fr, p, doc, linksToParse, workingPath, fileName,
 				collectRefLinks, false, html );
@@ -2432,7 +2434,7 @@ Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
 					{
 						auto p = static_cast< Paragraph< Trait >* > ( (*it).get() );
 
-						typename Trait::template SharedPointer< Paragraph< Trait > > pp( new Paragraph< Trait > );
+						std::shared_ptr< Paragraph< Trait > > pp( new Paragraph< Trait > );
 						pp->setDirty( p->isDirty() );
 
 						for( auto it = p->items().cbegin(), last = p->items().cend(); it != last; ++it )
@@ -2485,13 +2487,13 @@ Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
 
 template< class Trait >
 struct UnprotectedDocsMethods {
-	static void setFreeTag( typename Trait::template SharedPointer< RawHtml< Trait > > html,
+	static void setFreeTag( std::shared_ptr< RawHtml< Trait > > html,
 		bool on )
 	{
 		html->setFreeTag( on );
 	}
 
-	static void setDirty( typename Trait::template SharedPointer< Paragraph< Trait > > p )
+	static void setDirty( std::shared_ptr< Paragraph< Trait > > p )
 	{
 		p->setDirty( true );
 	}
@@ -2853,8 +2855,8 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 template< class Trait >
 struct TextParsingOpts {
 	MdBlock< Trait > & fr;
-	typename Trait::template SharedPointer< Block< Trait > > parent;
-	typename Trait::template SharedPointer< Document< Trait > > doc;
+	std::shared_ptr< Block< Trait > > parent;
+	std::shared_ptr< Document< Trait > > doc;
 	typename Trait::StringList & linksToParse;
 	typename Trait::String workingPath;
 	typename Trait::String fileName;
@@ -2872,8 +2874,8 @@ struct TextParsingOpts {
 template< class Trait >
 inline void
 parseFormattedText( MdBlock< Trait > & fr,
-	typename Trait::template SharedPointer< Block< Trait > > parent,
-	typename Trait::template SharedPointer< Document< Trait > > doc,
+	std::shared_ptr< Block< Trait > > parent,
+	std::shared_ptr< Document< Trait > > doc,
 	typename Trait::StringList & linksToParse,
 	const typename Trait::String & workingPath,
 	const typename Trait::String & fileName, bool collectRefLinks, bool ignoreLineBreak,
@@ -3046,7 +3048,7 @@ makeTextObject( const typename Trait::String & text, bool spaceBefore, bool spac
 
 	if( !s.isEmpty() )
 	{
-		typename Trait::template SharedPointer< Text< Trait > > t( new Text< Trait > );
+		std::shared_ptr< Text< Trait > > t( new Text< Trait > );
 		t->setText( s );
 		t->setOpts( po.opts );
 		t->setSpaceBefore( spaceBefore );
@@ -3064,7 +3066,7 @@ makeTextObjectWithLineBreak( const typename Trait::String & text, bool spaceBefo
 {
 	makeTextObject( text, spaceBefore, true, po, doNotEscape );
 
-	typename Trait::template SharedPointer< Item< Trait > > hr( new LineBreak< Trait > );
+	std::shared_ptr< Item< Trait > > hr( new LineBreak< Trait > );
 	po.wasRefLink = false;
 	po.parent->appendItem( hr );
 }
@@ -4140,7 +4142,7 @@ checkForMath( typename Delims< Trait >::const_iterator it,
 
 		if( !po.collectRefLinks )
 		{
-			typename Trait::template SharedPointer< Math< Trait > > m( new Math< Trait > );
+			std::shared_ptr< Math< Trait > > m( new Math< Trait > );
 			m->setInline( it->m_len == 1 );
 			m->setExpr( math );
 
@@ -4202,7 +4204,7 @@ checkForAutolinkHtml( typename Delims< Trait >::const_iterator it,
 			{
 				if( !po.collectRefLinks )
 				{
-					typename Trait::template SharedPointer< Link< Trait > > lnk( new Link< Trait > );
+					std::shared_ptr< Link< Trait > > lnk( new Link< Trait > );
 					lnk->setUrl( url.simplified() );
 					lnk->setOpts( po.opts );
 					po.parent->appendItem( lnk );
@@ -4256,7 +4258,7 @@ makeInlineCode( long long int lastLine, long long int lastPos,
 	}
 
 	if( !c.isEmpty() )
-		po.parent->appendItem( typename Trait::template SharedPointer< Code< Trait > >( new Code< Trait >( c, true ) ) );
+		po.parent->appendItem( std::shared_ptr< Code< Trait > >( new Code< Trait >( c, true ) ) );
 
 	po.wasRefLink = false;
 }
@@ -4462,7 +4464,7 @@ checkForLinkLabel( typename Delims< Trait >::const_iterator it,
 }
 
 template< class Trait >
-inline typename Trait::template SharedPointer< Link< Trait > >
+inline std::shared_ptr< Link< Trait > >
 makeLink( const typename Trait::String & url, const typename Trait::String & text,
 	TextParsingOpts< Trait > & po,
 	bool doNotCreateTextOnFail,
@@ -4489,7 +4491,7 @@ makeLink( const typename Trait::String & url, const typename Trait::String & tex
 			u = u + "/" + po.workingPath + po.fileName;
 	}
 
-	typename Trait::template SharedPointer< Link< Trait > > link( new Link< Trait > );
+	std::shared_ptr< Link< Trait > > link( new Link< Trait > );
 	link->setUrl( u );
 	link->setOpts( po.opts );
 
@@ -4497,17 +4499,17 @@ makeLink( const typename Trait::String & url, const typename Trait::String & tex
 	tmp.push_back( { text, { -1 } } );
 	MdBlock< Trait > block = { tmp, 0 };
 
-	typename Trait::template SharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
+	std::shared_ptr< Paragraph< Trait > > p( new Paragraph< Trait > );
 
 	RawHtmlBlock< Trait > html;
 
-	parseFormattedText( block, p, po.doc,
+	parseFormattedText( block, std::static_pointer_cast< Block< Trait > >( p ), po.doc,
 		po.linksToParse, po.workingPath,
 		po.fileName, po.collectRefLinks, true, html );
 
 	if( !p->isEmpty() )
 	{
-		typename Trait::template SharedPointer< Image< Trait > > img;
+		std::shared_ptr< Image< Trait > > img;
 
 		if( p->items().size() == 1 && p->items().at( 0 )->type() == ItemType::Paragraph )
 		{
@@ -4591,13 +4593,13 @@ createShortcutLink( const typename Trait::String & text,
 }
 
 template< class Trait >
-inline typename Trait::template SharedPointer< Image< Trait > >
+inline std::shared_ptr< Image< Trait > >
 makeImage( const typename Trait::String & url, const typename Trait::String & text,
 	TextParsingOpts< Trait > & po,
 	bool doNotCreateTextOnFail,
 	long long int lastLine, long long int lastPos )
 {
-	typename Trait::template SharedPointer< Image< Trait > > img( new Image< Trait > );
+	std::shared_ptr< Image< Trait > > img( new Image< Trait > );
 
 	typename Trait::String u = ( url.startsWith( c_35 ) ? url : removeBackslashes< Trait >(
 		replaceEntity< Trait >( url ) ) );
@@ -4611,11 +4613,11 @@ makeImage( const typename Trait::String & url, const typename Trait::String & te
 	tmp.push_back( { text, { -1 } } );
 	MdBlock< Trait > block = { tmp, 0 };
 
-	typename Trait::template SharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
+	std::shared_ptr< Paragraph< Trait > > p( new Paragraph< Trait > );
 
 	RawHtmlBlock< Trait > html;
 
-	parseFormattedText( block, p, po.doc,
+	parseFormattedText( block, std::static_pointer_cast< Block< Trait > >( p ), po.doc,
 		po.linksToParse, po.workingPath,
 		po.fileName, po.collectRefLinks, true, html );
 
@@ -5077,7 +5079,7 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 		{
 			if( !po.collectRefLinks )
 			{
-				typename Trait::template SharedPointer< FootnoteRef< Trait > > fnr(
+				std::shared_ptr< FootnoteRef< Trait > > fnr(
 					new FootnoteRef< Trait >( "#" +
 						text.simplified().toCaseFolded().toUpper() +
 						"/" + po.workingPath + po.fileName ) );
@@ -5113,7 +5115,7 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 							const auto label = "#" + text.simplified().toCaseFolded().toUpper() +
 								"/" + po.workingPath + po.fileName;
 
-							typename Trait::template SharedPointer< Link< Trait > > link( new Link< Trait > );
+							std::shared_ptr< Link< Trait > > link( new Link< Trait > );
 
 							url = removeBackslashes< Trait >( replaceEntity< Trait >( url ) );
 
@@ -5852,11 +5854,11 @@ checkForStyle( typename Delims< Trait >::const_iterator first,
 }
 
 template< class Trait >
-inline typename Trait::template SharedPointer< Text< Trait > >
+inline std::shared_ptr< Text< Trait > >
 concatenateText( typename Block< Trait >::Items::const_iterator it,
 	typename Block< Trait >::Items::const_iterator last )
 {
-	typename Trait::template SharedPointer< Text< Trait > > t( new Text< Trait > );
+	std::shared_ptr< Text< Trait > > t( new Text< Trait > );
 	t->setOpts( std::static_pointer_cast< Text< Trait > >( *it )->opts() );
 	t->setSpaceBefore( std::static_pointer_cast< Text< Trait > >( *it )->isSpaceBefore() );
 
@@ -5884,9 +5886,9 @@ concatenateText( typename Block< Trait >::Items::const_iterator it,
 
 template< class Trait >
 inline void
-optimizeParagraph( typename Trait::template SharedPointer< Paragraph< Trait > > & p )
+optimizeParagraph( std::shared_ptr< Paragraph< Trait > > & p )
 {
-	typename Trait::template SharedPointer< Paragraph< Trait > > np( new Paragraph< Trait > );
+	std::shared_ptr< Paragraph< Trait > > np( new Paragraph< Trait > );
 
 	int opts = TextWithoutFormat;
 
@@ -5932,8 +5934,8 @@ optimizeParagraph( typename Trait::template SharedPointer< Paragraph< Trait > > 
 template< class Trait >
 inline void
 parseFormattedText( MdBlock< Trait > & fr,
-	typename Trait::template SharedPointer< Block< Trait > > parent,
-	typename Trait::template SharedPointer< Document< Trait > > doc,
+	std::shared_ptr< Block< Trait > > parent,
+	std::shared_ptr< Document< Trait > > doc,
 	typename Trait::StringList & linksToParse,
 	const typename Trait::String & workingPath,
 	const typename Trait::String & fileName, bool collectRefLinks, bool ignoreLineBreak,
@@ -5943,7 +5945,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 	if( fr.data.empty() )
 		return;
 
-	typename Trait::template SharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
+	std::shared_ptr< Paragraph< Trait > > p( new Paragraph< Trait > );
 
 	const auto delims = collectDelimiters< Trait >( fr.data );
 
@@ -6020,7 +6022,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 								parent->appendItem( p );
 							}
 
-							typename Trait::template SharedPointer< Item< Trait > > hr( new HorizontalLine< Trait > );
+							std::shared_ptr< Item< Trait > > hr( new HorizontalLine< Trait > );
 							parent->appendItem( hr );
 
 							p.reset( new Paragraph< Trait > );
@@ -6083,8 +6085,8 @@ parseFormattedText( MdBlock< Trait > & fr,
 template< class Trait >
 inline void
 Parser< Trait >::parseFormattedTextLinksImages( MdBlock< Trait > & fr,
-	typename Trait::template SharedPointer< Block< Trait > > parent,
-	typename Trait::template SharedPointer< Document< Trait > > doc,
+	std::shared_ptr< Block< Trait > > parent,
+	std::shared_ptr< Document< Trait > > doc,
 	typename Trait::StringList & linksToParse,
 	const typename Trait::String & workingPath,
 	const typename Trait::String & fileName, bool collectRefLinks, bool ignoreLineBreak,
@@ -6098,8 +6100,8 @@ Parser< Trait >::parseFormattedTextLinksImages( MdBlock< Trait > & fr,
 template< class Trait >
 inline void
 Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
-	typename Trait::template SharedPointer< Block< Trait > >,
-	typename Trait::template SharedPointer< Document< Trait > > doc,
+	std::shared_ptr< Block< Trait > >,
+	std::shared_ptr< Document< Trait > > doc,
 	typename Trait::StringList & linksToParse,
 	const typename Trait::String & workingPath,
 	const typename Trait::String & fileName,
@@ -6107,7 +6109,7 @@ Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
 {
 	if( !fr.data.empty() )
 	{
-		typename Trait::template SharedPointer< Footnote< Trait > > f( new Footnote< Trait > );
+		std::shared_ptr< Footnote< Trait > > f( new Footnote< Trait > );
 
 		const auto delims = collectDelimiters< Trait >( fr.data );
 
@@ -6162,8 +6164,8 @@ Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
 template< class Trait >
 inline void
 Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
-	typename Trait::template SharedPointer< Block< Trait > > parent,
-	typename Trait::template SharedPointer< Document< Trait > > doc,
+	std::shared_ptr< Block< Trait > > parent,
+	std::shared_ptr< Document< Trait > > doc,
 	typename Trait::StringList & linksToParse,
 	const typename Trait::String & workingPath,
 	const typename Trait::String & fileName,
@@ -6235,7 +6237,7 @@ Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
 
 		StringListStream< Trait > stream( tmp );
 
-		typename Trait::template SharedPointer< Blockquote< Trait > > bq( new Blockquote< Trait > );
+		std::shared_ptr< Blockquote< Trait > > bq( new Blockquote< Trait > );
 
 		parse( stream, bq, doc, linksToParse, workingPath, fileName, collectRefLinks );
 
@@ -6340,8 +6342,8 @@ listItemData( const typename Trait::String & s )
 template< class Trait >
 inline void
 Parser< Trait >::parseList( MdBlock< Trait > & fr,
-	typename Trait::template SharedPointer< Block< Trait > > parent,
-	typename Trait::template SharedPointer< Document< Trait > > doc,
+	std::shared_ptr< Block< Trait > > parent,
+	std::shared_ptr< Document< Trait > > doc,
 	typename Trait::StringList & linksToParse,
 	const typename Trait::String & workingPath,
 	const typename Trait::String & fileName,
@@ -6354,7 +6356,7 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 
 	if( p != fr.data.front().first.length() )
 	{
-		typename Trait::template SharedPointer< List< Trait > > list( new List< Trait > );
+		std::shared_ptr< List< Trait > > list( new List< Trait > );
 
 		typename MdBlock< Trait >::Data listItem;
 		auto it = fr.data.begin();
@@ -6396,7 +6398,7 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 				list.reset( new List< Trait > );
 
 				if( !collectRefLinks )
-					doc->appendItem( typename Trait::template SharedPointer< Item< Trait > > ( new HorizontalLine< Trait > ) );
+					doc->appendItem( std::shared_ptr< Item< Trait > > ( new HorizontalLine< Trait > ) );
 
 				continue;
 			}
@@ -6440,14 +6442,14 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 template< class Trait >
 inline void
 Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
-	typename Trait::template SharedPointer< Block< Trait > > parent,
-	typename Trait::template SharedPointer< Document< Trait > > doc,
+	std::shared_ptr< Block< Trait > > parent,
+	std::shared_ptr< Document< Trait > > doc,
 	typename Trait::StringList & linksToParse,
 	const typename Trait::String & workingPath,
 	const typename Trait::String & fileName,
 	bool collectRefLinks, RawHtmlBlock< Trait > & html )
 {
-	typename Trait::template SharedPointer< ListItem< Trait > > item( new ListItem< Trait > );
+	std::shared_ptr< ListItem< Trait > > item( new ListItem< Trait > );
 
 	int i = 0;
 
@@ -6598,7 +6600,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 template< class Trait >
 inline void
 Parser< Trait >::parseCode( MdBlock< Trait > & fr,
-	typename Trait::template SharedPointer< Block< Trait > > parent,
+	std::shared_ptr< Block< Trait > > parent,
 	bool collectRefLinks, int indent )
 {
 	if( !collectRefLinks )
@@ -6632,8 +6634,8 @@ Parser< Trait >::parseCode( MdBlock< Trait > & fr,
 
 			if( !collectRefLinks )
 			{
-				typename Trait::template SharedPointer< Paragraph< Trait > > p( new Paragraph< Trait > );
-				typename Trait::template SharedPointer< Math< Trait > > m( new Math< Trait > );
+				std::shared_ptr< Paragraph< Trait > > p( new Paragraph< Trait > );
+				std::shared_ptr< Math< Trait > > m( new Math< Trait > );
 				m->setInline( false );
 				m->setExpr( math );
 				p->appendItem( m );
@@ -6649,7 +6651,7 @@ Parser< Trait >::parseCode( MdBlock< Trait > & fr,
 template< class Trait >
 inline void
 Parser< Trait >::parseCodeIndentedBySpaces( MdBlock< Trait > & fr,
-	typename Trait::template SharedPointer< Block< Trait > > parent,
+	std::shared_ptr< Block< Trait > > parent,
 	bool collectRefLinks, int indent,
 	const typename Trait::String & syntax )
 {
@@ -6669,7 +6671,7 @@ Parser< Trait >::parseCodeIndentedBySpaces( MdBlock< Trait > & fr,
 		if( !code.isEmpty() )
 			code.remove( code.length() - 1, 1 );
 
-		typename Trait::template SharedPointer< Code< Trait > > codeItem( new Code< Trait >( code ) );
+		std::shared_ptr< Code< Trait > > codeItem( new Code< Trait >( code ) );
 		codeItem->setSyntax( syntax );
 		parent->appendItem( codeItem );
 	}

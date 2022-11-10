@@ -40,7 +40,7 @@
 #endif
 
 
-inline typename TRAIT::template SharedPointer< MD::Document< TRAIT > >
+inline std::shared_ptr< MD::Document< TRAIT > >
 load_test( int n )
 {
 	auto fileName = std::to_string( n );

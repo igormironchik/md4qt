@@ -34,6 +34,9 @@
 // md4qt include.
 #include "utils.hpp"
 
+// C++ include.
+#include <memory>
+
 
 namespace MD {
 
@@ -413,7 +416,7 @@ protected:
 public:
 	~Block() override = default;
 
-	using ItemSharedPointer = typename Trait::template SharedPointer< Item< Trait > >;
+	using ItemSharedPointer = std::shared_ptr< Item< Trait > >;
 	using Items = typename Trait::template Vector< ItemSharedPointer >;
 
 	const Items & items() const
@@ -503,7 +506,7 @@ public:
 		return ItemType::Heading;
 	}
 
-	using ParagraphSharedPointer = typename Trait::template SharedPointer< Paragraph< Trait > >;
+	using ParagraphSharedPointer = std::shared_ptr< Paragraph< Trait > >;
 
 	ParagraphSharedPointer text() const
 	{
@@ -708,7 +711,7 @@ public:
 		return ItemType::Image;
 	}
 
-	using ParagraphSharedPointer = typename Trait::template SharedPointer< Paragraph< Trait > >;
+	using ParagraphSharedPointer = std::shared_ptr< Paragraph< Trait > >;
 
 	const typename Trait::String & url() const
 	{
@@ -808,8 +811,8 @@ public:
 		m_opts = o;
 	}
 
-	using ImageSharedPointer = typename Trait::template SharedPointer< Image< Trait > >;
-	using ParagraphSharedPointer = typename Trait::template SharedPointer< Paragraph< Trait > >;
+	using ImageSharedPointer = std::shared_ptr< Image< Trait > >;
+	using ParagraphSharedPointer = std::shared_ptr< Paragraph< Trait > >;
 
 	ImageSharedPointer img() const
 	{
@@ -935,7 +938,7 @@ public:
 		return ItemType::TableRow;
 	}
 
-	using TableCellSharedPointer = typename Trait::template SharedPointer< TableCell< Trait > >;
+	using TableCellSharedPointer = std::shared_ptr< TableCell< Trait > >;
 	using Cells = typename  Trait::template Vector< TableCellSharedPointer >;
 
 	const Cells & cells() const
@@ -978,7 +981,7 @@ public:
 		return ItemType::Table;
 	}
 
-	using TableRowSharedPointer = typename Trait::template SharedPointer< TableRow< Trait > >;
+	using TableRowSharedPointer = std::shared_ptr< TableRow< Trait > >;
 	using Rows = typename Trait::template Vector< TableRowSharedPointer >;
 
 	const Rows & rows() const
@@ -1106,7 +1109,7 @@ public:
 		return ItemType::Document;
 	}
 
-	using FootnoteSharedPointer = typename Trait::template SharedPointer< Footnote< Trait > >;
+	using FootnoteSharedPointer = std::shared_ptr< Footnote< Trait > >;
 	using Footnotes = typename Trait::template Map< typename Trait::String,
 		FootnoteSharedPointer >;
 
@@ -1121,7 +1124,7 @@ public:
 		m_footnotes.insert( { id, fn } );
 	}
 
-	using LinkSharedPointer = typename Trait::template SharedPointer< Link< Trait > >;
+	using LinkSharedPointer = std::shared_ptr< Link< Trait > >;
 	using LabeledLinks = typename Trait::template Map< typename Trait::String,
 		LinkSharedPointer >;
 
@@ -1135,7 +1138,7 @@ public:
 		m_labeledLinks.insert( { label, lnk } );
 	}
 
-	using HeadingSharedPointer = typename Trait::template SharedPointer< Heading< Trait > >;
+	using HeadingSharedPointer = std::shared_ptr< Heading< Trait > >;
 	using LabeledHeadings = typename Trait::template Map< typename Trait::String,
 		HeadingSharedPointer >;
 

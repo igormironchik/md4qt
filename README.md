@@ -1,4 +1,4 @@
-[![Build](https://github.com/igormironchik/md4qt/workflows/build/badge.svg)](https://github.com/igormironchik/md4qt/actions)[![codecov](https://codecov.io/gh/igormironchik/md4qt/branch/dev/graph/badge.svg)](https://codecov.io/gh/igormironchik/md4qt)[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Build](https://github.com/igormironchik/md4qt/workflows/build/badge.svg)](https://github.com/igormironchik/md4qt/actions)[![codecov](https://codecov.io/gh/igormironchik/md4qt/branch/main/graph/badge.svg)](https://codecov.io/gh/igormironchik/md4qt)[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 `md4qt` is a header-only C++ library for parsing Markdown.
 
@@ -12,7 +12,6 @@ This library parses Markdown into tree structure.
 ```cpp
 #define MD4QT_QT_SUPPORT
 #include <md4qt/parser.hpp>
-#include <md4qt/traits.hpp>
 
 int main()
 {
@@ -26,7 +25,7 @@ int main()
         {
             case MD::ItemType::Anchor :
             {
-                auto a = static_cast< MD::Anchor< MD::QStringTrait >* > ( it->data() );
+                auto a = static_cast< MD::Anchor< MD::QStringTrait >* > ( it->get() );
                 qDebug() << a->label();
             }
                 break;
@@ -75,8 +74,10 @@ labeled links, look:
 
    QString url = item->url();
 
-   if( doc->labeledLinks().contains( url ) )
-       url = doc->labeledLinks()[ url ]->url();
+   const auto it = doc->labeledLinks().find( url );
+   
+   if( it != doc->labeledLinks().cend() )
+       url = it->second->url();
    ```
 
 **What is the second argument of `MD::Parser::parse()`?**
