@@ -32,9 +32,9 @@
 #define MD4QT_MD_PARSER_HPP_INCLUDED
 
 // md4qt include.
+#include "traits.hpp"
 #include "doc.hpp"
 #include "entities_map.hpp"
-#include "traits.hpp"
 #include "utils.hpp"
 
 #ifdef MD4QT_QT_SUPPORT
@@ -945,6 +945,31 @@ public:
 		stream.read( &content[ 0 ], ssize );
 		content[ ssize ] = 0;
 
+		const auto z = std::count( content.cbegin(), content.cend(), 0 );
+
+		if( z > 1 )
+		{
+			std::vector< char > tmp;
+			tmp.resize( content.size() + ( z - 1 ) * 2 );
+
+			for( size_t i = 0, j = 0; i < content.size() - 1; ++i, ++j )
+			{
+				if( content[ i ] == 0 )
+				{
+					// 0xFFFD - replacement character in UTF-8.
+					tmp[ j++ ] = 0xEF;
+					tmp[ j++ ] = 0xBF;
+					tmp[ j ] = 0xBD;
+				}
+				else
+					tmp[ j ] = content[ i ];
+			}
+
+			tmp[ tmp.size() - 1 ] = 0;
+
+			std::swap( content, tmp );
+		}
+
 		m_str = UnicodeString::fromUTF8( &content[ 0 ] );
 	}
 
@@ -1523,6 +1548,8 @@ Parser< UnicodeStringTrait >::parseFile( const UnicodeString & fileName,
 					parseStream( file, UnicodeString::fromUTF8( workingDirectory ),
 						UnicodeString::fromUTF8( fileName ),
 						recursive, doc, ext, parentLinks );
+
+					file.close();
 				}
 			}
 		}
@@ -4195,11 +4222,18 @@ template<>
 inline bool isEmail< UnicodeStringTrait >( const UnicodeString & url )
 {
 	UParseError er;
-	UErrorCode status;
+	er.line = 0;
+	er.offset = 0;
+	er.preContext[ 0 ] = 0;
+	er.postContext[ 0 ] = 0;
 
-	return icu::RegexPattern::matches( icu::UnicodeString::fromUTF8(
-		u8"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
-		  "(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$" ), url, er, status );
+	UErrorCode status = U_ZERO_ERROR;
+
+	static const icu::UnicodeString pattern = icu::UnicodeString::fromUTF8(
+		"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
+		"(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$" );
+
+	return icu::RegexPattern::matches( pattern, url, er, status );
 }
 
 #endif

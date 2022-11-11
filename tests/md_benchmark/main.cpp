@@ -29,6 +29,7 @@
 */
 
 #define MD4QT_QT_SUPPORT
+#define MD4QT_ICU_STL_SUPPORT
 
 #include <md4qt/doc.hpp>
 #include <md4qt/parser.hpp>
@@ -39,6 +40,7 @@
 #include <chrono>
 #include <iostream>
 #include <vector>
+#include <memory>
 
 #include <QFile>
 
@@ -46,8 +48,8 @@
 
 
 struct DATA {
-	QSharedPointer< MD::Document< MD::QStringTrait > > * doc;
-	std::vector< QSharedPointer< MD::Item< MD::QStringTrait > > > elems;
+	std::shared_ptr< MD::Document< MD::QStringTrait > > * doc;
+	std::vector< std::shared_ptr< MD::Item< MD::QStringTrait > > > elems;
 };
 
 
@@ -55,7 +57,7 @@ int enter_block( MD_BLOCKTYPE type, void * data, void * doc )
 {
 	auto d = reinterpret_cast< DATA* >( doc );
 
-	QSharedPointer< MD::Item< MD::QStringTrait > > item;
+	std::shared_ptr< MD::Item< MD::QStringTrait > > item;
 
 	switch( type )
 	{
@@ -133,7 +135,7 @@ int enter_block( MD_BLOCKTYPE type, void * data, void * doc )
 				case MD::ItemType::ListItem :
 				case MD::ItemType::List :
 				{
-					auto * b = static_cast< MD::Block< MD::QStringTrait >* > ( d->elems.back().data() );
+					auto * b = static_cast< MD::Block< MD::QStringTrait >* > ( d->elems.back().get() );
 
 					b->appendItem( item );
 				}
@@ -141,17 +143,17 @@ int enter_block( MD_BLOCKTYPE type, void * data, void * doc )
 
 				case MD::ItemType::Table :
 				{
-					auto * t = static_cast< MD::Table< MD::QStringTrait >* > ( d->elems.back().data() );
+					auto * t = static_cast< MD::Table< MD::QStringTrait >* > ( d->elems.back().get() );
 
-					t->appendRow( qSharedPointerCast< MD::TableRow< MD::QStringTrait > > ( item ) );
+					t->appendRow( std::static_pointer_cast< MD::TableRow< MD::QStringTrait > > ( item ) );
 				}
 					break;
 
 				case MD::ItemType::TableRow :
 				{
-					auto * t = static_cast< MD::TableRow< MD::QStringTrait >* > ( d->elems.back().data() );
+					auto * t = static_cast< MD::TableRow< MD::QStringTrait >* > ( d->elems.back().get() );
 
-					t->appendCell( qSharedPointerCast< MD::TableCell< MD::QStringTrait > > ( item ) );
+					t->appendCell( std::static_pointer_cast< MD::TableCell< MD::QStringTrait > > ( item ) );
 				}
 					break;
 
@@ -203,7 +205,7 @@ int enter_span( MD_SPANTYPE type, void * data, void * doc )
 	{
 		case MD_SPAN_CODE :
 		{
-			QSharedPointer< MD::Item< MD::QStringTrait > > item(
+			std::shared_ptr< MD::Item< MD::QStringTrait > > item(
 				new MD::Code< MD::QStringTrait >( QStringLiteral( "" ), true ) );
 
 			if( d->elems.empty() )
@@ -217,7 +219,7 @@ int enter_span( MD_SPANTYPE type, void * data, void * doc )
 					case MD::ItemType::ListItem :
 					case MD::ItemType::List :
 					{
-						auto * b = static_cast< MD::Block< MD::QStringTrait >* > ( d->elems.back().data() );
+						auto * b = static_cast< MD::Block< MD::QStringTrait >* > ( d->elems.back().get() );
 
 						b->appendItem( item );
 					}
@@ -232,7 +234,7 @@ int enter_span( MD_SPANTYPE type, void * data, void * doc )
 
 		default :
 		{
-			QSharedPointer< MD::Item< MD::QStringTrait > > item( new MD::Text< MD::QStringTrait > );
+			std::shared_ptr< MD::Item< MD::QStringTrait > > item( new MD::Text< MD::QStringTrait > );
 
 			if( d->elems.empty() )
 				(*d->doc)->appendItem( item );
@@ -245,7 +247,7 @@ int enter_span( MD_SPANTYPE type, void * data, void * doc )
 					case MD::ItemType::ListItem :
 					case MD::ItemType::List :
 					{
-						auto * b = static_cast< MD::Block< MD::QStringTrait >* > ( d->elems.back().data() );
+						auto * b = static_cast< MD::Block< MD::QStringTrait >* > ( d->elems.back().get() );
 
 						b->appendItem( item );
 					}
@@ -294,8 +296,8 @@ int text( MD_TEXTTYPE type, const MD_CHAR * data, MD_SIZE size, void * doc )
 
 		case MD::ItemType::Paragraph :
 		{
-			auto * p = static_cast< MD::Paragraph< MD::QStringTrait >* > ( d->elems.back().data() );
-			QSharedPointer< MD::Text< MD::QStringTrait > > t( new MD::Text< MD::QStringTrait > );
+			auto * p = static_cast< MD::Paragraph< MD::QStringTrait >* > ( d->elems.back().get() );
+			std::shared_ptr< MD::Text< MD::QStringTrait > > t( new MD::Text< MD::QStringTrait > );
 			t->setText( txt );
 			p->appendItem( t );
 		}
@@ -303,10 +305,10 @@ int text( MD_TEXTTYPE type, const MD_CHAR * data, MD_SIZE size, void * doc )
 
 		case MD::ItemType::Heading :
 		{
-			auto * h = static_cast< MD::Heading< MD::QStringTrait >* > ( d->elems.back().data() );
-			QSharedPointer< MD::Paragraph< MD::QStringTrait > > p(
+			auto * h = static_cast< MD::Heading< MD::QStringTrait >* > ( d->elems.back().get() );
+			std::shared_ptr< MD::Paragraph< MD::QStringTrait > > p(
 				new MD::Paragraph< MD::QStringTrait > );
-			QSharedPointer< MD::Text< MD::QStringTrait > > t( new MD::Text< MD::QStringTrait > );
+			std::shared_ptr< MD::Text< MD::QStringTrait > > t( new MD::Text< MD::QStringTrait > );
 			t->setText( txt );
 			p->appendItem( t );
 			h->setText( p );
@@ -326,7 +328,7 @@ int main( int argc, char ** argv )
 	{
 		const auto start = std::chrono::high_resolution_clock::now();
 
-		QSharedPointer< MD::Document< MD::QStringTrait > > doc( new MD::Document< MD::QStringTrait > );
+		std::shared_ptr< MD::Document< MD::QStringTrait > > doc( new MD::Document< MD::QStringTrait > );
 
 		QFile file( QStringLiteral( "tests/manual/complex.md" ) );
 
@@ -363,6 +365,21 @@ int main( int argc, char ** argv )
 		const auto d = std::chrono::duration_cast< std::chrono::microseconds > ( end - start );
 
 		std::cout << "md4c parsing: " << d.count() << " us" << std::endl;
+	}
+
+	// md4qt
+	{
+		const auto start = std::chrono::high_resolution_clock::now();
+
+		MD::Parser< MD::UnicodeStringTrait > parser;
+
+		const auto doc = parser.parse( MD::UnicodeString( "tests/manual/complex.md" ), false );
+
+		const auto end = std::chrono::high_resolution_clock::now();
+
+		const auto d = std::chrono::duration_cast< std::chrono::microseconds > ( end - start );
+
+		std::cout << "md4qt with ICU parsing: " << d.count() << " us" << std::endl;
 	}
 
 	// md4qt

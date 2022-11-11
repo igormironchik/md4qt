@@ -221,6 +221,11 @@ public:
 	{
 	}
 
+	UnicodeString( const char16_t * str )
+		:	icu::UnicodeString( str )
+	{
+	}
+
 	UnicodeString( const UnicodeChar & ch )
 		:	icu::UnicodeString( 1, (UChar32) ch, 1 )
 	{
