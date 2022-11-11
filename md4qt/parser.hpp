@@ -47,6 +47,16 @@
 
 #endif // MD4QT_QT_SUPPORT
 
+#ifdef MD4QT_ICU_STL_SUPPORT
+
+// ICU include.
+#include <unicode/regex.h>
+
+// C++ include.
+#include <exception>
+
+#endif // MD4QT_ICU_STL_SUPPORT
+
 // C++ include.
 #include <set>
 #include <vector>
@@ -930,9 +940,10 @@ public:
 
 		stream.seekg( 0, std::ios::end );
 		const auto ssize = stream.tellg();
-		content.reserve( ssize );
+		content.resize( ssize );
 		stream.seekg( 0, std::ios::beg );
 		stream.read( &content[ 0 ], ssize );
+		content.push_back( 0 );
 
 		m_str = UnicodeString::fromUTF8( &content[ 0 ] );
 	}
@@ -1313,6 +1324,8 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 				if( type == BlockType::List || type == BlockType::ListWithFirstEmptyLine )
 					indents.insert( currentIndent );
+				else if( type == BlockType::Code )
+					startOfCode = startSequence< Trait >( line );
 			}
 
 			fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
@@ -1356,7 +1369,14 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				type = lineType;
 
 				if( !line.isEmpty() && ns < line.size() )
+				{
+					if( type == BlockType::List || type == BlockType::ListWithFirstEmptyLine )
+						indents.insert( currentIndent );
+					else if( type == BlockType::Code )
+						startOfCode = startSequence< Trait >( line );
+
 					fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+				}
 			}
 		}
 		// End of code block.
@@ -1478,27 +1498,34 @@ Parser< UnicodeStringTrait >::parseFile( const UnicodeString & fileName,
 		std::string fn;
 		fileName.toUTF8String( fn );
 
-		auto e = UnicodeString::fromUTF8( std::filesystem::path( fn ).extension().u8string() );
+		try {
+			auto e = UnicodeString::fromUTF8( std::filesystem::path( fn ).extension().u8string() );
 
-		if( !e.isEmpty() )
-			e.remove( 0, 1 );
+			if( !e.isEmpty() )
+				e.remove( 0, 1 );
 
-		if( std::find( ext.cbegin(), ext.cend(), e.toLower() ) != ext.cend() )
-		{
-			std::ifstream file( fn );
-
-			if( file.good() )
+			if( std::find( ext.cbegin(), ext.cend(), e.toLower() ) != ext.cend() )
 			{
-				auto path = std::filesystem::path( fn, std::filesystem::path::generic_format );
-				auto workingDirectory = path.remove_filename().u8string();
+				std::ifstream file( fn );
 
-				if( !workingDirectory.empty() )
-					workingDirectory.erase( workingDirectory.size() - 1, 1 );
+				if( file.good() )
+				{
+					auto path = std::filesystem::canonical(
+						std::filesystem::path( fn, std::filesystem::path::generic_format ) );
+					auto fileName = path.filename().u8string();
+					auto workingDirectory = path.remove_filename().u8string();
 
-				parseStream( file, UnicodeString::fromUTF8( workingDirectory ),
-					UnicodeString::fromUTF8( path.filename().u8string() ),
-					recursive, doc, ext, parentLinks );
+					if( !workingDirectory.empty() )
+						workingDirectory.erase( workingDirectory.size() - 1, 1 );
+
+					parseStream( file, UnicodeString::fromUTF8( workingDirectory ),
+						UnicodeString::fromUTF8( fileName ),
+						recursive, doc, ext, parentLinks );
+				}
 			}
+		}
+		catch( const std::exception & )
+		{
 		}
 	}
 }
@@ -1529,9 +1556,11 @@ void resolveLinks< QStringTrait >( QStringList & linksToParse,
 				continue;
 		}
 
-		QFileInfo nextFile( nextFileName );
-
-		*it = nextFile.absoluteFilePath();
+		if( typename QStringTrait::Url( nextFileName ).isRelative() )
+		{
+			if( QStringTrait::fileExists( nextFileName, "" ) )
+				*it = QStringTrait::absoluteFilePath( nextFileName );
+		}
 	}
 }
 
@@ -1557,7 +1586,11 @@ void resolveLinks< UnicodeStringTrait >( std::vector< UnicodeString > & linksToP
 				continue;
 		}
 
-		*it = UnicodeStringTrait::absoluteFilePath( nextFileName );
+		if( typename UnicodeStringTrait::Url( nextFileName ).isRelative() )
+		{
+			if( UnicodeStringTrait::fileExists( nextFileName, "" ) )
+				*it = UnicodeStringTrait::absoluteFilePath( nextFileName );
+		}
 	}
 }
 
@@ -4152,7 +4185,12 @@ inline bool isEmail< QStringTrait >( const QString & url )
 template<>
 inline bool isEmail< UnicodeStringTrait >( const UnicodeString & url )
 {
-	return false;
+	UParseError er;
+	UErrorCode status;
+
+	return icu::RegexPattern::matches( icu::UnicodeString::fromUTF8(
+		u8"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
+		  "(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$" ), url, er, status );
 }
 
 #endif
@@ -4561,7 +4599,7 @@ createShortcutLink( const typename Trait::String & text,
 				doNotCreateTextOnFail, lastLine, lastPos );
 
 			if( link.get() )
-			{
+			{	
 				po.linksToParse.push_back( url );
 				po.parent->appendItem( link );
 

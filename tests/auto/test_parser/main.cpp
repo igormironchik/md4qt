@@ -1325,7 +1325,7 @@ TEST_CASE( "030" )
 #ifdef MD4QT_QT_SUPPORT
 		QDir().absolutePath()
 #else
-		std::filesystem::current_path().u8string()
+		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
 #endif
 		+ u8"/tests/parser/data/";
 
@@ -1369,12 +1369,12 @@ TEST_CASE( "031" )
 #ifdef MD4QT_QT_SUPPORT
 		QDir().absolutePath()
 #else
-		std::filesystem::current_path().u8string()
+		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
 #endif
 		+ u8"/tests/parser/data";
 
 	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 9 );
+	REQUIRE( doc->items().size() == 8 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 
@@ -2164,7 +2164,7 @@ TEST_CASE( "042" )
 #ifdef MD4QT_QT_SUPPORT
 		QDir().absolutePath()
 #else
-		std::filesystem::current_path().u8string()
+		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
 #endif
 		+ u8"/tests/parser/data";
 
@@ -2226,7 +2226,7 @@ TEST_CASE( "042-1" )
 #ifdef MD4QT_QT_SUPPORT
 		QDir().absolutePath()
 #else
-		std::filesystem::current_path().u8string()
+		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
 #endif
 		+ u8"/tests/parser/data";
 
@@ -2316,7 +2316,7 @@ TEST_CASE( "045" )
 #ifdef MD4QT_QT_SUPPORT
 		QDir().absolutePath()
 #else
-		std::filesystem::current_path().u8string()
+		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
 #endif
 		+ u8"/tests/parser/data/";
 
@@ -2407,7 +2407,7 @@ TEST_CASE( "046" )
 #ifdef MD4QT_QT_SUPPORT
 		QDir().absolutePath()
 #else
-		std::filesystem::current_path().u8string()
+		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
 #endif
 		+ u8"/tests/parser/data/";
 
@@ -2595,7 +2595,7 @@ TEST_CASE( "051" )
 #ifdef MD4QT_QT_SUPPORT
 		QDir().absolutePath()
 #else
-		std::filesystem::current_path().u8string()
+		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
 #endif
 		+ u8"/tests/parser/data";
 
@@ -2691,7 +2691,7 @@ TEST_CASE( "055" )
 #ifdef MD4QT_QT_SUPPORT
 		QDir().absolutePath()
 #else
-		std::filesystem::current_path().u8string()
+		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
 #endif
 		+ u8"/tests/parser/data/";
 

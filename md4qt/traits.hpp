@@ -100,7 +100,24 @@ public:
 
 	inline bool isSpace() const
 	{
-		return std::isspace( static_cast< unsigned char > ( m_ch ) );
+		bool unicodeSpace = false;
+
+		const auto type = u_charType( m_ch );
+
+		switch( type )
+		{
+			case U_SPACE_SEPARATOR :
+			case U_LINE_SEPARATOR :
+			case U_PARAGRAPH_SEPARATOR :
+				unicodeSpace = true;
+				break;
+
+			default :
+				break;
+		}
+
+		return m_ch == 0x20 || ( m_ch <= 0x0D && m_ch >= 0x09 ) ||
+			( m_ch > 127 && ( m_ch == 0x85 || m_ch == 0xA0 || unicodeSpace ) );
 	}
 
 	inline bool isDigit() const
@@ -343,12 +360,10 @@ public:
 
 		while( true )
 		{
-			while( i < length() &&
-				std::isspace( static_cast< unsigned char > ( char32At( i ) ) ) )
+			while( i < length() && UnicodeChar( char32At( i ) ).isSpace() )
 					++i;
 
-			while( i != length() &&
-				!std::isspace( static_cast< unsigned char > ( char32At( i ) ) ) )
+			while( i != length() && !UnicodeChar( char32At( i ) ).isSpace() )
 			{
 				result.append( UnicodeChar( char32At( i ) ) );
 				++i;
@@ -435,7 +450,7 @@ public:
 	UnicodeString right( long long int n ) const
 	{
 		icu::UnicodeString tmp;
-		extract( length() - 1, n, tmp );
+		extract( length() - n, n, tmp );
 
 		return tmp;
 	}
@@ -456,7 +471,7 @@ public:
 
 	UnicodeString toLower() const
 	{
-		auto tmp = *this;
+		icu::UnicodeString tmp = *this;
 		tmp.toLower();
 
 		return tmp;
@@ -475,8 +490,21 @@ public:
 
 class UrlUri {
 public:
-	explicit UrlUri( const UnicodeString & uri )
+	explicit UrlUri( const UnicodeString & uriStr )
+		:	m_valid( false )
+		,	m_relative( false )
 	{
+		UriUriA uri;
+		std::string uriString;
+		uriStr.toUTF8String( uriString );
+
+		if( uriParseSingleUriA( &uri, uriString.c_str(), NULL ) == URI_SUCCESS )
+		{
+			m_valid = true;
+			m_relative = !( uri.scheme.first && uri.scheme.afterLast );
+
+			uriFreeUriMembersA( &uri );
+		}
 	}
 
 	~UrlUri()
@@ -485,15 +513,17 @@ public:
 
 	bool isValid() const
 	{
-		return false;
+		return m_valid;
 	}
 
 	bool isRelative() const
 	{
-		return false;
+		return m_relative;
 	}
 
 private:
+	bool m_valid;
+	bool m_relative;
 }; // class UrlUri
 
 
@@ -531,7 +561,11 @@ struct UnicodeStringTrait {
 		std::string path;
 		( workingPath + fileName ).toUTF8String( path );
 
-		return std::filesystem::exists( path );
+		std::error_code er;
+
+		const auto result = std::filesystem::exists( path, er );
+
+		return ( er ? false : result );
 	}
 
 	//! \return Absolute file path.
@@ -539,9 +573,10 @@ struct UnicodeStringTrait {
 	{
 		std::string tmp;
 		path.toUTF8String( tmp );
-		std::filesystem::path p( tmp );
+		std::error_code er;
+		std::filesystem::path p = std::filesystem::canonical( tmp, er );
 
-		return UnicodeString::fromUTF8( p.lexically_normal().u8string() );
+		return ( er ? "" : UnicodeString::fromUTF8( p.lexically_normal().u8string() ) );
 	}
 }; // struct UnicodeStringTrait
 

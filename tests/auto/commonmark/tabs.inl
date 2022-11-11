@@ -269,7 +269,7 @@ TEST_CASE( "010" )
 #ifdef MD4QT_QT_SUPPORT
 			QDir().absolutePath()
 #else
-			std::filesystem::current_path().u8string()
+			std::filesystem::canonical( std::filesystem::current_path() ).u8string()
 #endif
 			+ u8"/tests/commonmark/0.30/010.md";
 	REQUIRE( h->text().get() );
