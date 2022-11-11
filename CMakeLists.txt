@@ -10,6 +10,9 @@ option( BUILD_MD4QT_TESTS "Build tests? Default ON." ON )
 option( BUILD_MD4QT_QT_TESTS "Build tests with Qt support? Default ON." ON )
 option( BUILD_MD4QT_STL_TESTS "Build tests with STL support? Default OFF." OFF )
 
+set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_BINARY_DIR} )
+set( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${CMAKE_CURRENT_BINARY_DIR} )
+
 if( NOT CMAKE_BUILD_TYPE )
 	set( CMAKE_BUILD_TYPE "Release"
 		CACHE STRING "Choose the type of build."
@@ -21,11 +24,6 @@ set( CMAKE_CXX_STANDARD 17 )
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
 
 project( md4qt )
-
-if( MD4QT_USE_CONAN )
-	include( ${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake )
-	conan_basic_setup()
-endif()
 
 if( ${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME} )
 
