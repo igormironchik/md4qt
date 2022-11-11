@@ -188,14 +188,9 @@ public:
 		return m_ch == other.m_ch;
 	}
 
-	bool operator == ( UChar32 ch ) const
+	bool operator != ( const UnicodeChar & other ) const
 	{
-		return m_ch == ch;
-	}
-
-	bool operator != ( UChar32 ch ) const
-	{
-		return m_ch != ch;
+		return m_ch != other.m_ch;
 	}
 
 private:
@@ -375,7 +370,7 @@ public:
 			result.append( UnicodeChar( ' ' ) );
 		}
 
-		if( !result.isEmpty() && result[ result.size() - 1 ] == ' ' )
+		if( !result.isEmpty() && result[ result.size() - 1 ] == UnicodeChar( ' ' ) )
 			result.remove( result.size() - 1, 1 );
 
 		return result;
@@ -574,9 +569,11 @@ struct UnicodeStringTrait {
 		std::string tmp;
 		path.toUTF8String( tmp );
 		std::error_code er;
-		std::filesystem::path p = std::filesystem::canonical( tmp, er );
+		auto p = std::filesystem::canonical( tmp, er ).u8string();
 
-		return ( er ? "" : UnicodeString::fromUTF8( p.lexically_normal().u8string() ) );
+		std::replace( p.begin(), p.end(), '\\', '/' );
+
+		return ( er ? "" : UnicodeString::fromUTF8( p ) );
 	}
 }; // struct UnicodeStringTrait
 

@@ -65,7 +65,7 @@ TEST_CASE( "013" )
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"\\ \\A\\a\\ \\3\\φ\\«" );
+	REQUIRE( t->text() == TRAIT::String( (const char *) u8"\\ \\A\\a\\ \\3\\φ\\«" ) );
 }
 
 TEST_CASE( "014" )

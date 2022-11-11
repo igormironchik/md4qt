@@ -264,7 +264,7 @@ TEST_CASE( "361" )
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"пристаням_стремятся_" );
+	REQUIRE( t->text() == TRAIT::String( (const char *) u8"пристаням_стремятся_" ) );
 }
 
 TEST_CASE( "362" )
@@ -507,7 +507,7 @@ TEST_CASE( "374" )
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"_пристаням_стремятся" );
+	REQUIRE( t->text() == TRAIT::String( (const char *) u8"_пристаням_стремятся" ) );
 }
 
 TEST_CASE( "375" )
@@ -750,7 +750,7 @@ TEST_CASE( "387" )
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"пристаням__стремятся__" );
+	REQUIRE( t->text() == TRAIT::String( (const char *) u8"пристаням__стремятся__" ) );
 }
 
 TEST_CASE( "388" )
@@ -1071,7 +1071,7 @@ TEST_CASE( "400" )
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"__пристаням__стремятся" );
+	REQUIRE( t->text() == TRAIT::String( (const char *) u8"__пристаням__стремятся" ) );
 }
 
 TEST_CASE( "401" )

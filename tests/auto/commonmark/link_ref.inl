@@ -376,10 +376,10 @@ TEST_CASE( "206" )
 	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( l->img()->isEmpty() );
 	REQUIRE( l->opts() == MD::TextWithoutFormat );
-	REQUIRE( l->text() == u8"αγω" );
+	REQUIRE( l->text() == TRAIT::String( (const char *) u8"αγω" ) );
 	const auto lit = doc->labeledLinks().find( l->url() );
 	REQUIRE( lit != doc->labeledLinks().cend() );
-	REQUIRE( lit->second->url() == u8"/φου" );
+	REQUIRE( lit->second->url() == TRAIT::String( (const char *) u8"/φου" ) );
 }
 
 TEST_CASE( "207" )

@@ -413,13 +413,20 @@ TEST_CASE( "500" )
 		REQUIRE( l->opts() == MD::TextWithoutFormat );
 		REQUIRE( l->text() == u8"link" );
 
-		const typename TRAIT::String fn = u8"/" +
+		typename TRAIT::String fn = u8"/" +
 #ifdef MD4QT_QT_SUPPORT
 				QDir().absolutePath()
 #else
 				std::filesystem::canonical( std::filesystem::current_path() ).u8string()
 #endif
 				+ u8"/tests/commonmark/0.30/500.md";
+
+#ifndef MD4QT_QT_SUPPORT
+		std::string tmp;
+		fn.toUTF8String( tmp );
+		std::replace( tmp.begin(), tmp.end(), '\\', '/' );
+		fn = icu::UnicodeString::fromUTF8( tmp );
+#endif
 
 		REQUIRE( l->url() == u8"#fragment" + fn );
 	}

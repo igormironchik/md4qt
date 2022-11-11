@@ -1321,13 +1321,20 @@ TEST_CASE( "030" )
 
 	auto i1 = static_cast< MD::Image< TRAIT >* > ( p->items().at( 1 ).get() );
 
-	const typename TRAIT::String wd =
+	typename TRAIT::String wd =
 #ifdef MD4QT_QT_SUPPORT
 		QDir().absolutePath()
 #else
 		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
 #endif
 		+ u8"/tests/parser/data/";
+
+#ifndef MD4QT_QT_SUPPORT
+	std::string tmp;
+	wd.toUTF8String( tmp );
+	std::replace( tmp.begin(), tmp.end(), '\\', '/' );
+	wd = icu::UnicodeString::fromUTF8( tmp );
+#endif
 
 	REQUIRE( i1->text() == u8"Image 1" );
 	REQUIRE( i1->url() == wd + u8"a.jpg" );
@@ -1365,13 +1372,20 @@ TEST_CASE( "031" )
 
 	auto doc = parser.parse( "tests/parser/data/031.md" );
 
-	const typename TRAIT::String wd =
+	typename TRAIT::String wd =
 #ifdef MD4QT_QT_SUPPORT
 		QDir().absolutePath()
 #else
 		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
 #endif
 		+ u8"/tests/parser/data";
+
+#ifndef MD4QT_QT_SUPPORT
+	std::string tmp;
+	wd.toUTF8String( tmp );
+	std::replace( tmp.begin(), tmp.end(), '\\', '/' );
+	wd = icu::UnicodeString::fromUTF8( tmp );
+#endif
 
 	REQUIRE( doc->isEmpty() == false );
 	REQUIRE( doc->items().size() == 8 );
@@ -2160,13 +2174,20 @@ TEST_CASE( "042" )
 
 	REQUIRE( l->items().size() == 2 );
 
-	const typename TRAIT::String wd =
+	typename TRAIT::String wd =
 #ifdef MD4QT_QT_SUPPORT
 		QDir().absolutePath()
 #else
 		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
 #endif
 		+ u8"/tests/parser/data";
+
+#ifndef MD4QT_QT_SUPPORT
+	std::string tmp;
+	wd.toUTF8String( tmp );
+	std::replace( tmp.begin(), tmp.end(), '\\', '/' );
+	wd = icu::UnicodeString::fromUTF8( tmp );
+#endif
 
 	for( int i = 0; i < 2; ++i )
 	{
@@ -2222,13 +2243,20 @@ TEST_CASE( "042-1" )
 
 	REQUIRE( l->items().size() == 2 );
 
-	const typename TRAIT::String wd =
+	typename TRAIT::String wd =
 #ifdef MD4QT_QT_SUPPORT
 		QDir().absolutePath()
 #else
 		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
 #endif
 		+ u8"/tests/parser/data";
+
+#ifndef MD4QT_QT_SUPPORT
+	std::string tmp;
+	wd.toUTF8String( tmp );
+	std::replace( tmp.begin(), tmp.end(), '\\', '/' );
+	wd = icu::UnicodeString::fromUTF8( tmp );
+#endif
 
 	for( int i = 0; i < 2; ++i )
 	{
@@ -2312,13 +2340,20 @@ TEST_CASE( "045" )
 
 	REQUIRE( doc->footnotesMap().size() == 1 );
 
-	const typename TRAIT::String wd =
+	typename TRAIT::String wd =
 #ifdef MD4QT_QT_SUPPORT
 		QDir().absolutePath()
 #else
 		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
 #endif
 		+ u8"/tests/parser/data/";
+
+#ifndef MD4QT_QT_SUPPORT
+	std::string tmp;
+	wd.toUTF8String( tmp );
+	std::replace( tmp.begin(), tmp.end(), '\\', '/' );
+	wd = icu::UnicodeString::fromUTF8( tmp );
+#endif
 
 	const typename TRAIT::String label = u8"#^footnote/" + wd + u8"045.md";
 
@@ -2403,13 +2438,20 @@ TEST_CASE( "046" )
 	REQUIRE( t->text() == u8"Heading 3" );
 	REQUIRE( h->isLabeled() );
 
-	const typename TRAIT::String wd =
+	typename TRAIT::String wd =
 #ifdef MD4QT_QT_SUPPORT
 		QDir().absolutePath()
 #else
 		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
 #endif
 		+ u8"/tests/parser/data/";
+
+#ifndef MD4QT_QT_SUPPORT
+	std::string tmp;
+	wd.toUTF8String( tmp );
+	std::replace( tmp.begin(), tmp.end(), '\\', '/' );
+	wd = icu::UnicodeString::fromUTF8( tmp );
+#endif
 
 	const typename TRAIT::String label = u8"#heading-3/" + wd + u8"046.md";
 
@@ -2591,13 +2633,20 @@ TEST_CASE( "051" )
 	MD::Parser< TRAIT > parser;
 	auto doc = parser.parse( "tests/parser/data/051.md" );
 
-	const typename TRAIT::String wd =
+	typename TRAIT::String wd =
 #ifdef MD4QT_QT_SUPPORT
 		QDir().absolutePath()
 #else
 		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
 #endif
 		+ u8"/tests/parser/data";
+
+#ifndef MD4QT_QT_SUPPORT
+	std::string tmp;
+	wd.toUTF8String( tmp );
+	std::replace( tmp.begin(), tmp.end(), '\\', '/' );
+	wd = icu::UnicodeString::fromUTF8( tmp );
+#endif
 
 	REQUIRE( doc->items().size() == 8 );
 
@@ -2687,13 +2736,20 @@ TEST_CASE( "055" )
 
 	REQUIRE( doc->footnotesMap().size() == 1 );
 
-	const typename TRAIT::String wd =
+	typename TRAIT::String wd =
 #ifdef MD4QT_QT_SUPPORT
 		QDir().absolutePath()
 #else
 		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
 #endif
 		+ u8"/tests/parser/data/";
+
+#ifndef MD4QT_QT_SUPPORT
+	std::string tmp;
+	wd.toUTF8String( tmp );
+	std::replace( tmp.begin(), tmp.end(), '\\', '/' );
+	wd = icu::UnicodeString::fromUTF8( tmp );
+#endif
 
 	const typename TRAIT::String label = u8"#^footnote/" + wd + u8"055.md";
 

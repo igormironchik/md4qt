@@ -80,7 +80,7 @@ TEST_CASE( "003" )
 	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( c->isInlined() == false );
 	REQUIRE( c->syntax().isEmpty() );
-	REQUIRE( c->text() == u8"a    a\nὐ    a" );
+	REQUIRE( c->text() == TRAIT::String( (const char *) u8"a    a\nὐ    a" ) );
 }
 
 TEST_CASE( "004" )
@@ -265,13 +265,21 @@ TEST_CASE( "010" )
 
 	auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( h->isLabeled() );
-	const typename TRAIT::String fn = u8"/" +
+	typename TRAIT::String fn = u8"/" +
 #ifdef MD4QT_QT_SUPPORT
 			QDir().absolutePath()
 #else
 			std::filesystem::canonical( std::filesystem::current_path() ).u8string()
 #endif
 			+ u8"/tests/commonmark/0.30/010.md";
+
+#ifndef MD4QT_QT_SUPPORT
+	std::string tmp;
+	fn.toUTF8String( tmp );
+	std::replace( tmp.begin(), tmp.end(), '\\', '/' );
+	fn = icu::UnicodeString::fromUTF8( tmp );
+#endif
+
 	REQUIRE( h->text().get() );
 	auto p = h->text().get();
 	REQUIRE( p->items().size() == 1 );
