@@ -44,7 +44,6 @@
 #include <QFile>
 #include <QDir>
 #include <QRegularExpression>
-#include <QUrl>
 
 #endif // MD4QT_QT_SUPPORT
 
@@ -832,8 +831,6 @@ Parser< Trait >::parse( typename Trait::TextStream & stream,
 	return doc;
 }
 
-namespace /* anonymous */ {
-
 template< class Trait >
 class TextStream;
 
@@ -1048,8 +1045,6 @@ checkForHtmlComments( const typename Trait::String & line, StringListStream< Tra
 		++p;
 	}
 }
-
-} /* namespace anonymous */
 
 template< class Trait >
 inline void
@@ -1510,8 +1505,6 @@ Parser< UnicodeStringTrait >::parseFile( const UnicodeString & fileName,
 
 #endif
 
-namespace /* anonymous */ {
-
 template< class Trait >
 void resolveLinks( typename Trait::StringList & linksToParse,
 	std::shared_ptr< Document< Trait > > doc );
@@ -1564,17 +1557,11 @@ void resolveLinks< UnicodeStringTrait >( std::vector< UnicodeString > & linksToP
 				continue;
 		}
 
-		std::string tmp;
-		nextFileName.toUTF8String( tmp );
-		std::filesystem::path nextFile( tmp );
-
-		*it = UnicodeString::fromUTF8( nextFile.lexically_normal().u8string() );
+		*it = UnicodeStringTrait::absoluteFilePath( nextFileName );
 	}
 }
 
 #endif
-
-} /* namespace anonymous */
 
 template< class Trait >
 inline void
@@ -1655,8 +1642,6 @@ Parser< Trait >::parseStream( typename Trait::TextStream & s,
 	}
 }
 
-namespace /* anonymous */ {
-
 template< class Trait >
 inline long long int
 posOfListItem( const typename Trait::String & s, bool ordered )
@@ -1695,8 +1680,6 @@ posOfListItem( const typename Trait::String & s, bool ordered )
 
 	return p;
 }
-
-} /* namespace anonymous */
 
 template< class Trait >
 inline typename Parser< Trait >::BlockType
@@ -1857,8 +1840,6 @@ Parser< Trait >::clearCache()
 	m_parsedFiles.clear();
 }
 
-namespace /* anonymous */ {
-
 template< class Trait >
 inline int
 isTableHeader( const typename Trait::String & s )
@@ -1898,8 +1879,6 @@ isTableHeader( const typename Trait::String & s )
 		return 0;
 }
 
-} /* namespace anonymous */
-
 template< class Trait >
 inline void
 Parser< Trait >::parseText( MdBlock< Trait > & fr,
@@ -1922,8 +1901,6 @@ Parser< Trait >::parseText( MdBlock< Trait > & fr,
 		parseParagraph( fr, parent, doc, linksToParse,
 			workingPath, fileName, collectRefLinks, html );
 }
-
-namespace /* anonymous */ {
 
 template< class Trait >
 inline typename Trait::String
@@ -2023,8 +2000,6 @@ findAndRemoveClosingSequence( typename Trait::String & s )
 		s.remove( start, end - start + 1 );
 }
 
-} /* namespace anonymous */
-
 template< class Trait >
 inline void
 Parser< Trait >::parseHeading( MdBlock< Trait > & fr,
@@ -2105,8 +2080,6 @@ Parser< Trait >::parseHeading( MdBlock< Trait > & fr,
 	}
 }
 
-namespace /* anonymous */ {
-
 template< class Trait >
 inline typename Trait::StringList
 splitTableRow( const typename Trait::String & s )
@@ -2143,8 +2116,6 @@ splitTableRow( const typename Trait::String & s )
 
 	return res;
 }
-
-} /* namespace anonymous */
 
 template< class Trait >
 inline void
@@ -2254,8 +2225,6 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 	}
 }
 
-namespace /* anonymous */ {
-
 template< class Trait >
 inline bool
 isH( const typename Trait::String & s, const typename Trait::Char & c )
@@ -2298,8 +2267,6 @@ isH2( const typename Trait::String & s )
 {
 	return isH< Trait >( s, c_45 );
 }
-
-} /* namespace anonymous */
 
 template < class Trait >
 inline void
@@ -2498,8 +2465,6 @@ struct UnprotectedDocsMethods {
 		p->setDirty( true );
 	}
 };
-
-namespace /* anoymous*/ {
 
 struct Delimiter {
 	enum DelimiterType {
@@ -4159,6 +4124,40 @@ checkForMath( typename Delims< Trait >::const_iterator it,
 }
 
 template< class Trait >
+inline bool isEmail( const typename Trait::String & url );
+
+#ifdef MD4QT_QT_SUPPORT
+
+template<>
+inline bool isEmail< QStringTrait >( const QString & url )
+{
+	static const QRegularExpression er(
+		"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
+		"(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$" );
+
+	QRegularExpressionMatch erm;
+
+	if( url.startsWith( "mailto:", Qt::CaseInsensitive ) )
+		erm = er.match( url.right( url.length() - 7 ) );
+	else
+		erm = er.match( url );
+
+	return erm.hasMatch();
+}
+
+#endif
+
+#ifdef MD4QT_ICU_STL_SUPPORT
+
+template<>
+inline bool isEmail< UnicodeStringTrait >( const UnicodeString & url )
+{
+	return false;
+}
+
+#endif
+
+template< class Trait >
 inline typename Delims< Trait >::const_iterator
 checkForAutolinkHtml( typename Delims< Trait >::const_iterator it,
 	typename Delims< Trait >::const_iterator last,
@@ -4174,29 +4173,23 @@ checkForAutolinkHtml( typename Delims< Trait >::const_iterator it,
 			const auto url = po.fr.data.at( it->m_line ).first.sliced( it->m_pos + 1,
 				nit->m_pos - it->m_pos - 1 );
 
-			const auto sit = std::find_if( url.cbegin(), url.cend(),
-				[] ( const auto & c ) { return c.isSpace(); } );
-
 			bool isUrl = true;
 
-			if( sit != url.cend() )
-				isUrl = false;
-			else
+			for( long long int i = 0; i < url.size(); ++i )
 			{
-				static const QRegularExpression er(
-					"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
-					"(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$" );
+				if( url[ i ].isSpace() )
+				{
+					isUrl = false;
 
-				QRegularExpressionMatch erm;
+					break;
+				}
+			}
 
-				if( url.startsWith( "mailto:", Qt::CaseInsensitive ) )
-					erm = er.match( url.right( url.length() - 7 ) );
-				else
-					erm = er.match( url );
+			if( isUrl )
+			{
+				const typename Trait::Url u( url );
 
-				const QUrl u( url );
-
-				if( ( !u.isValid() || u.isRelative() ) && !erm.hasMatch() )
+				if( ( !u.isValid() || u.isRelative() ) && !isEmail< Trait >( url ) )
 					isUrl = false;
 			}
 
@@ -4477,11 +4470,11 @@ makeLink( const typename Trait::String & url, const typename Trait::String & tex
 	{
 		if( !u.startsWith( c_35 ) )
 		{
-			if( QUrl( u ).isRelative() )
+			if( typename Trait::Url( u ).isRelative() )
 			{
 				if( Trait::fileExists( u, po.workingPath ) )
 				{
-					u = QFileInfo( po.workingPath + u ).absoluteFilePath();
+					u = Trait::absoluteFilePath( po.workingPath + u );
 
 					po.linksToParse.push_back( u );
 				}
@@ -4604,7 +4597,7 @@ makeImage( const typename Trait::String & url, const typename Trait::String & te
 	typename Trait::String u = ( url.startsWith( c_35 ) ? url : removeBackslashes< Trait >(
 		replaceEntity< Trait >( url ) ) );
 
-	if( !QUrl( u ).isRelative() )
+	if( !typename Trait::Url( u ).isRelative() )
 		img->setUrl( u );
 	else
 		img->setUrl( Trait::fileExists( u, po.workingPath ) ? po.workingPath + u : u );
@@ -5121,10 +5114,10 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 
 							if( !url.isEmpty() )
 							{
-								if( QUrl( url ).isRelative() )
+								if( typename Trait::Url( url ).isRelative() )
 								{
 									if( Trait::fileExists( url, po.workingPath ) )
-										url = QFileInfo( po.workingPath + url ).absoluteFilePath();
+										url = Trait::absoluteFilePath( po.workingPath + url );
 								}
 							}
 
@@ -6080,8 +6073,6 @@ parseFormattedText( MdBlock< Trait > & fr,
 	}
 }
 
-} /* namespace anonymous */
-
 template< class Trait >
 inline void
 Parser< Trait >::parseFormattedTextLinksImages( MdBlock< Trait > & fr,
@@ -6258,8 +6249,6 @@ Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
 	}
 }
 
-namespace /* anonymous */ {
-
 template< class Trait >
 inline bool
 isListItemAndNotNested( const typename Trait::String & s, long long int indent )
@@ -6336,8 +6325,6 @@ listItemData( const typename Trait::String & s )
 	else
 		return { false, 0, typename Trait::Char() };
 }
-
-} /* namespace anonymous */
 
 template< class Trait >
 inline void

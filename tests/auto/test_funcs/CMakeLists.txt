@@ -1,8 +1,6 @@
 
 project( test.funcs )
 
-find_package( Qt6Core REQUIRED )
-
 if( ENABLE_COVERAGE )
 	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage" )
 	set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage" )
@@ -15,6 +13,8 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../3rdparty )
 
 if( BUILD_MD4QT_QT_TESTS )
+	find_package( Qt6Core REQUIRED )
+
 	add_executable( test.funcs.qt ${SRC} )
 	target_compile_definitions( test.funcs.qt PUBLIC TRAIT=MD::QStringTrait )
 	target_compile_definitions( test.funcs.qt PUBLIC MD4QT_QT_SUPPORT )
@@ -27,13 +27,14 @@ if( BUILD_MD4QT_QT_TESTS )
 endif()
 
 if( BUILD_MD4QT_STL_TESTS )
-	find_package( ICU )
+	find_package( ICU REQUIRED )
+	find_package( uriparser REQUIRED )
 
 	add_executable( test.funcs.stl ${SRC} )
 	target_compile_definitions( test.funcs.stl PUBLIC TRAIT=MD::UnicodeStringTrait )
 	target_compile_definitions( test.funcs.stl PUBLIC MD4QT_ICU_STL_SUPPORT )
 
-	target_link_libraries( test.funcs.stl icu::icu )
+	target_link_libraries( test.funcs.stl icu::icu uriparser::uriparser )
 
 	add_test( NAME test.funcs.stl
 		COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.funcs.stl

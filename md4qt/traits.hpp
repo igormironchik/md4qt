@@ -45,6 +45,9 @@
 #include <unicode/unistr.h>
 #include <unicode/uchar.h>
 
+// uriparser include.
+#include <uriparser/Uri.h>
+
 #endif // MD4QT_ICU_STL_SUPPORT
 
 
@@ -64,6 +67,7 @@
 #include <QTextStream>
 #include <QStringList>
 #include <QFileInfo>
+#include <QUrl>
 
 #endif // MD4QT_QT_SUPPORT
 
@@ -466,7 +470,35 @@ public:
 
 
 //
-// StdStringTrait
+// UrlUri
+//
+
+class UrlUri {
+public:
+	explicit UrlUri( const UnicodeString & uri )
+	{
+	}
+
+	~UrlUri()
+	{
+	}
+
+	bool isValid() const
+	{
+		return false;
+	}
+
+	bool isRelative() const
+	{
+		return false;
+	}
+
+private:
+}; // class UrlUri
+
+
+//
+// UnicodeStringTrait
 //
 
 //! Trait to use this library with std::string.
@@ -485,6 +517,8 @@ struct UnicodeStringTrait {
 
 	using StringList = std::vector< String >;
 
+	using Url = UrlUri;
+
 	//! Convert UTF-16 into trait's string.
 	static String utf16ToString( const char16_t * u16 )
 	{
@@ -498,6 +532,16 @@ struct UnicodeStringTrait {
 		( workingPath + fileName ).toUTF8String( path );
 
 		return std::filesystem::exists( path );
+	}
+
+	//! \return Absolute file path.
+	static String absoluteFilePath( const String & path )
+	{
+		std::string tmp;
+		path.toUTF8String( tmp );
+		std::filesystem::path p( tmp );
+
+		return UnicodeString::fromUTF8( p.lexically_normal().u8string() );
 	}
 }; // struct UnicodeStringTrait
 
@@ -525,6 +569,8 @@ struct QStringTrait {
 
 	using StringList = QStringList;
 
+	using Url = QUrl;
+
 	//! Convert UTF-16 into trait's string.
 	static String utf16ToString( const char16_t * u16 )
 	{
@@ -535,6 +581,12 @@ struct QStringTrait {
 	static bool fileExists( const String & fileName, const String & workingPath )
 	{
 		return QFileInfo::exists( workingPath + fileName );
+	}
+
+	//! \return Absolute file path.
+	static String absoluteFilePath( const String & path )
+	{
+		return QFileInfo( path ).absoluteFilePath();
 	}
 }; // struct QStringTrait
 

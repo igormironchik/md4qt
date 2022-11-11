@@ -281,7 +281,7 @@ TEST_CASE( "38" )
 		REQUIRE( l->items().size() == 1 );
 		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().front().get() );
 		REQUIRE( li->items().size() == 1 );
-		REQUIRE( li->items().first()->type() == MD::ItemType::Paragraph );
+		REQUIRE( li->items().front()->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).get() );
 		REQUIRE( p->items().size() == 1 );
 

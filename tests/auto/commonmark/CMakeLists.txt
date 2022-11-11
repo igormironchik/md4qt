@@ -1,8 +1,6 @@
 
 project( test.md_parser.commonmark )
 
-find_package( Qt6Core REQUIRED )
-
 if( ENABLE_COVERAGE )
 	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage" )
 	set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage" )
@@ -24,6 +22,8 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../3rdparty )
 
 if( BUILD_MD4QT_QT_TESTS )
+	find_package( Qt6Core REQUIRED )
+
 	add_executable( test.md_parser.commonmark.qt ${SRC} )
 	target_compile_definitions( test.md_parser.commonmark.qt PUBLIC TRAIT=MD::QStringTrait )
 	target_compile_definitions( test.md_parser.commonmark.qt PUBLIC MD4QT_QT_SUPPORT )
@@ -36,13 +36,14 @@ if( BUILD_MD4QT_QT_TESTS )
 endif()
 
 if( BUILD_MD4QT_STL_TESTS )
-	find_package( ICU )
+	find_package( ICU REQUIRED )
+	find_package( uriparser REQUIRED )
 
 	add_executable( test.md_parser.commonmark.stl ${SRC} )
 	target_compile_definitions( test.md_parser.commonmark.stl PUBLIC TRAIT=MD::UnicodeStringTrait )
 	target_compile_definitions( test.md_parser.commonmark.stl PUBLIC MD4QT_ICU_STL_SUPPORT )
 
-	target_link_libraries( test.md_parser.commonmark.stl icu::icu )
+	target_link_libraries( test.md_parser.commonmark.stl icu::icu uriparser::uriparser )
 
 	add_test( NAME test.md_parser.commonmark.stl
 		COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.commonmark.stl
