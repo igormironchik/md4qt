@@ -44,9 +44,16 @@ jobs:
     - run: sudo apt update
 
     - run: sudo apt install lcov
+    
+    - name: Install Conan
+      id: conan
+      uses: turtlebrowser/get-conan@main
+      
+    - name: Install dependencies with Conan
+      run: conan install .
 
     - name: Generate Makefiles
-      run: cmake -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug .
+      run: cmake -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DMD4QT_USE_CONAN=ON .
 
     - name: Build
       run: make
@@ -93,9 +100,16 @@ jobs:
         
     - name: Enable developer command prompt
       uses: ilammy/msvc-dev-cmd@v1
+      
+    - name: Install Conan
+      id: conan
+      uses: turtlebrowser/get-conan@main
+      
+    - name: Install dependencies with Conan
+      run: conan install .
 
     - name: Generate Makefiles
-      run: cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Relese .
+      run: cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Relese -DMD4QT_USE_CONAN=ON .
 
     - name: Build
       run: nmake
@@ -124,9 +138,16 @@ jobs:
       uses: jurplel/install-qt-action@v3
       with:
         version: '6.3.1'
+        
+    - name: Install Conan
+      id: conan
+      uses: turtlebrowser/get-conan@main
+      
+    - name: Install dependencies with Conan
+      run: conan install .
 
     - name: Generate Makefiles
-      run: cmake -DCMAKE_BUILD_TYPE=Relese .
+      run: cmake -DCMAKE_BUILD_TYPE=Relese -DMD4QT_USE_CONAN=ON .
 
     - name: Build
       run: make
