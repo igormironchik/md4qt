@@ -40,6 +40,7 @@
 #include <filesystem>
 #include <cctype>
 #include <string>
+#include <algorithm>
 
 // ICU include.
 #include <unicode/unistr.h>
