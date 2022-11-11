@@ -53,7 +53,7 @@ jobs:
       run: conan install .
 
     - name: Generate Makefiles
-      run: cmake -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DMD4QT_USE_CONAN=ON .
+      run: cmake -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug .
 
     - name: Build
       run: make
@@ -109,7 +109,7 @@ jobs:
       run: conan install .
 
     - name: Generate Makefiles
-      run: cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Relese -DMD4QT_USE_CONAN=ON .
+      run: cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Relese .
 
     - name: Build
       run: nmake
@@ -144,10 +144,10 @@ jobs:
       uses: turtlebrowser/get-conan@main
       
     - name: Install dependencies with Conan
-      run: conan install .
+      run: conan install . --build=missing
 
     - name: Generate Makefiles
-      run: cmake -DCMAKE_BUILD_TYPE=Relese -DMD4QT_USE_CONAN=ON .
+      run: cmake -DCMAKE_BUILD_TYPE=Relese .
 
     - name: Build
       run: make
