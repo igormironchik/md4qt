@@ -22,9 +22,6 @@ find_package( ICU REQUIRED )
 find_package( uriparser REQUIRED )
 find_package( Qt6Core REQUIRED )
 
-include_directories( ${ICU_INCLUDE_DIRS}
-	${uriparser_INCLUDE_DIRS} )
-
 add_executable( md_benchmark main.cpp )
 
 file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/../manual/complex.md
