@@ -4477,7 +4477,7 @@ TEST_CASE( "118-1" )
 		file.close();
 
 #else
-	std::ifstream stream( fileName, std::ios::in );
+	std::ifstream stream( fileName, std::ios::in | std::ios::binary );
 
 	if( stream.good() )
 	{
