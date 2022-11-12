@@ -30,6 +30,9 @@ if( BUILD_MD4QT_STL_TESTS )
 	find_package( ICU REQUIRED )
 	find_package( uriparser REQUIRED )
 
+	include_directories( ${ICU_INCLUDE_DIRS}
+		${uriparser_INCLUDE_DIRS} )
+
 	add_executable( test.funcs.stl ${SRC} )
 	target_compile_definitions( test.funcs.stl PUBLIC TRAIT=MD::UnicodeStringTrait )
 	target_compile_definitions( test.funcs.stl PUBLIC MD4QT_ICU_STL_SUPPORT )
