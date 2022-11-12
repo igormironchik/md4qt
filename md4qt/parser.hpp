@@ -605,7 +605,7 @@ splitString( const typename Trait::String & str, const typename Trait::Char & ch
 #ifdef MD4QT_ICU_STL_SUPPORT
 
 template<>
-typename UnicodeStringTrait::StringList
+inline typename UnicodeStringTrait::StringList
 splitString< UnicodeStringTrait >( const UnicodeString & str, const UnicodeChar & ch )
 {
 	return str.split( ch );
@@ -616,7 +616,7 @@ splitString< UnicodeStringTrait >( const UnicodeString & str, const UnicodeChar 
 #ifdef MD4QT_QT_SUPPORT
 
 template<>
-typename QStringTrait::StringList
+inline typename QStringTrait::StringList
 splitString< QStringTrait >( const QString & str, const QChar & ch )
 {
 	return str.split( ch, Qt::SkipEmptyParts );
@@ -1568,7 +1568,7 @@ void resolveLinks( typename Trait::StringList & linksToParse,
 #ifdef MD4QT_QT_SUPPORT
 
 template<>
-void resolveLinks< QStringTrait >( QStringList & linksToParse,
+inline void resolveLinks< QStringTrait >( QStringList & linksToParse,
 	std::shared_ptr< Document< QStringTrait > > doc )
 {
 	for( auto it = linksToParse.begin(), last = linksToParse.end(); it != last; ++it )
@@ -1598,7 +1598,7 @@ void resolveLinks< QStringTrait >( QStringList & linksToParse,
 #ifdef MD4QT_ICU_STL_SUPPORT
 
 template<>
-void resolveLinks< UnicodeStringTrait >( std::vector< UnicodeString > & linksToParse,
+inline void resolveLinks< UnicodeStringTrait >( std::vector< UnicodeString > & linksToParse,
 	std::shared_ptr< Document< UnicodeStringTrait > > doc )
 {
 	for( auto it = linksToParse.begin(), last = linksToParse.end(); it != last; ++it )
