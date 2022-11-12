@@ -16,9 +16,6 @@ jobs:
   linux:
     name: linux
     runs-on: ubuntu-latest
-    env:
-      CXX: g++
-      CC: gcc
 
     strategy:
       fail-fast: true
@@ -54,7 +51,7 @@ jobs:
       run: conan install .
 
     - name: Generate Makefiles
-      run: cmake -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_MD4QT_STL_TESTS=ON -DMD4QT_USE_CONAN=ON .
+      run: cmake -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_MD4QT_STL_TESTS=ON -DMD4QT_USE_CONAN=ON -DCMAKE_CXX_COMPILER_ID=GNU .
 
     - name: Build
       run: make
@@ -78,9 +75,6 @@ jobs:
   windows:
     name: windows
     runs-on: windows-2019
-    env:
-      CXX: cl
-      CC: cl
 
     strategy:
       fail-fast: true
@@ -113,7 +107,7 @@ jobs:
       run: conan install .
 
     - name: Generate Makefiles
-      run: cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Relese -DBUILD_MD4QT_STL_TESTS=ON -DMD4QT_USE_CONAN=ON .
+      run: cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Relese -DBUILD_MD4QT_STL_TESTS=ON -DMD4QT_USE_CONAN=ON -DCMAKE_CXX_COMPILER_ID=MSVC .
 
     - name: Build
       run: nmake
@@ -124,9 +118,6 @@ jobs:
   macos:
     name: macos
     runs-on: macos-11
-    env:
-      CXX: clang++
-      CC: clang
 
     strategy:
       fail-fast: true
@@ -154,7 +145,7 @@ jobs:
       run: conan install . --build=missing
 
     - name: Generate Makefiles
-      run: cmake -DCMAKE_BUILD_TYPE=Relese -DBUILD_MD4QT_STL_TESTS=ON -DMD4QT_USE_CONAN=ON .
+      run: cmake -DCMAKE_BUILD_TYPE=Relese -DBUILD_MD4QT_STL_TESTS=ON -DMD4QT_USE_CONAN=ON -DCMAKE_CXX_COMPILER_ID=AppleClang .
 
     - name: Build
       run: make
