@@ -141,3 +141,9 @@ with `operator [] (...)`, or member `at(..)`. I do it very often in the
 parser's code and profiler says that most of the run-time is spent
 on such operations. `QString` just more optimized for access separate
 character then `icu::UnicodeString`...
+
+**Why does parsing fail on Windows with `std::ifstream`?**
+
+ * Such problem can occur on Windows with MSVC if you open file in text
+mode, so for `MD::Parser` always open `std::ifstream` with `std::ios::binary`
+flag. And yes, I expect to receive UTF-8 encoded content...
