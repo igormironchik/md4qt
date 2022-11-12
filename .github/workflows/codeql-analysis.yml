@@ -24,8 +24,6 @@ jobs:
       uses: actions/checkout@v3
       with:
         fetch-depth: 2
-      
-    - run: git submodule update --init --recursive
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -36,7 +34,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
-        version: '6.2.0'
+        version: '6.3.2'
         
     - name: Install Conan
       id: conan
@@ -46,7 +44,7 @@ jobs:
       run: conan install .
 
     - name: Generate Makefiles
-      run: cmake -DMD4QT_USE_CONAN=ON .
+      run: cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_MD4QT_STL_TESTS=ON -DMD4QT_USE_CONAN=ON .
 
     - name: Build
       run: make
