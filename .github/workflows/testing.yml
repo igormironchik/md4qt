@@ -48,7 +48,7 @@ jobs:
       uses: turtlebrowser/get-conan@main
       
     - name: Install dependencies with Conan
-      run: conan install .
+      run: conan install . -s build_type=Debug
 
     - name: Generate Makefiles
       run: cmake -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_MD4QT_STL_TESTS=ON -DMD4QT_USE_CONAN=ON .
@@ -107,7 +107,7 @@ jobs:
       run: conan install .
 
     - name: Generate Makefiles
-      run: cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Relese -DBUILD_MD4QT_STL_TESTS=ON -DMD4QT_USE_CONAN=ON .
+      run: cmake -G "NMake Makefiles" -DBUILD_MD4QT_STL_TESTS=ON -DMD4QT_USE_CONAN=ON .
 
     - name: Build
       run: nmake
@@ -117,7 +117,7 @@ jobs:
 
   macos:
     name: macos
-    runs-on: macos-11
+    runs-on: macos-12
 
     strategy:
       fail-fast: true
@@ -145,7 +145,7 @@ jobs:
       run: conan install . --build=missing
 
     - name: Generate Makefiles
-      run: cmake -DCMAKE_BUILD_TYPE=Relese -DBUILD_MD4QT_STL_TESTS=ON -DMD4QT_USE_CONAN=ON .
+      run: cmake -DBUILD_MD4QT_STL_TESTS=ON -DMD4QT_USE_CONAN=ON .
 
     - name: Build
       run: make

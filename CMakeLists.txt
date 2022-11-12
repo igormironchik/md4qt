@@ -1,6 +1,8 @@
 
 cmake_minimum_required( VERSION 3.19 )
 
+project( md4qt )
+
 set( MD4QT_VERSION "2.0.0" )
 
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
@@ -22,8 +24,6 @@ endif( NOT CMAKE_BUILD_TYPE )
 set( CMAKE_CXX_STANDARD 17 )
 
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
-
-project( md4qt )
 
 if( ${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME} )
 
