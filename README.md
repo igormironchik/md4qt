@@ -99,4 +99,45 @@ the document you reached new file.
  * No. This library doesn't use exceptions. Any text is a valid Markdown, so I
 don't need to inform user about errors. Qt itself doesn't use exceptions too.
 So you can caught only standard C++ exceptions, like `std::bad_alloc`, for
-example.
+example. Possibly with `MD::UnicodeStringTrait` you will catch more standard
+exceptions, possibly I missed something somewhere, but I tried to negotiate
+all possible exceptions.
+
+**Why `MD::Parser` and `MD::Document` are templates?**
+
+ * Since version `2.0.0` `md4qt` can be built not only with `Qt6`, but with
+`STL` too. The code of the parser is the same in both cases. I just added two
+ready traits to support different C++ worlds. With `STL` I use `ICU` library
+for Unicode handling, and `uriparser` library to parse and check URLs.
+These dependencies can be installed with the Conan package manager. I did
+and attempt to make pure C++ `STL` solution, but handling Unicode in C++
+standard is a pain, it's still not enough powerful to implement all
+things without very big effort. But if somebody want to make such pure
+C++ `STL` trait - you are more then WELCOME with such PR.
+
+**So, how can I use `md4qt` with `Qt6` and `ICU`?**
+
+ * To build with `ICU` support you need to define `MD4QT_ICU_STL_SUPPORT`
+before including `md4qt/parser.hpp`. In this case you will get access to
+`MD::UnicodeStringTrait`, that can be passed to `MD::Parser` as template
+parameter. You will receive in dependencies `C++ STL`, `ICU` and
+`uriparser`.
+
+   To build with `Qt6` support you need to define `MD4QT_QT_SUPPORT`.
+   In this case you will get access to `MD::QStringTrait` to work with
+   Qt's classes and functions. In this case in dependencies you will
+   receive `Qt6`.
+   
+   You can define both to have ability to use `md4qt` with `Qt6` and
+   `ICU`.
+   
+**`ICU` slower then `Qt6`? Really?**
+
+ * Don't believe anybody, just build built-in `md_benchamrk` and have a
+look. Dry numbers says, that `Qt6` `QString` ~2 times faster
+`icu::UnicodeString` in such tasks. Markdown parsing implies to check
+every symbol, and tied to use access to every character in the string
+with `operator [] (...)`, or member `at(..)`. I do it very often in the
+parser's code and profiler says that most of the run-time is spent
+on such operations. `QString` just more optimized for access separate
+character then `icu::UnicodeString`...
