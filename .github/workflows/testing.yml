@@ -16,6 +16,9 @@ jobs:
   linux:
     name: linux
     runs-on: ubuntu-latest
+    env:
+      CXX: g++
+      CC: gcc
 
     strategy:
       fail-fast: true
@@ -23,8 +26,6 @@ jobs:
         # Override automatic language detection by changing the below list
         # Supported options are ['csharp', 'cpp', 'go', 'java', 'javascript', 'python']
         language: ['cpp']
-        # Learn more...
-        # https://docs.github.com/en/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#overriding-automatic-language-detection
 
     steps:
     - name: Checkout repository
@@ -77,6 +78,9 @@ jobs:
   windows:
     name: windows
     runs-on: windows-2019
+    env:
+      CXX: cl
+      CC: cl
 
     strategy:
       fail-fast: true
@@ -120,6 +124,9 @@ jobs:
   macos:
     name: macos
     runs-on: macos-11
+    env:
+      CXX: clang++
+      CC: clang
 
     strategy:
       fail-fast: true
