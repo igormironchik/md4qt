@@ -42,20 +42,20 @@ TEST_CASE( "571" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Image );
-	auto i = static_cast< MD::Image* > ( p->items().at( 0 ).data() );
+	auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( !i->isEmpty() );
-	REQUIRE( i->text() == QStringLiteral( "foo" ) );
-	REQUIRE( i->url() == QStringLiteral( "/url" ) );
+	REQUIRE( i->text() == u8"foo" );
+	REQUIRE( i->url() == u8"/url" );
 
-	REQUIRE( !i->p().isNull() );
+	REQUIRE( i->p().get() );
 	REQUIRE( i->p()->items().size() == 1 );
 	REQUIRE( i->p()->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t  = static_cast< MD::Text* > ( i->p()->items().at( 0 ).data() );
+	auto t  = static_cast< MD::Text< TRAIT >* > ( i->p()->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == QStringLiteral( "foo" ) );
+	REQUIRE( t->text() == u8"foo" );
 }
 
 TEST_CASE( "572" )
@@ -66,13 +66,13 @@ TEST_CASE( "572" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Image );
-	auto i = static_cast< MD::Image* > ( p->items().at( 0 ).data() );
+	auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( !i->isEmpty() );
-	REQUIRE( i->text() == QStringLiteral( "foo *bar*" ) );
-	REQUIRE( i->url() == QStringLiteral( "train.jpg" ) );
+	REQUIRE( i->text() == u8"foo *bar*" );
+	REQUIRE( i->url() == u8"train.jpg" );
 }
 
 TEST_CASE( "573" )
@@ -83,13 +83,13 @@ TEST_CASE( "573" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Image );
-	auto i = static_cast< MD::Image* > ( p->items().at( 0 ).data() );
+	auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( !i->isEmpty() );
-	REQUIRE( i->text() == QStringLiteral( "foo ![bar](/url)" ) );
-	REQUIRE( i->url() == QStringLiteral( "/url2" ) );
+	REQUIRE( i->text() == u8"foo ![bar](/url)" );
+	REQUIRE( i->url() == u8"/url2" );
 }
 
 TEST_CASE( "574" )
@@ -100,13 +100,13 @@ TEST_CASE( "574" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Image );
-	auto i = static_cast< MD::Image* > ( p->items().at( 0 ).data() );
+	auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( !i->isEmpty() );
-	REQUIRE( i->text() == QStringLiteral( "foo [bar](/url)" ) );
-	REQUIRE( i->url() == QStringLiteral( "/url2" ) );
+	REQUIRE( i->text() == u8"foo [bar](/url)" );
+	REQUIRE( i->url() == u8"/url2" );
 }
 
 TEST_CASE( "575" )
@@ -117,13 +117,13 @@ TEST_CASE( "575" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Image );
-	auto i = static_cast< MD::Image* > ( p->items().at( 0 ).data() );
+	auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( !i->isEmpty() );
-	REQUIRE( i->text() == QStringLiteral( "foo *bar*" ) );
-	REQUIRE( i->url() == QStringLiteral( "train.jpg" ) );
+	REQUIRE( i->text() == u8"foo *bar*" );
+	REQUIRE( i->url() == u8"train.jpg" );
 }
 
 TEST_CASE( "576" )
@@ -134,13 +134,13 @@ TEST_CASE( "576" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Image );
-	auto i = static_cast< MD::Image* > ( p->items().at( 0 ).data() );
+	auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( !i->isEmpty() );
-	REQUIRE( i->text() == QStringLiteral( "foo *bar*" ) );
-	REQUIRE( i->url() == QStringLiteral( "train.jpg" ) );
+	REQUIRE( i->text() == u8"foo *bar*" );
+	REQUIRE( i->url() == u8"train.jpg" );
 }
 
 TEST_CASE( "577" )
@@ -151,13 +151,13 @@ TEST_CASE( "577" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Image );
-	auto i = static_cast< MD::Image* > ( p->items().at( 0 ).data() );
+	auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( !i->isEmpty() );
-	REQUIRE( i->text() == QStringLiteral( "foo" ) );
-	REQUIRE( i->url() == QStringLiteral( "train.jpg" ) );
+	REQUIRE( i->text() == u8"foo" );
+	REQUIRE( i->url() == u8"train.jpg" );
 }
 
 TEST_CASE( "578" )
@@ -168,19 +168,19 @@ TEST_CASE( "578" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 2 );
 
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == QStringLiteral( "My" ) );
+	REQUIRE( t->text() == u8"My" );
 
 	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Image );
-	auto i = static_cast< MD::Image* > ( p->items().at( 1 ).data() );
+	auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 1 ).get() );
 	REQUIRE( !i->isEmpty() );
-	REQUIRE( i->text() == QStringLiteral( "foo bar" ) );
-	REQUIRE( i->url() == QStringLiteral( "/path/to/train.jpg" ) );
+	REQUIRE( i->text() == u8"foo bar" );
+	REQUIRE( i->url() == u8"/path/to/train.jpg" );
 }
 
 TEST_CASE( "579" )
@@ -191,13 +191,13 @@ TEST_CASE( "579" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Image );
-	auto i = static_cast< MD::Image* > ( p->items().at( 0 ).data() );
+	auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( !i->isEmpty() );
-	REQUIRE( i->text() == QStringLiteral( "foo" ) );
-	REQUIRE( i->url() == QStringLiteral( "url" ) );
+	REQUIRE( i->text() == u8"foo" );
+	REQUIRE( i->url() == u8"url" );
 }
 
 TEST_CASE( "580" )
@@ -208,13 +208,13 @@ TEST_CASE( "580" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Image );
-	auto i = static_cast< MD::Image* > ( p->items().at( 0 ).data() );
+	auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( !i->isEmpty() );
 	REQUIRE( i->text().isEmpty() );
-	REQUIRE( i->url() == QStringLiteral( "/url" ) );
+	REQUIRE( i->url() == u8"/url" );
 }
 
 TEST_CASE( "581" )
@@ -225,13 +225,13 @@ TEST_CASE( "581" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Image );
-	auto i = static_cast< MD::Image* > ( p->items().at( 0 ).data() );
+	auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( !i->isEmpty() );
-	REQUIRE( i->text() == QStringLiteral( "foo" ) );
-	REQUIRE( i->url() == QStringLiteral( "/url" ) );
+	REQUIRE( i->text() == u8"foo" );
+	REQUIRE( i->url() == u8"/url" );
 }
 
 TEST_CASE( "582" )
@@ -242,13 +242,13 @@ TEST_CASE( "582" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Image );
-	auto i = static_cast< MD::Image* > ( p->items().at( 0 ).data() );
+	auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( !i->isEmpty() );
-	REQUIRE( i->text() == QStringLiteral( "foo" ) );
-	REQUIRE( i->url() == QStringLiteral( "/url" ) );
+	REQUIRE( i->text() == u8"foo" );
+	REQUIRE( i->url() == u8"/url" );
 }
 
 TEST_CASE( "583" )
@@ -259,13 +259,13 @@ TEST_CASE( "583" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Image );
-	auto i = static_cast< MD::Image* > ( p->items().at( 0 ).data() );
+	auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( !i->isEmpty() );
-	REQUIRE( i->text() == QStringLiteral( "foo" ) );
-	REQUIRE( i->url() == QStringLiteral( "/url" ) );
+	REQUIRE( i->text() == u8"foo" );
+	REQUIRE( i->url() == u8"/url" );
 }
 
 TEST_CASE( "584" )
@@ -276,13 +276,13 @@ TEST_CASE( "584" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Image );
-	auto i = static_cast< MD::Image* > ( p->items().at( 0 ).data() );
+	auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( !i->isEmpty() );
-	REQUIRE( i->text() == QStringLiteral( "*foo* bar" ) );
-	REQUIRE( i->url() == QStringLiteral( "/url" ) );
+	REQUIRE( i->text() == u8"*foo* bar" );
+	REQUIRE( i->url() == u8"/url" );
 }
 
 TEST_CASE( "585" )
@@ -293,13 +293,13 @@ TEST_CASE( "585" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Image );
-	auto i = static_cast< MD::Image* > ( p->items().at( 0 ).data() );
+	auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( !i->isEmpty() );
-	REQUIRE( i->text() == QStringLiteral( "Foo" ) );
-	REQUIRE( i->url() == QStringLiteral( "/url" ) );
+	REQUIRE( i->text() == u8"Foo" );
+	REQUIRE( i->url() == u8"/url" );
 }
 
 TEST_CASE( "586" )
@@ -310,18 +310,18 @@ TEST_CASE( "586" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 2 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Image );
-	auto i = static_cast< MD::Image* > ( p->items().at( 0 ).data() );
+	auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( !i->isEmpty() );
-	REQUIRE( i->text() == QStringLiteral( "foo" ) );
-	REQUIRE( i->url() == QStringLiteral( "/url" ) );
+	REQUIRE( i->text() == u8"foo" );
+	REQUIRE( i->url() == u8"/url" );
 
 	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text* > ( p->items().at( 1 ).data() );
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == QStringLiteral( "[]" ) );
+	REQUIRE( t->text() == u8"[]" );
 }
 
 TEST_CASE( "587" )
@@ -332,13 +332,13 @@ TEST_CASE( "587" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Image );
-	auto i = static_cast< MD::Image* > ( p->items().at( 0 ).data() );
+	auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( !i->isEmpty() );
-	REQUIRE( i->text() == QStringLiteral( "foo" ) );
-	REQUIRE( i->url() == QStringLiteral( "/url" ) );
+	REQUIRE( i->text() == u8"foo" );
+	REQUIRE( i->url() == u8"/url" );
 }
 
 TEST_CASE( "588" )
@@ -349,13 +349,13 @@ TEST_CASE( "588" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Image );
-	auto i = static_cast< MD::Image* > ( p->items().at( 0 ).data() );
+	auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( !i->isEmpty() );
-	REQUIRE( i->text() == QStringLiteral( "*foo* bar" ) );
-	REQUIRE( i->url() == QStringLiteral( "/url" ) );
+	REQUIRE( i->text() == u8"*foo* bar" );
+	REQUIRE( i->url() == u8"/url" );
 }
 
 TEST_CASE( "589" )
@@ -367,24 +367,24 @@ TEST_CASE( "589" )
 
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 		REQUIRE( p->items().size() == 1 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == QStringLiteral( "![[foo]]" ) );
+		REQUIRE( t->text() == u8"![[foo]]" );
 	}
 
 	{
 		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph* > ( doc->items().at( 2 ).data() );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
 		REQUIRE( p->items().size() == 1 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == QStringLiteral( "[[foo]]: /url \"title\"" ) );
+		REQUIRE( t->text() == u8"[[foo]]: /url \"title\"" );
 	}
 }
 
@@ -396,13 +396,13 @@ TEST_CASE( "590" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Image );
-	auto i = static_cast< MD::Image* > ( p->items().at( 0 ).data() );
+	auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( !i->isEmpty() );
-	REQUIRE( i->text() == QStringLiteral( "Foo" ) );
-	REQUIRE( i->url() == QStringLiteral( "/url" ) );
+	REQUIRE( i->text() == u8"Foo" );
+	REQUIRE( i->url() == u8"/url" );
 }
 
 TEST_CASE( "591" )
@@ -413,13 +413,13 @@ TEST_CASE( "591" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
 
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == QStringLiteral( "![foo]" ) );
+	REQUIRE( t->text() == u8"![foo]" );
 }
 
 TEST_CASE( "592" )
@@ -430,18 +430,19 @@ TEST_CASE( "592" )
 	REQUIRE( doc->items().size() == 2 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph* > ( doc->items().at( 1 ).data() );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 2 );
 
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text* > ( p->items().at( 0 ).data() );
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == QStringLiteral( "!" ) );
+	REQUIRE( t->text() == u8"!" );
 
 	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Link );
-	auto l = static_cast< MD::Link* > ( p->items().at( 1 ).data() );
+	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 1 ).get() );
 	REQUIRE( l->opts() == MD::TextWithoutFormat );
-	REQUIRE( l->text() == QStringLiteral( "foo" ) );
-	REQUIRE( doc->labeledLinks().contains( l->url() ) );
-	REQUIRE( doc->labeledLinks()[ l->url() ]->url() == QStringLiteral( "/url" ) );
+	REQUIRE( l->text() == u8"foo" );
+	const auto lit = doc->labeledLinks().find( l->url() );
+	REQUIRE( lit != doc->labeledLinks().cend() );
+	REQUIRE( lit->second->url() == u8"/url" );
 }

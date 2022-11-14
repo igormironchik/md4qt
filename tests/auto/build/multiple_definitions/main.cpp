@@ -28,36 +28,16 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#pragma once
+#include "1.hpp"
+#include "2.hpp"
 
-#include <md4qt/parser.hpp>
-#include <md4qt/traits.hpp>
-
-#include <string>
-
-#ifdef MD4QT_QT_SUPPORT
-#include <QString>
-#endif
-
-
-inline std::shared_ptr< MD::Document< TRAIT > >
-load_test( int n )
+int main()
 {
-	auto fileName = std::to_string( n );
+	A a;
+	B b;
 
-	if( fileName.size() < 3 )
-		fileName.insert( 0, 3 - fileName.size(), '0' );
+	a.parse();
+	b.parse();
 
-	fileName.insert( 0, "tests/commonmark/0.30/" );
-	fileName.append( ".md" );
-
-	MD::Parser< TRAIT > p;
-
-	return p.parse(
-#ifdef MD4QT_QT_SUPPORT
-		QString::fromStdString( fileName ),
-#else
-		fileName,
-#endif
-		false );
+	return 0;
 }

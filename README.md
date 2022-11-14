@@ -1,6 +1,6 @@
 [![Build](https://github.com/igormironchik/md4qt/workflows/build/badge.svg)](https://github.com/igormironchik/md4qt/actions)[![codecov](https://codecov.io/gh/igormironchik/md4qt/branch/main/graph/badge.svg)](https://codecov.io/gh/igormironchik/md4qt)[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-`md4qt` is a static C++ library for parsing Markdown with Qt.
+`md4qt` is a header-only C++ library for parsing Markdown.
 
 `md4qt` supports CommonMark 0.30 Spec, and some GitHub extensions, such as
 tables, footnotes, tasks lists, strikethroughs, LaTeX Math injections.
@@ -10,11 +10,12 @@ This library parses Markdown into tree structure.
 # Example
 
 ```cpp
-#include <md4qt/md_parser.hpp>
+#define MD4QT_QT_SUPPORT
+#include <md4qt/parser.hpp>
 
 int main()
 {
-    MD::Parser p;
+    MD::Parser< MD::QStringTrait > p;
 
     auto doc = p.parse( QStringLiteral( "your_markdown.md" ) );
 	
@@ -24,7 +25,7 @@ int main()
         {
             case MD::ItemType::Anchor :
             {
-                auto a = static_cast< MD::Anchor* > ( it->data() );
+                auto a = static_cast< MD::Anchor< MD::QStringTrait >* > ( it->get() );
                 qDebug() << a->label();
             }
                 break;
@@ -61,19 +62,6 @@ major extensions. Conclusion why it's so you can read [here](tests/md_benchmark/
    And one more cherry on the cake - `md4qt` can parse Markdown recursively.
    What it is described bellow.
 
-**Why this library tied to Qt? I want to see STL only in dependencies.**
-
- * This library was born in the Qt based project. Long time the library
- was not in separate project, and the code was under the GPL license.
- I decided to weak restrictions for the possible users, and separated code
- into this library, and gave it MIT license. Ok, I can template the code,
- make Qt dependency as optional, and make library header-only. Yes, it's
- not so big effort, I guess a week or two. But I don't need it. I don't
- believe that this library will become very popular and will has a lot
- of users, so I don't see a need for this job. But if you need pure STL
- solution for `std::wstring` and `std::wistream`, just let me know. Submit an
- issue, and we'll discuss.
-
 **What should I know about links in the document?**
 
  * In some cases in Markdown link's URL is something document related. So, when
@@ -82,12 +70,14 @@ document contains key with URL in the link, and if so, use URL from
 labeled links, look:
 
    ```cpp
-   MD::Link * item = ...;
+   MD::Link< MD::QStringTrait > * item = ...;
 
    QString url = item->url();
 
-   if( doc->labeledLinks().contains( url ) )
-       url = doc->labeledLinks()[ url ]->url();
+   const auto it = doc->labeledLinks().find( url );
+   
+   if( it != doc->labeledLinks().cend() )
+       url = it->second->url();
    ```
 
 **What is the second argument of `MD::Parser::parse()`?**
@@ -109,4 +99,51 @@ the document you reached new file.
  * No. This library doesn't use exceptions. Any text is a valid Markdown, so I
 don't need to inform user about errors. Qt itself doesn't use exceptions too.
 So you can caught only standard C++ exceptions, like `std::bad_alloc`, for
-example.
+example. Possibly with `MD::UnicodeStringTrait` you will catch more standard
+exceptions, possibly I missed something somewhere, but I tried to negotiate
+all possible exceptions.
+
+**Why `MD::Parser` and `MD::Document` are templates?**
+
+ * Since version `2.0.0` `md4qt` can be built not only with `Qt6`, but with
+`STL` too. The code of the parser is the same in both cases. I just added two
+ready traits to support different C++ worlds. With `STL` I use `ICU` library
+for Unicode handling, and `uriparser` library to parse and check URLs.
+These dependencies can be installed with the Conan package manager. I did
+an attempt to make pure C++ `STL` solution, but handling Unicode in C++
+standard is a pain, it's still not enough powerful to implement all
+things without very big effort. But if somebody want to make such pure
+C++ `STL` trait - you are more then WELCOME with such PR.
+
+**So, how can I use `md4qt` with `Qt6` and `ICU`?**
+
+ * To build with `ICU` support you need to define `MD4QT_ICU_STL_SUPPORT`
+before including `md4qt/parser.hpp`. In this case you will get access to
+`MD::UnicodeStringTrait`, that can be passed to `MD::Parser` as template
+parameter. You will receive in dependencies `C++ STL`, `ICU` and
+`uriparser`.
+
+   To build with `Qt6` support you need to define `MD4QT_QT_SUPPORT`.
+   In this case you will get access to `MD::QStringTrait` to work with
+   Qt's classes and functions. In this case in dependencies you will
+   receive `Qt6`.
+   
+   You can define both to have ability to use `md4qt` with `Qt6` and
+   `ICU`.
+   
+**`ICU` slower then `Qt6`? Really?**
+
+ * Don't believe anybody, just build built-in `md_benchamrk` and have a
+look. Dry numbers says, that `Qt6` `QString` ~2 times faster
+`icu::UnicodeString` in such tasks. Markdown parsing implies to check
+every symbol, and tied to use access to every character in the string
+with `operator [] (...)`, or member `at(..)`. I do it very often in the
+parser's code and profiler says that most of the run-time is spent
+on such operations. `QString` just more optimized for access separate
+character then `icu::UnicodeString`...
+
+**Why does parsing fail on Windows with `std::ifstream`?**
+
+ * Such problem can occur on Windows with MSVC if you open file in text
+mode, so for `MD::Parser` always open `std::ifstream` with `std::ios::binary`
+flag. And yes, I expect to receive UTF-8 encoded content...

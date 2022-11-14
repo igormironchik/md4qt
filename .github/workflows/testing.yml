@@ -23,8 +23,6 @@ jobs:
         # Override automatic language detection by changing the below list
         # Supported options are ['csharp', 'cpp', 'go', 'java', 'javascript', 'python']
         language: ['cpp']
-        # Learn more...
-        # https://docs.github.com/en/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#overriding-automatic-language-detection
 
     steps:
     - name: Checkout repository
@@ -44,9 +42,16 @@ jobs:
     - run: sudo apt update
 
     - run: sudo apt install lcov
+    
+    - name: Install Conan
+      id: conan
+      uses: turtlebrowser/get-conan@main
+      
+    - name: Install dependencies with Conan
+      run: conan install . -s build_type=Debug
 
     - name: Generate Makefiles
-      run: cmake -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug .
+      run: cmake -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_MD4QT_STL_TESTS=ON -DMD4QT_USE_CONAN=ON .
 
     - name: Build
       run: make
@@ -93,9 +98,16 @@ jobs:
         
     - name: Enable developer command prompt
       uses: ilammy/msvc-dev-cmd@v1
+      
+    - name: Install Conan
+      id: conan
+      uses: turtlebrowser/get-conan@main
+      
+    - name: Install dependencies with Conan
+      run: conan install .
 
     - name: Generate Makefiles
-      run: cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Relese .
+      run: cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_MD4QT_STL_TESTS=ON -DMD4QT_USE_CONAN=ON .
 
     - name: Build
       run: nmake
@@ -105,7 +117,7 @@ jobs:
 
   macos:
     name: macos
-    runs-on: macos-11
+    runs-on: macos-12
 
     strategy:
       fail-fast: true
@@ -124,9 +136,16 @@ jobs:
       uses: jurplel/install-qt-action@v3
       with:
         version: '6.3.1'
+        
+    - name: Install Conan
+      id: conan
+      uses: turtlebrowser/get-conan@main
+      
+    - name: Install dependencies with Conan
+      run: conan install . --build=missing
 
     - name: Generate Makefiles
-      run: cmake -DCMAKE_BUILD_TYPE=Relese .
+      run: cmake -DBUILD_MD4QT_STL_TESTS=ON -DCMAKE_BUILD_TYPE=Release -DMD4QT_USE_CONAN=ON .
 
     - name: Build
       run: make
