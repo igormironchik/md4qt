@@ -1585,11 +1585,8 @@ inline void resolveLinks< QStringTrait >( QStringList & linksToParse,
 				continue;
 		}
 
-		if( typename QStringTrait::Url( nextFileName ).isRelative() )
-		{
-			if( QStringTrait::fileExists( nextFileName, "" ) )
-				*it = QStringTrait::absoluteFilePath( nextFileName );
-		}
+		if( QStringTrait::fileExists( nextFileName, "" ) )
+			*it = QStringTrait::absoluteFilePath( nextFileName );
 	}
 }
 
@@ -1615,11 +1612,8 @@ inline void resolveLinks< UnicodeStringTrait >( std::vector< UnicodeString > & l
 				continue;
 		}
 
-		if( typename UnicodeStringTrait::Url( nextFileName ).isRelative() )
-		{
-			if( UnicodeStringTrait::fileExists( nextFileName, "" ) )
-				*it = UnicodeStringTrait::absoluteFilePath( nextFileName );
-		}
+		if( UnicodeStringTrait::fileExists( nextFileName, "" ) )
+			*it = UnicodeStringTrait::absoluteFilePath( nextFileName );
 	}
 }
 
