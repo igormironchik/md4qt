@@ -5,6 +5,8 @@
 `md4qt` supports CommonMark 0.30 Spec, and some GitHub extensions, such as
 tables, footnotes, tasks lists, strikethroughs, LaTeX Math injections.
 
+`md4qt` can be built with Qt6 or with ICU.
+
 This library parses Markdown into tree structure.
 
 # Example
@@ -42,9 +44,9 @@ int main()
 # Benchmark
 
 Approximate benchmark with [md4c](https://github.com/mity/md4c) and
-[cmark-gfm](https://github.com/github/cmark-gfm) says, that `md4qt` is slower ~5-7 times.
+[cmark-gfm](https://github.com/github/cmark-gfm) says, that Qt6 version of `md4qt` is slower ~5-7 times.
 But you will get complete C++ tree structure of the Markdown document with all
-major extensions. Conclusion why it's so you can read [here](tests/md_benchmark/README.md).
+major extensions. Conclusion why it's slower you can read [here](tests/md_benchmark/README.md).
 
 # Q/A
 
@@ -83,7 +85,7 @@ labeled links, look:
 **What is the second argument of `MD::Parser::parse()`?**
 
  * Second argument of `MD::Parser::parse()` is a flag that tells to the
-parser to process Markdown files recursively or not. If parsing is recursive
+parser to process Markdown files recursively or no. If parsing is recursive
 then if in the targeted Markdown file exist links to other Markdown files,
 then they will be parsed too and will exist in the resulting document.
 
@@ -131,7 +133,7 @@ parameter. You will receive in dependencies `C++ STL`, `ICU` and
    You can define both to have ability to use `md4qt` with `Qt6` and
    `ICU`.
    
-**`ICU` slower then `Qt6`? Really?**
+**`ICU` is slower then `Qt6`? Really?**
 
  * Don't believe anybody, just build built-in `md_benchamrk` and have a
 look. Dry numbers says, that `Qt6` `QString` ~2 times faster
