@@ -4546,14 +4546,11 @@ makeLink( const typename Trait::String & url, const typename Trait::String & tex
 	{
 		if( !u.startsWith( c_35 ) )
 		{
-			if( typename Trait::Url( u ).isRelative() )
+			if( Trait::fileExists( u, po.workingPath ) )
 			{
-				if( Trait::fileExists( u, po.workingPath ) )
-				{
-					u = Trait::absoluteFilePath( po.workingPath + u );
+				u = Trait::absoluteFilePath( po.workingPath + u );
 
-					po.linksToParse.push_back( u );
-				}
+				po.linksToParse.push_back( u );
 			}
 		}
 		else
@@ -4673,10 +4670,10 @@ makeImage( const typename Trait::String & url, const typename Trait::String & te
 	typename Trait::String u = ( url.startsWith( c_35 ) ? url : removeBackslashes< Trait >(
 		replaceEntity< Trait >( url ) ) );
 
-	if( !typename Trait::Url( u ).isRelative() )
-		img->setUrl( u );
+	if( Trait::fileExists( u, po.workingPath ) )
+		img->setUrl( po.workingPath + u );
 	else
-		img->setUrl( Trait::fileExists( u, po.workingPath ) ? po.workingPath + u : u );
+		img->setUrl( u );
 
 	typename MdBlock< Trait >::Data tmp;
 	tmp.push_back( { text, { -1 } } );
@@ -5197,11 +5194,8 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 
 							if( !url.isEmpty() )
 							{
-								if( typename Trait::Url( url ).isRelative() )
-								{
-									if( Trait::fileExists( url, po.workingPath ) )
-										url = Trait::absoluteFilePath( po.workingPath + url );
-								}
+								if( Trait::fileExists( url, po.workingPath ) )
+									url = Trait::absoluteFilePath( po.workingPath + url );
 							}
 
 							link->setUrl( url );
