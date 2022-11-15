@@ -144,7 +144,7 @@ parser's code and profiler says that most of the run-time is spent
 on such operations. `QString` just more optimized for access separate
 character then `icu::UnicodeString`...
 
-**Why does parsing fail on Windows with `std::ifstream`?**
+**Why is parsing wrong on Windows with `std::ifstream`?**
 
  * Such problem can occur on Windows with MSVC if you open file in text
 mode, so for `MD::Parser` always open `std::ifstream` with `std::ios::binary`
