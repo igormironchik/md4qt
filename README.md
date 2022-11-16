@@ -139,7 +139,7 @@ parameter. You will receive in dependencies `C++ STL`, `ICU` and
 look. Dry numbers says, that `Qt6` `QString` ~2 times faster
 `icu::UnicodeString` in such tasks. Markdown parsing implies to check
 every symbol, and tied to use access to every character in the string
-with `operator [] (...)`, or member `at(..)`. I do it very often in the
+with `operator [] (...)`, or member `at(...)`. I do it very often in the
 parser's code and profiler says that most of the run-time is spent
 on such operations. `QString` just more optimized for access separate
 character then `icu::UnicodeString`...
