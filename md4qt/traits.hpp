@@ -304,30 +304,13 @@ public:
 			return UnicodeString();
 	}
 
-	int toInt() const
-	{
-		try {
-			std::string tmp;
-			toUTF8String( tmp );
-			return std::stoi( tmp );
-		}
-		catch( const std::invalid_argument & )
-		{
-		}
-		catch( const std::out_of_range & )
-		{
-		}
-
-		return 0;
-	}
-
-	int toInt( bool * ok, int base ) const
+	int toInt( bool * ok = nullptr, int base = 10 ) const
 	{
 		try {
 			std::string tmp;
 			toUTF8String( tmp );
 			const auto result = std::stoi( tmp, nullptr, base );
-			if( ok) *ok = true;
+			if( ok ) *ok = true;
 			return result;
 		}
 		catch( const std::invalid_argument & )
@@ -433,18 +416,10 @@ public:
 		return *this;
 	}
 
-	UnicodeString sliced( long long int pos ) const
+	UnicodeString sliced( long long int pos, long long int len = -1 ) const
 	{
 		icu::UnicodeString tmp;
-		extract( pos, length() - pos, tmp );
-
-		return tmp;
-	}
-
-	UnicodeString sliced( long long int pos, long long int length ) const
-	{
-		icu::UnicodeString tmp;
-		extract( pos, length, tmp );
+		extract( pos, ( len == -1 ? length() - pos : len ), tmp );
 
 		return tmp;
 	}
