@@ -1563,13 +1563,7 @@ Parser< UnicodeStringTrait >::parseFile( const UnicodeString & fileName,
 
 template< class Trait >
 void resolveLinks( typename Trait::StringList & linksToParse,
-	std::shared_ptr< Document< Trait > > doc );
-
-#ifdef MD4QT_QT_SUPPORT
-
-template<>
-inline void resolveLinks< QStringTrait >( QStringList & linksToParse,
-	std::shared_ptr< Document< QStringTrait > > doc )
+	std::shared_ptr< Document< Trait > > doc )
 {
 	for( auto it = linksToParse.begin(), last = linksToParse.end(); it != last; ++it )
 	{
@@ -1585,39 +1579,11 @@ inline void resolveLinks< QStringTrait >( QStringList & linksToParse,
 				continue;
 		}
 
-		if( QStringTrait::fileExists( nextFileName, "" ) )
-			*it = QStringTrait::absoluteFilePath( nextFileName );
+		if( Trait::fileExists( nextFileName, "" ) )
+			*it = Trait::absoluteFilePath( nextFileName );
 	}
 }
 
-#endif
-
-#ifdef MD4QT_ICU_STL_SUPPORT
-
-template<>
-inline void resolveLinks< UnicodeStringTrait >( std::vector< UnicodeString > & linksToParse,
-	std::shared_ptr< Document< UnicodeStringTrait > > doc )
-{
-	for( auto it = linksToParse.begin(), last = linksToParse.end(); it != last; ++it )
-	{
-		auto nextFileName = *it;
-
-		if( nextFileName.startsWith( c_35 ) )
-		{
-			const auto lit = doc->labeledLinks().find( nextFileName );
-
-			if( lit != doc->labeledLinks().cend() )
-				nextFileName = lit->second->url();
-			else
-				continue;
-		}
-
-		if( UnicodeStringTrait::fileExists( nextFileName, "" ) )
-			*it = UnicodeStringTrait::absoluteFilePath( nextFileName );
-	}
-}
-
-#endif
 
 template< class Trait >
 inline void
@@ -4227,7 +4193,10 @@ inline bool isEmail< UnicodeStringTrait >( const UnicodeString & url )
 		"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
 		"(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$" );
 
-	return icu::RegexPattern::matches( pattern, url, er, status );
+	if( url.toLower().startsWith( "mailto:" ) )
+		return icu::RegexPattern::matches( pattern, url.right( url.length() - 7 ), er, status );
+	else
+		return icu::RegexPattern::matches( pattern, url, er, status );
 }
 
 #endif

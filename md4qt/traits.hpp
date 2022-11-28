@@ -78,7 +78,7 @@ namespace MD {
 #ifdef MD4QT_ICU_STL_SUPPORT
 
 //
-// StdChar
+// UnicodeChar
 //
 
 //! Wrapper for UChar32 to be used with MD::Parser.
@@ -196,10 +196,11 @@ public:
 
 private:
 	UChar32 m_ch;
-}; // class StdChar
+}; // class UnicodeChar
+
 
 //
-// StdString
+// UnicodeString
 //
 
 //! Wrapper for icu::UnicodeString to be used with MD::Parser.
@@ -456,18 +457,20 @@ public:
 		return tmp;
 	}
 
-	UnicodeString & toCaseFolded()
+	UnicodeString toCaseFolded() const
 	{
-		icu::UnicodeString::foldCase();
+		icu::UnicodeString tmp = *this;
+		tmp.foldCase();
 
-		return *this;
+		return tmp;
 	}
 
-	UnicodeString toUpper()
+	UnicodeString toUpper() const
 	{
-		icu::UnicodeString::toUpper();
+		icu::UnicodeString tmp = *this;
+		tmp.toUpper();
 
-		return *this;
+		return tmp;
 	}
 
 	UnicodeString toLower() const
