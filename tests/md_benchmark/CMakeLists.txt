@@ -7,6 +7,11 @@ SET( CMAKE_CXX_STANDARD_REQUIRED ON )
 
 project( md_benchmark )
 
+if( MSVC )
+	add_compile_options( /bigobj )
+	add_compile_options( /utf-8 )
+endif()
+
 add_subdirectory( 3rdparty/md4c )
 
 set( CMARK_TESTS OFF CACHE INTERNAL "" FORCE )

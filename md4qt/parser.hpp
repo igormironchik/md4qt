@@ -278,7 +278,7 @@ private:
 
 inline void
 collapseStack( std::stack< std::pair< long long int, int > > & st, long long int v, int type,
-	long long int idx )
+	size_t idx )
 {
 	while( !st.empty() && v > 0 )
 	{
@@ -307,7 +307,7 @@ checkEmphasisSequence( const std::vector< std::pair< long long int, int > > & s,
 
 	size_t ret = 0;
 	bool retInit = false;
-	long long int ii = idx;
+	size_t ii = idx;
 
 	for( size_t i = idx + 1; i < s.size(); ++i )
 	{
@@ -936,20 +936,20 @@ public:
 	TextStream( std::istream & stream )
 		:	m_pos( 0 )
 	{
-		std::vector< char > content;
+		std::vector< unsigned char > content;
 
 		stream.seekg( 0, std::ios::end );
 		const auto ssize = stream.tellg();
 		content.resize( (size_t) ssize + 1 );
 		stream.seekg( 0, std::ios::beg );
-		stream.read( &content[ 0 ], ssize );
-		content[ ssize ] = 0;
+		stream.read( (char*) &content[ 0 ], ssize );
+		content[ (size_t) ssize ] = 0;
 
 		const auto z = std::count( content.cbegin(), content.cend(), 0 );
 
 		if( z > 1 )
 		{
-			std::vector< char > tmp;
+			std::vector< unsigned char > tmp;
 			tmp.resize( content.size() + ( z - 1 ) * 2 );
 
 			for( size_t i = 0, j = 0; i < content.size() - 1; ++i, ++j )
@@ -970,7 +970,7 @@ public:
 			std::swap( content, tmp );
 		}
 
-		m_str = UnicodeString::fromUTF8( &content[ 0 ] );
+		m_str = UnicodeString::fromUTF8( (char*) &content[ 0 ] );
 	}
 
 	bool atEnd() const { return m_pos == m_str.size(); }
@@ -1537,7 +1537,7 @@ Parser< UnicodeStringTrait >::parseFile( const UnicodeString & fileName,
 				{
 					auto path = std::filesystem::canonical(
 						std::filesystem::path( fn, std::filesystem::path::generic_format ) );
-					auto fileName = path.filename().u8string();
+					auto fileNameS = path.filename().u8string();
 					auto workingDirectory = path.remove_filename().u8string();
 
 					if( !workingDirectory.empty() )
@@ -1546,7 +1546,7 @@ Parser< UnicodeStringTrait >::parseFile( const UnicodeString & fileName,
 					std::replace( workingDirectory.begin(), workingDirectory.end(), '\\', '/' );
 
 					parseStream( file, UnicodeString::fromUTF8( workingDirectory ),
-						UnicodeString::fromUTF8( fileName ),
+						UnicodeString::fromUTF8( fileNameS ),
 						recursive, doc, ext, parentLinks );
 
 					file.close();
@@ -4194,9 +4194,9 @@ inline bool isEmail< UnicodeStringTrait >( const UnicodeString & url )
 		"(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$" );
 
 	if( url.toLower().startsWith( "mailto:" ) )
-		return icu::RegexPattern::matches( pattern, url.right( url.length() - 7 ), er, status );
+		return (bool) icu::RegexPattern::matches( pattern, url.right( url.length() - 7 ), er, status );
 	else
-		return icu::RegexPattern::matches( pattern, url, er, status );
+		return (bool) icu::RegexPattern::matches( pattern, url, er, status );
 }
 
 #endif
@@ -5484,7 +5484,7 @@ createStyles( const std::vector< std::pair< long long int, int > > & s, size_t i
 	size_t closeIdx = 0;
 	std::tie( std::ignore, closeIdx ) = checkEmphasisSequence( s, i );
 
-	for( i = closeIdx; i >= 0; --i )
+	for( i = closeIdx; ; --i )
 	{
 		if( s[ i ].second == s[ idx ].second && s[ i ].first < 0 )
 		{
@@ -5497,6 +5497,9 @@ createStyles( const std::vector< std::pair< long long int, int > > & s, size_t i
 			if( !len )
 				break;
 		}
+
+		if( i == 0 )
+			break;
 	}
 
 	return styles;

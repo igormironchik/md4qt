@@ -243,7 +243,7 @@ public:
 	}
 
 	UnicodeString( long long int count, char ch )
-		:	icu::UnicodeString( count, (UChar32) ch, count )
+		:	icu::UnicodeString( (int32_t) count, (UChar32) ch, (int32_t) count )
 	{
 	}
 
@@ -251,7 +251,7 @@ public:
 
 	UnicodeChar operator [] ( long long int position ) const
 	{
-		return UnicodeChar( char32At( position ) );
+		return UnicodeChar( char32At( (int32_t) position ) );
 	}
 
 	void push_back( const UnicodeChar & ch )
@@ -296,7 +296,7 @@ public:
 		if( n > 0 )
 		{
 			icu::UnicodeString result;
-			extract( position, n, result );
+			extract( (int32_t) position, (int32_t) n, result );
 
 			return result;
 		}
@@ -366,7 +366,7 @@ public:
 		return result;
 	}
 
-	std::vector< UnicodeString > split( char ch ) const
+	std::vector< UnicodeString > split( const UnicodeChar & ch ) const
 	{
 		std::vector< UnicodeString > result;
 
@@ -374,7 +374,7 @@ public:
 
 		while( pos < length() )
 		{
-			const auto fpos = indexOf( ch, pos );
+			const auto fpos = indexOf( (UChar32) ch, pos );
 
 			if( fpos != -1 )
 			{
@@ -400,6 +400,11 @@ public:
 		return result;
 	}
 
+	std::vector< UnicodeString > split( char ch ) const
+	{
+		return split( UnicodeChar( ch ) );
+	}
+
 	UnicodeString & replace( const UnicodeChar & before, const UnicodeString & after )
 	{
 		for( int32_t pos = 0; ( pos = indexOf( before, pos ) ) != -1; pos += after.size() )
@@ -419,7 +424,7 @@ public:
 	UnicodeString sliced( long long int pos, long long int len = -1 ) const
 	{
 		icu::UnicodeString tmp;
-		extract( pos, ( len == -1 ? length() - pos : len ), tmp );
+		extract( (int32_t) pos, (int32_t) ( len == -1 ? length() - pos : len ), tmp );
 
 		return tmp;
 	}
@@ -427,7 +432,7 @@ public:
 	UnicodeString right( long long int n ) const
 	{
 		icu::UnicodeString tmp;
-		extract( length() - n, n, tmp );
+		extract( length() - (int32_t) n, (int32_t) n, tmp );
 
 		return tmp;
 	}
