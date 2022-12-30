@@ -45,6 +45,8 @@
 #include <QFile>
 
 #include <cmark-gfm.h>
+#include <cmark-gfm-core-extensions.h>
+#include <registry.h>
 
 
 struct DATA {
@@ -409,9 +411,13 @@ int main( int argc, char ** argv )
 
 			file.close();
 
+			cmark_gfm_core_extensions_ensure_registered();
+
 			auto doc = cmark_parse_document( md.constData(), md.size(), CMARK_OPT_FOOTNOTES );
 
 			cmark_node_free( doc );
+
+			cmark_release_plugins();
 		}
 		else
 			std::cout << "failed to open complex.md" << std::endl;
