@@ -1521,20 +1521,19 @@ Parser< UnicodeStringTrait >::parseFile( const UnicodeString & fileName,
 		fileName.toUTF8String( fn );
 
 		try {
-			auto e = UnicodeString::fromUTF8( std::filesystem::path( fn ).extension().u8string() );
+			auto e = UnicodeString::fromUTF8( std::filesystem::u8path( fn ).extension().u8string() );
 
 			if( !e.isEmpty() )
 				e.remove( 0, 1 );
 
 			if( std::find( ext.cbegin(), ext.cend(), e.toLower() ) != ext.cend() )
 			{
-				std::ifstream file( fn, std::ios::in | std::ios::binary );
+				auto path = std::filesystem::canonical( std::filesystem::u8path( fn ) );
+				std::ifstream file( path.c_str(), std::ios::in | std::ios::binary );
 
 				if( file.good() )
 				{
-					auto path = std::filesystem::canonical(
-						std::filesystem::path( fn, std::filesystem::path::generic_format ) );
-					auto fileNameS = path.filename().u8string();
+					const auto fileNameS = path.filename().u8string();
 					auto workingDirectory = path.remove_filename().u8string();
 
 					if( !workingDirectory.empty() )
