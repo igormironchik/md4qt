@@ -173,7 +173,7 @@ isOrderedList( const typename Trait::String & s, int * num = nullptr, int * len 
 
 	if( dp != p && p < s.size() )
 	{
-		const auto digits = s.mid( dp, p - dp );
+		const auto digits = s.sliced( dp, p - dp );
 
 		if( digits.size() > 9 )
 			return false;
@@ -1938,7 +1938,7 @@ findAndRemoveHeaderLabel( typename Trait::String & s )
 
 		if( p < s.size() && s[ p ] == typename Trait::Char( c_125 ) )
 		{
-			const auto label = s.mid( start, p - start + 1 );
+			const auto label = s.sliced( start, p - start + 1 );
 			s.remove( start, p - start + 1 );
 			return label;
 		}
@@ -2059,7 +2059,7 @@ Parser< Trait >::parseHeading( MdBlock< Trait > & fr,
 		h->setLevel( lvl );
 
 		if( !label.isEmpty() )
-			h->setLabel( label.mid( 1, label.length() - 2 ) + "/" +
+			h->setLabel( label.sliced( 1, label.length() - 2 ) + "/" +
 				workingPath + fileName );
 
 		std::shared_ptr< Paragraph< Trait > > p( new Paragraph< Trait > );
@@ -6181,9 +6181,9 @@ Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
 				for( auto it = fr.data.begin(), last = fr.data.end(); it != last; ++it )
 				{
 					if( it->first.startsWith( "    " ) )
-						it->first = it->first.mid( 4 );
+						it->first = it->first.sliced( 4 );
 					else if( it->first.startsWith( c_9 ) )
-						it->first = it->first.mid( 1 );
+						it->first = it->first.sliced( 1 );
 				}
 
 				StringListStream< Trait > stream( fr.data );

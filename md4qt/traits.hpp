@@ -269,41 +269,6 @@ public:
 		return length();
 	}
 
-	UnicodeString mid( long long int position, long long int n = -1 ) const
-	{
-		const auto originalLength = size();
-
-		if( position > originalLength )
-			return UnicodeString();
-
-		if( position < 0 )
-		{
-			if( n < 0 || n + position >= originalLength )
-				return *this;
-
-			if( n + position <= 0 )
-				return UnicodeString();
-
-			n += position;
-			position = 0;
-		}
-		else if( static_cast< size_t > ( n ) > static_cast< size_t > ( originalLength - position ) )
-			n = originalLength - position;
-
-		if( position == 0 && n == originalLength )
-			return *this;
-
-		if( n > 0 )
-		{
-			icu::UnicodeString result;
-			extract( (int32_t) position, (int32_t) n, result );
-
-			return result;
-		}
-		else
-			return UnicodeString();
-	}
-
 	int toInt( bool * ok = nullptr, int base = 10 ) const
 	{
 		try {
