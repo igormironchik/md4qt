@@ -89,9 +89,9 @@ if( ${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME} )
 
 		find_package( Qt6Core REQUIRED )
 
-		add_executable( md4qt2html md2html/main.cpp )
+		add_executable( md2html md2html/main.cpp )
 
-		target_link_libraries( md4qt2html Qt6::Core )
+		target_link_libraries( md2html Qt6::Core )
 	endif()
 
 else()
