@@ -709,6 +709,87 @@ anchorToHtml( Anchor< Trait > * a )
 	return html;
 }
 
+template< class Trait >
+typename Trait::String
+footnotesToHtml( std::shared_ptr< Document< Trait > > doc,
+	typename Trait::template Vector< typename Trait::String > & fns )
+{
+	typename Trait::String html;
+
+	if( !fns.empty() )
+		html.push_back( "<hr /><table><tbody>" );
+
+	int i = 1;
+
+	typename Trait::template Vector< typename Trait::String > tmp;
+
+	for( const auto & id : fns )
+	{
+		html.push_back( "<tr><td id=\"" );
+		html.push_back( id );
+		html.push_back( "\">" );
+		html.push_back( std::to_string( i ).c_str() );
+		html.push_back( "</td><td>" );
+		++i;
+
+		const auto fit = doc->footnotesMap().find( id );
+
+		if( fit != doc->footnotesMap().cend() )
+		{
+			for( auto it = fit->second->items().cbegin(), last = fit->second->items().cend();
+				 it != last; ++it )
+			{
+				switch( (*it)->type() )
+				{
+					case ItemType::Heading :
+						html.push_back( headingToHtml(
+							static_cast< Heading< Trait >* > ( it->get() ), doc, tmp ) );
+						break;
+
+					case ItemType::Paragraph :
+						html.push_back( paragraphToHtml(
+							static_cast< Paragraph< Trait >* > ( it->get() ), true, doc, tmp ) );
+						break;
+
+					case ItemType::Code :
+						html.push_back( codeToHtml(
+							static_cast< Code< Trait >* > ( it->get() ) ) );
+						break;
+
+					case ItemType::Blockquote :
+						html.push_back( blockquoteToHtml(
+							static_cast< Blockquote< Trait >* > ( it->get() ), doc, tmp ) );
+						break;
+
+					case ItemType::List :
+						html.push_back( listToHtml(
+							static_cast< List< Trait >* > ( it->get() ), doc, tmp ) );
+						break;
+
+					case ItemType::Table :
+						html.push_back( tableToHtml(
+							static_cast< Table< Trait >* > ( it->get() ), doc, tmp ) );
+						break;
+
+					case ItemType::RawHtml :
+						html.push_back( static_cast< RawHtml< Trait >* > ( it->get() )->text() );
+						break;
+
+					default :
+						break;
+				}
+			}
+
+			html.push_back( "</td></tr>" );
+		}
+	}
+
+	if( !fns.empty() )
+		html.push_back( "</tbody></table>\n" );
+
+	return html;
+}
+
 } /* namespace details */
 
 template< class Trait >
@@ -778,6 +859,8 @@ toHtml( std::shared_ptr< Document< Trait > > doc )
 				break;
 		}
 	}
+
+	html.push_back( details::footnotesToHtml( doc, fns ) );
 
 	html.push_back( "</body></html>\n" );
 
