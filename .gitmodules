@@ -1,0 +1,3 @@
+[submodule "3rdparty/args-parser"]
+	path = 3rdparty/args-parser
+	url = https://github.com/igormironchik/args-parser.git
