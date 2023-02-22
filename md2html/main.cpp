@@ -90,7 +90,7 @@ int main( int argc, char ** argv )
 			}
 			else
 			{
-				outStream() << "Wrong file suffix of Markdown file.\n";
+				outStream() << "Wrong file suffix of Markdown file (supported *.md, *.markdown).\n";
 
 				return 1;
 			}
