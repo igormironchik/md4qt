@@ -312,27 +312,13 @@ headingToHtml( Heading< Trait > * h, std::shared_ptr< Document< Trait > > doc,
 	switch( h->level() )
 	{
 		case 1 :
-			html.push_back( headingToHtml( h, "h1", doc, fns ) );
-			break;
-
 		case 2 :
-			html.push_back( headingToHtml( h, "h2", doc, fns ) );
-			break;
-
 		case 3 :
-			html.push_back( headingToHtml( h, "h3", doc, fns ) );
-			break;
-
 		case 4 :
-			html.push_back( headingToHtml( h, "h4", doc, fns ) );
-			break;
-
 		case 5 :
-			html.push_back( headingToHtml( h, "h5", doc, fns ) );
-			break;
-
 		case 6 :
-			html.push_back( headingToHtml( h, "h6", doc, fns ) );
+			html.push_back( headingToHtml( h,
+				typename Trait::String( "h" ) + std::to_string( h->level() ).c_str(), doc, fns ) );
 			break;
 
 		default :
