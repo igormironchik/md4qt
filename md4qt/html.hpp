@@ -572,8 +572,7 @@ tableToHtml( Table< Trait > * t, std::shared_ptr< Document< Trait > > doc,
 
 	if( !t->isEmpty() )
 	{
-		html.push_back( "<table style=\"width:100%;border:1px solid black;border-collapse:collapse;max-width:100%;\">"
-						"<thead><tr>\n" );
+		html.push_back( "<table><thead><tr>\n" );
 
 		int i = 0;
 
@@ -582,7 +581,7 @@ tableToHtml( Table< Trait > * t, std::shared_ptr< Document< Trait > > doc,
 		{
 			html.push_back( "<th" );
 			html.push_back( tableAlignmentToHtml< Trait >( t->columnAlignment( i ) ) );
-			html.push_back( " style=\"border:1px solid black;border-collapse:collapse;max-width:100%;\">\n" );
+			html.push_back( ">\n" );
 			html.push_back( cellToHtml( th->get(), doc, fns ) );
 			html.push_back( "\n</th>\n" );
 
@@ -601,7 +600,7 @@ tableToHtml( Table< Trait > * t, std::shared_ptr< Document< Trait > > doc,
 			{
 				html.push_back( "\n<td" );
 				html.push_back( tableAlignmentToHtml< Trait >( t->columnAlignment( i ) ) );
-				html.push_back( " style=\"border:1px solid black;border-collapse:collapse;max-width:100%;\">\n" );
+				html.push_back( ">\n" );
 				html.push_back( cellToHtml( c->get(), doc, fns ) );
 				html.push_back( "\n</td>\n" );
 
@@ -626,7 +625,7 @@ blockquoteToHtml( Blockquote< Trait > * b, std::shared_ptr< Document< Trait > > 
 {
 	typename Trait::String html;
 
-	html.push_back( "\n<blockquote style=\"padding-left:10px;border-left:8px solid black;\">" );
+	html.push_back( "\n<blockquote>" );
 
 	for( auto it = b->items().cbegin(), last = b->items().cend(); it != last; ++it )
 	{
