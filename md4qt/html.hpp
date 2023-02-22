@@ -142,6 +142,7 @@ inlineCodeToHtml( Code< Trait > * c )
 	html.push_back( "<code>" );
 
 	auto code = c->text();
+	code.replace( typename Trait::Char( '&' ), "&amp;" );
 	code.replace( typename Trait::Char( '<' ), "&lt;" );
 	code.replace( typename Trait::Char( '>' ), "&gt;" );
 
@@ -361,6 +362,7 @@ codeToHtml( Code< Trait > * c )
 
 	html.push_back( ">" );
 	auto code = c->text();
+	code.replace( typename Trait::Char( '&' ), "&amp;" );
 	code.replace( typename Trait::Char( '<' ), "&lt;" );
 	code.replace( typename Trait::Char( '>' ), "&gt;" );
 	html.push_back( code );
@@ -638,7 +640,7 @@ blockquoteToHtml( Blockquote< Trait > * b, std::shared_ptr< Document< Trait > > 
 {
 	typename Trait::String html;
 
-	html.push_back( "\n<blockquote>" );
+	html.push_back( "\n<blockquote style=\"padding-left:10px;border-left:8px solid black;\">" );
 
 	for( auto it = b->items().cbegin(), last = b->items().cend(); it != last; ++it )
 	{
