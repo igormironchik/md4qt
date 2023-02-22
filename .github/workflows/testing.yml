@@ -46,6 +46,8 @@ jobs:
     - name: Install Conan
       id: conan
       uses: turtlebrowser/get-conan@main
+      with:
+        version: 1.59.0
       
     - name: Install dependencies with Conan
       run: conan install . -s build_type=Debug
@@ -102,6 +104,8 @@ jobs:
     - name: Install Conan
       id: conan
       uses: turtlebrowser/get-conan@main
+      with:
+        version: 1.59.0
       
     - name: Install dependencies with Conan
       run: conan install .
@@ -140,6 +144,8 @@ jobs:
     - name: Install Conan
       id: conan
       uses: turtlebrowser/get-conan@main
+      with:
+        version: 1.59.0
       
     - name: Install dependencies with Conan
       run: conan install . --build=missing
