@@ -181,8 +181,9 @@ linkToHtml( Link< Trait > * l, std::shared_ptr< Document< Trait > > doc )
 	if( lit != doc->labeledLinks().cend() )
 		url = lit->second->url();
 
-	if( typename Trait::Url( url ).isRelative() )
-		url = typename Trait::String( "#" ) + url;
+	if( typename Trait::Url( url ).isRelative() &&
+		!url.startsWith( typename Trait::String( "#" ) ) )
+			url = typename Trait::String( "#" ) + url;
 
 	html.push_back( "<a href=\"" );
 	html.push_back( url );
