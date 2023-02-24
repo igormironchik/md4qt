@@ -75,6 +75,116 @@
 
 namespace MD {
 
+template< class String >
+class InternalStringT {
+public:
+	InternalStringT() {}
+	InternalStringT( const String & s )
+		:	str( s )
+		,	startPos( 0 )
+	{}
+
+	String & asString() { return str; }
+	const String & asString() const { return str; }
+
+	long long int virginPos( long long int pos ) const
+	{
+		for( auto it = changedPos.crbegin(), last = changedPos.crend(); it != last; ++it )
+			pos = virginPosImpl( pos, *it );
+
+		return startPos + pos;
+	}
+
+	InternalStringT & replace( const String & what, const String & with )
+	{
+		String tmp;
+		bool init = false;
+
+		for( long long int i = 0; i < str.size(); )
+		{
+			long long int p = str.indexOf( what, i );
+
+			if( p != -1 )
+			{
+				tmp.push_back( str.sliced( i, p - i ) );
+				tmp.push_back( with );
+
+				i = p + what.size();
+
+				if( what.size() != with.size() )
+				{
+					if( !init )
+					{
+						changedPos.push_back( {} );
+						init = true;
+					}
+
+					changedPos.back().push_back( { p, what.size(), with.size() } );
+				}
+			}
+			else
+			{
+				tmp.push_back( str.sliced( i ) );
+
+				i = str.size();
+			}
+		}
+
+		std::swap( str, tmp );
+
+		return *this;
+	}
+
+	InternalStringT & remove( long long int pos, long long int size )
+	{
+		str.remove( pos, size );
+
+		changedPos.push_back( {} );
+		changedPos.back().push_back( { pos, size, 0 } );
+
+		return *this;
+	}
+
+private:
+	String str;
+
+	struct ChangedPos {
+		long long int pos = -1;
+		long long int oldLen = -1;
+		long long int len = -1;
+	};
+
+	long long int startPos = -1;
+	std::vector< std::vector< ChangedPos > > changedPos;
+
+private:
+	long long int virginPosImpl( long long int pos,
+		const std::vector< ChangedPos > & changed ) const
+	{
+		long long int p = 0;
+
+		for( const auto & c : changed )
+		{
+			if( c.pos <= pos + p )
+			{
+				if( c.pos + std::min( c.oldLen, c.len ) <= pos + p )
+				{
+					if( c.oldLen < c.len )
+						p -= ( c.len - c.oldLen );
+					else
+						p += ( c.oldLen - c.len );
+				}
+				else
+					break;
+			}
+			else
+				break;
+		}
+
+		return pos + p;
+	}
+}; // class InternalString
+
 #ifdef MD4QT_ICU_STL_SUPPORT
 
 //
@@ -490,6 +600,8 @@ struct UnicodeStringTrait {
 
 	using String = UnicodeString;
 
+	using InternalString = InternalStringT< String >;
+
 	using Char = UnicodeChar;
 
 	using TextStream = std::istream;
@@ -548,6 +660,8 @@ struct QStringTrait {
 	using Map = std::map< T, U >;
 
 	using String = QString;
+
+	using InternalString = InternalStringT< String >;
 
 	using Char = QChar;
 
