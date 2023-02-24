@@ -149,3 +149,30 @@ character then `icu::UnicodeString`...
  * Such problem can occur on Windows with MSVC if you open file in text
 mode, so for `MD::Parser` always open `std::ifstream` with `std::ios::binary`
 flag. And yes, I expect to receive UTF-8 encoded content...
+
+**How can I convert `MD::Document` into `HTML`?**
+
+ * In the `master` branch were made commits with implementation of
+`MD::toHtml()` function. You can do the following:
+
+   ```cpp
+   #define MD4QT_QT_SUPPORT
+   #include <md4qt/traits.hpp>
+   #include <md4qt/parser.hpp>
+   #include <md4qt/html.hpp>
+
+   int main()
+   {
+       MD::Parser< MD::QStringTrait > p;
+
+       auto doc = p.parse( QStringLiteral( "your_markdown.md" ) );
+
+       const auto html = MD::toHtml( doc );
+   ```
+   
+   But this functionality is not tested yet.
+   
+**I need to know positions in the `Markdown` file of blocks/elements. How
+can I achieve this?**
+
+ * Work in progress, be patient.
