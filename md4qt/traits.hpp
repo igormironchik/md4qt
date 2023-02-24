@@ -165,17 +165,12 @@ private:
 
 		for( const auto & c : changed )
 		{
-			if( c.pos <= pos + p )
+			if( c.pos + std::min( c.oldLen, c.len ) <= pos + p )
 			{
-				if( c.pos + std::min( c.oldLen, c.len ) <= pos + p )
-				{
-					if( c.oldLen < c.len )
-						p -= ( c.len - c.oldLen );
-					else
-						p += ( c.oldLen - c.len );
-				}
+				if( c.oldLen < c.len )
+					p -= ( c.len - c.oldLen );
 				else
-					break;
+					p += ( c.oldLen - c.len );
 			}
 			else
 				break;
