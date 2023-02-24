@@ -178,3 +178,54 @@ TEST_CASE( "replace_remove_5" )
 	REQUIRE( s.virginPos( 4 ) == 4 );
 	REQUIRE( s.virginPos( 5 ) == 5 );
 }
+
+TEST_CASE( "simplified" )
+{
+	TRAIT::InternalString s( "   a   b   c   " );
+
+	s = s.simplified();
+
+	REQUIRE( s.asString() == "a b c" );
+
+	REQUIRE( s.virginPos( 0 ) == 3 );
+	REQUIRE( s.virginPos( 1 ) == 4 );
+	REQUIRE( s.virginPos( 2 ) == 7 );
+	REQUIRE( s.virginPos( 3 ) == 8 );
+	REQUIRE( s.virginPos( 4 ) == 11 );
+
+	s = TRAIT::InternalString( "   a b c   " );
+
+	s = s.simplified();
+
+	REQUIRE( s.asString() == "a b c" );
+
+	REQUIRE( s.virginPos( 0 ) == 3 );
+	REQUIRE( s.virginPos( 1 ) == 4 );
+	REQUIRE( s.virginPos( 2 ) == 5 );
+	REQUIRE( s.virginPos( 3 ) == 6 );
+	REQUIRE( s.virginPos( 4 ) == 7 );
+
+	s = TRAIT::InternalString( "a b c" );
+
+	s = s.simplified();
+
+	REQUIRE( s.asString() == "a b c" );
+
+	REQUIRE( s.virginPos( 0 ) == 0 );
+	REQUIRE( s.virginPos( 1 ) == 1 );
+	REQUIRE( s.virginPos( 2 ) == 2 );
+	REQUIRE( s.virginPos( 3 ) == 3 );
+	REQUIRE( s.virginPos( 4 ) == 4 );
+
+	s = TRAIT::InternalString( "a b  c" );
+
+	s = s.simplified();
+
+	REQUIRE( s.asString() == "a b c" );
+
+	REQUIRE( s.virginPos( 0 ) == 0 );
+	REQUIRE( s.virginPos( 1 ) == 1 );
+	REQUIRE( s.virginPos( 2 ) == 2 );
+	REQUIRE( s.virginPos( 3 ) == 3 );
+	REQUIRE( s.virginPos( 4 ) == 5 );
+}

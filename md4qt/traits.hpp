@@ -75,13 +75,12 @@
 
 namespace MD {
 
-template< class String >
+template< class String, class Char >
 class InternalStringT {
 public:
 	InternalStringT() {}
 	InternalStringT( const String & s )
 		:	str( s )
-		,	startPos( 0 )
 	{}
 
 	String & asString() { return str; }
@@ -145,6 +144,61 @@ public:
 		return *this;
 	}
 
+	bool isEmpty() const { return str.isEmpty(); }
+	long long int length() const { return str.length(); }
+
+	InternalStringT simplified() const
+	{
+		if( isEmpty() )
+			return *this;
+
+		InternalStringT result;
+		long long int i = 0;
+		bool init = false;
+		bool first = true;
+
+		while( true )
+		{
+			long long tmp = i;
+
+			while( i < length() && str[ i ].isSpace() )
+				++i;
+
+			if( i != tmp )
+			{
+				if( !init )
+				{
+					result.changedPos.push_back( {} );
+					init = true;
+				}
+
+				if( i - tmp > 1 || first )
+					result.changedPos.back().push_back( { tmp, i - tmp, ( first ? 0 : 1 ) } );
+			}
+
+			first = false;
+
+			while( i != length() && !str[ i ].isSpace() )
+			{
+				result.str.push_back( str[ i ] );
+				++i;
+			}
+
+			if( i == length() )
+				break;
+
+			result.str.push_back( Char( ' ' ) );
+		}
+
+		if( !result.isEmpty() && result.str[ result.length() - 1 ] ==  Char( ' ' ) )
+		{
+			result.str.remove( result.length() - 1, 1 );
+			result.changedPos.back().back().len = 0;
+		}
+
+		return result;
+	}
+
 private:
 	String str;
 
@@ -154,7 +208,7 @@ private:
 		long long int len = -1;
 	};
 
-	long long int startPos = -1;
+	long long int startPos = 0;
 	std::vector< std::vector< ChangedPos > > changedPos;
 
 private:
@@ -595,9 +649,9 @@ struct UnicodeStringTrait {
 
 	using String = UnicodeString;
 
-	using InternalString = InternalStringT< String >;
-
 	using Char = UnicodeChar;
+
+	using InternalString = InternalStringT< String, Char >;
 
 	using TextStream = std::istream;
 
@@ -656,9 +710,9 @@ struct QStringTrait {
 
 	using String = QString;
 
-	using InternalString = InternalStringT< String >;
-
 	using Char = QChar;
+
+	using InternalString = InternalStringT< String, Char >;
 
 	using TextStream = QTextStream;
 
