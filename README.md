@@ -168,6 +168,9 @@ flag. And yes, I expect to receive UTF-8 encoded content...
        auto doc = p.parse( QStringLiteral( "your_markdown.md" ) );
 
        const auto html = MD::toHtml( doc );
+
+       return 0;
+   }
    ```
    
    But this functionality is not tested yet.
