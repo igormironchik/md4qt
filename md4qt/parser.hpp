@@ -70,40 +70,6 @@
 
 namespace MD {
 
-static const char c_32 = ' ';
-static const char c_35 = '#';
-static const char c_46 = '.';
-static const char c_41 = ')';
-static const char c_96 = '`';
-static const char c_126 = '~';
-static const char c_9 = '\t';
-static const char c_62 = '>';
-static const char c_45 = '-';
-static const char c_43 = '+';
-static const char c_42 = '*';
-static const char c_91 = '[';
-static const char c_94 = '^';
-static const char c_93 = ']';
-static const char c_58 = ':';
-static const char c_124 = '|';
-static const char c_92 = '\\';
-static const char c_125 = '}';
-static const char c_61 = '=';
-static const char c_95 = '_';
-static const char c_34 = '"';
-static const char c_40 = '(';
-static const char c_33 = '!';
-static const char c_60 = '<';
-static const char c_10 = '\n';
-static const char c_13 = '\r';
-static const char c_39 = '\'';
-static const char c_47 = '/';
-static const char c_63 = '?';
-static const char c_38 = '&';
-static const char c_59 = ';';
-static const char c_120 = 'x';
-static const char c_36 = '$';
-
 static const char * c_startComment = "<!--";
 
 inline bool
@@ -186,7 +152,7 @@ isOrderedList( const typename Trait::String & s, int * num = nullptr, int * len 
 		if( len )
 			*len = p - dp;
 
-		if( s[ p ] == typename Trait::Char( c_46 ) || s[ p ] == typename Trait::Char( c_41 ) )
+		if( s[ p ] == typename Trait::Char( '.' ) || s[ p ] == typename Trait::Char( ')' ) )
 		{
 			if( delim )
 				*delim = s[ p ];
@@ -198,7 +164,7 @@ isOrderedList( const typename Trait::String & s, int * num = nullptr, int * len 
 			if( isFirstLineEmpty )
 				*isFirstLineEmpty = ( tmp == s.size() );
 
-			if( ( p < s.size() && s[ p ] == typename Trait::Char( c_32 ) ) || p == s.size() )
+			if( ( p < s.size() && s[ p ] == typename Trait::Char( ' ' ) ) || p == s.size() )
 				return true;
 		}
 	}
@@ -370,18 +336,18 @@ isFootnote( const typename Trait::String & s )
 	if( s.size() - p < 5 )
 		return false;
 
-	if( s[ p++ ] != typename Trait::Char( c_91 ) )
+	if( s[ p++ ] != typename Trait::Char( '[' ) )
 		return false;
 
-	if( s[ p++ ] != typename Trait::Char( c_94 ) )
+	if( s[ p++ ] != typename Trait::Char( '^' ) )
 		return false;
 
-	if( s[ p ] == typename Trait::Char( c_93 ) || s[ p ].isSpace() )
+	if( s[ p ] == typename Trait::Char( ']' ) || s[ p ].isSpace() )
 		return false;
 
 	for( ; p < s.size(); ++p )
 	{
-		if( s[ p ] == typename Trait::Char( c_93 ) )
+		if( s[ p ] == typename Trait::Char( ']' ) )
 			break;
 		else if( s[ p ].isSpace() )
 			return false;
@@ -389,7 +355,7 @@ isFootnote( const typename Trait::String & s )
 
 	++p;
 
-	if( p < s.size() && s[ p ] == typename Trait::Char( c_58 ) )
+	if( p < s.size() && s[ p ] == typename Trait::Char( ':' ) )
 		return true;
 	else
 		return false;
@@ -407,7 +373,7 @@ isCodeFences( const typename Trait::String & s, bool closing = false )
 
 	const auto ch = s[ p ];
 
-	if( ch != typename Trait::Char( c_126 ) && ch != typename Trait::Char( c_96 ) )
+	if( ch != typename Trait::Char( '~' ) && ch != typename Trait::Char( '`' ) )
 		return false;
 
 	bool space = false;
@@ -421,7 +387,7 @@ isCodeFences( const typename Trait::String & s, bool closing = false )
 			space = true;
 		else if( s[ p ] == ch )
 		{
-			if( space && ( closing ? true : ch == typename Trait::Char( c_96 ) ) )
+			if( space && ( closing ? true : ch == typename Trait::Char( '`' ) ) )
 				return false;
 
 			if( !space )
@@ -436,11 +402,11 @@ isCodeFences( const typename Trait::String & s, bool closing = false )
 	if( c < 3 )
 		return false;
 
-	if( ch == typename Trait::Char( c_96 ) )
+	if( ch == typename Trait::Char( '`' ) )
 	{
 		for( ; p < s.length(); ++p )
 		{
-			if( s[ p ] == typename Trait::Char( c_96 ) )
+			if( s[ p ] == typename Trait::Char( '`' ) )
 				return false;
 		}
 	}
@@ -459,7 +425,7 @@ readEscapedSequence( long long int i, const typename Trait::String & str )
 	{
 		bool now = false;
 
-		if( str[ i ] == typename Trait::Char( c_92 ) && !backslash )
+		if( str[ i ] == typename Trait::Char( '\\' ) && !backslash )
 		{
 			backslash = true;
 			now = true;
@@ -486,8 +452,8 @@ isStartOfCode( const typename Trait::String & str, typename Trait::String * synt
 	if( str.size() < 3 )
 		return false;
 
-	const bool c96 = str[ 0 ] == typename Trait::Char( c_96 );
-	const bool c126 = str[ 0 ] == typename Trait::Char( c_126 );
+	const bool c96 = str[ 0 ] == typename Trait::Char( '`' );
+	const bool c126 = str[ 0 ] == typename Trait::Char( '~' );
 
 	if( c96 || c126 )
 	{
@@ -496,7 +462,7 @@ isStartOfCode( const typename Trait::String & str, typename Trait::String * synt
 
 		while( p < str.length() )
 		{
-			if( str[ p ] != ( c96 ? typename Trait::Char( c_96 ) : typename Trait::Char( c_126 ) ) )
+			if( str[ p ] != ( c96 ? typename Trait::Char( '`' ) : typename Trait::Char( '~' ) ) )
 				break;
 
 			++c;
@@ -531,12 +497,12 @@ isHorizontalLine( const typename Trait::String & s )
 
 	typename Trait::Char c;
 
-	if( s[ 0 ] == typename Trait::Char( c_42 ) )
-		c = c_42;
-	else if( s[ 0 ] == typename Trait::Char( c_45 ) )
-		c = c_45;
-	else if( s[ 0 ] == typename Trait::Char( c_95 ) )
-		c = c_95;
+	if( s[ 0 ] == typename Trait::Char( '*' ) )
+		c = '*';
+	else if( s[ 0 ] == typename Trait::Char( '-' ) )
+		c = '-';
+	else if( s[ 0 ] == typename Trait::Char( '_' ) )
+		c = '_';
 	else
 		return false;
 
@@ -572,19 +538,19 @@ isColumnAlignment( const typename Trait::String & s )
 	if( !c_legitime.contains( s[ p ] ) )
 		return false;
 
-	if( s[ p ] == typename Trait::Char( c_58 ) )
+	if( s[ p ] == typename Trait::Char( ':' ) )
 		++p;
 
 	for( ; p < s.size(); ++p )
 	{
-		if( s[ p ] != typename Trait::Char( c_45 ) )
+		if( s[ p ] != typename Trait::Char( '-' ) )
 			break;
 	}
 
 	if( p == s.size() )
 		return true;
 
-	if( s[ p ] != typename Trait::Char( c_58 ) && !s[ p ].isSpace() )
+	if( s[ p ] != typename Trait::Char( ':' ) && !s[ p ].isSpace() )
 		return false;
 
 	++p;
@@ -630,7 +596,7 @@ template< class Trait >
 inline int
 isTableAlignment( const typename Trait::String & s )
 {
-	const auto columns = splitString< Trait >( s.simplified(), c_124 );
+	const auto columns = splitString< Trait >( s.simplified(), '|' );
 
 	for( const auto & c : columns )
 	{
@@ -653,7 +619,7 @@ isHtmlComment( const typename Trait::String & s )
 	else
 		return false;
 
-	if( c.startsWith( c_62 ) )
+	if( c.startsWith( '>' ) )
 		return false;
 
 	if( c.startsWith( "->" ) )
@@ -664,7 +630,7 @@ isHtmlComment( const typename Trait::String & s )
 	if( p > -1 )
 	{
 		if( c.size() > p + 2 )
-			return c[ p + 2 ] == typename Trait::Char( c_62 );
+			return c[ p + 2 ] == typename Trait::Char( '>' );
 		else
 			return false;
 	}
@@ -870,20 +836,20 @@ public:
 		{
 			const auto c = getChar();
 
-			if( rFound && c != c_10 )
+			if( rFound && c != '\n' )
 			{
 				--m_pos;
 
 				return line;
 			}
 
-			if( c == c_13 )
+			if( c == '\r' )
 			{
 				rFound = true;
 
 				continue;
 			}
-			else if( c == c_10 )
+			else if( c == '\n' )
 				return line;
 
 			if( !c.isNull() )
@@ -986,20 +952,20 @@ public:
 		{
 			const auto c = getChar();
 
-			if( rFound && c != UnicodeChar( c_10 ) )
+			if( rFound && c != UnicodeChar( '\n' ) )
 			{
 				--m_pos;
 
 				return line;
 			}
 
-			if( c == UnicodeChar( c_13 ) )
+			if( c == UnicodeChar( '\r' ) )
 			{
 				rFound = true;
 
 				continue;
 			}
-			else if( c == UnicodeChar( c_10 ) )
+			else if( c == UnicodeChar( '\n' ) )
 				return line;
 
 			if( !c.isNull() )
@@ -1034,7 +1000,7 @@ checkForEndHtmlComments( const typename Trait::String & line, long long int pos,
 
 	if( e != -1 )
 	{
-		if( e + 2 < line.size() && line[ e + 2 ] == typename Trait::Char( c_62 ) )
+		if( e + 2 < line.size() && line[ e + 2 ] == typename Trait::Char( '>' ) )
 			res.push_back( isHtmlComment< Trait >( line.sliced( 0, e + 3 ) ) );
 		else
 			res.push_back( false );
@@ -1062,7 +1028,7 @@ checkForHtmlComments( const typename Trait::String & line, StringListStream< Tra
 		{
 			for( ; l < stream.size(); ++l )
 			{
-				c.push_back( typename Trait::Char( c_32 ) );
+				c.push_back( typename Trait::Char( ' ' ) );
 				c.push_back( stream.lineAt( l ).asString() );
 
 				if( checkForEndHtmlComments< Trait >( c, 4, res ) )
@@ -1142,7 +1108,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				auto line = stream.readLine();
 
 				if( line.isEmpty() || line.asString().startsWith( "    " ) ||
-					line.asString().startsWith( c_9 ) )
+					line.asString().startsWith( '\t' ) )
 				{
 					fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 				}
@@ -1332,7 +1298,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				const auto indent = skipSpaces< Trait >( 0, fragment.front().first.asString() );
 
 				for( long long int i = 0; i < emptyLinesCount; ++i )
-					fragment.push_back( { typename Trait::String( indent, c_32 ),
+					fragment.push_back( { typename Trait::String( indent, ' ' ),
 						{ currentLineNumber - emptyLinesCount + i, {} } } );
 			}
 			else
@@ -1567,7 +1533,7 @@ void resolveLinks( typename Trait::StringList & linksToParse,
 	{
 		auto nextFileName = *it;
 
-		if( nextFileName.startsWith( c_35 ) )
+		if( nextFileName.startsWith( '#' ) )
 		{
 			const auto lit = doc->labeledLinks().find( nextFileName );
 
@@ -1641,7 +1607,7 @@ Parser< Trait >::parseStream( typename Trait::TextStream & s,
 					continue;
 			}
 
-			if( nextFileName.startsWith( c_35 ) )
+			if( nextFileName.startsWith( '#' ) )
 				continue;
 
 			const auto pit = std::find( m_parsedFiles.cbegin(), m_parsedFiles.cend(),
@@ -1707,7 +1673,7 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 	bool inList, long long int * indent, bool calcIndent,
 	const std::set< long long int > * indents ) const
 {
-	str.replace( typename Trait::Char( c_9 ), typename Trait::String( 4, c_32 ) );
+	str.replace( typename Trait::Char( '\t' ), typename Trait::String( 4, ' ' ) );
 
 	const auto first = skipSpaces< Trait >( 0, str.asString() );
 
@@ -1715,13 +1681,13 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 	{
 		auto s = str.sliced( first );
 
-		if( s.asString().startsWith( c_62 ) && first < 4 )
+		if( s.asString().startsWith( '>' ) && first < 4 )
 			return BlockType::Blockquote;
-		else if( s.asString().startsWith( c_35 ) && first < 4 )
+		else if( s.asString().startsWith( '#' ) && first < 4 )
 		{
 			long long int c = 0;
 
-			while( c < s.length() && s[ c ] == typename Trait::Char( c_35 ) )
+			while( c < s.length() && s[ c ] == typename Trait::Char( '#' ) )
 				++c;
 
 			if( c <= 6 && ( ( c < s.length() && s[ c ].isSpace() ) || c == s.length() ) )
@@ -1739,9 +1705,9 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 			const auto orderedList = isOrderedList< Trait >( str.asString(),
 				nullptr, nullptr, nullptr, &isFirstLineEmpty );
 
-			if( ( ( ( s.asString().startsWith( c_45 ) ||
-					s.asString().startsWith( c_43 ) || s.asString().startsWith( c_42 ) ) &&
-				( ( s.length() > 1 && s[ 1 ] == typename Trait::Char( c_32 ) ) || s.length() == 1 ) ) ||
+			if( ( ( ( s.asString().startsWith( '-' ) ||
+					s.asString().startsWith( '+' ) || s.asString().startsWith( '*' ) ) &&
+				( ( s.length() > 1 && s[ 1 ] == typename Trait::Char( ' ' ) ) || s.length() == 1 ) ) ||
 				orderedList ) && ( first < 4  || indentInList( indents, first ) ) )
 			{
 				if( calcIndent && indent )
@@ -1752,7 +1718,7 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 				else
 					return BlockType::List;
 			}
-			else if( str.asString().startsWith( typename Trait::String( ( indent ? *indent : 4 ), c_32 ) ) )
+			else if( str.asString().startsWith( typename Trait::String( ( indent ? *indent : 4 ), ' ' ) ) )
 			{
 				if( str.asString().startsWith( "    " ) )
 					return BlockType::CodeIndentedBySpaces;
@@ -1765,9 +1731,9 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 			const auto orderedList = isOrderedList< Trait >( str.asString(),
 				nullptr, nullptr, nullptr, &isFirstLineEmpty );
 
-			if( ( ( ( s.asString().startsWith( c_45 ) ||
-					s.asString().startsWith( c_43 ) || s.asString().startsWith( c_42 ) ) &&
-				( ( s.length() > 1 && s[ 1 ] == typename Trait::Char( c_32 ) ) || s.length() == 1 ) ) ||
+			if( ( ( ( s.asString().startsWith( '-' ) ||
+					s.asString().startsWith( '+' ) || s.asString().startsWith( '*' ) ) &&
+				( ( s.length() > 1 && s[ 1 ] == typename Trait::Char( ' ' ) ) || s.length() == 1 ) ) ||
 				orderedList ) && ( first < 4  || indentInList( indents, first ) ) )
 			{
 				if( calcIndent && indent )
@@ -1778,7 +1744,7 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 				else
 					return BlockType::List;
 			}
-			else if( str.asString().startsWith( "    " ) || str.asString().startsWith( c_9 ) )
+			else if( str.asString().startsWith( "    " ) || str.asString().startsWith( '\t' ) )
 				return BlockType::CodeIndentedBySpaces;
 		}
 
@@ -1866,13 +1832,13 @@ template< class Trait >
 inline int
 isTableHeader( const typename Trait::String & s )
 {
-	if( s.contains( typename Trait::Char( c_124 ) ) )
+	if( s.contains( typename Trait::Char( '|' ) ) )
 	{
 		int c = 0;
 
 		const auto tmp = s.simplified();
-		const auto p = tmp.startsWith( c_124 ) ? 1 : 0;
-		const auto n = tmp.size() - p - ( tmp.endsWith( c_124 ) ? 1 : 0 );
+		const auto p = tmp.startsWith( '|' ) ? 1 : 0;
+		const auto n = tmp.size() - p - ( tmp.endsWith( '|' ) ? 1 : 0 );
 		const auto v = tmp.sliced( p, n );
 
 		bool backslash = false;
@@ -1881,12 +1847,12 @@ isTableHeader( const typename Trait::String & s )
 		{
 			bool now = false;
 
-			if( v[ i ] == typename Trait::Char( c_92 ) && !backslash )
+			if( v[ i ] == typename Trait::Char( '\\' ) && !backslash )
 			{
 				backslash = true;
 				now = true;
 			}
-			else if( v[ i ] == typename Trait::Char( c_124 ) && !backslash )
+			else if( v[ i ] == typename Trait::Char( '|' ) && !backslash )
 				++c;
 
 			if( !now )
@@ -1937,11 +1903,11 @@ findAndRemoveHeaderLabel( typename Trait::String & s )
 
 		for( ; p < s.size(); ++p )
 		{
-			if( s[ p ] == typename Trait::Char( c_125 ) )
+			if( s[ p ] == typename Trait::Char( '}' ) )
 				break;
 		}
 
-		if( p < s.size() && s[ p ] == typename Trait::Char( c_125 ) )
+		if( p < s.size() && s[ p ] == typename Trait::Char( '}' ) )
 		{
 			const auto label = s.sliced( start, p - start + 1 );
 			s.remove( start, p - start + 1 );
@@ -1996,10 +1962,10 @@ findAndRemoveClosingSequence( typename Trait::InternalString & s )
 
 	for( long long int i = s.length() - 1; i >= 0 ; --i )
 	{
-		if( !s[ i ].isSpace() && s[ i ] != typename Trait::Char( c_35 ) && end == -1 )
+		if( !s[ i ].isSpace() && s[ i ] != typename Trait::Char( '#' ) && end == -1 )
 			return;
 
-		if( s[ i ] == typename Trait::Char( c_35 ) )
+		if( s[ i ] == typename Trait::Char( '#' ) )
 		{
 			if( end == -1 )
 				end = i;
@@ -2011,7 +1977,7 @@ findAndRemoveClosingSequence( typename Trait::InternalString & s )
 					start = i;
 					break;
 				}
-				else if( s[ i - 1 ] != typename Trait::Char( c_35 ) )
+				else if( s[ i - 1 ] != typename Trait::Char( '#' ) )
 					return;
 			}
 			else
@@ -2045,7 +2011,7 @@ Parser< Trait >::parseHeading( MdBlock< Trait > & fr,
 		pos = 0;
 		int lvl = 0;
 
-		while( pos < line.length() && line[ pos ] == typename Trait::Char( c_35 ) )
+		while( pos < line.length() && line[ pos ] == typename Trait::Char( '#' ) )
 		{
 			++lvl;
 			++pos;
@@ -2125,12 +2091,12 @@ splitTableRow( const typename Trait::InternalString & s )
 	{
 		bool now = false;
 
-		if( s[ i ] == typename Trait::Char( c_92 ) && !backslash )
+		if( s[ i ] == typename Trait::Char( '\\' ) && !backslash )
 		{
 			backslash = true;
 			now = true;
 		}
-		else if( s[ i ] == typename Trait::Char( c_124 ) && !backslash )
+		else if( s[ i ] == typename Trait::Char( '|' ) && !backslash )
 		{
 			res.push_back( prepareTableData< Trait >( s.sliced( start, i - start ).simplified() ) );
 			start = i + 1;
@@ -2236,9 +2202,9 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 				{
 					typename Table< Trait >::Alignment a = Table< Trait >::AlignLeft;
 
-					if( it->asString().endsWith( c_58 ) && it->asString().startsWith( c_58 ) )
+					if( it->asString().endsWith( ':' ) && it->asString().startsWith( ':' ) )
 						a = Table< Trait >::AlignCenter;
-					else if( it->asString().endsWith( c_58 ) )
+					else if( it->asString().endsWith( ':' ) )
 						a = Table< Trait >::AlignRight;
 
 					table->setColumnAlignment( table->columnsCount(), a );
@@ -2289,14 +2255,14 @@ template< class Trait >
 inline bool
 isH1( const typename Trait::String & s )
 {
-	return isH< Trait >( s, c_61 );
+	return isH< Trait >( s, '=' );
 }
 
 template< class Trait >
 inline bool
 isH2( const typename Trait::String & s )
 {
-	return isH< Trait >( s, c_45 );
+	return isH< Trait >( s, '-' );
 }
 
 template < class Trait >
@@ -2575,7 +2541,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 			{
 				bool now = false;
 
-				if( str[ i ] == typename Trait::Char( c_92 ) && !backslash )
+				if( str[ i ] == typename Trait::Char( '\\' ) && !backslash )
 				{
 					backslash = true;
 					now = true;
@@ -2588,13 +2554,13 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 				else
 				{
 					// * or _
-					if( ( str[ i ] == typename Trait::Char( c_95 ) ||
-						str[ i ] == typename Trait::Char( c_42 ) ) && !backslash )
+					if( ( str[ i ] == typename Trait::Char( '_' ) ||
+						str[ i ] == typename Trait::Char( '*' ) ) && !backslash )
 					{
 						typename Trait::String style;
 
 						const bool punctBefore = ( i > 0 ? str[ i - 1 ].isPunct() ||
-							str[ i - 1 ] == typename Trait::Char( c_126 ) : false );
+							str[ i - 1 ] == typename Trait::Char( '~' ) : false );
 						const bool alNumBefore =
 							( i > 0 ? str[ i - 1 ].isLetterOrNumber() : false );
 
@@ -2608,7 +2574,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 
 						Delimiter::DelimiterType dt = Delimiter::Unknown;
 
-						if( ch == typename Trait::Char( c_42 ) )
+						if( ch == typename Trait::Char( '*' ) )
 							dt = Delimiter::Emphasis1;
 						else
 							dt = Delimiter::Emphasis2;
@@ -2617,7 +2583,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 							( i < str.length() ? str[ i ].isSpace() : true );
 						const bool punctAfter =
 							( i < str.length() ? str[ i ].isPunct() ||
-								str[ i ] == typename Trait::Char( c_126 ) : false );
+								str[ i ] == typename Trait::Char( '~' ) : false );
 						const bool leftFlanking =
 							( ( space || punctBefore ) && punctAfter ) ||
 							( !spaceAfter && !punctAfter );
@@ -2626,7 +2592,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 							( !space && !punctBefore );
 						const bool disabledEmphasis =
 							( ( i < str.length() ? str[ i ].isLetterOrNumber() : false ) &&
-							alNumBefore && ch == typename Trait::Char( c_95 ) );
+							alNumBefore && ch == typename Trait::Char( '_' ) );
 
 						if( ( leftFlanking || rightFlanking ) && !disabledEmphasis )
 						{
@@ -2645,14 +2611,14 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 						--i;
 					}
 					// ~
-					else if( str[ i ] == typename Trait::Char( c_126 ) && !backslash )
+					else if( str[ i ] == typename Trait::Char( '~' ) && !backslash )
 					{
 						typename Trait::String style;
 
 						const bool punctBefore = ( i > 0 ? str[ i - 1 ].isPunct() ||
-							str[ i - 1 ] == typename Trait::Char( c_126 ) : false );
+							str[ i - 1 ] == typename Trait::Char( '~' ) : false );
 
-						while( i < str.length() && str[ i ] == typename Trait::Char( c_126 ) )
+						while( i < str.length() && str[ i ] == typename Trait::Char( '~' ) )
 						{
 							style.push_back( str[ i ] );
 							++i;
@@ -2664,7 +2630,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 								( i < str.length() ? str[ i ].isSpace() : true );
 							const bool punctAfter =
 								( i < str.length() ? str[ i ].isPunct() ||
-									str[ i ] == typename Trait::Char( c_126 ) : false );
+									str[ i ] == typename Trait::Char( '~' ) : false );
 							const bool leftFlanking =
 								( ( space || punctBefore ) && punctAfter ) ||
 								( !spaceAfter && !punctAfter );
@@ -2689,7 +2655,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 						--i;
 					}
 					// [
-					else if( str[ i ] == typename Trait::Char( c_91 ) && !backslash )
+					else if( str[ i ] == typename Trait::Char( '[' ) && !backslash )
 					{
 						const bool spaceAfter =
 							( i < str.length() ? str[ i ].isSpace() : true );
@@ -2700,11 +2666,11 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 						word = false;
 					}
 					// !
-					else if( str[ i ] == typename Trait::Char( c_33 ) && !backslash )
+					else if( str[ i ] == typename Trait::Char( '!' ) && !backslash )
 					{
 						if( i + 1 < str.length() )
 						{
-							if( str[ i + 1 ] == typename Trait::Char( c_91 ) )
+							if( str[ i + 1 ] == typename Trait::Char( '[' ) )
 							{
 								const bool spaceAfter =
 									( i < str.length() ? str[ i ].isSpace() : true );
@@ -2723,7 +2689,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 							word = true;
 					}
 					// (
-					else if( str[ i ] == typename Trait::Char( c_40 ) && !backslash )
+					else if( str[ i ] == typename Trait::Char( '(' ) && !backslash )
 					{
 						const bool spaceAfter =
 							( i < str.length() ? str[ i ].isSpace() : true );
@@ -2734,7 +2700,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 						word = false;
 					}
 					// ]
-					else if( str[ i ] == typename Trait::Char( c_93 ) && !backslash )
+					else if( str[ i ] == typename Trait::Char( ']' ) && !backslash )
 					{
 						const bool spaceAfter =
 							( i < str.length() ? str[ i ].isSpace() : true );
@@ -2745,7 +2711,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 						word = false;
 					}
 					// )
-					else if( str[ i ] == typename Trait::Char( c_41 ) && !backslash )
+					else if( str[ i ] == typename Trait::Char( ')' ) && !backslash )
 					{
 						const bool spaceAfter =
 							( i < str.length() ? str[ i ].isSpace() : true );
@@ -2756,7 +2722,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 						word = false;
 					}
 					// <
-					else if( str[ i ] == typename Trait::Char( c_60 ) && !backslash )
+					else if( str[ i ] == typename Trait::Char( '<' ) && !backslash )
 					{
 						const bool spaceAfter =
 							( i < str.length() ? str[ i ].isSpace() : true );
@@ -2767,7 +2733,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 						word = false;
 					}
 					// >
-					else if( str[ i ] == typename Trait::Char( c_62 ) && !backslash )
+					else if( str[ i ] == typename Trait::Char( '>' ) && !backslash )
 					{
 						const bool spaceAfter =
 							( i < str.length() ? str[ i ].isSpace() : true );
@@ -2778,11 +2744,11 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 						word = false;
 					}
 					// `
-					else if( str[ i ] == typename Trait::Char( c_96 ) )
+					else if( str[ i ] == typename Trait::Char( '`' ) )
 					{
 						typename Trait::String code;
 
-						while( i < str.length() && str[ i ] == typename Trait::Char( c_96 ) )
+						while( i < str.length() && str[ i ] == typename Trait::Char( '`' ) )
 						{
 							code.push_back( str[ i ] );
 							++i;
@@ -2812,11 +2778,11 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 						--i;
 					}
 					// $
-					else if( str[ i ] == typename Trait::Char( c_36 ) )
+					else if( str[ i ] == typename Trait::Char( '$' ) )
 					{
 						typename Trait::String m;
 
-						while( i < str.length() && str[ i ] == typename Trait::Char( c_36 ) )
+						while( i < str.length() && str[ i ] == typename Trait::Char( '$' ) )
 						{
 							m.push_back( str[ i ] );
 							++i;
@@ -2882,14 +2848,14 @@ template< class Trait >
 inline bool
 isLineBreak( const typename Trait::String & s )
 {
-	return ( s.endsWith( "  " ) || s.endsWith( c_92 ) );
+	return ( s.endsWith( "  " ) || s.endsWith( '\\' ) );
 }
 
 template< class Trait >
 inline typename Trait::String
 removeLineBreak( const typename Trait::String & s )
 {
-	if( s.endsWith( c_92 ) )
+	if( s.endsWith( '\\' ) )
 		return s.sliced( 0, s.size() - 1 );
 	else
 		return s;
@@ -2904,24 +2870,24 @@ replaceEntity( const typename Trait::String & s )
 	typename Trait::String res;
 	long long int i = 0;
 
-	while( ( p1 = s.indexOf( c_38, p1 ) ) != -1 )
+	while( ( p1 = s.indexOf( '&', p1 ) ) != -1 )
 	{
-		if( p1 > 0 && s[ p1 - 1 ] == typename Trait::Char( c_92 ) )
+		if( p1 > 0 && s[ p1 - 1 ] == typename Trait::Char( '\\' ) )
 		{
 			++p1;
 
 			continue;
 		}
 
-		const auto p2 = s.indexOf( c_59, p1 );
+		const auto p2 = s.indexOf( ';', p1 );
 
 		if( p2 != -1 )
 		{
 			const auto en = s.sliced( p1, p2 - p1 + 1 );
 
-			if( en.size() > 2 && en[ 1 ] == typename Trait::Char( c_35 ) )
+			if( en.size() > 2 && en[ 1 ] == typename Trait::Char( '#' ) )
 			{
-				if( en.size() > 3 && en[ 2 ].toLower() == typename Trait::Char( c_120 ) )
+				if( en.size() > 3 && en[ 2 ].toLower() == typename Trait::Char( 'x' ) )
 				{
 					const auto hex = en.sliced( 3, en.size() - 4 );
 
@@ -3004,7 +2970,7 @@ removeBackslashes( const typename Trait::InternalString & s )
 	{
 		bool now = false;
 
-		if( s[ i ] == typename Trait::Char( c_92 ) && !backslash && i != s.length() - 1 )
+		if( s[ i ] == typename Trait::Char( '\\' ) && !backslash && i != s.length() - 1 )
 		{
 			backslash = true;
 			now = true;
@@ -3134,7 +3100,7 @@ makeText(
 
 	if( po.line != lastLine )
 	{
-		text.push_back( typename Trait::Char( c_32 ) );
+		text.push_back( typename Trait::Char( ' ' ) );
 		++po.line;
 
 		for( ; po.line < lastLine; ++po.line )
@@ -3147,7 +3113,7 @@ makeText(
 				po.fr.data.at( po.line ).first.asString() );
 			text.push_back( s );
 
-			text.push_back( typename Trait::Char( c_32 ) );
+			text.push_back( typename Trait::Char( ' ' ) );
 
 			if( lineBreak )
 				makeTOWLB();
@@ -3210,7 +3176,7 @@ readUnquotedHtmlAttrValue( long long int & l, long long int & p, const typename 
 			break;
 		else if( notAllowed.contains( fr[ l ].first[ p ] ) )
 			return { false, false };
-		else if( fr[ l ].first[ p ] == typename Trait::Char( c_62 ) )
+		else if( fr[ l ].first[ p ] == typename Trait::Char( '>' ) )
 			return { !value.isEmpty(), !value.isEmpty() };
 		else
 			value.push_back( fr[ l ].first[ p ] );
@@ -3226,8 +3192,8 @@ template< class Trait >
 inline std::pair< bool, bool >
 readHtmlAttrValue( long long int & l, long long int & p, const typename MdBlock< Trait >::Data & fr )
 {
-	if( p < fr[ l ].first.length() && fr[ l ].first[ p ] != typename Trait::Char( c_34 ) &&
-		fr[ l ].first[ p ] != typename Trait::Char( c_39 ) )
+	if( p < fr[ l ].first.length() && fr[ l ].first[ p ] != typename Trait::Char( '"' ) &&
+		fr[ l ].first[ p ] != typename Trait::Char( '\'' ) )
 			return readUnquotedHtmlAttrValue< Trait >( l, p, fr );
 
 	const auto s = fr[ l ].first[ p ];
@@ -3286,11 +3252,11 @@ readHtmlAttr( long long int & l, long long int & p, const typename MdBlock< Trai
 		return { false, false };
 
 	// /
-	if( p < fr[ l ].first.length() && fr[ l ].first[ p ] == typename Trait::Char( c_47 ) )
+	if( p < fr[ l ].first.length() && fr[ l ].first[ p ] == typename Trait::Char( '/' ) )
 		return { false, true };
 
 	// >
-	if( p < fr[ l ].first.length() && fr[ l ].first[ p ] == typename Trait::Char( c_62 ) )
+	if( p < fr[ l ].first.length() && fr[ l ].first[ p ] == typename Trait::Char( '>' ) )
 		return { false, true };
 
 	if( checkForSpace )
@@ -3305,7 +3271,7 @@ readHtmlAttr( long long int & l, long long int & p, const typename MdBlock< Trai
 	{
 		const auto ch = fr[ l ].first[ p ];
 
-		if( ch.isSpace() || ch == typename Trait::Char( c_62 ) || ch == typename Trait::Char( c_61 ) )
+		if( ch.isSpace() || ch == typename Trait::Char( '>' ) || ch == typename Trait::Char( '=' ) )
 			break;
 		else
 			name.push_back( ch );
@@ -3313,7 +3279,7 @@ readHtmlAttr( long long int & l, long long int & p, const typename MdBlock< Trai
 
 	name = name.toLower();
 
-	if( !name.startsWith( c_95 ) && !name.startsWith( c_58 ) &&
+	if( !name.startsWith( '_' ) && !name.startsWith( ':' ) &&
 		!name.isEmpty() &&
 		!( name[ 0 ].unicode() >= 97 && name[ 0 ].unicode() <= 122 ) )
 	{
@@ -3330,7 +3296,7 @@ readHtmlAttr( long long int & l, long long int & p, const typename MdBlock< Trai
 	}
 
 	// >
-	if( p < fr[ l ].first.length() && fr[ l ].first[ p ] == typename Trait::Char( c_62 ) )
+	if( p < fr[ l ].first.length() && fr[ l ].first[ p ] == typename Trait::Char( '>' ) )
 		return { false, true };
 
 	tl = l;
@@ -3344,7 +3310,7 @@ readHtmlAttr( long long int & l, long long int & p, const typename MdBlock< Trai
 	// =
 	if( p < fr[ l ].first.length() )
 	{
-		if( fr[ l ].first[ p ] != typename Trait::Char( c_61 ) )
+		if( fr[ l ].first[ p ] != typename Trait::Char( '=' ) )
 		{
 			l = tl;
 			p = tp;
@@ -3425,7 +3391,7 @@ template< class Trait >
 inline std::tuple< bool, long long int, long long int, bool, typename Trait::String >
 isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po, int rule )
 {
-	if( po.fr.data[ line ].first[ pos ] != typename Trait::Char( c_60 ) )
+	if( po.fr.data[ line ].first[ pos ] != typename Trait::Char( '<' ) )
 		return { false, line, pos, false, {} };
 
 	typename Trait::String tag;
@@ -3444,11 +3410,11 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 
 	bool closing = false;
 
-	if( po.fr.data[ l ].first[ p ] == typename Trait::Char( c_47 ) )
+	if( po.fr.data[ l ].first[ p ] == typename Trait::Char( '/' ) )
 	{
 		closing = true;
 
-		tag.push_back( typename Trait::Char( c_47 ) );
+		tag.push_back( typename Trait::Char( '/' ) );
 
 		++p;
 	}
@@ -3458,16 +3424,16 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 	{
 		const auto ch = po.fr.data[ l ].first[ p ];
 
-		if( ch.isSpace() || ch == typename Trait::Char( c_62 ) || ch == typename Trait::Char( c_47 ) )
+		if( ch.isSpace() || ch == typename Trait::Char( '>' ) || ch == typename Trait::Char( '/' ) )
 			break;
 		else
 			tag.push_back( ch );
 	}
 
-	if( p < po.fr.data[ l ].first.length() && po.fr.data[ l ].first[ p ] == typename Trait::Char( c_47 ) )
+	if( p < po.fr.data[ l ].first.length() && po.fr.data[ l ].first[ p ] == typename Trait::Char( '/' ) )
 	{
 		if( p + 1 < po.fr.data[ l ].first.length() && po.fr.data[ l ].first[ p + 1 ] ==
-			typename Trait::Char( c_62 ) )
+			typename Trait::Char( '>' ) )
 		{
 			long long int tmp = 0;
 
@@ -3484,7 +3450,7 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 	}
 
 	if( p < po.fr.data[ l ].first.length() && po.fr.data[ l ].first[ p ] ==
-		typename Trait::Char( c_62 ) )
+		typename Trait::Char( '>' ) )
 	{
 		long long int tmp = 0;
 
@@ -3502,7 +3468,7 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 	if( l >= (long long int) po.fr.data.size() )
 		return { false, line, pos, false, tag };
 
-	if( po.fr.data[ l ].first[ p ] == typename Trait::Char( c_62 ) )
+	if( po.fr.data[ l ].first[ p ] == typename Trait::Char( '>' ) )
 	{
 		long long int tmp = 0;
 
@@ -3533,7 +3499,7 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 			return { false, line, pos, false, tag };
 	}
 
-	if( po.fr.data[ l ].first[ p ] == typename Trait::Char( c_47 ) )
+	if( po.fr.data[ l ].first[ p ] == typename Trait::Char( '/' ) )
 		++p;
 	else
 	{
@@ -3543,7 +3509,7 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 			return { false, line, pos, false, tag };
 	}
 
-	if( po.fr.data[ l ].first[ p ] == typename Trait::Char( c_62 ) )
+	if( po.fr.data[ l ].first[ p ] == typename Trait::Char( '>' ) )
 	{
 		long long int tmp = 0;
 
@@ -3571,14 +3537,14 @@ readHtmlTag( typename Delims< Trait >::const_iterator it, TextParsingOpts< Trait
 	{
 		const auto ch = po.fr.data[ it->m_line ].first[ i ];
 
-		if( !ch.isSpace() && ch != typename Trait::Char( c_62 ) )
+		if( !ch.isSpace() && ch != typename Trait::Char( '>' ) )
 			tag.push_back( ch );
 		else
 			break;
 	}
 
 	return { tag, i < po.fr.data[ it->m_line ].first.length() ?
-		po.fr.data[ it->m_line ].first[ i ] == typename Trait::Char( c_62 ) : false };
+		po.fr.data[ it->m_line ].first[ i ] == typename Trait::Char( '>' ) : false };
 }
 
 template< class Trait >
@@ -3609,7 +3575,7 @@ eatRawHtml( long long int line, long long int pos, long long int toLine, long lo
 		if( !h.isEmpty() )
 		{
 			for( long long int i = 0; i < po.fr.emptyLinesBefore; ++i )
-				h.push_back( typename Trait::Char( c_10 ) );
+				h.push_back( typename Trait::Char( '\n' ) );
 		}
 
 		const auto first = po.fr.data[ line ].first.asString().sliced( pos,
@@ -3617,7 +3583,7 @@ eatRawHtml( long long int line, long long int pos, long long int toLine, long lo
 				po.fr.data[ line ].first.length() - pos ) );
 
 		if( !h.isEmpty() && !first.isEmpty() )
-			h.push_back( typename Trait::Char( c_10 ) );
+			h.push_back( typename Trait::Char( '\n' ) );
 
 		if( !first.isEmpty() )
 			h.push_back( first );
@@ -3626,13 +3592,13 @@ eatRawHtml( long long int line, long long int pos, long long int toLine, long lo
 
 		for( ; line < toLine; ++line )
 		{
-			h.push_back( typename Trait::Char( c_10 ) );
+			h.push_back( typename Trait::Char( '\n' ) );
 			h.push_back( po.fr.data[ line ].first.asString() );
 		}
 
 		if( line == toLine && toPos != 0 )
 		{
-			h.push_back( typename Trait::Char( c_10 ) );
+			h.push_back( typename Trait::Char( '\n' ) );
 			h.push_back( po.fr.data[ line ].first.asString().sliced( 0,
 				toPos > 0 ? toPos : po.fr.data[ line ].first.length() ) );
 		}
@@ -3745,8 +3711,8 @@ finishRule2HtmlTag( typename Delims< Trait >::const_iterator it,
 			if( it->m_type == Delimiter::Greater )
 			{
 				if( it->m_pos > 1 && po.fr.data[ it->m_line ].first[ it->m_pos - 1 ] ==
-						typename Trait::Char( c_45 ) &&
-					po.fr.data[ it->m_line ].first[ it->m_pos - 2 ] == typename Trait::Char( c_45 ) )
+						typename Trait::Char( '-' ) &&
+					po.fr.data[ it->m_line ].first[ it->m_pos - 2 ] == typename Trait::Char( '-' ) )
 				{
 					eatRawHtml( po.line, po.pos, it->m_line, po.fr.data[ it->m_line ].first.length(),
 						po, true, 2, onLine );
@@ -3786,13 +3752,13 @@ finishRule3HtmlTag( typename Delims< Trait >::const_iterator it,
 		if( it->m_type == Delimiter::Greater )
 		{
 			if( it->m_pos > 0 && po.fr.data[ it->m_line ].first[ it->m_pos - 1 ] ==
-				typename Trait::Char( c_63 ) )
+				typename Trait::Char( '?' ) )
 			{
 				long long int i = it->m_pos + 1;
 
 				for( ; i < po.fr.data[ it->m_line ].first.length(); ++i )
 				{
-					if( po.fr.data[ it->m_line ].first[ i ] == typename Trait::Char( c_60 ) )
+					if( po.fr.data[ it->m_line ].first[ i ] == typename Trait::Char( '<' ) )
 						break;
 				}
 
@@ -3828,7 +3794,7 @@ finishRule4HtmlTag( typename Delims< Trait >::const_iterator it,
 
 			for( ; i < po.fr.data[ it->m_line ].first.length(); ++i )
 			{
-				if( po.fr.data[ it->m_line ].first[ i ] == typename Trait::Char( c_60 ) )
+				if( po.fr.data[ it->m_line ].first[ i ] == typename Trait::Char( '<' ) )
 					break;
 			}
 
@@ -3860,14 +3826,14 @@ finishRule5HtmlTag( typename Delims< Trait >::const_iterator it,
 		if( it->m_type == Delimiter::Greater )
 		{
 			if( it->m_pos > 1 && po.fr.data[ it->m_line ].first[ it->m_pos - 1 ] ==
-					typename Trait::Char( c_93 ) &&
-				po.fr.data[ it->m_line ].first[ it->m_pos - 2 ] == typename Trait::Char( c_93 ) )
+					typename Trait::Char( ']' ) &&
+				po.fr.data[ it->m_line ].first[ it->m_pos - 2 ] == typename Trait::Char( ']' ) )
 			{
 				long long int i = it->m_pos + 1;
 
 				for( ; i < po.fr.data[ it->m_line ].first.length(); ++i )
 				{
-					if( po.fr.data[ it->m_line ].first[ i ] == typename Trait::Char( c_60 ) )
+					if( po.fr.data[ it->m_line ].first[ i ] == typename Trait::Char( '<' ) )
 						break;
 				}
 
@@ -3964,16 +3930,16 @@ htmlTagRule( typename Delims< Trait >::const_iterator it,
 
 	bool closing = false;
 
-	if( tag.startsWith( c_47 ) )
+	if( tag.startsWith( '/' ) )
 	{
 		tag.remove( 0, 1 );
 		closing = true;
 	}
 
-	if( tag.endsWith( c_47 ) )
+	if( tag.endsWith( '/' ) )
 		tag.remove( tag.size() - 1, 1 );
 
-	if( !tag.startsWith( c_33 ) && !tag.startsWith( c_63 ) &&
+	if( !tag.startsWith( '!' ) && !tag.startsWith( '?' ) &&
 		!( tag[ 0 ].unicode() >= 97 && tag[ 0 ].unicode() <= 122 ) )
 			return -1;
 
@@ -4145,11 +4111,11 @@ checkForMath( typename Delims< Trait >::const_iterator it,
 
 			for( long long int i = it->m_line + 1; i < end->m_line; ++i )
 			{
-				math.push_back( typename Trait::Char( c_10 ) );
+				math.push_back( typename Trait::Char( '\n' ) );
 				math.push_back( po.fr.data[ i ].first.asString() );
 			}
 
-			math.push_back( typename Trait::Char( c_10 ) );
+			math.push_back( typename Trait::Char( '\n' ) );
 			math.push_back( po.fr.data[ end->m_line ].first.asString().sliced( 0, end->m_pos ) );
 		}
 
@@ -4300,14 +4266,14 @@ makeInlineCode( long long int lastLine, long long int lastPos,
 				po.fr.data.at( po.line ).first.length() - po.pos ) ) );
 
 		if( po.line < lastLine )
-			c.push_back( typename Trait::Char( c_32 ) );
+			c.push_back( typename Trait::Char( ' ' ) );
 
 		po.pos = 0;
 	}
 
 	po.line = lastLine;
 
-	if( c[ 0 ] == typename Trait::Char( c_32 ) && c[ c.size() - 1 ] == typename Trait::Char( c_32 ) &&
+	if( c[ 0 ] == typename Trait::Char( ' ' ) && c[ c.size() - 1 ] == typename Trait::Char( ' ' ) &&
 		skipSpaces< Trait >( 0, c ) < c.size() )
 	{
 		c.remove( 0, 1 );
@@ -4547,12 +4513,12 @@ makeLink( const typename Trait::String & url, const typename MdBlock< Trait >::D
 	bool doNotCreateTextOnFail,
 	long long int lastLine, long long int lastPos )
 {
-	typename Trait::String u = ( url.startsWith( c_35 ) ? url : removeBackslashes< Trait >(
+	typename Trait::String u = ( url.startsWith( '#' ) ? url : removeBackslashes< Trait >(
 		replaceEntity< Trait >( url ) ).asString() );
 
 	if( !u.isEmpty() )
 	{
-		if( !u.startsWith( c_35 ) )
+		if( !u.startsWith( '#' ) )
 		{
 			if( Trait::fileExists( u, po.workingPath ) )
 			{
@@ -4674,7 +4640,7 @@ makeImage( const typename Trait::String & url, const typename MdBlock< Trait >::
 {
 	std::shared_ptr< Image< Trait > > img( new Image< Trait > );
 
-	typename Trait::String u = ( url.startsWith( c_35 ) ? url :
+	typename Trait::String u = ( url.startsWith( '#' ) ? url :
 		removeBackslashes< Trait >( replaceEntity< Trait >( url ) ).asString() );
 
 	if( Trait::fileExists( u, po.workingPath ) )
@@ -4767,7 +4733,7 @@ readLinkDestination( long long int line, long long int pos, const typename MdBlo
 
 	if( pos < s.length() )
 	{
-		if( s[ pos ] == typename Trait::Char( c_60 ) )
+		if( s[ pos ] == typename Trait::Char( '<' ) )
 		{
 			++pos;
 
@@ -4775,19 +4741,19 @@ readLinkDestination( long long int line, long long int pos, const typename MdBlo
 			{
 				bool now = false;
 
-				if( s[ pos ] == typename Trait::Char( c_92 ) && !backslash )
+				if( s[ pos ] == typename Trait::Char( '\\' ) && !backslash )
 				{
 					backslash = true;
 					now = true;
 				}
-				else if( !backslash && s[ pos ] == typename Trait::Char( c_60 ) )
+				else if( !backslash && s[ pos ] == typename Trait::Char( '<' ) )
 					return { line, pos, false, {}, destLine };
-				else if( !backslash && s[ pos ] == typename Trait::Char( c_62 ) )
+				else if( !backslash && s[ pos ] == typename Trait::Char( '>' ) )
 					break;
 				else
 				{
 					if( backslash )
-						dest.push_back( typename Trait::Char( c_92 ) );
+						dest.push_back( typename Trait::Char( '\\' ) );
 
 					dest.push_back( s[ pos ] );
 				}
@@ -4798,7 +4764,7 @@ readLinkDestination( long long int line, long long int pos, const typename MdBlo
 				++pos;
 			}
 
-			if( pos < s.size() && s[ pos ] == typename Trait::Char( c_62 ) )
+			if( pos < s.size() && s[ pos ] == typename Trait::Char( '>' ) )
 				return { line, ++pos, true, dest, destLine };
 			else
 				return { line, pos, false, {}, destLine };
@@ -4811,25 +4777,25 @@ readLinkDestination( long long int line, long long int pos, const typename MdBlo
 			{
 				bool now = false;
 
-				if( s[ pos ] == typename Trait::Char( c_92 ) && !backslash )
+				if( s[ pos ] == typename Trait::Char( '\\' ) && !backslash )
 				{
 					backslash = true;
 					now = true;
 				}
-				else if( !backslash && ( s[ pos ] == typename Trait::Char( c_32 ) ||
-					s[ pos ] == typename Trait::Char( c_9 ) ) )
+				else if( !backslash && ( s[ pos ] == typename Trait::Char( ' ' ) ||
+					s[ pos ] == typename Trait::Char( '\t' ) ) )
 				{
 					if( !pc )
 						return { line, pos, true, dest, destLine };
 					else
 						return { line, pos, false, {}, destLine };
 				}
-				else if( !backslash && s[ pos ] == typename Trait::Char( c_40 ) )
+				else if( !backslash && s[ pos ] == typename Trait::Char( '(' ) )
 				{
 					++pc;
 					dest.push_back( s[ pos ] );
 				}
-				else if( !backslash && s[ pos ] == typename Trait::Char( c_41 ) )
+				else if( !backslash && s[ pos ] == typename Trait::Char( ')' ) )
 				{
 					if( !pc )
 						return { line, pos, true, dest, destLine };
@@ -4842,7 +4808,7 @@ readLinkDestination( long long int line, long long int pos, const typename MdBlo
 				else
 				{
 					if( backslash )
-						dest.push_back( typename Trait::Char( c_92 ) );
+						dest.push_back( typename Trait::Char( '\\' ) );
 
 					dest.push_back( s[ pos ] );
 				}
@@ -4876,13 +4842,13 @@ readLinkTitle( long long int line, long long int pos, const typename MdBlock< Tr
 
 	const auto sc = fr.at( line ).first[ pos ];
 
-	if( sc != typename Trait::Char( c_34 ) && sc != typename Trait::Char( c_39 ) &&
-		sc != typename Trait::Char( c_40 ) && sc != typename Trait::Char( c_41 ) )
+	if( sc != typename Trait::Char( '"' ) && sc != typename Trait::Char( '\'' ) &&
+		sc != typename Trait::Char( '(' ) && sc != typename Trait::Char( ')' ) )
 			return { line, pos, ( firstLine != line ), {}, firstLine };
-	else if( !space && sc != typename Trait::Char( c_41 ) )
+	else if( !space && sc != typename Trait::Char( ')' ) )
 		return { line, pos, false, {}, firstLine };
 
-	if( sc == typename Trait::Char( c_41 ) )
+	if( sc == typename Trait::Char( ')' ) )
 		return { line, pos, true, {}, firstLine };
 
 	const auto startLine = line;
@@ -4899,18 +4865,18 @@ readLinkTitle( long long int line, long long int pos, const typename MdBlock< Tr
 	{
 		bool now = false;
 
-		if( fr.at( line ).first[ pos ] == typename Trait::Char( c_92 ) && !backslash )
+		if( fr.at( line ).first[ pos ] == typename Trait::Char( '\\' ) && !backslash )
 		{
 			backslash = true;
 			now = true;
 		}
-		else if( sc == typename Trait::Char( c_40 ) &&
-			fr.at( line ).first[ pos ] == typename Trait::Char( c_41 ) && !backslash )
+		else if( sc == typename Trait::Char( '(' ) &&
+			fr.at( line ).first[ pos ] == typename Trait::Char( ')' ) && !backslash )
 				return { line, ++pos, true, title, startLine };
-		else if( sc == typename Trait::Char( c_40 ) &&
-			fr.at( line ).first[ pos ] == typename Trait::Char( c_40 ) && !backslash )
+		else if( sc == typename Trait::Char( '(' ) &&
+			fr.at( line ).first[ pos ] == typename Trait::Char( '(' ) && !backslash )
 				return { line, pos, false, {}, startLine };
-		else if( sc != typename Trait::Char( c_40 ) && fr.at( line ).first[ pos ] == sc && !backslash )
+		else if( sc != typename Trait::Char( '(' ) && fr.at( line ).first[ pos ] == sc && !backslash )
 			return { line, ++pos, true, title, startLine };
 		else
 			title.push_back( fr.at( line ).first[ pos ] );
@@ -4952,7 +4918,7 @@ checkForInlineLink( typename Delims< Trait >::const_iterator it,
 	skipSpacesUpTo1Line< Trait >( l, p, po.fr.data );
 
 	if( !ok || ( l >= (long long int) po.fr.data.size() || p >= po.fr.data.at( l ).first.length() ||
-		po.fr.data.at( l ).first[ p ] != typename Trait::Char( c_41 ) ) )
+		po.fr.data.at( l ).first[ p ] != typename Trait::Char( ')' ) ) )
 			return { {}, {}, it, false };
 
 	for( ; it != last; ++it )
@@ -5035,7 +5001,7 @@ checkForImage( typename Delims< Trait >::const_iterator it,
 		{
 			// Inline -> (
 			if( po.fr.data.at( it->m_line ).first[ it->m_pos + it->m_len ] ==
-				typename Trait::Char( c_40 ) )
+				typename Trait::Char( '(' ) )
 			{
 				typename Trait::String url, title;
 				typename Delims< Trait >::const_iterator iit;
@@ -5063,7 +5029,7 @@ checkForImage( typename Delims< Trait >::const_iterator it,
 			}
 			// Reference -> [
 			else if( po.fr.data.at( it->m_line ).first[ it->m_pos + it->m_len ] ==
-				typename Trait::Char( c_91 ) )
+				typename Trait::Char( '[' ) )
 			{
 				typename MdBlock< Trait >::Data label;
 				typename Delims< Trait >::const_iterator lit;
@@ -5153,7 +5119,7 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 	if( it != start )
 	{
 		// Footnote reference.
-		if( text.front().first.asString().startsWith( c_94 ) )
+		if( text.front().first.asString().startsWith( '^' ) )
 		{
 			if( !po.collectRefLinks )
 			{
@@ -5174,7 +5140,7 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 		{
 			// Reference definition -> :
 			if( po.fr.data.at( it->m_line ).first[ it->m_pos + it->m_len ] ==
-				typename Trait::Char( c_58 ) )
+				typename Trait::Char( ':' ) )
 			{
 				// Reference definitions allowed only at start of paragraph.
 				if( ( po.line == 0 || wasRefLink ) && ns < 4 && start->m_pos == ns )
@@ -5240,7 +5206,7 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 			}
 			// Inline -> (
 			else if( po.fr.data.at( it->m_line ).first[ it->m_pos + it->m_len ] ==
-				typename Trait::Char( c_40 ) )
+				typename Trait::Char( '(' ) )
 			{
 				typename Trait::String url, title;
 				typename Delims< Trait >::const_iterator iit;
@@ -5275,7 +5241,7 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 			}
 			// Reference -> [
 			else if( po.fr.data.at( it->m_line ).first[ it->m_pos + it->m_len ] ==
-				typename Trait::Char( c_91 ) )
+				typename Trait::Char( '[' ) )
 			{
 				typename MdBlock< Trait >::Data label;
 				typename Delims< Trait >::const_iterator lit;
@@ -5954,12 +5920,12 @@ concatenateText( typename Block< Trait >::Items::const_iterator it,
 		const auto tt = std::static_pointer_cast< Text< Trait > >( *it );
 
 		if( tt->isSpaceBefore() )
-			data.push_back( typename Trait::Char( c_32 ) );
+			data.push_back( typename Trait::Char( ' ' ) );
 
 		data.push_back( tt->text() );
 
 		if( tt->isSpaceAfter() )
-			data.push_back( typename Trait::Char( c_32 ) );
+			data.push_back( typename Trait::Char( ' ' ) );
 	}
 
 	t->setText( data.simplified() );
@@ -6213,10 +6179,10 @@ Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
 			std::tie( id, it ) = checkForLinkText( delims.cbegin(), delims.cend(), po );
 
 			if( !toSingleLine< Trait > ( id ).simplified().isEmpty() &&
-				id.front().first.asString().startsWith( c_94 ) &&
+				id.front().first.asString().startsWith( '^' ) &&
 				it != delims.cend() &&
 				fr.data.at( it->m_line ).first.length() > it->m_pos + 1 &&
-				fr.data.at( it->m_line ).first[ it->m_pos + 1 ] == typename Trait::Char( c_58 ) )
+				fr.data.at( it->m_line ).first[ it->m_pos + 1 ] == typename Trait::Char( ':' ) )
 			{
 				{
 					typename MdBlock< Trait >::Data tmp;
@@ -6231,7 +6197,7 @@ Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
 				{
 					if( it->first.asString().startsWith( "    " ) )
 						it->first = it->first.sliced( 4 );
-					else if( it->first.asString().startsWith( c_9 ) )
+					else if( it->first.asString().startsWith( '\t' ) )
 						it->first = it->first.sliced( 1 );
 				}
 
@@ -6257,7 +6223,7 @@ Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
 	const typename Trait::String & fileName,
 	bool collectRefLinks, RawHtmlBlock< Trait > & html )
 {
-	const int pos = fr.data.front().first.asString().indexOf( c_62 );
+	const int pos = fr.data.front().first.asString().indexOf( '>' );
 
 	if( pos > -1 )
 	{
@@ -6269,12 +6235,12 @@ Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
 		{
 			const auto ns = skipSpaces< Trait >( 0, it->first.asString() );
 			const auto gt = ( ns < it->first.length() ?
-				( it->first[ ns ] == typename Trait::Char( c_62 ) ? ns : -1 ) : -1 );
+				( it->first[ ns ] == typename Trait::Char( '>' ) ? ns : -1 ) : -1 );
 
 			if( gt > -1 )
 			{
 				it->first = it->first.sliced( gt + ( it->first.length() > gt + 1 ?
-					( it->first[ gt + 1 ] == typename Trait::Char( c_32 ) ? 1 : 0 ) : 0 ) + 1 );
+					( it->first[ gt + 1 ] == typename Trait::Char( ' ' ) ? 1 : 0 ) : 0 ) + 1 );
 				bt = whatIsTheLine( it->first );
 			}
 			// Process lazyness...
@@ -6289,17 +6255,17 @@ Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
 				{
 					if( isH1< Trait >( it->first.asString() ) )
 					{
-						const auto p = it->first.asString().indexOf( c_61 );
+						const auto p = it->first.asString().indexOf( '=' );
 
-						it->first.insert( p, c_92 );
+						it->first.insert( p, '\\' );
 
 						continue;
 					}
 					else if( isH2< Trait >( it->first.asString() ) )
 					{
-						const auto p = it->first.asString().indexOf( c_45 );
+						const auto p = it->first.asString().indexOf( '-' );
 
-						it->first.insert( p, c_92 );
+						it->first.insert( p, '\\' );
 
 						continue;
 					}
@@ -6361,11 +6327,11 @@ isListItemAndNotNested( const typename Trait::String & s, long long int indent )
 
 	if( p < 4 )
 	{
-		if( s[ p ] == typename Trait::Char( c_42 ) && space )
+		if( s[ p ] == typename Trait::Char( '*' ) && space )
 			return true;
-		else if( s[ p ] == typename Trait::Char( c_45 ) && space )
+		else if( s[ p ] == typename Trait::Char( '-' ) && space )
 			return true;
-		else if( s[ p ] == typename Trait::Char( c_43 ) && space )
+		else if( s[ p ] == typename Trait::Char( '+' ) && space )
 			return true;
 		else
 			return isOrderedList< Trait >( s );
@@ -6399,12 +6365,12 @@ listItemData( const typename Trait::String & s )
 
 	if( p < 4 )
 	{
-		if( s[ p ] == typename Trait::Char( c_42 ) && space )
-			return { true, p + 2, c_42 };
-		else if( s[ p ] == typename Trait::Char( c_45 ) && space )
-			return { true, p + 2, c_45 };
-		else if( s[ p ] == typename Trait::Char( c_43 ) && space )
-			return { true, p + 2, c_43 };
+		if( s[ p ] == typename Trait::Char( '*' ) && space )
+			return { true, p + 2, '*' };
+		else if( s[ p ] == typename Trait::Char( '-' ) && space )
+			return { true, p + 2, '-' };
+		else if( s[ p ] == typename Trait::Char( '+' ) && space )
+			return { true, p + 2, '+' };
 		else
 		{
 			int d = 0, l = 0;
@@ -6431,7 +6397,7 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 	bool collectRefLinks, RawHtmlBlock< Trait > & html )
 {
 	for( auto it = fr.data.begin(), last = fr.data.end(); it != last; ++it )
-		it->first.replace( typename Trait::Char( c_9 ), typename Trait::String( "    " ) );
+		it->first.replace( typename Trait::Char( '\t' ), typename Trait::String( "    " ) );
 
 	const auto p = skipSpaces< Trait >( 0, fr.data.front().first.asString() );
 
@@ -6575,23 +6541,23 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 
 		if( p < data.front().first.length() )
 		{
-			if( data.front().first[ p ] == typename Trait::Char( c_91 ) )
+			if( data.front().first[ p ] == typename Trait::Char( '[' ) )
 			{
 				++p;
 
 				if( p < data.front().first.length() )
 				{
-					if( data.front().first[ p ] == typename Trait::Char( c_32 ) ||
-						data.front().first[ p ].toLower() == typename Trait::Char( c_120 ) )
+					if( data.front().first[ p ] == typename Trait::Char( ' ' ) ||
+						data.front().first[ p ].toLower() == typename Trait::Char( 'x' ) )
 					{
-						if( data.front().first[ p ].toLower() == typename Trait::Char( c_120 ) )
+						if( data.front().first[ p ].toLower() == typename Trait::Char( 'x' ) )
 							checked = true;
 
 						++p;
 
 						if( p < data.front().first.length() )
 						{
-							if( data.front().first[ p ] == typename Trait::Char( c_93 ) )
+							if( data.front().first[ p ] == typename Trait::Char( ']' ) )
 							{
 								taskList = true;
 
@@ -6641,7 +6607,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 
 			for( auto it = nestedList.begin(), last = nestedList.end(); it != last; ++it )
 			{
-				if( it->first.asString().startsWith( typename Trait::String( indent, c_32 ) ) )
+				if( it->first.asString().startsWith( typename Trait::String( indent, ' ' ) ) )
 					it->first = it->first.sliced( indent );
 			}
 
@@ -6652,7 +6618,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 
 			for( ; it != last; ++it )
 			{
-				if( it->first.asString().startsWith( typename Trait::String( indent, c_32 ) ) )
+				if( it->first.asString().startsWith( typename Trait::String( indent, ' ' ) ) )
 					it->first = it->first.sliced( indent );
 
 				data.push_back( *it );
@@ -6662,7 +6628,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 		}
 		else
 		{
-			if( it->first.asString().startsWith( typename Trait::String( indent, c_32 ) ) )
+			if( it->first.asString().startsWith( typename Trait::String( indent, ' ' ) ) )
 				it->first = it->first.sliced( indent );
 
 			data.push_back( *it );
@@ -6708,7 +6674,7 @@ Parser< Trait >::parseCode( MdBlock< Trait > & fr,
 			for( const auto & l : std::as_const( fr.data ) )
 			{
 				if( !first )
-					math.push_back( typename Trait::Char( c_10 ) );
+					math.push_back( typename Trait::Char( '\n' ) );
 
 				math.push_back( l.first.asString() );
 
@@ -6747,8 +6713,8 @@ Parser< Trait >::parseCodeIndentedBySpaces( MdBlock< Trait > & fr,
 			const auto ns = skipSpaces< Trait >( 0, l.first.asString() );
 
 			code.push_back( ( indent > 0 ? l.first.asString().right( l.first.length() -
-					( ns < indent ? ns : indent ) ) + c_10 :
-				l.first.asString() + c_10 ) );
+					( ns < indent ? ns : indent ) ) + '\n' :
+				l.first.asString() + '\n' ) );
 		}
 
 		if( !code.isEmpty() )
