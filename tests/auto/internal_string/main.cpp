@@ -243,3 +243,73 @@ TEST_CASE( "simplified" )
 	REQUIRE( s.asString() == "" );
 	REQUIRE( s.isEmpty() );
 }
+
+TEST_CASE( "split" )
+{
+	TRAIT::InternalString s( "|a|b|c|" );
+
+	auto r = s.split( TRAIT::InternalString( "|" ) );
+
+	REQUIRE( r.size() == 3 );
+
+	REQUIRE( r.at( 0 ).asString() == "a" );
+	REQUIRE( r.at( 0 ).virginPos( 0 ) == 1 );
+
+	REQUIRE( r.at( 1 ).asString() == "b" );
+	REQUIRE( r.at( 1 ).virginPos( 0 ) == 3 );
+
+	REQUIRE( r.at( 2 ).asString() == "c" );
+	REQUIRE( r.at( 2 ).virginPos( 0 ) == 5 );
+
+	s = TRAIT::InternalString( " | a | b | c | " );
+
+	r = s.split( TRAIT::InternalString( "|" ) );
+
+	REQUIRE( r.size() == 5 );
+
+	REQUIRE( r.at( 0 ).asString() == " " );
+	REQUIRE( r.at( 0 ).virginPos( 0 ) == 0 );
+
+	REQUIRE( r.at( 1 ).asString() == " a " );
+	REQUIRE( r.at( 1 ).virginPos( 1 ) == 3 );
+
+	REQUIRE( r.at( 2 ).asString() == " b " );
+	REQUIRE( r.at( 2 ).virginPos( 1 ) == 7 );
+
+	REQUIRE( r.at( 3 ).asString() == " c " );
+	REQUIRE( r.at( 3 ).virginPos( 1 ) == 11 );
+
+	REQUIRE( r.at( 4 ).asString() == " " );
+	REQUIRE( r.at( 4 ).virginPos( 0 ) == 14 );
+
+	s = TRAIT::InternalString( "abc" );
+
+	r = s.split( TRAIT::InternalString( "" ) );
+
+	REQUIRE( r.size() == 3 );
+
+	REQUIRE( r.at( 0 ).asString() == "a" );
+	REQUIRE( r.at( 0 ).virginPos( 0 ) == 0 );
+
+	REQUIRE( r.at( 1 ).asString() == "b" );
+	REQUIRE( r.at( 1 ).virginPos( 0 ) == 1 );
+
+	REQUIRE( r.at( 2 ).asString() == "c" );
+	REQUIRE( r.at( 2 ).virginPos( 0 ) == 2 );
+
+	s = TRAIT::InternalString( " | a | b | c | " );
+	s = s.simplified();
+
+	r = s.split( TRAIT::InternalString( "|" ) );
+
+	REQUIRE( r.size() == 3 );
+
+	REQUIRE( r.at( 0 ).asString() == " a " );
+	REQUIRE( r.at( 0 ).virginPos( 1 ) == 3 );
+
+	REQUIRE( r.at( 1 ).asString() == " b " );
+	REQUIRE( r.at( 1 ).virginPos( 1 ) == 7 );
+
+	REQUIRE( r.at( 2 ).asString() == " c " );
+	REQUIRE( r.at( 2 ).virginPos( 1 ) == 11 );
+}

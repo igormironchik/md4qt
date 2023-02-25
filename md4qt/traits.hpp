@@ -91,7 +91,7 @@ public:
 		for( auto it = changedPos.crbegin(), last = changedPos.crend(); it != last; ++it )
 			pos = virginPosImpl( pos, *it );
 
-		return startPos + pos;
+		return pos;
 	}
 
 	InternalStringT & replace( const String & what, const String & with )
@@ -115,10 +115,11 @@ public:
 					if( !init )
 					{
 						changedPos.push_back( {} );
+						changedPos.back().first = 0;
 						init = true;
 					}
 
-					changedPos.back().push_back( { p, what.size(), with.size() } );
+					changedPos.back().second.push_back( { p, what.size(), with.size() } );
 				}
 			}
 			else
@@ -139,7 +140,8 @@ public:
 		str.remove( pos, size );
 
 		changedPos.push_back( {} );
-		changedPos.back().push_back( { pos, size, 0 } );
+		changedPos.back().first = 0;
+		changedPos.back().second.push_back( { pos, size, 0 } );
 
 		return *this;
 	}
@@ -152,10 +154,12 @@ public:
 		if( isEmpty() )
 			return *this;
 
-		InternalStringT result;
+		InternalStringT result = *this;
+		result.str.clear();
 		long long int i = 0;
 		bool init = false;
 		bool first = true;
+		long long int spaces = 0;
 
 		while( true )
 		{
@@ -164,16 +168,19 @@ public:
 			while( i < length() && str[ i ].isSpace() )
 				++i;
 
+			spaces = i - tmp;
+
 			if( i != tmp )
 			{
 				if( !init )
 				{
 					result.changedPos.push_back( {} );
+					result.changedPos.back().first = 0;
 					init = true;
 				}
 
 				if( i - tmp > 1 || first )
-					result.changedPos.back().push_back( { tmp, i - tmp, ( first ? 0 : 1 ) } );
+					result.changedPos.back().second.push_back( { tmp, i - tmp, ( first ? 0 : 1 ) } );
 			}
 
 			first = false;
@@ -193,7 +200,61 @@ public:
 		if( !result.isEmpty() && result.str[ result.length() - 1 ] ==  Char( ' ' ) )
 		{
 			result.str.remove( result.length() - 1, 1 );
-			result.changedPos.back().back().len = 0;
+
+			if( spaces > 1 )
+				result.changedPos.back().second.back().len = 0;
+			else if( spaces == 1 )
+				result.changedPos.back().second.push_back( { str.length() - spaces, spaces, 0 } );
+		}
+
+		return result;
+	}
+
+	std::vector< InternalStringT > split( const InternalStringT & sep ) const
+	{
+		std::vector< InternalStringT > result;
+
+		if( sep.isEmpty() )
+		{
+			for( long long int i = 0; i < str.length(); ++i )
+			{
+				auto is = *this;
+				is.str = str[ i ];
+				is.changedPos.push_back( {} );
+				is.changedPos.back().first = i;
+
+				result.push_back( is );
+			}
+
+			return result;
+		}
+
+		long long int pos = 0;
+		long long int fpos = 0;
+
+		while( ( fpos = str.indexOf( sep.asString(), pos ) ) != -1 && fpos < length() )
+		{
+			if( fpos - pos > 0 )
+			{
+				auto is = *this;
+				is.str = str.sliced( pos, fpos - pos );
+				is.changedPos.push_back( {} );
+				is.changedPos.back().first = pos;
+
+				result.push_back( is );
+			}
+
+			pos = fpos + sep.length();
+		}
+
+		if( pos < str.length() )
+		{
+			auto is = *this;
+			is.str = str.sliced( pos, str.length() - pos );
+			is.changedPos.push_back( {} );
+			is.changedPos.back().first = pos;
+
+			result.push_back( is );
 		}
 
 		return result;
@@ -208,16 +269,15 @@ private:
 		long long int len = -1;
 	};
 
-	long long int startPos = 0;
-	std::vector< std::vector< ChangedPos > > changedPos;
+	std::vector< std::pair< long long int, std::vector< ChangedPos > > > changedPos;
 
 private:
 	long long int virginPosImpl( long long int pos,
-		const std::vector< ChangedPos > & changed ) const
+		const std::pair< long long int, std::vector< ChangedPos > > & changed ) const
 	{
 		long long int p = 0;
 
-		for( const auto & c : changed )
+		for( const auto & c : changed.second )
 		{
 			if( c.pos + std::min( c.oldLen, c.len ) <= pos + p )
 			{
@@ -230,7 +290,7 @@ private:
 				break;
 		}
 
-		return pos + p;
+		return pos + p + changed.first;
 	}
 }; // class InternalString
 
