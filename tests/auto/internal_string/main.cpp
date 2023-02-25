@@ -228,4 +228,11 @@ TEST_CASE( "simplified" )
 	REQUIRE( s.virginPos( 2 ) == 2 );
 	REQUIRE( s.virginPos( 3 ) == 3 );
 	REQUIRE( s.virginPos( 4 ) == 5 );
+
+	s = TRAIT::InternalString( "" );
+
+	s = s.simplified();
+
+	REQUIRE( s.asString() == "" );
+	REQUIRE( s.isEmpty() );
 }
