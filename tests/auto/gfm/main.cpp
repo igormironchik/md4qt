@@ -235,7 +235,7 @@ TEST_CASE( "200" )
 		{
 			REQUIRE( c->items().at( 1 )->type() == MD::ItemType::Code );
 			const auto cc = static_cast< MD::Code< TRAIT >* > ( c->items().at( 1 ).get() );
-			REQUIRE( cc->text() == u8"\\|" );
+			REQUIRE( cc->text() == u8"|" );
 		}
 
 		{

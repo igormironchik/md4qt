@@ -324,6 +324,18 @@ TEST_CASE( "sliced" )
 	REQUIRE( s.virginPos( 0 ) == 3 );
 	REQUIRE( s.virginPos( 1 ) == 4 );
 	REQUIRE( s.virginPos( 2 ) == 5 );
+
+	s = TRAIT::InternalString( "aaabbbccc" );
+
+	s = s.sliced( 3 );
+
+	REQUIRE( s.asString() == "bbbccc" );
+	REQUIRE( s.virginPos( 0 ) == 3 );
+	REQUIRE( s.virginPos( 1 ) == 4 );
+	REQUIRE( s.virginPos( 2 ) == 5 );
+	REQUIRE( s.virginPos( 3 ) == 6 );
+	REQUIRE( s.virginPos( 4 ) == 7 );
+	REQUIRE( s.virginPos( 5 ) == 8 );
 }
 
 TEST_CASE( "right" )
@@ -336,4 +348,15 @@ TEST_CASE( "right" )
 	REQUIRE( s.virginPos( 0 ) == 6 );
 	REQUIRE( s.virginPos( 1 ) == 7 );
 	REQUIRE( s.virginPos( 2 ) == 8 );
+}
+
+TEST_CASE( "insert" )
+{
+	TRAIT::InternalString s( "a" );
+
+	s = s.insert( 0, 'b' );
+
+	REQUIRE( s.asString() == "ba" );
+	REQUIRE( s.virginPos( 0 ) == 0 );
+	REQUIRE( s.virginPos( 1 ) == 0 );
 }

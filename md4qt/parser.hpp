@@ -239,7 +239,8 @@ struct MdLineData {
 //! Internal structure.
 template< class Trait >
 struct MdBlock {
-	using Data = typename Trait::template Vector< std::pair< typename Trait::String, MdLineData > >;
+	using Data = typename Trait::template Vector<
+		std::pair< typename Trait::InternalString, MdLineData > >;
 
 	Data data;
 	long long int emptyLinesBefore = 0;
@@ -263,10 +264,10 @@ public:
 	}
 
 	bool atEnd() const { return ( m_pos >= (long long int) m_stream.size() ); }
-	typename Trait::String readLine() { return m_stream.at( m_pos++ ).first; }
+	typename Trait::InternalString readLine() { return m_stream.at( m_pos++ ).first; }
 	long long int currentLineNumber() const
 		{ return ( m_pos < size() ? m_stream.at( m_pos ).second.lineNumber : size() ); }
-	typename Trait::String lineAt( long long int pos ) { return m_stream.at( pos ).first; }
+	typename Trait::InternalString lineAt( long long int pos ) { return m_stream.at( pos ).first; }
 	long long int size() const { return m_stream.size(); }
 
 private:
@@ -607,7 +608,7 @@ template<>
 inline typename UnicodeStringTrait::StringList
 splitString< UnicodeStringTrait >( const UnicodeString & str, const UnicodeChar & ch )
 {
-	return str.split( ch );
+       return str.split( ch );
 }
 
 #endif
@@ -618,7 +619,7 @@ template<>
 inline typename QStringTrait::StringList
 splitString< QStringTrait >( const QString & str, const QChar & ch )
 {
-	return str.split( ch, Qt::SkipEmptyParts );
+       return str.split( ch, Qt::SkipEmptyParts );
 }
 
 #endif
@@ -725,7 +726,8 @@ private:
 		Heading
 	}; // enum BlockType
 
-	BlockType whatIsTheLine( typename Trait::String & str, bool inList = false, long long int * indent = nullptr,
+	BlockType whatIsTheLine( typename Trait::InternalString & str, bool inList = false,
+		long long int * indent = nullptr,
 		bool calcIndent = false, const std::set< long long int > * indents = nullptr ) const;
 	void parseFragment( MdBlock< Trait > & fr, std::shared_ptr< Block< Trait > > parent,
 		std::shared_ptr< Document< Trait > > doc,
@@ -1061,7 +1063,7 @@ checkForHtmlComments( const typename Trait::String & line, StringListStream< Tra
 			for( ; l < stream.size(); ++l )
 			{
 				c.push_back( typename Trait::Char( c_32 ) );
-				c.push_back( stream.lineAt( l ) );
+				c.push_back( stream.lineAt( l ).asString() );
 
 				if( checkForEndHtmlComments< Trait >( c, 4, res ) )
 				{
@@ -1139,8 +1141,8 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 				auto line = stream.readLine();
 
-				if( line.isEmpty() || line.startsWith( "    " ) ||
-					line.startsWith( c_9 ) )
+				if( line.isEmpty() || line.asString().startsWith( "    " ) ||
+					line.asString().startsWith( c_9 ) )
 				{
 					fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 				}
@@ -1173,7 +1175,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 		line.replace( typename Trait::Char( 0 ), Trait::utf16ToString( &c_zeroReplaceWith[ 0 ] ) );
 
-		checkForHtmlComments( line, stream, htmlCommentClosed );
+		checkForHtmlComments( line.asString(), stream, htmlCommentClosed );
 
 		const long long int prevIndent = indent;
 
@@ -1185,7 +1187,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 		const long long int currentIndent = indent;
 
-		const auto ns = skipSpaces< Trait >( 0, line );
+		const auto ns = skipSpaces< Trait >( 0, line.asString() );
 
 		if( type == BlockType::CodeIndentedBySpaces && ns > 3 )
 			lineType = BlockType::CodeIndentedBySpaces;
@@ -1229,7 +1231,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			++lineCounter;
 
 			if( type == BlockType::Code )
-				startOfCode = startSequence< Trait >( line );
+				startOfCode = startSequence< Trait >( line.asString() );
 
 			fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 
@@ -1252,7 +1254,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			{
 				case BlockType::Text :
 				{
-					if( isFootnote< Trait >( fragment.front().first ) )
+					if( isFootnote< Trait >( fragment.front().first.asString() ) )
 					{
 						fragment.push_back( { typename Trait::String(),
 							{ currentLineNumber, htmlCommentClosed } } );
@@ -1327,7 +1329,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			if( type == BlockType::CodeIndentedBySpaces &&
 				lineType == BlockType::CodeIndentedBySpaces )
 			{
-				const auto indent = skipSpaces< Trait >( 0, fragment.front().first );
+				const auto indent = skipSpaces< Trait >( 0, fragment.front().first.asString() );
 
 				for( long long int i = 0; i < emptyLinesCount; ++i )
 					fragment.push_back( { typename Trait::String( indent, c_32 ),
@@ -1347,7 +1349,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				if( type == BlockType::List || type == BlockType::ListWithFirstEmptyLine )
 					indents.insert( currentIndent );
 				else if( type == BlockType::Code )
-					startOfCode = startSequence< Trait >( line );
+					startOfCode = startSequence< Trait >( line.asString() );
 			}
 
 			fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
@@ -1370,7 +1372,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				{
 					int num = 0;
 
-					if( isOrderedList< Trait >( line, &num ) )
+					if( isOrderedList< Trait >( line.asString(), &num ) )
 					{
 						if( num > 1 )
 						{
@@ -1390,12 +1392,12 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 				type = lineType;
 
-				if( !line.isEmpty() && ns < line.size() )
+				if( !line.isEmpty() && ns < line.length() )
 				{
 					if( type == BlockType::List || type == BlockType::ListWithFirstEmptyLine )
 						indents.insert( currentIndent );
 					else if( type == BlockType::Code )
-						startOfCode = startSequence< Trait >( line );
+						startOfCode = startSequence< Trait >( line.asString() );
 
 					fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 				}
@@ -1403,8 +1405,8 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 		}
 		// End of code block.
 		else if( type == BlockType::Code && type == lineType &&
-			startSequence< Trait >( line ).contains( startOfCode ) &&
-			isCodeFences< Trait >( line, true ) )
+			startSequence< Trait >( line.asString() ).contains( startOfCode ) &&
+			isCodeFences< Trait >( line.asString(), true ) )
 		{
 			fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 
@@ -1701,21 +1703,21 @@ posOfListItem( const typename Trait::String & s, bool ordered )
 
 template< class Trait >
 inline typename Parser< Trait >::BlockType
-Parser< Trait >::whatIsTheLine( typename Trait::String & str,
+Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 	bool inList, long long int * indent, bool calcIndent,
 	const std::set< long long int > * indents ) const
 {
 	str.replace( typename Trait::Char( c_9 ), typename Trait::String( 4, c_32 ) );
 
-	const auto first = skipSpaces< Trait >( 0, str );
+	const auto first = skipSpaces< Trait >( 0, str.asString() );
 
 	if( first < str.length() )
 	{
 		auto s = str.sliced( first );
 
-		if( s.startsWith( c_62 ) && first < 4 )
+		if( s.asString().startsWith( c_62 ) && first < 4 )
 			return BlockType::Blockquote;
-		else if( s.startsWith( c_35 ) && first < 4 )
+		else if( s.asString().startsWith( c_35 ) && first < 4 )
 		{
 			long long int c = 0;
 
@@ -1728,30 +1730,31 @@ Parser< Trait >::whatIsTheLine( typename Trait::String & str,
 				return BlockType::Text;
 		}
 
-		if( first < 4 && isHorizontalLine< Trait >( s ) )
+		if( first < 4 && isHorizontalLine< Trait >( s.asString() ) )
 			return BlockType::Text;
 
 		if( inList )
 		{
 			bool isFirstLineEmpty = false;
-			const auto orderedList = isOrderedList< Trait >( str, nullptr, nullptr, nullptr,
-				&isFirstLineEmpty );
+			const auto orderedList = isOrderedList< Trait >( str.asString(),
+				nullptr, nullptr, nullptr, &isFirstLineEmpty );
 
-			if( ( ( ( s.startsWith( c_45 ) || s.startsWith( c_43 ) || s.startsWith( c_42 ) ) &&
+			if( ( ( ( s.asString().startsWith( c_45 ) ||
+					s.asString().startsWith( c_43 ) || s.asString().startsWith( c_42 ) ) &&
 				( ( s.length() > 1 && s[ 1 ] == typename Trait::Char( c_32 ) ) || s.length() == 1 ) ) ||
 				orderedList ) && ( first < 4  || indentInList( indents, first ) ) )
 			{
 				if( calcIndent && indent )
-					*indent = posOfListItem< Trait >( str, orderedList );
+					*indent = posOfListItem< Trait >( str.asString(), orderedList );
 
 				if( s.length() == 1 || isFirstLineEmpty )
 					return BlockType::ListWithFirstEmptyLine;
 				else
 					return BlockType::List;
 			}
-			else if( str.startsWith( typename Trait::String( ( indent ? *indent : 4 ), c_32 ) ) )
+			else if( str.asString().startsWith( typename Trait::String( ( indent ? *indent : 4 ), c_32 ) ) )
 			{
-				if( str.startsWith( "    " ) )
+				if( str.asString().startsWith( "    " ) )
 					return BlockType::CodeIndentedBySpaces;
 			}
 		}
@@ -1759,28 +1762,29 @@ Parser< Trait >::whatIsTheLine( typename Trait::String & str,
 		{
 			bool isFirstLineEmpty = false;
 
-			const auto orderedList = isOrderedList< Trait >( str, nullptr, nullptr, nullptr,
-				&isFirstLineEmpty );
+			const auto orderedList = isOrderedList< Trait >( str.asString(),
+				nullptr, nullptr, nullptr, &isFirstLineEmpty );
 
-			if( ( ( ( s.startsWith( c_45 ) || s.startsWith( c_43 ) || s.startsWith( c_42 ) ) &&
+			if( ( ( ( s.asString().startsWith( c_45 ) ||
+					s.asString().startsWith( c_43 ) || s.asString().startsWith( c_42 ) ) &&
 				( ( s.length() > 1 && s[ 1 ] == typename Trait::Char( c_32 ) ) || s.length() == 1 ) ) ||
 				orderedList ) && ( first < 4  || indentInList( indents, first ) ) )
 			{
 				if( calcIndent && indent )
-					*indent = posOfListItem< Trait >( str, orderedList );
+					*indent = posOfListItem< Trait >( str.asString(), orderedList );
 
 				if( s.length() == 1 || isFirstLineEmpty )
 					return BlockType::ListWithFirstEmptyLine;
 				else
 					return BlockType::List;
 			}
-			else if( str.startsWith( "    " ) || str.startsWith( c_9 ) )
+			else if( str.asString().startsWith( "    " ) || str.asString().startsWith( c_9 ) )
 				return BlockType::CodeIndentedBySpaces;
 		}
 
-		if( s.startsWith( "```" ) || s.startsWith( "~~~" ) )
+		if( s.asString().startsWith( "```" ) || s.asString().startsWith( "~~~" ) )
 		{
-			if( isCodeFences< Trait >( str ) )
+			if( isCodeFences< Trait >( str.asString() ) )
 				return BlockType::Code;
 			else
 				return BlockType::Text;
@@ -1827,7 +1831,7 @@ Parser< Trait >::parseFragment( MdBlock< Trait > & fr,
 			{
 				int indent = 1;
 
-				if( fr.data.front().first.startsWith( "    " ) )
+				if( fr.data.front().first.asString().startsWith( "    " ) )
 					indent = 4;
 
 				parseCodeIndentedBySpaces( fr, parent, collectRefLinks, indent );
@@ -1907,10 +1911,11 @@ Parser< Trait >::parseText( MdBlock< Trait > & fr,
 	const typename Trait::String & fileName,
 	bool collectRefLinks, RawHtmlBlock< Trait > & html )
 {
-	const auto h = isTableHeader< Trait >( fr.data.front().first );
-	const auto c = fr.data.size() > 1 ? isTableAlignment< Trait >( fr.data[ 1 ].first ) : 0;
+	const auto h = isTableHeader< Trait >( fr.data.front().first.asString() );
+	const auto c = fr.data.size() > 1 ?
+		isTableAlignment< Trait >( fr.data[ 1 ].first.asString() ) : 0;
 
-	if( isFootnote< Trait >( fr.data.front().first ) )
+	if( isFootnote< Trait >( fr.data.front().first.asString() ) )
 		parseFootnote( fr, parent, doc, linksToParse, workingPath, fileName,
 			collectRefLinks );
 	else if( c && h && c == h )
@@ -1984,7 +1989,7 @@ paragraphToLabel( Paragraph< Trait > * p )
 
 template< class Trait >
 inline void
-findAndRemoveClosingSequence( typename Trait::String & s )
+findAndRemoveClosingSequence( typename Trait::InternalString & s )
 {
 	long long int end = -1;
 	long long int start = -1;
@@ -2032,7 +2037,7 @@ Parser< Trait >::parseHeading( MdBlock< Trait > & fr,
 	{
 		auto line = fr.data.front().first;
 		long long int pos = 0;
-		pos = skipSpaces< Trait >( pos, line );
+		pos = skipSpaces< Trait >( pos, line.asString() );
 
 		if( pos > 0  )
 			line = line.sliced( pos );
@@ -2046,12 +2051,12 @@ Parser< Trait >::parseHeading( MdBlock< Trait > & fr,
 			++pos;
 		}
 
-		pos = skipSpaces< Trait >( pos, line );
+		pos = skipSpaces< Trait >( pos, line.asString() );
 
 		if( pos > 0 )
 			fr.data.front().first = line.sliced( pos );
 
-		const auto label = findAndRemoveHeaderLabel< Trait >( fr.data.front().first );
+		const auto label = findAndRemoveHeaderLabel< Trait >( fr.data.front().first.asString() );
 
 		findAndRemoveClosingSequence< Trait >( fr.data.front().first );
 
@@ -2099,15 +2104,24 @@ Parser< Trait >::parseHeading( MdBlock< Trait > & fr,
 }
 
 template< class Trait >
-inline typename Trait::StringList
-splitTableRow( const typename Trait::String & s )
+inline typename Trait::InternalString
+prepareTableData( typename Trait::InternalString s )
 {
-	typename Trait::StringList res;
-	typename Trait::String c;
+	s.replace( "\\|", "|" );
+
+	return s;
+}
+
+template< class Trait >
+inline typename Trait::InternalStringList
+splitTableRow( const typename Trait::InternalString & s )
+{
+	typename Trait::InternalStringList res;
 
 	bool backslash = false;
+	long long int start = 0;
 
-	for( long long int i = 0; i < s.size(); ++i )
+	for( long long int i = 0; i < s.length(); ++i )
 	{
 		bool now = false;
 
@@ -2115,22 +2129,20 @@ splitTableRow( const typename Trait::String & s )
 		{
 			backslash = true;
 			now = true;
-			c.push_back( s[ i ] );
 		}
 		else if( s[ i ] == typename Trait::Char( c_124 ) && !backslash )
 		{
-			res.push_back( c.simplified() );
-			c.clear();
+			res.push_back( prepareTableData< Trait >( s.sliced( start, i - start ).simplified() ) );
+			start = i + 1;
 		}
-		else
-			c.push_back( s[ i ] );
 
 		if( !now )
 			backslash = false;
 	}
 
-	if( !c.isEmpty() )
-		res.push_back( c.simplified() );
+	if( start < s.length() )
+		res.push_back( prepareTableData< Trait >(
+			s.sliced( start, s.length() - start ).simplified() ) );
 
 	return res;
 }
@@ -2151,14 +2163,15 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 	{
 		std::shared_ptr< Table< Trait > > table( new Table< Trait > );
 
-		auto parseTableRow = [&] ( const typename Trait::String & row )
+		auto parseTableRow = [&] ( const typename Trait::InternalString & row,
+			long long int lineNumber )
 		{
 			auto line = row.simplified();
 
-			if( line.startsWith( sep ) )
+			if( line.asString().startsWith( sep ) )
 				line.remove( 0, 1 );
 
-			if( line.endsWith( sep ) )
+			if( line.asString().endsWith( sep ) )
 				line.remove( line.length() - 1, 1 );
 
 			auto columns = splitTableRow< Trait >( line );
@@ -2180,7 +2193,7 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 					it->replace( "&#124;", typename Trait::Char( sep ) );
 
 					typename MdBlock< Trait >::Data fragment;
-					fragment.push_back( { *it, { -1 } } );
+					fragment.push_back( { *it, { lineNumber } } );
 					MdBlock< Trait > block = { fragment, 0 };
 
 					std::shared_ptr< Paragraph< Trait > > p( new Paragraph< Trait > );
@@ -2213,7 +2226,7 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 		{
 			auto fmt = fr.data.at( 1 ).first;
 
-			auto columns = splitString< Trait > ( fmt, sep );
+			auto columns = fmt.split( typename Trait::String( sep ) );
 
 			for( auto it = columns.begin(), last = columns.end(); it != last; ++it )
 			{
@@ -2223,9 +2236,9 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 				{
 					typename Table< Trait >::Alignment a = Table< Trait >::AlignLeft;
 
-					if( it->endsWith( c_58 ) && it->startsWith( c_58 ) )
+					if( it->asString().endsWith( c_58 ) && it->asString().startsWith( c_58 ) )
 						a = Table< Trait >::AlignCenter;
-					else if( it->endsWith( c_58 ) )
+					else if( it->asString().endsWith( c_58 ) )
 						a = Table< Trait >::AlignRight;
 
 					table->setColumnAlignment( table->columnsCount(), a );
@@ -2236,7 +2249,7 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 		fr.data.erase( fr.data.cbegin() + 1 );
 
 		for( const auto & line : std::as_const( fr.data ) )
-			parseTableRow( line.first );
+			parseTableRow( line.first, line.second.lineNumber );
 
 		if( !table->isEmpty() && !collectRefLinks )
 			parent->appendItem( table );
@@ -2307,24 +2320,24 @@ Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
 
 		for( ; i < (long long int) fr.data.size(); ++i )
 		{
-			const auto first = skipSpaces< Trait >( 0, fr.data.at( i - 1 ).first );
+			const auto first = skipSpaces< Trait >( 0, fr.data.at( i - 1 ).first.asString() );
 
-			auto s = fr.data.at( i - 1 ).first.sliced( first );
+			auto s = fr.data.at( i - 1 ).first.asString().sliced( first );
 
 			const bool prevHorLine = ( first < 4 && isHorizontalLine< Trait >( s ) );
 
 			if( prevHorLine )
 				++horLines;
 
-			if( isH1< Trait >( fr.data.at( i ).first ) && !prevHorLine &&
-				!fr.data.at( i - 1 ).first.simplified().isEmpty() )
+			if( isH1< Trait >( fr.data.at( i ).first.asString() ) && !prevHorLine &&
+				!fr.data.at( i - 1 ).first.asString().simplified().isEmpty() )
 			{
 				lvl = 1;
 				heading = true;
 				break;
 			}
-			else if( isH2< Trait >( fr.data.at( i ).first ) && !prevHorLine &&
-				!fr.data.at( i - 1 ).first.simplified().isEmpty() )
+			else if( isH2< Trait >( fr.data.at( i ).first.asString() ) && !prevHorLine &&
+				!fr.data.at( i - 1 ).first.asString().simplified().isEmpty() )
 			{
 				lvl = 2;
 				heading = true;
@@ -2349,7 +2362,7 @@ Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
 			std::copy( fr.data.cbegin(), fr.data.cbegin() + ( i - horLines ),
 				std::back_inserter( tmp ) );
 
-			const auto ns1 = skipSpaces< Trait >( 0, tmp.front().first );
+			const auto ns1 = skipSpaces< Trait >( 0, tmp.front().first.asString() );
 
 			if( ns1 > 0 && ns1 < tmp.front().first.length() )
 				tmp.front().first = tmp.front().first.sliced( ns1 );
@@ -2546,7 +2559,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 
 	for( long long int line = 0; line < (long long int) fr.size(); ++line )
 	{
-		const typename Trait::String & str = fr.at( line ).first;
+		const typename Trait::String & str = fr.at( line ).first.asString();
 		const auto p = skipSpaces< Trait >( 0, str );
 		const auto withoutSpaces = str.sliced( p );
 
@@ -3072,16 +3085,16 @@ makeText(
 
 	typename Trait::String text;
 
-	bool spaceBefore = ( po.pos > 0 && po.pos < po.fr.data.at( po.line ).first.size() ?
+	bool spaceBefore = ( po.pos > 0 && po.pos < po.fr.data.at( po.line ).first.length() ?
 		po.fr.data.at( po.line ).first[ po.pos - 1 ].isSpace() ||
 			po.fr.data.at( po.line ).first[ po.pos ].isSpace() :
 		true );
 
 	bool lineBreak = ( !po.ignoreLineBreak && po.line != (long long int) ( po.fr.data.size() - 1 ) &&
 		( po.line == lastLine ?
-			( lastPos == po.fr.data.at( po.line ).first.size() &&
-			isLineBreak< Trait >( po.fr.data.at( po.line ).first ) ) :
-			isLineBreak< Trait >( po.fr.data.at( po.line ).first ) ) );
+			( lastPos == po.fr.data.at( po.line ).first.length() &&
+			isLineBreak< Trait >( po.fr.data.at( po.line ).first.asString() ) ) :
+			isLineBreak< Trait >( po.fr.data.at( po.line ).first.asString() ) ) );
 
 	// makeTOWLB
 	auto makeTOWLB = [&] () {
@@ -3097,15 +3110,16 @@ makeText(
 
 	if( lineBreak )
 	{
-		text.push_back( removeLineBreak< Trait >( po.fr.data.at( po.line ).first ).sliced( po.pos ) );
+		text.push_back( removeLineBreak< Trait >( po.fr.data.at( po.line ).first.asString() )
+			.sliced( po.pos ) );
 
 		makeTOWLB();
 	}
 	else
 	{
-		const auto s = po.fr.data.at( po.line ).first.sliced( po.pos,
+		const auto s = po.fr.data.at( po.line ).first.asString().sliced( po.pos,
 			( po.line == lastLine ? lastPos - po.pos :
-				po.fr.data.at( po.line ).first.size() - po.pos ) );
+				po.fr.data.at( po.line ).first.length() - po.pos ) );
 		text.push_back( s );
 	}
 
@@ -3117,10 +3131,11 @@ makeText(
 		for( ; po.line < lastLine; ++po.line )
 		{
 			lineBreak = ( !po.ignoreLineBreak && po.line != (long long int) ( po.fr.data.size() - 1 ) &&
-				isLineBreak< Trait >( po.fr.data.at( po.line ).first ) );
+				isLineBreak< Trait >( po.fr.data.at( po.line ).first.asString() ) );
 
 			const auto s = ( lineBreak ?
-				removeLineBreak< Trait >( po.fr.data.at( po.line ).first ) : po.fr.data.at( po.line ).first );
+				removeLineBreak< Trait >( po.fr.data.at( po.line ).first.asString() ) :
+				po.fr.data.at( po.line ).first.asString() );
 			text.push_back( s );
 
 			text.push_back( typename Trait::Char( c_32 ) );
@@ -3130,10 +3145,10 @@ makeText(
 		}
 
 		lineBreak = ( !po.ignoreLineBreak && po.line != (long long int) ( po.fr.data.size() - 1 ) &&
-			lastPos == po.fr.data.at( po.line ).first.size() &&
-			isLineBreak< Trait >( po.fr.data.at( po.line ).first ) );
+			lastPos == po.fr.data.at( po.line ).first.length() &&
+			isLineBreak< Trait >( po.fr.data.at( po.line ).first.asString() ) );
 
-		auto s = po.fr.data.at( po.line ).first.sliced( 0, lastPos );
+		auto s = po.fr.data.at( po.line ).first.asString().sliced( 0, lastPos );
 
 		if( !lineBreak )
 			text.push_back( s );
@@ -3159,7 +3174,7 @@ skipSpacesInHtml( long long int & l, long long int & p, const typename MdBlock< 
 {
 	while( l < (long long int) fr.size() )
 	{
-		while( p < fr[ l ].first.size() )
+		while( p < fr[ l ].first.length() )
 		{
 			if( !fr[ l ].first[ p ].isSpace() )
 				return;
@@ -3180,7 +3195,7 @@ readUnquotedHtmlAttrValue( long long int & l, long long int & p, const typename 
 
 	typename Trait::String value;
 
-	for( ; p < fr[ l ].first.size(); ++p )
+	for( ; p < fr[ l ].first.length(); ++p )
 	{
 		if( fr[ l ].first[ p ].isSpace() )
 			break;
@@ -3202,7 +3217,7 @@ template< class Trait >
 inline std::pair< bool, bool >
 readHtmlAttrValue( long long int & l, long long int & p, const typename MdBlock< Trait >::Data & fr )
 {
-	if( p < fr[ l ].first.size() && fr[ l ].first[ p ] != typename Trait::Char( c_34 ) &&
+	if( p < fr[ l ].first.length() && fr[ l ].first[ p ] != typename Trait::Char( c_34 ) &&
 		fr[ l ].first[ p ] != typename Trait::Char( c_39 ) )
 			return readUnquotedHtmlAttrValue< Trait >( l, p, fr );
 
@@ -3210,14 +3225,14 @@ readHtmlAttrValue( long long int & l, long long int & p, const typename MdBlock<
 
 	++p;
 
-	if( p >= fr[ l ].first.size() )
+	if( p >= fr[ l ].first.length() )
 		return { false, false };
 
 	for( ; l < (long long int) fr.size(); ++l )
 	{
 		bool doBreak = false;
 
-		for( ; p < fr[ l ].first.size(); ++p )
+		for( ; p < fr[ l ].first.length(); ++p )
 		{
 			const auto ch = fr[ l ].first[ p ];
 
@@ -3238,7 +3253,7 @@ readHtmlAttrValue( long long int & l, long long int & p, const typename MdBlock<
 	if( l >= (long long int) fr.size() )
 		return { false, false };
 
-	if( p >= fr[ l ].first.size() )
+	if( p >= fr[ l ].first.length() )
 		return { false, false };
 
 	if( fr[ l ].first[ p ] != s )
@@ -3262,11 +3277,11 @@ readHtmlAttr( long long int & l, long long int & p, const typename MdBlock< Trai
 		return { false, false };
 
 	// /
-	if( p < fr[ l ].first.size() && fr[ l ].first[ p ] == typename Trait::Char( c_47 ) )
+	if( p < fr[ l ].first.length() && fr[ l ].first[ p ] == typename Trait::Char( c_47 ) )
 		return { false, true };
 
 	// >
-	if( p < fr[ l ].first.size() && fr[ l ].first[ p ] == typename Trait::Char( c_62 ) )
+	if( p < fr[ l ].first.length() && fr[ l ].first[ p ] == typename Trait::Char( c_62 ) )
 		return { false, true };
 
 	if( checkForSpace )
@@ -3277,7 +3292,7 @@ readHtmlAttr( long long int & l, long long int & p, const typename MdBlock< Trai
 
 	typename Trait::String name;
 
-	for( ; p < fr[ l ].first.size(); ++p )
+	for( ; p < fr[ l ].first.length(); ++p )
 	{
 		const auto ch = fr[ l ].first[ p ];
 
@@ -3306,7 +3321,7 @@ readHtmlAttr( long long int & l, long long int & p, const typename MdBlock< Trai
 	}
 
 	// >
-	if( p < fr[ l ].first.size() && fr[ l ].first[ p ] == typename Trait::Char( c_62 ) )
+	if( p < fr[ l ].first.length() && fr[ l ].first[ p ] == typename Trait::Char( c_62 ) )
 		return { false, true };
 
 	tl = l;
@@ -3318,7 +3333,7 @@ readHtmlAttr( long long int & l, long long int & p, const typename MdBlock< Trai
 		return { false, false };
 
 	// =
-	if( p < fr[ l ].first.size() )
+	if( p < fr[ l ].first.length() )
 	{
 		if( fr[ l ].first[ p ] != typename Trait::Char( c_61 ) )
 		{
@@ -3357,9 +3372,9 @@ isOnlyHtmlTagsAfterOrClosedRule1( long long int line, long long int pos,
 		"/textarea"
 	};
 
-	auto p = skipSpaces< Trait >( pos, po.fr.data[ line ].first );
+	auto p = skipSpaces< Trait >( pos, po.fr.data[ line ].first.asString() );
 
-	while( p < po.fr.data[ line ].first.size() )
+	while( p < po.fr.data[ line ].first.length() )
 	{
 		bool ok = false;
 
@@ -3388,10 +3403,10 @@ isOnlyHtmlTagsAfterOrClosedRule1( long long int line, long long int pos,
 				return false;
 		}
 
-		p = skipSpaces< Trait >( p, po.fr.data[ line ].first );
+		p = skipSpaces< Trait >( p, po.fr.data[ line ].first.asString() );
 	}
 
-	if( p >= po.fr.data[ line ].first.size() )
+	if( p >= po.fr.data[ line ].first.length() )
 		return true;
 
 	return false;
@@ -3411,11 +3426,11 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 	bool first = false;
 
 	{
-		const auto tmp = skipSpaces< Trait >( 0, po.fr.data[ l ].first );
+		const auto tmp = skipSpaces< Trait >( 0, po.fr.data[ l ].first.asString() );
 		first = ( tmp == pos );
 	}
 
-	if( p >= po.fr.data[ l ].first.size() )
+	if( p >= po.fr.data[ l ].first.length() )
 		return { false, line, pos, false, tag };
 
 	bool closing = false;
@@ -3430,7 +3445,7 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 	}
 
 	// tag
-	for( ; p < po.fr.data[ l ].first.size(); ++p )
+	for( ; p < po.fr.data[ l ].first.length(); ++p )
 	{
 		const auto ch = po.fr.data[ l ].first[ p ];
 
@@ -3440,17 +3455,17 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 			tag.push_back( ch );
 	}
 
-	if( p < po.fr.data[ l ].first.size() && po.fr.data[ l ].first[ p ] == typename Trait::Char( c_47 ) )
+	if( p < po.fr.data[ l ].first.length() && po.fr.data[ l ].first[ p ] == typename Trait::Char( c_47 ) )
 	{
-		if( p + 1 < po.fr.data[ l ].first.size() && po.fr.data[ l ].first[ p + 1 ] ==
+		if( p + 1 < po.fr.data[ l ].first.length() && po.fr.data[ l ].first[ p + 1 ] ==
 			typename Trait::Char( c_62 ) )
 		{
 			long long int tmp = 0;
 
 			if( rule == 7 )
-				tmp = skipSpaces< Trait >( p + 2, po.fr.data[ l ].first );
+				tmp = skipSpaces< Trait >( p + 2, po.fr.data[ l ].first.asString() );
 
-			bool onLine = ( first && ( rule == 7 ? tmp == po.fr.data[ l ].first.size() :
+			bool onLine = ( first && ( rule == 7 ? tmp == po.fr.data[ l ].first.length() :
 				isOnlyHtmlTagsAfterOrClosedRule1( l, p + 2, po, rule == 1 ) ) );
 
 			return { true, l, p + 1, onLine, tag };
@@ -3459,15 +3474,15 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 			return { false, line, pos, false, tag };
 	}
 
-	if( p < po.fr.data[ l ].first.size() && po.fr.data[ l ].first[ p ] ==
+	if( p < po.fr.data[ l ].first.length() && po.fr.data[ l ].first[ p ] ==
 		typename Trait::Char( c_62 ) )
 	{
 		long long int tmp = 0;
 
 		if( rule == 7 )
-			tmp = skipSpaces< Trait >( p + 1, po.fr.data[ l ].first );
+			tmp = skipSpaces< Trait >( p + 1, po.fr.data[ l ].first.asString() );
 
-		bool onLine = ( first && ( rule == 7 ? tmp == po.fr.data[ l ].first.size() :
+		bool onLine = ( first && ( rule == 7 ? tmp == po.fr.data[ l ].first.length() :
 			isOnlyHtmlTagsAfterOrClosedRule1( l, p + 1, po, rule == 1 ) ) );
 
 		return { true, l, p, onLine, tag };
@@ -3483,9 +3498,9 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 		long long int tmp = 0;
 
 		if( rule == 7 )
-			tmp = skipSpaces< Trait >( p + 1, po.fr.data[ l ].first );
+			tmp = skipSpaces< Trait >( p + 1, po.fr.data[ l ].first.asString() );
 
-		bool onLine = ( first && ( rule == 7 ? tmp == po.fr.data[ l ].first.size() :
+		bool onLine = ( first && ( rule == 7 ? tmp == po.fr.data[ l ].first.length() :
 			isOnlyHtmlTagsAfterOrClosedRule1( l, p + 1, po, rule == 1 ) ) );
 
 		return { true, l, p, onLine, tag };
@@ -3524,9 +3539,9 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 		long long int tmp = 0;
 
 		if( rule == 7 )
-			tmp = skipSpaces< Trait >( p + 1, po.fr.data[ l ].first );
+			tmp = skipSpaces< Trait >( p + 1, po.fr.data[ l ].first.asString() );
 
-		bool onLine = ( first && ( rule == 7 ? tmp == po.fr.data[ l ].first.size() :
+		bool onLine = ( first && ( rule == 7 ? tmp == po.fr.data[ l ].first.length() :
 			isOnlyHtmlTagsAfterOrClosedRule1( l, p + 1, po, rule == 1 ) ) );
 
 		return { true, l, p, onLine, tag };
@@ -3543,7 +3558,7 @@ readHtmlTag( typename Delims< Trait >::const_iterator it, TextParsingOpts< Trait
 
 	long long int i = it->m_pos + 1;
 
-	for( ; i < po.fr.data[ it->m_line ].first.size(); ++i )
+	for( ; i < po.fr.data[ it->m_line ].first.length(); ++i )
 	{
 		const auto ch = po.fr.data[ it->m_line ].first[ i ];
 
@@ -3553,7 +3568,7 @@ readHtmlTag( typename Delims< Trait >::const_iterator it, TextParsingOpts< Trait
 			break;
 	}
 
-	return { tag, i < po.fr.data[ it->m_line ].first.size() ?
+	return { tag, i < po.fr.data[ it->m_line ].first.length() ?
 		po.fr.data[ it->m_line ].first[ i ] == typename Trait::Char( c_62 ) : false };
 }
 
@@ -3588,9 +3603,9 @@ eatRawHtml( long long int line, long long int pos, long long int toLine, long lo
 				h.push_back( typename Trait::Char( c_10 ) );
 		}
 
-		const auto first = po.fr.data[ line ].first.sliced( pos,
-			( line == toLine ? ( toPos >= 0 ? toPos - pos : po.fr.data[ line ].first.size() - pos ) :
-				po.fr.data[ line ].first.size() - pos ) );
+		const auto first = po.fr.data[ line ].first.asString().sliced( pos,
+			( line == toLine ? ( toPos >= 0 ? toPos - pos : po.fr.data[ line ].first.length() - pos ) :
+				po.fr.data[ line ].first.length() - pos ) );
 
 		if( !h.isEmpty() && !first.isEmpty() )
 			h.push_back( typename Trait::Char( c_10 ) );
@@ -3603,21 +3618,21 @@ eatRawHtml( long long int line, long long int pos, long long int toLine, long lo
 		for( ; line < toLine; ++line )
 		{
 			h.push_back( typename Trait::Char( c_10 ) );
-			h.push_back( po.fr.data[ line ].first );
+			h.push_back( po.fr.data[ line ].first.asString() );
 		}
 
 		if( line == toLine && toPos != 0 )
 		{
 			h.push_back( typename Trait::Char( c_10 ) );
-			h.push_back( po.fr.data[ line ].first.sliced( 0,
-				toPos > 0 ? toPos : po.fr.data[ line ].first.size() ) );
+			h.push_back( po.fr.data[ line ].first.asString().sliced( 0,
+				toPos > 0 ? toPos : po.fr.data[ line ].first.length() ) );
 		}
 
 		po.line = ( toPos >= 0 ? toLine : toLine + 1 );
 		po.pos = ( toPos >= 0 ? toPos : 0 );
 
 		if( po.line < (long long int) po.fr.data.size() &&
-			po.pos >= po.fr.data.at( po.line ).first.size() )
+			po.pos >= po.fr.data.at( po.line ).first.length() )
 		{
 			++po.line;
 			po.pos = 0;
@@ -3698,7 +3713,7 @@ finishRule2HtmlTag( typename Delims< Trait >::const_iterator it,
 	{
 		size_t i = 0;
 
-		const auto & s = po.fr.data[ it->m_line ].first;
+		const auto & s = po.fr.data[ it->m_line ].first.asString();
 
 		long long int p = 0;
 
@@ -3710,7 +3725,7 @@ finishRule2HtmlTag( typename Delims< Trait >::const_iterator it,
 
 		finish = po.fr.data[ it->m_line ].second.htmlCommentClosed[ i ];
 
-		onLine = ( it->m_pos == skipSpaces< Trait >( 0, po.fr.data[ it->m_line ].first ) );
+		onLine = ( it->m_pos == skipSpaces< Trait >( 0, po.fr.data[ it->m_line ].first.asString() ) );
 		po.html.onLine = onLine;
 	}
 
@@ -3724,7 +3739,7 @@ finishRule2HtmlTag( typename Delims< Trait >::const_iterator it,
 						typename Trait::Char( c_45 ) &&
 					po.fr.data[ it->m_line ].first[ it->m_pos - 2 ] == typename Trait::Char( c_45 ) )
 				{
-					eatRawHtml( po.line, po.pos, it->m_line, po.fr.data[ it->m_line ].first.size(),
+					eatRawHtml( po.line, po.pos, it->m_line, po.fr.data[ it->m_line ].first.length(),
 						po, true, 2, onLine );
 
 					return;
@@ -3753,7 +3768,7 @@ finishRule3HtmlTag( typename Delims< Trait >::const_iterator it,
 
 	if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less )
 	{
-		onLine = ( it->m_pos == skipSpaces< Trait >( 0, po.fr.data[ it->m_line ].first ) );
+		onLine = ( it->m_pos == skipSpaces< Trait >( 0, po.fr.data[ it->m_line ].first.asString() ) );
 		po.html.onLine = onLine;
 	}
 
@@ -3766,7 +3781,7 @@ finishRule3HtmlTag( typename Delims< Trait >::const_iterator it,
 			{
 				long long int i = it->m_pos + 1;
 
-				for( ; i < po.fr.data[ it->m_line ].first.size(); ++i )
+				for( ; i < po.fr.data[ it->m_line ].first.length(); ++i )
 				{
 					if( po.fr.data[ it->m_line ].first[ i ] == typename Trait::Char( c_60 ) )
 						break;
@@ -3792,7 +3807,7 @@ finishRule4HtmlTag( typename Delims< Trait >::const_iterator it,
 
 	if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less )
 	{
-		onLine = ( it->m_pos == skipSpaces< Trait >( 0, po.fr.data[ it->m_line ].first ) );
+		onLine = ( it->m_pos == skipSpaces< Trait >( 0, po.fr.data[ it->m_line ].first.asString() ) );
 		po.html.onLine = onLine;
 	}
 
@@ -3802,7 +3817,7 @@ finishRule4HtmlTag( typename Delims< Trait >::const_iterator it,
 		{
 			long long int i = it->m_pos + 1;
 
-			for( ; i < po.fr.data[ it->m_line ].first.size(); ++i )
+			for( ; i < po.fr.data[ it->m_line ].first.length(); ++i )
 			{
 				if( po.fr.data[ it->m_line ].first[ i ] == typename Trait::Char( c_60 ) )
 					break;
@@ -3827,7 +3842,7 @@ finishRule5HtmlTag( typename Delims< Trait >::const_iterator it,
 
 	if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less )
 	{
-		onLine = ( it->m_pos == skipSpaces< Trait >( 0, po.fr.data[ it->m_line ].first ) );
+		onLine = ( it->m_pos == skipSpaces< Trait >( 0, po.fr.data[ it->m_line ].first.asString() ) );
 		po.html.onLine = onLine;
 	}
 
@@ -3841,7 +3856,7 @@ finishRule5HtmlTag( typename Delims< Trait >::const_iterator it,
 			{
 				long long int i = it->m_pos + 1;
 
-				for( ; i < po.fr.data[ it->m_line ].first.size(); ++i )
+				for( ; i < po.fr.data[ it->m_line ].first.length(); ++i )
 				{
 					if( po.fr.data[ it->m_line ].first[ i ] == typename Trait::Char( c_60 ) )
 						break;
@@ -3863,8 +3878,8 @@ finishRule6HtmlTag( typename Delims< Trait >::const_iterator it,
 	typename Delims< Trait >::const_iterator last,
 	TextParsingOpts< Trait > & po )
 {
-	po.html.onLine = ( it != last ? it->m_pos == skipSpaces< Trait >( 0, po.fr.data[ it->m_line ].first ) :
-		true );
+	po.html.onLine = ( it != last ? it->m_pos == skipSpaces< Trait >(
+		0, po.fr.data[ it->m_line ].first.asString() ) : true );
 
 	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 6, po.html.onLine );
 }
@@ -4113,20 +4128,20 @@ checkForMath( typename Delims< Trait >::const_iterator it,
 		typename Trait::String math;
 
 		if( it->m_line == end->m_line )
-			math = po.fr.data[ it->m_line ].first.sliced( it->m_pos + it->m_len,
+			math = po.fr.data[ it->m_line ].first.asString().sliced( it->m_pos + it->m_len,
 				end->m_pos - ( it->m_pos + it->m_len ) );
 		else
 		{
-			math = po.fr.data[ it->m_line ].first.sliced( it->m_pos + it->m_len );
+			math = po.fr.data[ it->m_line ].first.asString().sliced( it->m_pos + it->m_len );
 
 			for( long long int i = it->m_line + 1; i < end->m_line; ++i )
 			{
 				math.push_back( typename Trait::Char( c_10 ) );
-				math.push_back( po.fr.data[ i ].first );
+				math.push_back( po.fr.data[ i ].first.asString() );
 			}
 
 			math.push_back( typename Trait::Char( c_10 ) );
-			math.push_back( po.fr.data[ end->m_line ].first.sliced( 0, end->m_pos ) );
+			math.push_back( po.fr.data[ end->m_line ].first.asString().sliced( 0, end->m_pos ) );
 		}
 
 		if( !po.collectRefLinks )
@@ -4209,7 +4224,7 @@ checkForAutolinkHtml( typename Delims< Trait >::const_iterator it,
 	{
 		if( nit->m_line == it->m_line )
 		{
-			const auto url = po.fr.data.at( it->m_line ).first.sliced( it->m_pos + 1,
+			const auto url = po.fr.data.at( it->m_line ).first.asString().sliced( it->m_pos + 1,
 				nit->m_pos - it->m_pos - 1 );
 
 			bool isUrl = true;
@@ -4271,9 +4286,9 @@ makeInlineCode( long long int lastLine, long long int lastPos,
 
 	for( ; po.line <= lastLine; ++po.line )
 	{
-		c.push_back( po.fr.data.at( po.line ).first.sliced( po.pos,
+		c.push_back( po.fr.data.at( po.line ).first.asString().sliced( po.pos,
 			( po.line == lastLine ? lastPos - po.pos :
-				po.fr.data.at( po.line ).first.size() - po.pos ) ) );
+				po.fr.data.at( po.line ).first.length() - po.pos ) ) );
 
 		if( po.line < lastLine )
 			c.push_back( typename Trait::Char( c_32 ) );
@@ -4352,14 +4367,14 @@ readTextBetweenSquareBrackets( typename Delims< Trait >::const_iterator start,
 			const auto p = start->m_pos + start->m_len;
 			const auto n = it->m_pos - p;
 
-			return { po.fr.data.at( start->m_line ).first.sliced( p, n ).simplified(),
+			return { po.fr.data.at( start->m_line ).first.asString().sliced( p, n ).simplified(),
 				it };
 		}
 		else
 		{
 			if( it->m_line - start->m_line < 3 )
 			{
-				auto text = po.fr.data.at( start->m_line ).first
+				auto text = po.fr.data.at( start->m_line ).first.asString()
 					.sliced( start->m_pos + start->m_len );
 
 				long long int i = start->m_line + 1;
@@ -4369,9 +4384,9 @@ readTextBetweenSquareBrackets( typename Delims< Trait >::const_iterator start,
 					text.push_back( typename Trait::Char( c_32 ) );
 
 					if( i == it->m_line )
-						text.push_back( po.fr.data.at( i ).first.sliced( 0, it->m_pos ) );
+						text.push_back( po.fr.data.at( i ).first.asString().sliced( 0, it->m_pos ) );
 					else
-						text.push_back( po.fr.data.at( i ).first );
+						text.push_back( po.fr.data.at( i ).first.asString() );
 				}
 
 				return { text.simplified(), it };
@@ -4704,12 +4719,12 @@ template< class Trait >
 inline void
 skipSpacesUpTo1Line( long long int & line, long long int & pos, const typename MdBlock< Trait >::Data & fr )
 {
-	pos = skipSpaces< Trait >( pos, fr.at( line ).first );
+	pos = skipSpaces< Trait >( pos, fr.at( line ).first.asString() );
 
-	if( pos == fr.at( line ).first.size() && line + 1 < (long long int) fr.size() )
+	if( pos == fr.at( line ).first.length() && line + 1 < (long long int) fr.size() )
 	{
 		++line;
-		pos = skipSpaces< Trait >( 0, fr.at( line ).first );
+		pos = skipSpaces< Trait >( 0, fr.at( line ).first.asString() );
 	}
 }
 
@@ -4720,11 +4735,11 @@ readLinkDestination( long long int line, long long int pos, const typename MdBlo
 	skipSpacesUpTo1Line< Trait >( line, pos, fr );
 
 	const auto destLine = line;
-	const auto & s = fr.at( line ).first;
+	const auto & s = fr.at( line ).first.asString();
 	typename Trait::String dest;
 	bool backslash = false;
 
-	if( pos < s.size() )
+	if( pos < s.length() )
 	{
 		if( s[ pos ] == typename Trait::Char( c_60 ) )
 		{
@@ -4823,14 +4838,14 @@ template< class Trait >
 inline std::tuple< long long int, long long int, bool, typename Trait::String, long long int >
 readLinkTitle( long long int line, long long int pos, const typename MdBlock< Trait >::Data & fr )
 {
-	const auto space = ( pos < fr.at( line ).first.size() ?
+	const auto space = ( pos < fr.at( line ).first.length() ?
 		fr.at( line ).first[ pos ].isSpace() : true );
 
 	const auto firstLine = line;
 
 	skipSpacesUpTo1Line< Trait >( line, pos, fr );
 
-	if( pos >= fr.at( line ).first.size() )
+	if( pos >= fr.at( line ).first.length() )
 		return { line, pos, true, {}, firstLine };
 
 	const auto sc = fr.at( line ).first[ pos ];
@@ -4854,7 +4869,7 @@ readLinkTitle( long long int line, long long int pos, const typename MdBlock< Tr
 
 	typename Trait::String title;
 
-	while( line < (long long int) fr.size() && pos < fr.at( line ).first.size() )
+	while( line < (long long int) fr.size() && pos < fr.at( line ).first.length() )
 	{
 		bool now = false;
 
@@ -4879,7 +4894,7 @@ readLinkTitle( long long int line, long long int pos, const typename MdBlock< Tr
 
 		++pos;
 
-		if( pos == fr.at( line ).first.size() )
+		if( pos == fr.at( line ).first.length() )
 			skipSpacesUpTo1Line< Trait >( line, pos, fr );
 	}
 
@@ -4910,7 +4925,7 @@ checkForInlineLink( typename Delims< Trait >::const_iterator it,
 
 	skipSpacesUpTo1Line< Trait >( l, p, po.fr.data );
 
-	if( !ok || ( l >= (long long int) po.fr.data.size() || p >= po.fr.data.at( l ).first.size() ||
+	if( !ok || ( l >= (long long int) po.fr.data.size() || p >= po.fr.data.at( l ).first.length() ||
 		po.fr.data.at( l ).first[ p ] != typename Trait::Char( c_41 ) ) )
 			return { {}, {}, it, false };
 
@@ -4950,14 +4965,14 @@ checkForRefLink( typename Delims< Trait >::const_iterator it,
 
 	if( !title.isEmpty() )
 	{
-		p = skipSpaces< Trait >( p, po.fr.data.at( l ).first );
+		p = skipSpaces< Trait >( p, po.fr.data.at( l ).first.asString() );
 
-		if( titleStartLine == destStartLine && p < po.fr.data.at( l ).first.size() )
+		if( titleStartLine == destStartLine && p < po.fr.data.at( l ).first.length() )
 			return { {}, {}, it, false };
-		else if( titleStartLine != destStartLine && p < po.fr.data.at( l ).first.size() )
+		else if( titleStartLine != destStartLine && p < po.fr.data.at( l ).first.length() )
 		{
 			l = destStartLine;
-			p = po.fr.data.at( l ).first.size();
+			p = po.fr.data.at( l ).first.length();
 			title.clear();
 		}
 	}
@@ -4990,7 +5005,7 @@ checkForImage( typename Delims< Trait >::const_iterator it,
 
 	if( it != start )
 	{
-		if( it->m_pos + it->m_len < po.fr.data.at( it->m_line ).first.size() )
+		if( it->m_pos + it->m_len < po.fr.data.at( it->m_line ).first.length() )
 		{
 			// Inline -> (
 			if( po.fr.data.at( it->m_line ).first[ it->m_pos + it->m_len ] ==
@@ -5103,7 +5118,7 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 	const auto wasRefLink = po.wasRefLink;
 	po.wasRefLink = false;
 
-	const auto ns = skipSpaces< Trait >( 0, po.fr.data.at( po.line ).first );
+	const auto ns = skipSpaces< Trait >( 0, po.fr.data.at( po.line ).first.asString() );
 
 	std::tie( text, it ) = checkForLinkText( it, last, po );
 
@@ -5127,7 +5142,7 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 
 			return it;
 		}
-		else if( it->m_pos + it->m_len < po.fr.data.at( it->m_line ).first.size() )
+		else if( it->m_pos + it->m_len < po.fr.data.at( it->m_line ).first.length() )
 		{
 			// Reference definition -> :
 			if( po.fr.data.at( it->m_line ).first[ it->m_pos + it->m_len ] ==
@@ -6166,7 +6181,7 @@ Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
 			std::tie( id, it ) = checkForLinkText( delims.cbegin(), delims.cend(), po );
 
 			if( !id.isEmpty() && id.startsWith( c_94 ) && it != delims.cend() &&
-				fr.data.at( it->m_line ).first.size() > it->m_pos + 1 &&
+				fr.data.at( it->m_line ).first.length() > it->m_pos + 1 &&
 				fr.data.at( it->m_line ).first[ it->m_pos + 1 ] == typename Trait::Char( c_58 ) )
 			{
 				{
@@ -6180,9 +6195,9 @@ Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
 
 				for( auto it = fr.data.begin(), last = fr.data.end(); it != last; ++it )
 				{
-					if( it->first.startsWith( "    " ) )
+					if( it->first.asString().startsWith( "    " ) )
 						it->first = it->first.sliced( 4 );
-					else if( it->first.startsWith( c_9 ) )
+					else if( it->first.asString().startsWith( c_9 ) )
 						it->first = it->first.sliced( 1 );
 				}
 
@@ -6207,7 +6222,7 @@ Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
 	const typename Trait::String & fileName,
 	bool collectRefLinks, RawHtmlBlock< Trait > & html )
 {
-	const int pos = fr.data.front().first.indexOf( c_62 );
+	const int pos = fr.data.front().first.asString().indexOf( c_62 );
 
 	if( pos > -1 )
 	{
@@ -6217,37 +6232,37 @@ Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
 
 		for( auto it = fr.data.begin(), last = fr.data.end(); it != last; ++it, ++i )
 		{
-			const auto ns = skipSpaces< Trait >( 0, it->first );
-			const auto gt = ( ns < it->first.size() ?
+			const auto ns = skipSpaces< Trait >( 0, it->first.asString() );
+			const auto gt = ( ns < it->first.length() ?
 				( it->first[ ns ] == typename Trait::Char( c_62 ) ? ns : -1 ) : -1 );
 
 			if( gt > -1 )
 			{
-				it->first = it->first.sliced( gt + ( it->first.size() > gt + 1 ?
+				it->first = it->first.sliced( gt + ( it->first.length() > gt + 1 ?
 					( it->first[ gt + 1 ] == typename Trait::Char( c_32 ) ? 1 : 0 ) : 0 ) + 1 );
 				bt = whatIsTheLine( it->first );
 			}
 			// Process lazyness...
 			else
 			{
-				if( ns < 4 && isHorizontalLine< Trait >( it->first.sliced( ns ) ) )
+				if( ns < 4 && isHorizontalLine< Trait >( it->first.asString().sliced( ns ) ) )
 					break;
 
 				const auto tmpBt = whatIsTheLine( it->first );
 
 				if( bt == BlockType::Text )
 				{
-					if( isH1< Trait >( it->first ) )
+					if( isH1< Trait >( it->first.asString() ) )
 					{
-						const auto p = it->first.indexOf( c_61 );
+						const auto p = it->first.asString().indexOf( c_61 );
 
 						it->first.insert( p, c_92 );
 
 						continue;
 					}
-					else if( isH2< Trait >( it->first ) )
+					else if( isH2< Trait >( it->first.asString() ) )
 					{
-						const auto p = it->first.indexOf( c_45 );
+						const auto p = it->first.asString().indexOf( c_45 );
 
 						it->first.insert( p, c_92 );
 
@@ -6383,7 +6398,7 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 	for( auto it = fr.data.begin(), last = fr.data.end(); it != last; ++it )
 		it->first.replace( typename Trait::Char( c_9 ), typename Trait::String( "    " ) );
 
-	const auto p = skipSpaces< Trait >( 0, fr.data.front().first );
+	const auto p = skipSpaces< Trait >( 0, fr.data.front().first.asString() );
 
 	if( p != fr.data.front().first.length() )
 	{
@@ -6398,7 +6413,7 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 		long long int indent = 0;
 		typename Trait::Char marker;
 
-		std::tie( ok, indent, marker ) = listItemData< Trait >( listItem.front().first );
+		std::tie( ok, indent, marker ) = listItemData< Trait >( listItem.front().first.asString() );
 
 		bool updateIndent = false;
 
@@ -6406,14 +6421,14 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 		{
 			if( updateIndent )
 			{
-				std::tie( ok, indent, marker ) = listItemData< Trait >( it->first );
+				std::tie( ok, indent, marker ) = listItemData< Trait >( it->first.asString() );
 				updateIndent = false;
 			}
 
-			const auto ns = skipSpaces< Trait >( 0, it->first );
+			const auto ns = skipSpaces< Trait >( 0, it->first.asString() );
 
-			if( isHorizontalLine< Trait >( it->first.sliced( ns ) ) && !listItem.empty() &&
-				( ns == indent ? !isH2< Trait >( it->first.sliced( ns ) ) : true ) )
+			if( isHorizontalLine< Trait >( it->first.asString().sliced( ns ) ) && !listItem.empty() &&
+				( ns == indent ? !isH2< Trait >( it->first.asString().sliced( ns ) ) : true ) )
 			{
 				updateIndent = true;
 
@@ -6433,10 +6448,10 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 
 				continue;
 			}
-			else if( isListItemAndNotNested< Trait >( it->first, indent ) && !listItem.empty() )
+			else if( isListItemAndNotNested< Trait >( it->first.asString(), indent ) && !listItem.empty() )
 			{
 				typename Trait::Char tmpMarker;
-				std::tie( ok, indent, tmpMarker ) = listItemData< Trait >( it->first );
+				std::tie( ok, indent, tmpMarker ) = listItemData< Trait >( it->first.asString() );
 
 				MdBlock< Trait > block = { listItem, 0 };
 
@@ -6484,7 +6499,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 
 	int i = 0;
 
-	if( isOrderedList< Trait >( fr.data.front().first, &i ) )
+	if( isOrderedList< Trait >( fr.data.front().first.asString(), &i ) )
 	{
 		item->setListType( ListItem< Trait >::Ordered );
 		item->setStartNumber( i );
@@ -6506,9 +6521,10 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 	long long int indent = 0;
 	bool ok = false;
 
-	std::tie( ok, indent, std::ignore ) = listItemData< Trait >( fr.data.front().first );
+	std::tie( ok, indent, std::ignore ) = listItemData< Trait >( fr.data.front().first.asString() );
 
-	const auto firstNonSpacePos = calculateIndent< Trait >( fr.data.front().first, indent ).second;
+	const auto firstNonSpacePos = calculateIndent< Trait >(
+		fr.data.front().first.asString(), indent ).second;
 	if( firstNonSpacePos - indent < 4 ) indent = firstNonSpacePos;
 
 	if( indent < fr.data.front().first.length() )
@@ -6520,15 +6536,15 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 
 	if( !data.empty() )
 	{
-		auto p = skipSpaces< Trait >( 0, data.front().first );
+		auto p = skipSpaces< Trait >( 0, data.front().first.asString() );
 
-		if( p < data.front().first.size() )
+		if( p < data.front().first.length() )
 		{
 			if( data.front().first[ p ] == typename Trait::Char( c_91 ) )
 			{
 				++p;
 
-				if( p < data.front().first.size() )
+				if( p < data.front().first.length() )
 				{
 					if( data.front().first[ p ] == typename Trait::Char( c_32 ) ||
 						data.front().first[ p ].toLower() == typename Trait::Char( c_120 ) )
@@ -6538,7 +6554,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 
 						++p;
 
-						if( p < data.front().first.size() )
+						if( p < data.front().first.length() )
 						{
 							if( data.front().first[ p ] == typename Trait::Char( c_93 ) )
 							{
@@ -6561,7 +6577,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 
 	for( auto last = fr.data.end(); it != last; ++it, ++pos )
 	{
-		std::tie( ok, std::ignore, std::ignore ) = listItemData< Trait >( it->first );
+		std::tie( ok, std::ignore, std::ignore ) = listItemData< Trait >( it->first.asString() );
 
 		if( ok )
 		{
@@ -6578,8 +6594,9 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 
 			for( ; it != last; ++it )
 			{
-				const auto ns = skipSpaces< Trait >( 0, it->first );
-				std::tie( ok, std::ignore, std::ignore ) = listItemData< Trait >( it->first );
+				const auto ns = skipSpaces< Trait >( 0, it->first.asString() );
+				std::tie( ok, std::ignore, std::ignore ) = listItemData< Trait >(
+					it->first.asString() );
 
 				if( ok || ns > indent || ns == it->first.length() )
 					nestedList.push_back( *it );
@@ -6589,7 +6606,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 
 			for( auto it = nestedList.begin(), last = nestedList.end(); it != last; ++it )
 			{
-				if( it->first.startsWith( typename Trait::String( indent, c_32 ) ) )
+				if( it->first.asString().startsWith( typename Trait::String( indent, c_32 ) ) )
 					it->first = it->first.sliced( indent );
 			}
 
@@ -6600,7 +6617,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 
 			for( ; it != last; ++it )
 			{
-				if( it->first.startsWith( typename Trait::String( indent, c_32 ) ) )
+				if( it->first.asString().startsWith( typename Trait::String( indent, c_32 ) ) )
 					it->first = it->first.sliced( indent );
 
 				data.push_back( *it );
@@ -6610,7 +6627,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 		}
 		else
 		{
-			if( it->first.startsWith( typename Trait::String( indent, c_32 ) ) )
+			if( it->first.asString().startsWith( typename Trait::String( indent, c_32 ) ) )
 				it->first = it->first.sliced( indent );
 
 			data.push_back( *it );
@@ -6636,13 +6653,13 @@ Parser< Trait >::parseCode( MdBlock< Trait > & fr,
 {
 	if( !collectRefLinks )
 	{
-		const auto i = skipSpaces< Trait >( 0, fr.data.front().first );
+		const auto i = skipSpaces< Trait >( 0, fr.data.front().first.asString() );
 
 		if( i != fr.data.front().first.length() )
 			indent += i;
 
 		typename Trait::String syntax;
-		isStartOfCode< Trait >( fr.data.front().first, &syntax );
+		isStartOfCode< Trait >( fr.data.front().first.asString(), &syntax );
 		syntax = replaceEntity< Trait >( syntax );
 
 		fr.data.erase( fr.data.cbegin() );
@@ -6658,7 +6675,7 @@ Parser< Trait >::parseCode( MdBlock< Trait > & fr,
 				if( !first )
 					math.push_back( typename Trait::Char( c_10 ) );
 
-				math.push_back( l.first );
+				math.push_back( l.first.asString() );
 
 				first = false;
 			}
@@ -6692,11 +6709,11 @@ Parser< Trait >::parseCodeIndentedBySpaces( MdBlock< Trait > & fr,
 
 		for( const auto & l : std::as_const( fr.data ) )
 		{
-			const auto ns = skipSpaces< Trait >( 0, l.first );
+			const auto ns = skipSpaces< Trait >( 0, l.first.asString() );
 
-			code.push_back( ( indent > 0 ? l.first.right( l.first.length() -
+			code.push_back( ( indent > 0 ? l.first.asString().right( l.first.length() -
 					( ns < indent ? ns : indent ) ) + c_10 :
-				l.first + c_10 ) );
+				l.first.asString() + c_10 ) );
 		}
 
 		if( !code.isEmpty() )

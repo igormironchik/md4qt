@@ -94,6 +94,11 @@ public:
 		return pos;
 	}
 
+	Char operator [] ( long long int position ) const
+	{
+		return str[ position ];
+	}
+
 	InternalStringT & replace( const String & what, const String & with )
 	{
 		String tmp;
@@ -263,9 +268,9 @@ public:
 	InternalStringT sliced( long long int pos, long long int len = -1 ) const
 	{
 		InternalStringT tmp = *this;
-		tmp.str = tmp.str.sliced( pos, len );
+		tmp.str = tmp.str.sliced( pos, ( len == -1 ? tmp.str.length() - pos : len ) );
 		tmp.changedPos.push_back( { pos, {} } );
-		if( len != -1 && len < length() )
+		if( len != -1 && len < length() - pos )
 			tmp.changedPos.back().second.push_back( { pos + len, length() - pos - len, 0 } );
 
 		return tmp;
@@ -278,6 +283,15 @@ public:
 		tmp.changedPos.push_back( { length() - n, {} } );
 
 		return tmp;
+	}
+
+	InternalStringT & insert( long long int pos, Char ch )
+	{
+		str.insert( pos, ch );
+		changedPos.push_back( {} );
+		changedPos.back().second.push_back( { pos, 1, 2 } );
+
+		return *this;
 	}
 
 private:
@@ -575,30 +589,25 @@ public:
 		std::vector< UnicodeString > result;
 
 		int32_t pos = 0;
+		int32_t fpos = 0;
 
-		while( pos < length() )
+		while( ( fpos = indexOf( ch, pos ) ) != -1 && fpos < length() )
 		{
-			const auto fpos = indexOf( (UChar32) ch, pos );
-
-			if( fpos != -1 )
-			{
-				if( fpos - pos > 0 )
-				{
-					icu::UnicodeString tmp;
-					extract( pos, fpos - pos, tmp );
-					result.push_back( tmp );
-				}
-
-				pos = fpos + 1;
-			}
-			else if( pos < length() )
+			if( fpos - pos > 0 )
 			{
 				icu::UnicodeString tmp;
-				extract( pos, length() - pos, tmp );
+				extract( pos, fpos - pos, tmp );
 				result.push_back( tmp );
-
-				break;
 			}
+
+			pos = fpos + 1;
+		}
+
+		if( pos < length() )
+		{
+			icu::UnicodeString tmp;
+			extract( pos, length() - pos, tmp );
+			result.push_back( tmp );
 		}
 
 		return result;
@@ -737,6 +746,8 @@ struct UnicodeStringTrait {
 
 	using StringList = std::vector< String >;
 
+	using InternalStringList = std::vector< InternalString >;
+
 	using Url = UrlUri;
 
 	//! Convert UTF-16 into trait's string.
@@ -793,6 +804,8 @@ struct QStringTrait {
 	using Char = QChar;
 
 	using InternalString = InternalStringT< String, Char >;
+
+	using InternalStringList = std::vector< InternalString >;
 
 	using TextStream = QTextStream;
 
