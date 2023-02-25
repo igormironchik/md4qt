@@ -235,4 +235,11 @@ TEST_CASE( "simplified" )
 
 	REQUIRE( s.asString() == "" );
 	REQUIRE( s.isEmpty() );
+
+	s = TRAIT::InternalString( "   " );
+
+	s = s.simplified();
+
+	REQUIRE( s.asString() == "" );
+	REQUIRE( s.isEmpty() );
 }
