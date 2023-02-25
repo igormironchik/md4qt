@@ -313,3 +313,27 @@ TEST_CASE( "split" )
 	REQUIRE( r.at( 2 ).asString() == " c " );
 	REQUIRE( r.at( 2 ).virginPos( 1 ) == 11 );
 }
+
+TEST_CASE( "sliced" )
+{
+	TRAIT::InternalString s( "aaabbbccc" );
+
+	s = s.sliced( 3, 3 );
+
+	REQUIRE( s.asString() == "bbb" );
+	REQUIRE( s.virginPos( 0 ) == 3 );
+	REQUIRE( s.virginPos( 1 ) == 4 );
+	REQUIRE( s.virginPos( 2 ) == 5 );
+}
+
+TEST_CASE( "right" )
+{
+	TRAIT::InternalString s( "aaabbbccc" );
+
+	s = s.right( 3 );
+
+	REQUIRE( s.asString() == "ccc" );
+	REQUIRE( s.virginPos( 0 ) == 6 );
+	REQUIRE( s.virginPos( 1 ) == 7 );
+	REQUIRE( s.virginPos( 2 ) == 8 );
+}

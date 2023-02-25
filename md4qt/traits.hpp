@@ -260,6 +260,26 @@ public:
 		return result;
 	}
 
+	InternalStringT sliced( long long int pos, long long int len = -1 ) const
+	{
+		InternalStringT tmp = *this;
+		tmp.str = tmp.str.sliced( pos, len );
+		tmp.changedPos.push_back( { pos, {} } );
+		if( len != -1 && len < length() )
+			tmp.changedPos.back().second.push_back( { pos + len, length() - pos - len, 0 } );
+
+		return tmp;
+	}
+
+	InternalStringT right( long long int n ) const
+	{
+		InternalStringT tmp = *this;
+		tmp.str = tmp.str.right( n );
+		tmp.changedPos.push_back( { length() - n, {} } );
+
+		return tmp;
+	}
+
 private:
 	String str;
 
