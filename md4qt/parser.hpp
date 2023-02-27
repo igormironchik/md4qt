@@ -102,23 +102,18 @@ startSequence( const typename Trait::String & line )
 {
 	auto pos = skipSpaces< Trait >( 0, line );
 
-	const auto sch = ( pos < line.length() ? line[ pos ] : typename Trait::Char() );
+	if( pos >= line.length() )
+		return {};
 
-	typename Trait::String s = sch;
+	const auto sch = ( pos < line.length() ? line[ pos ] : typename Trait::Char() );
+	const auto start = pos;
 
 	++pos;
 
-	while( pos < line.length() )
-	{
-		if( line[ pos ] == sch )
-			s.push_back( sch );
-		else
-			break;
-
+	while( pos < line.length() && line[ pos ] == sch )
 		++pos;
-	}
 
-	return s;
+	return line.sliced( start, pos - start );
 }
 
 //! \return Is string an ordered list.
@@ -418,8 +413,11 @@ template< class Trait >
 inline typename Trait::String
 readEscapedSequence( long long int i, const typename Trait::String & str )
 {
-	typename Trait::String ret;
 	bool backslash = false;
+	const auto start = i;
+
+	if( start >= str.length() )
+		return {};
 
 	while( i < str.length() )
 	{
@@ -432,8 +430,6 @@ readEscapedSequence( long long int i, const typename Trait::String & str )
 		}
 		else if( str[ i ].isSpace() && !backslash )
 			break;
-		else
-			ret.push_back( str[ i ] );
 
 		if( !now )
 			backslash = false;
@@ -441,7 +437,40 @@ readEscapedSequence( long long int i, const typename Trait::String & str )
 		++i;
 	}
 
-	return ret;
+	return str.sliced( start, i - start );
+}
+
+template< class Trait >
+static const typename Trait::String c_canBeEscaped = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+
+template< class Trait >
+inline typename Trait::InternalString
+removeBackslashes( const typename Trait::InternalString & s )
+{
+	typename Trait::InternalString r = s;
+	bool backslash = false;
+	long long int extra = 0;
+
+	for( long long int i = 0; i < s.length(); ++i )
+	{
+		bool now = false;
+
+		if( s[ i ] == typename Trait::Char( '\\' ) && !backslash && i != s.length() - 1 )
+		{
+			backslash = true;
+			now = true;
+		}
+		else if( c_canBeEscaped< Trait >.contains( s[ i ] ) && backslash )
+		{
+			r.remove( i - extra - 1, 1 );
+			++extra;
+		}
+
+		if( !now )
+			backslash = false;
+	}
+
+	return r;
 }
 
 //! \return Is string a start of code?
@@ -477,7 +506,8 @@ isStartOfCode( const typename Trait::String & str, typename Trait::String * synt
 			p = skipSpaces< Trait >( p, str );
 
 			if( p < str.size() )
-				*syntax = readEscapedSequence< Trait >( p, str );
+				*syntax = removeBackslashes< Trait >(
+					readEscapedSequence< Trait >( p, str ) ).asString();
 		}
 
 		return true;
@@ -2956,39 +2986,6 @@ replaceEntity( const typename Trait::String & s )
 }
 
 template< class Trait >
-static const typename Trait::String c_canBeEscaped = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
-
-template< class Trait >
-inline typename Trait::InternalString
-removeBackslashes( const typename Trait::InternalString & s )
-{
-	typename Trait::InternalString r = s;
-	bool backslash = false;
-	long long int extra = 0;
-
-	for( long long int i = 0; i < s.length(); ++i )
-	{
-		bool now = false;
-
-		if( s[ i ] == typename Trait::Char( '\\' ) && !backslash && i != s.length() - 1 )
-		{
-			backslash = true;
-			now = true;
-		}
-		else if( c_canBeEscaped< Trait >.contains( s[ i ] ) && backslash )
-		{
-			r.remove( i - extra - 1, 1 );
-			++extra;
-		}
-
-		if( !now )
-			backslash = false;
-	}
-
-	return r;
-}
-
-template< class Trait >
 inline typename MdBlock< Trait >::Data
 removeBackslashes( const typename MdBlock< Trait >::Data & d )
 {
@@ -3168,7 +3165,7 @@ readUnquotedHtmlAttrValue( long long int & l, long long int & p, const typename 
 {
 	static const typename Trait::String notAllowed = "\"`=<'";
 
-	typename Trait::String value;
+	const auto start = p;
 
 	for( ; p < fr[ l ].first.length(); ++p )
 	{
@@ -3177,15 +3174,10 @@ readUnquotedHtmlAttrValue( long long int & l, long long int & p, const typename 
 		else if( notAllowed.contains( fr[ l ].first[ p ] ) )
 			return { false, false };
 		else if( fr[ l ].first[ p ] == typename Trait::Char( '>' ) )
-			return { !value.isEmpty(), !value.isEmpty() };
-		else
-			value.push_back( fr[ l ].first[ p ] );
+			return { p - start > 0, p - start > 0 };
 	}
 
-	if( value.isEmpty() )
-		return { false, false };
-
-	return { true, true };
+	return { p - start > 0, p - start > 0 };
 }
 
 template< class Trait >
@@ -3265,7 +3257,7 @@ readHtmlAttr( long long int & l, long long int & p, const typename MdBlock< Trai
 			return { false, false };
 	}
 
-	typename Trait::String name;
+	const auto start = p;
 
 	for( ; p < fr[ l ].first.length(); ++p )
 	{
@@ -3273,11 +3265,10 @@ readHtmlAttr( long long int & l, long long int & p, const typename MdBlock< Trai
 
 		if( ch.isSpace() || ch == typename Trait::Char( '>' ) || ch == typename Trait::Char( '=' ) )
 			break;
-		else
-			name.push_back( ch );
 	}
 
-	name = name.toLower();
+	const typename Trait::String name = fr[ l ].first.asString()
+		.sliced( start, p - start ).toLower();
 
 	if( !name.startsWith( '_' ) && !name.startsWith( ':' ) &&
 		!name.isEmpty() &&
@@ -3419,6 +3410,8 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 		++p;
 	}
 
+	const auto start = p;
+
 	// tag
 	for( ; p < po.fr.data[ l ].first.length(); ++p )
 	{
@@ -3426,9 +3419,9 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 
 		if( ch.isSpace() || ch == typename Trait::Char( '>' ) || ch == typename Trait::Char( '/' ) )
 			break;
-		else
-			tag.push_back( ch );
 	}
+
+	tag.push_back( po.fr.data[ l ].first.asString().sliced( start, p - start ) );
 
 	if( p < po.fr.data[ l ].first.length() && po.fr.data[ l ].first[ p ] == typename Trait::Char( '/' ) )
 	{
@@ -3529,22 +3522,23 @@ template< class Trait >
 inline std::pair< typename Trait::String, bool >
 readHtmlTag( typename Delims< Trait >::const_iterator it, TextParsingOpts< Trait > & po )
 {
-	typename Trait::String tag;
-
 	long long int i = it->m_pos + 1;
+	const auto start = i;
+
+	if( start >= po.fr.data[ it->m_line ].first.length() )
+		return { {}, false };
 
 	for( ; i < po.fr.data[ it->m_line ].first.length(); ++i )
 	{
 		const auto ch = po.fr.data[ it->m_line ].first[ i ];
 
-		if( !ch.isSpace() && ch != typename Trait::Char( '>' ) )
-			tag.push_back( ch );
-		else
+		if( ch.isSpace() || ch == typename Trait::Char( '>' ) )
 			break;
 	}
 
-	return { tag, i < po.fr.data[ it->m_line ].first.length() ?
-		po.fr.data[ it->m_line ].first[ i ] == typename Trait::Char( '>' ) : false };
+	return { po.fr.data[ it->m_line ].first.asString().sliced( start, i - start ),
+		i < po.fr.data[ it->m_line ].first.length() ?
+			po.fr.data[ it->m_line ].first[ i ] == typename Trait::Char( '>' ) : false };
 }
 
 template< class Trait >
@@ -4737,6 +4731,8 @@ readLinkDestination( long long int line, long long int pos, const typename MdBlo
 		{
 			++pos;
 
+			const auto start = pos;
+
 			while( pos < s.size() )
 			{
 				bool now = false;
@@ -4750,13 +4746,6 @@ readLinkDestination( long long int line, long long int pos, const typename MdBlo
 					return { line, pos, false, {}, destLine };
 				else if( !backslash && s[ pos ] == typename Trait::Char( '>' ) )
 					break;
-				else
-				{
-					if( backslash )
-						dest.push_back( typename Trait::Char( '\\' ) );
-
-					dest.push_back( s[ pos ] );
-				}
 
 				if( !now )
 					backslash = false;
@@ -4765,13 +4754,15 @@ readLinkDestination( long long int line, long long int pos, const typename MdBlo
 			}
 
 			if( pos < s.size() && s[ pos ] == typename Trait::Char( '>' ) )
-				return { line, ++pos, true, dest, destLine };
+				return { line, ++pos, true, s.sliced( start, pos - start - 1 ), destLine };
 			else
 				return { line, pos, false, {}, destLine };
 		}
 		else
 		{
 			long long int pc = 0;
+
+			const auto start = pos;
 
 			while( pos < s.size() )
 			{
@@ -4786,31 +4777,18 @@ readLinkDestination( long long int line, long long int pos, const typename MdBlo
 					s[ pos ] == typename Trait::Char( '\t' ) ) )
 				{
 					if( !pc )
-						return { line, pos, true, dest, destLine };
+						return { line, pos, true, s.sliced( start, pos - start ), destLine };
 					else
 						return { line, pos, false, {}, destLine };
 				}
 				else if( !backslash && s[ pos ] == typename Trait::Char( '(' ) )
-				{
 					++pc;
-					dest.push_back( s[ pos ] );
-				}
 				else if( !backslash && s[ pos ] == typename Trait::Char( ')' ) )
 				{
 					if( !pc )
-						return { line, pos, true, dest, destLine };
+						return { line, pos, true, s.sliced( start, pos - start ), destLine };
 					else
-					{
-						dest.push_back( s[ pos ] );
 						--pc;
-					}
-				}
-				else
-				{
-					if( backslash )
-						dest.push_back( typename Trait::Char( '\\' ) );
-
-					dest.push_back( s[ pos ] );
 				}
 
 				if( !now )
@@ -4819,7 +4797,7 @@ readLinkDestination( long long int line, long long int pos, const typename MdBlo
 				++pos;
 			}
 
-			return { line, pos, true, dest, destLine };
+			return { line, pos, true, s.sliced( start, pos - start ), destLine };
 		}
 	}
 	else
