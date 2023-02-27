@@ -4722,7 +4722,6 @@ readLinkDestination( long long int line, long long int pos, const typename MdBlo
 
 	const auto destLine = line;
 	const auto & s = fr.at( line ).first.asString();
-	typename Trait::String dest;
 	bool backslash = false;
 
 	if( pos < s.length() )
