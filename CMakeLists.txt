@@ -39,6 +39,10 @@ if( ${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME} )
 		add_subdirectory( tests )
 	endif()
 
+	if( BUILD_MD4QT_BENCHMARK )
+		add_subdirectory( tests/md_benchmark )
+	endif( BUILD_MD4QT_BENCHMARK )
+
 	file( GLOB_RECURSE SRC md4qt/* )
 
 	add_library( md4qt INTERFACE ${SRC} )

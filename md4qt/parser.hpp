@@ -5952,6 +5952,8 @@ concatenateText( typename Block< Trait >::Items::const_iterator it,
 	std::shared_ptr< Text< Trait > > t( new Text< Trait > );
 	t->setOpts( std::static_pointer_cast< Text< Trait > >( *it )->opts() );
 	t->setSpaceBefore( std::static_pointer_cast< Text< Trait > >( *it )->isSpaceBefore() );
+	t->setStartColumn( (*it)->startColumn() );
+	t->setStartLine( (*it)->startLine() );
 
 	typename Trait::String data;
 
@@ -5968,9 +5970,12 @@ concatenateText( typename Block< Trait >::Items::const_iterator it,
 			data.push_back( typename Trait::Char( ' ' ) );
 	}
 
-	t->setText( data.simplified() );
+	it = std::prev( it );
 
-	t->setSpaceAfter( std::static_pointer_cast< Text< Trait > >( *std::prev( it ) )->isSpaceAfter() );
+	t->setText( data.simplified() );
+	t->setSpaceAfter( std::static_pointer_cast< Text< Trait > >( *it )->isSpaceAfter() );
+	t->setEndColumn( (*it)->endColumn() );
+	t->setEndLine( (*it)->endLine() );
 
 	return t;
 }
