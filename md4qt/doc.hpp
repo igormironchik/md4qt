@@ -107,7 +107,22 @@ public:
 
 	virtual ItemType type() const = 0;
 
+	long long int startColumn() const { return m_startColumn; }
+	long long int startLine() const { return m_startLine; }
+	long long int endColumn() const { return m_endColumn; }
+	long long int endLine() const { return m_endLine; }
+
+	void setStartColumn( long long int c ) { m_startColumn = c; }
+	void setStartLine( long long int l ) { m_startLine = l; }
+	void setEndColumn( long long int c ) { m_endColumn = c; }
+	void setEndLine( long long int l ) { m_endLine = l; }
+
 private:
+	long long int m_startColumn = -1;
+	long long int m_startLine = -1;
+	long long int m_endColumn = -1;
+	long long int m_endLine = -1;
+
 	DISABLE_COPY( Item )
 }; // class Item
 

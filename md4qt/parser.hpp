@@ -2882,6 +2882,13 @@ isLineBreak( const typename Trait::String & s )
 }
 
 template< class Trait >
+inline long long int
+lineBreakLength( const typename Trait::String & s )
+{
+	return ( s.endsWith( "  " ) ? 2 : 1 );
+}
+
+template< class Trait >
 inline typename Trait::String
 removeLineBreak( const typename Trait::String & s )
 {
@@ -3000,7 +3007,9 @@ removeBackslashes( const typename MdBlock< Trait >::Data & d )
 template< class Trait >
 inline void
 makeTextObject( const typename Trait::String & text, bool spaceBefore, bool spaceAfter,
-	TextParsingOpts< Trait > & po, bool doNotEscape )
+	TextParsingOpts< Trait > & po, bool doNotEscape,
+	long long int startPos, long long int startLine,
+	long long int endPos, long long int endLine )
 {
 	auto s = replaceEntity< Trait >( text );
 
@@ -3022,6 +3031,10 @@ makeTextObject( const typename Trait::String & text, bool spaceBefore, bool spac
 		t->setOpts( po.opts );
 		t->setSpaceBefore( spaceBefore );
 		t->setSpaceAfter( spaceAfter );
+		t->setStartColumn( po.fr.data.at( startLine ).first.virginPos( startPos ) );
+		t->setStartLine( po.fr.data.at( startLine ).second.lineNumber );
+		t->setEndColumn( po.fr.data.at( endLine ).first.virginPos( endPos ) );
+		t->setEndLine( po.fr.data.at( endLine ).second.lineNumber );
 
 		po.wasRefLink = false;
 		po.parent->appendItem( t );
@@ -3031,9 +3044,12 @@ makeTextObject( const typename Trait::String & text, bool spaceBefore, bool spac
 template< class Trait >
 inline void
 makeTextObjectWithLineBreak( const typename Trait::String & text, bool spaceBefore, bool spaceAfter,
-	TextParsingOpts< Trait > & po, bool doNotEscape )
+	TextParsingOpts< Trait > & po, bool doNotEscape,
+	long long int startPos, long long int startLine,
+	long long int endPos, long long int endLine )
 {
-	makeTextObject( text, spaceBefore, true, po, doNotEscape );
+	makeTextObject( text, spaceBefore, true, po, doNotEscape,
+		startPos, startLine, endPos, endLine );
 
 	std::shared_ptr< Item< Trait > > hr( new LineBreak< Trait > );
 	po.wasRefLink = false;
@@ -3057,6 +3073,9 @@ makeText(
 
 	typename Trait::String text;
 
+	long long int startPos = po.pos;
+	long long int startLine = po.line;
+
 	bool spaceBefore = ( po.pos > 0 && po.pos < po.fr.data.at( po.line ).first.length() ?
 		po.fr.data.at( po.line ).first[ po.pos - 1 ].isSpace() ||
 			po.fr.data.at( po.line ).first[ po.pos ].isSpace() :
@@ -3072,7 +3091,13 @@ makeText(
 	auto makeTOWLB = [&] () {
 		if( po.line != (long long int) ( po.fr.data.size() - 1 ) )
 		{
-			makeTextObjectWithLineBreak( text, spaceBefore, true, po, doNotEscape );
+			const auto & line = po.fr.data.at( po.line ).first.asString();
+
+			makeTextObjectWithLineBreak( text, spaceBefore, true, po, doNotEscape,
+				startPos, startLine, line.length() - lineBreakLength< Trait >( line ) - 1, po.line );
+
+			startPos = 0;
+			startLine = po.line + 1;
 
 			text.clear();
 
@@ -3137,7 +3162,7 @@ makeText(
 
 	makeTextObject( text, spaceBefore,
 		( po.pos > 0 ? po.fr.data.at( po.line ).first[ po.pos - 1 ].isSpace() : true ), po,
-		doNotEscape );
+		doNotEscape, startPos, startLine, lastPos - 1, lastLine );
 }
 
 template< class Trait >
@@ -4248,7 +4273,8 @@ checkForAutolinkHtml( typename Delims< Trait >::const_iterator it,
 
 template< class Trait >
 inline void
-makeInlineCode( long long int lastLine, long long int lastPos,
+makeInlineCode( long long int startLine, long long int startPos,
+	long long int lastLine, long long int lastPos,
 	TextParsingOpts< Trait > & po )
 {
 	typename Trait::String c;
@@ -4275,7 +4301,16 @@ makeInlineCode( long long int lastLine, long long int lastPos,
 	}
 
 	if( !c.isEmpty() )
-		po.parent->appendItem( std::shared_ptr< Code< Trait > >( new Code< Trait >( c, true ) ) );
+	{
+		auto code = std::make_shared< Code< Trait > >( c, true );
+
+		code->setStartColumn( po.fr.data.at( startLine ).first.virginPos( startPos ) );
+		code->setStartLine( po.fr.data.at( startLine ).second.lineNumber );
+		code->setEndColumn( po.fr.data.at( lastLine ).first.virginPos( lastPos ) );
+		code->setEndLine( po.fr.data.at( lastLine ).second.lineNumber );
+
+		po.parent->appendItem( code );
+	}
 
 	po.wasRefLink = false;
 }
@@ -4302,7 +4337,8 @@ checkForInlineCode( typename Delims< Trait >::const_iterator it,
 
 				po.pos = start->m_pos + start->m_len;
 
-				makeInlineCode( it->m_line, it->m_pos + ( it->m_backslashed ? 1 : 0 ), po );
+				makeInlineCode( start->m_line, start->m_pos + start->m_len,
+					it->m_line, it->m_pos + ( it->m_backslashed ? 1 : 0 ), po );
 
 				po.line = it->m_line;
 				po.pos = it->m_pos + it->m_len;
@@ -4505,6 +4541,7 @@ inline std::shared_ptr< Link< Trait > >
 makeLink( const typename Trait::String & url, const typename MdBlock< Trait >::Data & text,
 	TextParsingOpts< Trait > & po,
 	bool doNotCreateTextOnFail,
+	long long int startLine, long long int startPos,
 	long long int lastLine, long long int lastPos )
 {
 	typename Trait::String u = ( url.startsWith( '#' ) ? url : removeBackslashes< Trait >(
@@ -4573,6 +4610,10 @@ makeLink( const typename Trait::String & url, const typename MdBlock< Trait >::D
 	}
 
 	link->setText( toSingleLine< Trait >( text ).simplified() );
+	link->setStartColumn( po.fr.data.at( startLine ).first.virginPos( startPos ) );
+	link->setStartLine( po.fr.data.at( startLine ).second.lineNumber );
+	link->setEndColumn( po.fr.data.at( lastLine ).first.virginPos( lastPos - 1 ) );
+	link->setEndLine( po.fr.data.at( lastLine ).second.lineNumber );
 
 	return link;
 }
@@ -4581,7 +4622,8 @@ template< class Trait >
 inline bool
 createShortcutLink( const typename MdBlock< Trait >::Data & text,
 	TextParsingOpts< Trait > & po,
-	long long int lastLine, long long int lastPos,
+	long long int startLine, long long int startPos,
+	long long int lastLineForText, long long int lastPosForText,
 	typename Delims< Trait >::const_iterator lastIt,
 	const typename MdBlock< Trait >::Data & linkText,
 	bool doNotCreateTextOnFail )
@@ -4598,7 +4640,8 @@ createShortcutLink( const typename MdBlock< Trait >::Data & text,
 			const auto link = makeLink( u,
 				removeBackslashes< Trait >( toSingleLine< Trait > (
 					linkText ).simplified().isEmpty() ? text : linkText ),
-				po, doNotCreateTextOnFail, lastLine, lastPos );
+				po, doNotCreateTextOnFail, startLine, startPos,
+				lastIt->m_line, lastIt->m_pos + lastIt->m_len );
 
 			if( link.get() )
 			{	
@@ -4611,7 +4654,7 @@ createShortcutLink( const typename MdBlock< Trait >::Data & text,
 			else
 			{
 				if( !po.collectRefLinks && !doNotCreateTextOnFail )
-					makeText( lastLine, lastPos, po );
+					makeText( lastLineForText, lastPosForText, po );
 
 				return false;
 			}
@@ -4620,7 +4663,7 @@ createShortcutLink( const typename MdBlock< Trait >::Data & text,
 		return true;
 	}
 	else if( !po.collectRefLinks && !doNotCreateTextOnFail )
-		makeText( lastLine, lastPos, po );
+		makeText( lastLineForText, lastPosForText, po );
 
 	return false;
 }
@@ -4630,6 +4673,7 @@ inline std::shared_ptr< Image< Trait > >
 makeImage( const typename Trait::String & url, const typename MdBlock< Trait >::Data & text,
 	TextParsingOpts< Trait > & po,
 	bool doNotCreateTextOnFail,
+	long long int startLine, long long int startPos,
 	long long int lastLine, long long int lastPos )
 {
 	std::shared_ptr< Image< Trait > > img( new Image< Trait > );
@@ -4659,6 +4703,10 @@ makeImage( const typename Trait::String & url, const typename MdBlock< Trait >::
 	}
 
 	img->setText( toSingleLine< Trait >( removeBackslashes< Trait >( text ) ).simplified() );
+	img->setStartColumn( po.fr.data.at( startLine ).first.virginPos( startPos ) );
+	img->setStartLine( po.fr.data.at( startLine ).second.lineNumber );
+	img->setEndColumn( po.fr.data.at( lastLine ).first.virginPos( lastPos - 1 ) );
+	img->setEndLine( po.fr.data.at( lastLine ).second.lineNumber );
 
 	return img;
 }
@@ -4667,7 +4715,8 @@ template< class Trait >
 inline bool
 createShortcutImage( const typename MdBlock< Trait >::Data & text,
 	TextParsingOpts< Trait > & po,
-	long long int lastLine, long long int lastPos,
+	long long int startLine, long long int startPos,
+	long long int lastLineForText, long long int lastPosForText,
 	typename Delims< Trait >::const_iterator lastIt,
 	const typename MdBlock< Trait >::Data & linkText,
 	bool doNotCreateTextOnFail )
@@ -4685,7 +4734,8 @@ createShortcutImage( const typename MdBlock< Trait >::Data & text,
 		{
 			const auto img = makeImage( iit->second->url(),
 				( toSingleLine< Trait >( linkText ).simplified().isEmpty() ? text : linkText ), po,
-				doNotCreateTextOnFail, lastLine, lastPos );
+				doNotCreateTextOnFail, startLine, startPos,
+				lastIt->m_line, lastIt->m_pos + lastIt->m_len );
 
 			po.parent->appendItem( img );
 
@@ -4696,7 +4746,7 @@ createShortcutImage( const typename MdBlock< Trait >::Data & text,
 		return true;
 	}
 	else if( !po.collectRefLinks && !doNotCreateTextOnFail )
-		makeText( lastLine, lastPos, po );
+		makeText( lastLineForText, lastPosForText, po );
 
 	return false;
 }
@@ -4990,7 +5040,8 @@ checkForImage( typename Delims< Trait >::const_iterator it,
 				{
 					if( !po.collectRefLinks )
 						po.parent->appendItem( makeImage( url, text, po, false,
-							start->m_line, start->m_pos + start->m_len ) );
+							start->m_line, start->m_pos,
+							it->m_line, it->m_pos + it->m_len ) );
 
 					po.line = iit->m_line;
 					po.pos = iit->m_pos + iit->m_len;
@@ -4998,7 +5049,8 @@ checkForImage( typename Delims< Trait >::const_iterator it,
 					return iit;
 				}
 				else if( createShortcutImage( text,
-							po, start->m_line, start->m_pos + start->m_len,
+							po, start->m_line, start->m_pos,
+							start->m_line, start->m_pos + start->m_len,
 							it, {}, false ) )
 				{
 					return it;
@@ -5019,21 +5071,24 @@ checkForImage( typename Delims< Trait >::const_iterator it,
 
 					if( !isLabelEmpty &&
 						createShortcutImage( label,
-							po, start->m_line, start->m_pos + start->m_len,
+							po, start->m_line, start->m_pos,
+							start->m_line, start->m_pos + start->m_len,
 							lit, text, true ) )
 					{
 						return lit;
 					}
 					else if( isLabelEmpty &&
 						createShortcutImage( text,
-							po, start->m_line, start->m_pos + start->m_len,
+							po, start->m_line, start->m_pos,
+							start->m_line, start->m_pos + start->m_len,
 							lit, {}, false ) )
 					{
 						return lit;
 					}
 				}
 				else if( createShortcutImage( text,
-					po, start->m_line, start->m_pos + start->m_len,
+					po, start->m_line, start->m_pos,
+					start->m_line, start->m_pos + start->m_len,
 					it, {}, false ) )
 				{
 					return it;
@@ -5046,7 +5101,8 @@ checkForImage( typename Delims< Trait >::const_iterator it,
 				if( it != start && !toSingleLine< Trait >( text ).simplified().isEmpty() )
 				{
 					if( createShortcutImage( text,
-						po, start->m_line, start->m_pos + start->m_len,
+						po, start->m_line, start->m_pos,
+						start->m_line, start->m_pos + start->m_len,
 						it, {}, false ) )
 					{
 						return it;
@@ -5062,7 +5118,8 @@ checkForImage( typename Delims< Trait >::const_iterator it,
 			if( it != start && !toSingleLine< Trait >( text ).simplified().isEmpty() )
 			{
 				if( createShortcutImage( text,
-					po, start->m_line, start->m_pos + start->m_len,
+					po, start->m_line, start->m_pos,
+					start->m_line, start->m_pos + start->m_len,
 					it, {}, false ) )
 				{
 					return it;
@@ -5194,7 +5251,7 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 				if( ok )
 				{
 					const auto link = makeLink( url, removeBackslashes< Trait >( text ), po, false,
-						start->m_line, start->m_pos + start->m_len );
+						start->m_line, start->m_pos, iit->m_line, iit->m_pos + iit->m_len );
 
 					if( link.get() )
 					{
@@ -5210,7 +5267,8 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 						return start;
 				}
 				else if( createShortcutLink( text,
-							po, start->m_line, start->m_pos + start->m_len,
+							po, start->m_line, start->m_pos,
+							start->m_line, start->m_pos + start->m_len,
 							it, {}, false ) )
 				{
 					return it;
@@ -5230,13 +5288,15 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 				if( lit != std::next( it ) )
 				{
 					if( !isLabelEmpty && createShortcutLink( label,
-							po, start->m_line, start->m_pos + start->m_len,
+							po, start->m_line, start->m_pos,
+							start->m_line, start->m_pos + start->m_len,
 							lit, text, true ) )
 					{
 						return lit;
 					}
 					else if( isLabelEmpty && createShortcutLink( text,
-							po, start->m_line, start->m_pos + start->m_len,
+							po, start->m_line, start->m_pos,
+							start->m_line, start->m_pos + start->m_len,
 							it, {}, false ) )
 					{
 						po.line = lit->m_line;
@@ -5246,7 +5306,8 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 					}
 				}
 				else if( createShortcutLink( text,
-							po, start->m_line, start->m_pos + start->m_len,
+							po, start->m_line, start->m_pos,
+							start->m_line, start->m_pos + start->m_len,
 							it, {}, false ) )
 				{
 					return it;
@@ -5260,7 +5321,8 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 				if( it != start && !toSingleLine< Trait >( text ).simplified().isEmpty() )
 				{
 					if( createShortcutLink( text,
-							po, start->m_line, start->m_pos + start->m_len,
+							po, start->m_line, start->m_pos,
+							start->m_line, start->m_pos + start->m_len,
 							it, {}, false ) )
 					{
 						return it;
@@ -5276,7 +5338,8 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 			if( it != start && !toSingleLine< Trait >( text ).simplified().isEmpty() )
 			{
 				if( createShortcutLink( text,
-						po, start->m_line, start->m_pos + start->m_len,
+						po, start->m_line, start->m_pos,
+						start->m_line, start->m_pos + start->m_len,
 						it, {}, false ) )
 				{
 					return it;
