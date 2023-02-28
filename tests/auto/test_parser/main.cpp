@@ -2015,6 +2015,10 @@ TEST_CASE( "029" )
 	REQUIRE( t->endLine() == 24 );
 }
 
+/*
+Text ![Image 1](a.jpg) continue ![ Image 2 ](b.png) and ![ Image 3]( http://www.where.com/c.jpeg "description" )
+
+*/
 TEST_CASE( "030" )
 {
 	MD::Parser< TRAIT > parser;
@@ -2027,18 +2031,30 @@ TEST_CASE( "030" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 111 );
+	REQUIRE( p->endLine() == 0 );
 
 	REQUIRE( p->items().size() == 6 );
 
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 	auto t1 = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t1->startColumn() == 0 );
+	REQUIRE( t1->startLine() == 0 );
+	REQUIRE( t1->endColumn() == 4 );
+	REQUIRE( t1->endLine() == 0 );
 
 	REQUIRE( t1->text() == u8"Text" );
 
 	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Image );
 
 	auto i1 = static_cast< MD::Image< TRAIT >* > ( p->items().at( 1 ).get() );
+	REQUIRE( i1->startColumn() == 5 );
+	REQUIRE( i1->startLine() == 0 );
+	REQUIRE( i1->endColumn() == 21 );
+	REQUIRE( i1->endLine() == 0 );
 
 	typename TRAIT::String wd =
 #ifdef MD4QT_QT_SUPPORT
@@ -2061,12 +2077,20 @@ TEST_CASE( "030" )
 	REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
 
 	auto t2 = static_cast< MD::Text< TRAIT >* > ( p->items().at( 2 ).get() );
+	REQUIRE( t2->startColumn() == 22 );
+	REQUIRE( t2->startLine() == 0 );
+	REQUIRE( t2->endColumn() == 31 );
+	REQUIRE( t2->endLine() == 0 );
 
 	REQUIRE( t2->text() == u8"continue" );
 
 	REQUIRE( p->items().at( 3 )->type() == MD::ItemType::Image );
 
 	auto i2 = static_cast< MD::Image< TRAIT >* > ( p->items().at( 3 ).get() );
+	REQUIRE( i2->startColumn() == 32 );
+	REQUIRE( i2->startLine() == 0 );
+	REQUIRE( i2->endColumn() == 50 );
+	REQUIRE( i2->endLine() == 0 );
 
 	REQUIRE( i2->text() == u8"Image 2" );
 	REQUIRE( i2->url() == wd + u8"b.png" );
@@ -2074,12 +2098,20 @@ TEST_CASE( "030" )
 	REQUIRE( p->items().at( 4 )->type() == MD::ItemType::Text );
 
 	auto t3 = static_cast< MD::Text< TRAIT >* > ( p->items().at( 4 ).get() );
+	REQUIRE( t3->startColumn() == 51 );
+	REQUIRE( t3->startLine() == 0 );
+	REQUIRE( t3->endColumn() == 55 );
+	REQUIRE( t3->endLine() == 0 );
 
 	REQUIRE( t3->text() == u8"and" );
 
 	REQUIRE( p->items().at( 5 )->type() == MD::ItemType::Image );
 
 	auto i3 = static_cast< MD::Image< TRAIT >* > ( p->items().at( 5 ).get() );
+	REQUIRE( i3->startColumn() == 56 );
+	REQUIRE( i3->startLine() == 0 );
+	REQUIRE( i3->endColumn() == 111 );
+	REQUIRE( i3->endLine() == 0 );
 
 	REQUIRE( i3->text() == u8"Image 3" );
 	REQUIRE( i3->url() == u8"http://www.where.com/c.jpeg" );

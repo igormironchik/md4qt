@@ -5137,7 +5137,7 @@ checkForImage( typename Delims< Trait >::const_iterator it,
 					if( !po.collectRefLinks )
 						po.parent->appendItem( makeImage( url, text, po, false,
 							start->m_line, start->m_pos,
-							it->m_line, it->m_pos + it->m_len ) );
+							iit->m_line, iit->m_pos + iit->m_len ) );
 
 					po.line = iit->m_line;
 					po.pos = iit->m_pos + iit->m_len;
@@ -5292,6 +5292,12 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 								"/" + po.workingPath + po.fileName;
 
 							std::shared_ptr< Link< Trait > > link( new Link< Trait > );
+							link->setStartColumn( po.fr.data.at( start->m_line ).first
+								.virginPos( start->m_pos ) );
+							link->setStartLine( po.fr.data.at( start->m_line ).second.lineNumber );
+							link->setEndColumn( po.fr.data.at( iit->m_line ).first
+								.virginPos( iit->m_pos + iit->m_len - 1 ) );
+							link->setEndLine( po.fr.data.at( iit->m_line ).second.lineNumber );
 
 							url = removeBackslashes< Trait >(
 								replaceEntity< Trait >( url ) ).asString();
