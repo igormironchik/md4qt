@@ -6617,7 +6617,7 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 	if( p != fr.data.front().first.length() )
 	{
 		std::shared_ptr< List< Trait > > list( new List< Trait > );
-		list->setStartColumn( fr.data.front().first.virginPos( p ) );
+		list->setStartColumn( fr.data.front().first.virginPos( 0 ) );
 		list->setStartLine( fr.data.front().second.lineNumber );
 		list->setEndColumn( fr.data.back().first.virginPos(
 			fr.data.back().first.length() - 1 ) );
