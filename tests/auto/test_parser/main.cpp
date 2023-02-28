@@ -1164,6 +1164,12 @@ TEST_CASE( "020" )
 	REQUIRE( c->syntax() == u8"cpp" );
 }
 
+/*
+	if( a > b )
+      do_something();
+    else
+      dont_do_anything();
+*/
 TEST_CASE( "021" )
 {
 	MD::Parser< TRAIT > parser;
@@ -1176,12 +1182,23 @@ TEST_CASE( "021" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Code );
 
 	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( c->startColumn() == 4 );
+	REQUIRE( c->startLine() == 0 );
+	REQUIRE( c->endColumn() == 24 );
+	REQUIRE( c->endLine() == 3 );
 
 	REQUIRE( c->isInlined() == false );
 	REQUIRE( c->text() ==
 		u8"if( a > b )\n  do_something();\nelse\n  dont_do_anything();" );
 }
 
+/*
+	if( a > b )
+	  do_something();
+	else
+	  dont_do_anything();
+
+*/
 TEST_CASE( "022" )
 {
 	MD::Parser< TRAIT > parser;
@@ -1194,12 +1211,22 @@ TEST_CASE( "022" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Code );
 
 	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( c->startColumn() == 1 );
+	REQUIRE( c->startLine() == 0 );
+	REQUIRE( c->endColumn() == 21 );
+	REQUIRE( c->endLine() == 3 );
 
 	REQUIRE( c->isInlined() == false );
 	REQUIRE( c->text() ==
 		u8"if( a > b )\n  do_something();\nelse\n  dont_do_anything();" );
 }
 
+/*
+* Item 1
+* Item 2
+* Item 3
+
+*/
 TEST_CASE( "023" )
 {
 	MD::Parser< TRAIT > parser;
@@ -1212,6 +1239,10 @@ TEST_CASE( "023" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
 
 	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startColumn() == 0 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 7 );
+	REQUIRE( l->endLine() == 2 );
 
 	REQUIRE( l->items().size() == 3 );
 
@@ -1220,6 +1251,10 @@ TEST_CASE( "023" )
 		REQUIRE( l->items().at( i )->type() == MD::ItemType::ListItem );
 
 		auto item = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( i ).get() );
+		REQUIRE( item->startColumn() == 0 );
+		REQUIRE( item->startLine() == i );
+		REQUIRE( item->endColumn() == 7 );
+		REQUIRE( item->endLine() == i );
 
 		REQUIRE( item->listType() == MD::ListItem< TRAIT >::Unordered );
 
@@ -1228,6 +1263,10 @@ TEST_CASE( "023" )
 		REQUIRE( item->items().at( 0 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( item->items().at( 0 ).get() );
+		REQUIRE( p->startColumn() == 2 );
+		REQUIRE( p->startLine() == i );
+		REQUIRE( p->endColumn() == 7 );
+		REQUIRE( p->endLine() == i );
 
 		REQUIRE( p->items().size() == 1 );
 
@@ -1237,16 +1276,36 @@ TEST_CASE( "023" )
 
 		REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
 		REQUIRE( t->text() == u8"Item " + to_string( i + 1 ) );
+		REQUIRE( t->startColumn() == 2 );
+		REQUIRE( t->startLine() == i );
+		REQUIRE( t->endColumn() == 7 );
+		REQUIRE( t->endLine() == i );
 	}
 }
 
+/*
+* Item 1
+  * Item 1
+  * Item 2
+* Item 2
+  * Item 1
+  * Item 2
+* Item 3
+  * Item 1
+  * Item 2
+
+*/
 TEST_CASE( "024" )
 {
-	auto checkItem = [] ( MD::ListItem< TRAIT > * item, int i )
+	auto checkItem = [] ( MD::ListItem< TRAIT > * item, int i, int indent, int line )
 	{
 		REQUIRE( item->items().at( 0 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( item->items().at( 0 ).get() );
+		REQUIRE( p->startColumn() == 2 + indent );
+		REQUIRE( p->startLine() == line );
+		REQUIRE( p->endColumn() == 7 + indent );
+		REQUIRE( p->endLine() == line );
 
 		REQUIRE( p->items().size() == 1 );
 
@@ -1256,6 +1315,10 @@ TEST_CASE( "024" )
 
 		REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
 		REQUIRE( t->text() == u8"Item " + to_string( i + 1 ) );
+		REQUIRE( t->startColumn() == 2 + indent );
+		REQUIRE( t->startLine() == line );
+		REQUIRE( t->endColumn() == 7 + indent );
+		REQUIRE( t->endLine() == line );
 	};
 
 	MD::Parser< TRAIT > parser;
@@ -1268,6 +1331,10 @@ TEST_CASE( "024" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
 
 	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startColumn() == 0 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 9 );
+	REQUIRE( l->endLine() == 8 );
 
 	REQUIRE( l->items().size() == 3 );
 
@@ -1276,12 +1343,16 @@ TEST_CASE( "024" )
 		REQUIRE( l->items().at( i )->type() == MD::ItemType::ListItem );
 
 		auto item = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( i ).get() );
+		REQUIRE( item->startColumn() == 0 );
+		REQUIRE( item->startLine() == i * 3 );
+		REQUIRE( item->endColumn() == 9 );
+		REQUIRE( item->endLine() == 2 + i * 3 );
 
 		REQUIRE( item->listType() == MD::ListItem< TRAIT >::Unordered );
 
 		REQUIRE( item->items().size() == 2 );
 
-		checkItem( item, i );
+		checkItem( item, i, 0, i * 3 );
 
 		REQUIRE( item->items().at( 1 )->type() == MD::ItemType::List );
 
@@ -1295,11 +1366,25 @@ TEST_CASE( "024" )
 
 			auto nitem = static_cast< MD::ListItem< TRAIT >* > ( nl->items().at( j ).get() );
 
-			checkItem( nitem, j );
+			checkItem( nitem, j, 2, j + i * 3 + 1 );
 		}
 	}
 }
 
+/*
+* Item 1
+
+  Paragraph in list
+
+* Item 2
+
+  Paragraph in list
+
+* Item 3
+
+  Paragraph in list
+
+*/
 TEST_CASE( "025" )
 {
 	MD::Parser< TRAIT > parser;
@@ -1312,6 +1397,10 @@ TEST_CASE( "025" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
 
 	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startColumn() == 0 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 18 );
+	REQUIRE( l->endLine() == 10 );
 
 	REQUIRE( l->items().size() == 3 );
 
@@ -1320,6 +1409,10 @@ TEST_CASE( "025" )
 		REQUIRE( l->items().at( i )->type() == MD::ItemType::ListItem );
 
 		auto item = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( i ).get() );
+		REQUIRE( item->startColumn() == 0 );
+		REQUIRE( item->startLine() == i * 4 );
+		REQUIRE( item->endColumn() == 18 );
+		REQUIRE( item->endLine() == 2 + i * 4 );
 
 		REQUIRE( item->listType() == MD::ListItem< TRAIT >::Unordered );
 
@@ -1329,6 +1422,10 @@ TEST_CASE( "025" )
 			REQUIRE( item->items().at( 0 )->type() == MD::ItemType::Paragraph );
 
 			auto p = static_cast< MD::Paragraph< TRAIT >* > ( item->items().at( 0 ).get() );
+			REQUIRE( p->startColumn() == 2 );
+			REQUIRE( p->startLine() == 0 + i * 4 );
+			REQUIRE( p->endColumn() == 7 );
+			REQUIRE( p->endLine() == 0 + i * 4 );
 
 			REQUIRE( p->items().size() == 1 );
 
@@ -1338,12 +1435,20 @@ TEST_CASE( "025" )
 
 			REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
 			REQUIRE( t->text() == ( u8"Item " + to_string( i + 1 ) ) );
+			REQUIRE( t->startColumn() == 2 );
+			REQUIRE( t->startLine() == 0 + i * 4 );
+			REQUIRE( t->endColumn() == 7 );
+			REQUIRE( t->endLine() == 0 + i * 4 );
 		}
 
 		{
 			REQUIRE( item->items().at( 1 )->type() == MD::ItemType::Paragraph );
 
 			auto p = static_cast< MD::Paragraph< TRAIT >* > ( item->items().at( 1 ).get() );
+			REQUIRE( p->startColumn() == 2 );
+			REQUIRE( p->startLine() == 2 + i * 4 );
+			REQUIRE( p->endColumn() == 18 );
+			REQUIRE( p->endLine() == 2 + i * 4 );
 
 			REQUIRE( p->items().size() == 1 );
 
@@ -1353,10 +1458,40 @@ TEST_CASE( "025" )
 
 			REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
 			REQUIRE( t->text() == u8"Paragraph in list" );
+			REQUIRE( t->startColumn() == 2 );
+			REQUIRE( t->startLine() == 2 + i * 4 );
+			REQUIRE( t->endColumn() == 18 );
+			REQUIRE( t->endLine() == 2 + i * 4 );
 		}
 	}
 }
 
+/*
+* Item 1
+
+  Paragraph in list
+
+  * Nested
+
+    Paragraph in list
+
+* Item 2
+
+  Paragraph in list
+
+  * Nested
+
+    Paragraph in list
+
+* Item 3
+
+  Paragraph in list
+
+  * Nested
+
+    Paragraph in list
+
+*/
 TEST_CASE( "026" )
 {
 	MD::Parser< TRAIT > parser;
@@ -1369,6 +1504,10 @@ TEST_CASE( "026" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
 
 	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startColumn() == 0 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 20 );
+	REQUIRE( l->endLine() == 22 );
 
 	REQUIRE( l->items().size() == 3 );
 
@@ -1377,6 +1516,10 @@ TEST_CASE( "026" )
 		REQUIRE( l->items().at( i )->type() == MD::ItemType::ListItem );
 
 		auto item = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( i ).get() );
+		REQUIRE( item->startColumn() == 0 );
+		REQUIRE( item->startLine() == 0 + 8 * i );
+		REQUIRE( item->endColumn() == 20 );
+		REQUIRE( item->endLine() == 6 + 8 * i );
 
 		REQUIRE( item->listType() == MD::ListItem< TRAIT >::Unordered );
 
@@ -1386,6 +1529,10 @@ TEST_CASE( "026" )
 			REQUIRE( item->items().at( 0 )->type() == MD::ItemType::Paragraph );
 
 			auto p = static_cast< MD::Paragraph< TRAIT >* > ( item->items().at( 0 ).get() );
+			REQUIRE( p->startColumn() == 2 );
+			REQUIRE( p->startLine() == 0 + 8 * i );
+			REQUIRE( p->endColumn() == 7 );
+			REQUIRE( p->endLine() == 0 + 8 * i );
 
 			REQUIRE( p->items().size() == 1 );
 
@@ -1395,12 +1542,20 @@ TEST_CASE( "026" )
 
 			REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
 			REQUIRE( t->text() == ( u8"Item " + to_string( i + 1 ) ) );
+			REQUIRE( t->startColumn() == 2 );
+			REQUIRE( t->startLine() == 0 + 8 * i );
+			REQUIRE( t->endColumn() == 7 );
+			REQUIRE( t->endLine() == 0 + 8 * i );
 		}
 
 		{
 			REQUIRE( item->items().at( 1 )->type() == MD::ItemType::Paragraph );
 
 			auto p = static_cast< MD::Paragraph< TRAIT >* > ( item->items().at( 1 ).get() );
+			REQUIRE( p->startColumn() == 2 );
+			REQUIRE( p->startLine() == 2 + 8 * i );
+			REQUIRE( p->endColumn() == 18 );
+			REQUIRE( p->endLine() == 2 + 8 * i );
 
 			REQUIRE( p->items().size() == 1 );
 
@@ -1410,16 +1565,28 @@ TEST_CASE( "026" )
 
 			REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
 			REQUIRE( t->text() == u8"Paragraph in list" );
+			REQUIRE( t->startColumn() == 2 );
+			REQUIRE( t->startLine() == 2 + 8 * i );
+			REQUIRE( t->endColumn() == 18 );
+			REQUIRE( t->endLine() == 2 + 8 * i );
 		}
 
 		{
 			REQUIRE( item->items().at( 2 )->type() == MD::ItemType::List );
 
 			auto nl = static_cast< MD::List< TRAIT >* > ( item->items().at( 2 ).get() );
+			REQUIRE( nl->startColumn() == 2 );
+			REQUIRE( nl->startLine() == 4 + 8 * i );
+			REQUIRE( nl->endColumn() == 20 );
+			REQUIRE( nl->endLine() == 6 + 8 * i );
 
 			REQUIRE( nl->items().at( 0 )->type() == MD::ItemType::ListItem );
 
 			auto item = static_cast< MD::ListItem< TRAIT >* > ( nl->items().at( 0 ).get() );
+			REQUIRE( item->startColumn() == 2 );
+			REQUIRE( item->startLine() == 4 + 8 * i );
+			REQUIRE( item->endColumn() == 20 );
+			REQUIRE( item->endLine() == 6 + 8 * i );
 
 			REQUIRE( item->listType() == MD::ListItem< TRAIT >::Unordered );
 
@@ -1429,6 +1596,10 @@ TEST_CASE( "026" )
 				REQUIRE( item->items().at( 0 )->type() == MD::ItemType::Paragraph );
 
 				auto p = static_cast< MD::Paragraph< TRAIT >* > ( item->items().at( 0 ).get() );
+				REQUIRE( p->startColumn() == 4 );
+				REQUIRE( p->startLine() == 4 + 8 * i );
+				REQUIRE( p->endColumn() == 9 );
+				REQUIRE( p->endLine() == 4 + 8 * i );
 
 				REQUIRE( p->items().size() == 1 );
 
@@ -1438,12 +1609,20 @@ TEST_CASE( "026" )
 
 				REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
 				REQUIRE( t->text() == u8"Nested" );
+				REQUIRE( t->startColumn() == 4 );
+				REQUIRE( t->startLine() == 4 + 8 * i );
+				REQUIRE( t->endColumn() == 9 );
+				REQUIRE( t->endLine() == 4 + 8 * i );
 			}
 
 			{
 				REQUIRE( item->items().at( 1 )->type() == MD::ItemType::Paragraph );
 
 				auto p = static_cast< MD::Paragraph< TRAIT >* > ( item->items().at( 1 ).get() );
+				REQUIRE( p->startColumn() == 4 );
+				REQUIRE( p->startLine() == 6 + 8 * i );
+				REQUIRE( p->endColumn() == 20 );
+				REQUIRE( p->endLine() == 6 + 8 * i );
 
 				REQUIRE( p->items().size() == 1 );
 
@@ -1453,6 +1632,10 @@ TEST_CASE( "026" )
 
 				REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
 				REQUIRE( t->text() == u8"Paragraph in list" );
+				REQUIRE( t->startColumn() == 4 );
+				REQUIRE( t->startLine() == 6 + 8 * i );
+				REQUIRE( t->endColumn() == 20 );
+				REQUIRE( t->endLine() == 6 + 8 * i );
 			}
 		}
 	}

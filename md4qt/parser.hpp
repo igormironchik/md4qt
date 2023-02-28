@@ -6617,6 +6617,11 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 	if( p != fr.data.front().first.length() )
 	{
 		std::shared_ptr< List< Trait > > list( new List< Trait > );
+		list->setStartColumn( fr.data.front().first.virginPos( p ) );
+		list->setStartLine( fr.data.front().second.lineNumber );
+		list->setEndColumn( fr.data.back().first.virginPos(
+			fr.data.back().first.length() - 1 ) );
+		list->setEndLine( fr.data.back().second.lineNumber );
 
 		typename MdBlock< Trait >::Data listItem;
 		auto it = fr.data.begin();
@@ -6709,7 +6714,20 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 	const typename Trait::String & fileName,
 	bool collectRefLinks, RawHtmlBlock< Trait > & html )
 {
+	{
+		const auto it = ( std::find_if( fr.data.rbegin(), fr.data.rend(),
+			[] ( const auto & s ) { return !s.first.simplified().isEmpty(); } ) ).base();
+
+		if( it != fr.data.end() )
+			fr.data.erase( it, fr.data.end() );
+	}
+
 	std::shared_ptr< ListItem< Trait > > item( new ListItem< Trait > );
+	item->setStartColumn( fr.data.front().first.virginPos( 0 ) );
+	item->setStartLine( fr.data.front().second.lineNumber );
+	item->setEndColumn( fr.data.back().first.virginPos(
+		fr.data.back().first.length() - 1 ) );
+	item->setEndLine( fr.data.back().second.lineNumber );
 
 	int i = 0;
 
