@@ -44,6 +44,7 @@ TEST_CASE( "replace_remove_1" )
 	REQUIRE( s.virginPos( 2 ) == 2 );
 	REQUIRE( s.virginPos( 3 ) == 3 );
 	REQUIRE( s.virginPos( 4 ) == 4 );
+	REQUIRE( s.virginPos( 5 ) == 5 );
 
 	s.replace( "b", "bb" );
 
@@ -55,6 +56,7 @@ TEST_CASE( "replace_remove_1" )
 	REQUIRE( s.virginPos( 3 ) == 2 );
 	REQUIRE( s.virginPos( 4 ) == 3 );
 	REQUIRE( s.virginPos( 5 ) == 4 );
+	REQUIRE( s.virginPos( 6 ) == 5 );
 
 	s.replace( "bb", "b" );
 
