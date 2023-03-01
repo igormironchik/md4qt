@@ -2294,6 +2294,13 @@ TEST_CASE( "031" )
 	REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::PageBreak );
 }
 
+/*
+> ```cpp
+> if( a < b )
+>   do_something();
+> ```
+
+*/
 TEST_CASE( "032" )
 {
 	MD::Parser< TRAIT > parser;
@@ -2306,12 +2313,20 @@ TEST_CASE( "032" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Blockquote );
 
 	auto q = static_cast< MD::Blockquote< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( q->startColumn() == 0 );
+	REQUIRE( q->startLine() == 0 );
+	REQUIRE( q->endColumn() == 4 );
+	REQUIRE( q->endLine() == 3 );
 
 	REQUIRE( q->items().size() == 1 );
 
 	REQUIRE( q->items().at( 0 )->type() == MD::ItemType::Code );
 
 	auto c = static_cast< MD::Code< TRAIT >* > ( q->items().at( 0 ).get() );
+	REQUIRE( c->startColumn() == 2 );
+	REQUIRE( c->startLine() == 1 );
+	REQUIRE( c->endColumn() == 18 );
+	REQUIRE( c->endLine() == 2 );
 
 	REQUIRE( c->isInlined() == false );
 	REQUIRE( c->text() == u8"if( a < b )\n  do_something();" );
