@@ -4343,6 +4343,11 @@ checkForAutolinkHtml( typename Delims< Trait >::const_iterator it,
 				if( !po.collectRefLinks )
 				{
 					std::shared_ptr< Link< Trait > > lnk( new Link< Trait > );
+					lnk->setStartColumn( po.fr.data.at( it->m_line ).first.virginPos( it->m_pos ) );
+					lnk->setStartLine( po.fr.data.at( it->m_line ).second.lineNumber );
+					lnk->setEndColumn( po.fr.data.at( nit->m_line ).first.virginPos(
+						nit->m_pos + nit->m_len - 1 ) );
+					lnk->setEndLine( po.fr.data.at( nit->m_line ).second.lineNumber );
 					lnk->setUrl( url.simplified() );
 					lnk->setOpts( po.opts );
 					po.parent->appendItem( lnk );

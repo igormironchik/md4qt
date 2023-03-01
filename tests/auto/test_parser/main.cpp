@@ -2332,6 +2332,10 @@ TEST_CASE( "032" )
 	REQUIRE( c->text() == u8"if( a < b )\n  do_something();" );
 }
 
+/*
+<http://www.google.com>
+
+*/
 TEST_CASE( "033" )
 {
 	MD::Parser< TRAIT > parser;
@@ -2344,12 +2348,20 @@ TEST_CASE( "033" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 22 );
+	REQUIRE( p->endLine() == 0 );
 
 	REQUIRE( p->items().size() == 1 );
 
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
 
 	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( l->startColumn() == 0 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 22 );
+	REQUIRE( l->endLine() == 0 );
 
 	REQUIRE( l->url() == u8"http://www.google.com" );
 	REQUIRE( l->text().isEmpty() );
