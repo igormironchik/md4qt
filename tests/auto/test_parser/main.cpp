@@ -2403,6 +2403,14 @@ TEST_CASE( "034" )
 	REQUIRE( l->opts() == MD::TextOption::BoldText );
 }
 
+/*
+1. 1
+2. 2
+   1. 1
+   2. 2
+3. 3
+
+*/
 TEST_CASE( "035" )
 {
 	MD::Parser< TRAIT > parser;
@@ -2415,6 +2423,10 @@ TEST_CASE( "035" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
 
 	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startColumn() == 0 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 3 );
+	REQUIRE( l->endLine() == 4 );
 
 	REQUIRE( l->items().size() == 3 );
 
@@ -2422,6 +2434,10 @@ TEST_CASE( "035" )
 		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
 
 		auto i1 = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+		REQUIRE( i1->startColumn() == 0 );
+		REQUIRE( i1->startLine() == 0 );
+		REQUIRE( i1->endColumn() == 3 );
+		REQUIRE( i1->endLine() == 0 );
 
 		REQUIRE( i1->listType() == MD::ListItem< TRAIT >::Ordered );
 		REQUIRE( i1->orderedListPreState() == MD::ListItem< TRAIT >::Start );
@@ -2429,6 +2445,10 @@ TEST_CASE( "035" )
 		REQUIRE( i1->items().at( 0 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( i1->items().at( 0 ).get() );
+		REQUIRE( p->startColumn() == 3 );
+		REQUIRE( p->startLine() == 0 );
+		REQUIRE( p->endColumn() == 3 );
+		REQUIRE( p->endLine() == 0 );
 
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
@@ -2441,6 +2461,10 @@ TEST_CASE( "035" )
 		REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
 
 		auto i1 = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).get() );
+		REQUIRE( i1->startColumn() == 0 );
+		REQUIRE( i1->startLine() == 1 );
+		REQUIRE( i1->endColumn() == 6 );
+		REQUIRE( i1->endLine() == 3 );
 
 		REQUIRE( i1->listType() == MD::ListItem< TRAIT >::Ordered );
 		REQUIRE( i1->orderedListPreState() == MD::ListItem< TRAIT >::Continue );
@@ -2448,6 +2472,10 @@ TEST_CASE( "035" )
 		REQUIRE( i1->items().at( 0 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( i1->items().at( 0 ).get() );
+		REQUIRE( p->startColumn() == 3 );
+		REQUIRE( p->startLine() == 1 );
+		REQUIRE( p->endColumn() == 3 );
+		REQUIRE( p->endLine() == 1 );
 
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
@@ -2456,6 +2484,10 @@ TEST_CASE( "035" )
 		REQUIRE( i1->items().at( 1 )->type() == MD::ItemType::List );
 
 		auto nl = static_cast< MD::List< TRAIT >* > ( i1->items().at( 1 ).get() );
+		REQUIRE( nl->startColumn() == 3 );
+		REQUIRE( nl->startLine() == 2 );
+		REQUIRE( nl->endColumn() == 6 );
+		REQUIRE( nl->endLine() == 3 );
 
 		REQUIRE( nl->items().size() == 2 );
 
@@ -2463,6 +2495,10 @@ TEST_CASE( "035" )
 			REQUIRE( nl->items().at( 0 )->type() == MD::ItemType::ListItem );
 
 			auto i1 = static_cast< MD::ListItem< TRAIT >* > ( nl->items().at( 0 ).get() );
+			REQUIRE( i1->startColumn() == 3 );
+			REQUIRE( i1->startLine() == 2 );
+			REQUIRE( i1->endColumn() == 6 );
+			REQUIRE( i1->endLine() == 2 );
 
 			REQUIRE( i1->listType() == MD::ListItem< TRAIT >::Ordered );
 			REQUIRE( i1->orderedListPreState() == MD::ListItem< TRAIT >::Start );
@@ -2470,6 +2506,10 @@ TEST_CASE( "035" )
 			REQUIRE( i1->items().at( 0 )->type() == MD::ItemType::Paragraph );
 
 			auto p = static_cast< MD::Paragraph< TRAIT >* > ( i1->items().at( 0 ).get() );
+			REQUIRE( p->startColumn() == 6 );
+			REQUIRE( p->startLine() == 2 );
+			REQUIRE( p->endColumn() == 6 );
+			REQUIRE( p->endLine() == 2 );
 
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
@@ -2480,6 +2520,10 @@ TEST_CASE( "035" )
 			REQUIRE( nl->items().at( 1 )->type() == MD::ItemType::ListItem );
 
 			auto i1 = static_cast< MD::ListItem< TRAIT >* > ( nl->items().at( 1 ).get() );
+			REQUIRE( i1->startColumn() == 3 );
+			REQUIRE( i1->startLine() == 3 );
+			REQUIRE( i1->endColumn() == 6 );
+			REQUIRE( i1->endLine() == 3 );
 
 			REQUIRE( i1->listType() == MD::ListItem< TRAIT >::Ordered );
 			REQUIRE( i1->orderedListPreState() == MD::ListItem< TRAIT >::Continue );
@@ -2487,6 +2531,10 @@ TEST_CASE( "035" )
 			REQUIRE( i1->items().at( 0 )->type() == MD::ItemType::Paragraph );
 
 			auto p = static_cast< MD::Paragraph< TRAIT >* > ( i1->items().at( 0 ).get() );
+			REQUIRE( p->startColumn() == 6 );
+			REQUIRE( p->startLine() == 3 );
+			REQUIRE( p->endColumn() == 6 );
+			REQUIRE( p->endLine() == 3 );
 
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
@@ -2498,6 +2546,10 @@ TEST_CASE( "035" )
 		REQUIRE( l->items().at( 2 )->type() == MD::ItemType::ListItem );
 
 		auto i1 = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 2 ).get() );
+		REQUIRE( i1->startColumn() == 0 );
+		REQUIRE( i1->startLine() == 4 );
+		REQUIRE( i1->endColumn() == 3 );
+		REQUIRE( i1->endLine() == 4 );
 
 		REQUIRE( i1->listType() == MD::ListItem< TRAIT >::Ordered );
 		REQUIRE( i1->orderedListPreState() == MD::ListItem< TRAIT >::Continue );
@@ -2505,6 +2557,10 @@ TEST_CASE( "035" )
 		REQUIRE( i1->items().at( 0 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( i1->items().at( 0 ).get() );
+		REQUIRE( p->startColumn() == 3 );
+		REQUIRE( p->startLine() == 4 );
+		REQUIRE( p->endColumn() == 3 );
+		REQUIRE( p->endLine() == 4 );
 
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
