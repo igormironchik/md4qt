@@ -3244,8 +3244,11 @@ makeText(
 
 	po.pos = lastPos;
 
-	makeTextObject( text, spaceBefore,
-		( po.pos > 0 ? po.fr.data.at( po.line ).first[ po.pos - 1 ].isSpace() : true ), po,
+	bool isSpaceAfter = po.pos > 0 ? po.fr.data.at( po.line ).first[ po.pos - 1 ].isSpace() : true;
+	isSpaceAfter = !isSpaceAfter && po.pos < po.fr.data.at( po.line ).first.length() ?
+		po.fr.data.at( po.line ).first[ po.pos ].isSpace() : isSpaceAfter;
+
+	makeTextObject( text, spaceBefore, isSpaceAfter, po,
 		doNotEscape, startPos, startLine, lastPos - 1, lastLine );
 }
 
@@ -5257,6 +5260,11 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 					new FootnoteRef< Trait >( "#" +
 						toSingleLine< Trait >( text ).simplified().toCaseFolded().toUpper() +
 						"/" + po.workingPath + po.fileName ) );
+				fnr->setStartColumn( po.fr.data.at( start->m_line ).first.virginPos( start->m_pos ) );
+				fnr->setStartLine( po.fr.data.at( start->m_line ).second.lineNumber );
+				fnr->setEndColumn( po.fr.data.at( it->m_line ).first.virginPos(
+					it->m_pos + it->m_len - 1 ) );
+				fnr->setEndLine( po.fr.data.at( it->m_line ).second.lineNumber );
 
 				po.parent->appendItem( fnr );
 			}

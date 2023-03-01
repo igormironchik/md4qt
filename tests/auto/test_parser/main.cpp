@@ -2117,6 +2117,18 @@ TEST_CASE( "030" )
 	REQUIRE( i3->url() == u8"http://www.where.com/c.jpeg" );
 }
 
+/*
+[link 0][wrong-label] [link 1](a.md) [![image 1](a.png)](b.md) [link 3][label] [^ref]
+
+[label]: http://www.where.com/a.md (caption)
+
+[^ref] text
+
+[1]: a.md 'title'
+
+[link 4](#label)
+
+*/
 TEST_CASE( "031" )
 {
 	MD::Parser< TRAIT > parser;
@@ -2144,12 +2156,21 @@ TEST_CASE( "031" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 84 );
+	REQUIRE( p->endLine() == 0 );
 
 	REQUIRE( p->items().size() == 5 );
 
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 	auto t0 = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t0->startColumn() == 0 );
+	REQUIRE( t0->startLine() == 0 );
+	REQUIRE( t0->endColumn() == 20 );
+	REQUIRE( t0->endLine() == 0 );
+	REQUIRE( t0->isSpaceAfter() );
 
 	REQUIRE( t0->text() == u8"[link 0][wrong-label]" );
 	REQUIRE( t0->opts() == MD::TextWithoutFormat );
@@ -2157,6 +2178,10 @@ TEST_CASE( "031" )
 	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Link );
 
 	auto l1 = static_cast< MD::Link< TRAIT >* > ( p->items().at( 1 ).get() );
+	REQUIRE( l1->startColumn() == 22 );
+	REQUIRE( l1->startLine() == 0 );
+	REQUIRE( l1->endColumn() == 35 );
+	REQUIRE( l1->endLine() == 0 );
 
 	REQUIRE( l1->text() == u8"link 1" );
 	REQUIRE( l1->url() == wd + u8"/a.md" );
@@ -2164,6 +2189,10 @@ TEST_CASE( "031" )
 	REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Link );
 
 	auto l2 = static_cast< MD::Link< TRAIT >* > ( p->items().at( 2 ).get() );
+	REQUIRE( l2->startColumn() == 37 );
+	REQUIRE( l2->startLine() == 0 );
+	REQUIRE( l2->endColumn() == 61 );
+	REQUIRE( l2->endLine() == 0 );
 
 	REQUIRE( l2->url() == wd + u8"/b.md" );
 	REQUIRE( l2->opts() == MD::TextOption::TextWithoutFormat );
@@ -2175,6 +2204,10 @@ TEST_CASE( "031" )
 	REQUIRE( p->items().at( 3 )->type() == MD::ItemType::Link );
 
 	auto l3 = static_cast< MD::Link< TRAIT >* > ( p->items().at( 3 ).get() );
+	REQUIRE( l3->startColumn() == 63 );
+	REQUIRE( l3->startLine() == 0 );
+	REQUIRE( l3->endColumn() == 77 );
+	REQUIRE( l3->endLine() == 0 );
 
 	REQUIRE( l3->text() == u8"link 3" );
 
@@ -2185,6 +2218,10 @@ TEST_CASE( "031" )
 	REQUIRE( p->items().at( 4 )->type() == MD::ItemType::FootnoteRef );
 
 	auto f1 = static_cast< MD::FootnoteRef< TRAIT >* > ( p->items().at( 4 ).get() );
+	REQUIRE( f1->startColumn() == 79 );
+	REQUIRE( f1->startLine() == 0 );
+	REQUIRE( f1->endColumn() == 84 );
+	REQUIRE( f1->endLine() == 0 );
 
 	REQUIRE( f1->id() == u8"#^REF/" + wd + u8"/031.md" );
 
@@ -2198,16 +2235,29 @@ TEST_CASE( "031" )
 		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
 
 		p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 4 );
+		REQUIRE( p->endColumn() == 10 );
+		REQUIRE( p->endLine() == 4 );
 
 		REQUIRE( p->items().size() == 2 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::FootnoteRef );
 
 		f1 = static_cast< MD::FootnoteRef< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( f1->startColumn() == 0 );
+		REQUIRE( f1->startLine() == 4 );
+		REQUIRE( f1->endColumn() == 5 );
+		REQUIRE( f1->endLine() == 4 );
 
 		REQUIRE( f1->id() == u8"#^REF/" + wd + u8"/031.md" );
 
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+		REQUIRE( t->isSpaceBefore() );
+		REQUIRE( t->startColumn() == 6 );
+		REQUIRE( t->startLine() == 4 );
+		REQUIRE( t->endColumn() == 10 );
+		REQUIRE( t->endLine() == 4 );
 
 		REQUIRE( t->text() == u8"text" );
 
@@ -2223,12 +2273,20 @@ TEST_CASE( "031" )
 		REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Paragraph );
 
 		p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 3 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 8 );
+		REQUIRE( p->endColumn() == 15 );
+		REQUIRE( p->endLine() == 8 );
 
 		REQUIRE( p->items().size() == 1 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
 
 		auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( l->startColumn() == 0 );
+		REQUIRE( l->startLine() == 8 );
+		REQUIRE( l->endColumn() == 15 );
+		REQUIRE( l->endLine() == 8 );
 
 		REQUIRE( l->url() == u8"#label/" + wd + u8"/031.md" );
 	}
