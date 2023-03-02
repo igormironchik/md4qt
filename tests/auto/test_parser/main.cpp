@@ -3256,6 +3256,7 @@ TEST_CASE( "040" )
 	REQUIRE( t1->startLine() == 0 );
 	REQUIRE( t1->endColumn() == 10 );
 	REQUIRE( t1->endLine() == 0 );
+	REQUIRE( t1->isSpaceAfter() );
 
 	REQUIRE( dp->items().at( 1 )->type() == MD::ItemType::Code );
 
