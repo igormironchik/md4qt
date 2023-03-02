@@ -2603,6 +2603,40 @@ TEST_CASE( "036" )
 	REQUIRE( l->text() == u8"Google" );
 }
 
+/*
+[Google] ( www.google.com Google Shmoogle...
+
+[Google] (
+
+[Google
+
+[Google]
+
+[![Google](
+
+![Google](
+
+[Google] ( www.google.com "Google Shmoogle..."
+
+[![Google](https://www.google.com/logo.png)
+
+text [^ref]:
+
+[^ref
+
+[
+
+[1]:
+
+[1]:
+
+[text][link
+
+[text]#
+
+<www.google.com
+
+*/
 TEST_CASE( "037" )
 {
 	MD::Parser< TRAIT > parser;
@@ -2616,12 +2650,20 @@ TEST_CASE( "037" )
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 0 );
+		REQUIRE( p->endColumn() == 43 );
+		REQUIRE( p->endLine() == 0 );
 
 		REQUIRE( p->items().size() == 1 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 43 );
+		REQUIRE( t->endLine() == 0 );
 
 		REQUIRE( t->text() == u8"[Google] ( www.google.com Google Shmoogle..." );
 	}
@@ -2630,12 +2672,20 @@ TEST_CASE( "037" )
 		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 2 );
+		REQUIRE( p->endColumn() == 9 );
+		REQUIRE( p->endLine() == 2 );
 
 		REQUIRE( p->items().size() == 1 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 2 );
+		REQUIRE( t->endColumn() == 9 );
+		REQUIRE( t->endLine() == 2 );
 
 		REQUIRE( t->text() == u8"[Google] (" );
 	}
@@ -2644,12 +2694,20 @@ TEST_CASE( "037" )
 		REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 3 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 4 );
+		REQUIRE( p->endColumn() == 6 );
+		REQUIRE( p->endLine() == 4 );
 
 		REQUIRE( p->items().size() == 1 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 4 );
+		REQUIRE( t->endColumn() == 6 );
+		REQUIRE( t->endLine() == 4 );
 
 		REQUIRE( t->text() == u8"[Google" );
 	}
@@ -2658,6 +2716,10 @@ TEST_CASE( "037" )
 		REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 4 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 6 );
+		REQUIRE( p->endColumn() == 7 );
+		REQUIRE( p->endLine() == 6 );
 
 		REQUIRE( p->items().size() == 1 );
 
@@ -2666,12 +2728,20 @@ TEST_CASE( "037" )
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 
 		REQUIRE( t->text() == u8"[Google]" );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 6 );
+		REQUIRE( t->endColumn() == 7 );
+		REQUIRE( t->endLine() == 6 );
 	}
 
 	{
 		REQUIRE( doc->items().at( 5 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 5 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 8 );
+		REQUIRE( p->endColumn() == 10 );
+		REQUIRE( p->endLine() == 8 );
 
 		REQUIRE( p->items().size() == 1 );
 
@@ -2680,12 +2750,20 @@ TEST_CASE( "037" )
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 
 		REQUIRE( t->text() == u8"[![Google](" );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 8 );
+		REQUIRE( t->endColumn() == 10 );
+		REQUIRE( t->endLine() == 8 );
 	}
 
 	{
 		REQUIRE( doc->items().at( 6 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 6 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 10 );
+		REQUIRE( p->endColumn() == 9 );
+		REQUIRE( p->endLine() == 10 );
 
 		REQUIRE( p->items().size() == 1 );
 
@@ -2694,18 +2772,30 @@ TEST_CASE( "037" )
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 
 		REQUIRE( t->text() == u8"![Google](" );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 10 );
+		REQUIRE( t->endColumn() == 9 );
+		REQUIRE( t->endLine() == 10 );
 	}
 
 	{
 		REQUIRE( doc->items().at( 7 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 7 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 12 );
+		REQUIRE( p->endColumn() == 45 );
+		REQUIRE( p->endLine() == 12 );
 
 		REQUIRE( p->items().size() == 1 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 12 );
+		REQUIRE( t->endColumn() == 45 );
+		REQUIRE( t->endLine() == 12 );
 
 		REQUIRE( t->text() == u8"[Google] ( www.google.com \"Google Shmoogle...\"" );
 	}
@@ -2714,18 +2804,30 @@ TEST_CASE( "037" )
 		REQUIRE( doc->items().at( 8 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 8 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 14 );
+		REQUIRE( p->endColumn() == 42 );
+		REQUIRE( p->endLine() == 14 );
 
 		REQUIRE( p->items().size() == 2 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 14 );
+		REQUIRE( t->endColumn() == 0 );
+		REQUIRE( t->endLine() == 14 );
 
 		REQUIRE( t->text() == u8"[" );
 
 		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Image );
 
 		auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 1 ).get() );
+		REQUIRE( i->startColumn() == 1 );
+		REQUIRE( i->startLine() == 14 );
+		REQUIRE( i->endColumn() == 42 );
+		REQUIRE( i->endLine() == 14 );
 
 		REQUIRE( i->url() == u8"https://www.google.com/logo.png" );
 		REQUIRE( i->text() == u8"Google" );
@@ -2735,12 +2837,20 @@ TEST_CASE( "037" )
 		REQUIRE( doc->items().at( 9 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 9 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 16 );
+		REQUIRE( p->endColumn() == 11 );
+		REQUIRE( p->endLine() == 16 );
 
 		REQUIRE( p->items().size() == 3 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 16 );
+		REQUIRE( t->endColumn() == 4 );
+		REQUIRE( t->endLine() == 16 );
 
 		REQUIRE( t->text() == u8"text" );
 
@@ -2749,6 +2859,10 @@ TEST_CASE( "037" )
 		REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
 
 		t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 2 ).get() );
+		REQUIRE( t->startColumn() == 11 );
+		REQUIRE( t->startLine() == 16 );
+		REQUIRE( t->endColumn() == 11 );
+		REQUIRE( t->endLine() == 16 );
 
 		REQUIRE( t->text() == u8":" );
 	}
@@ -2757,12 +2871,20 @@ TEST_CASE( "037" )
 		REQUIRE( doc->items().at( 10 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 10 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 18 );
+		REQUIRE( p->endColumn() == 4 );
+		REQUIRE( p->endLine() == 18 );
 
 		REQUIRE( p->items().size() == 1 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 18 );
+		REQUIRE( t->endColumn() == 4 );
+		REQUIRE( t->endLine() == 18 );
 
 		REQUIRE( t->text() == u8"[^ref" );
 	}
@@ -2771,12 +2893,20 @@ TEST_CASE( "037" )
 		REQUIRE( doc->items().at( 11 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 11 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 20 );
+		REQUIRE( p->endColumn() == 0 );
+		REQUIRE( p->endLine() == 20 );
 
 		REQUIRE( p->items().size() == 1 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 20 );
+		REQUIRE( t->endColumn() == 0 );
+		REQUIRE( t->endLine() == 20 );
 
 		REQUIRE( t->text() == u8"[" );
 	}
@@ -2785,12 +2915,20 @@ TEST_CASE( "037" )
 		REQUIRE( doc->items().at( 12 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 12 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 22 );
+		REQUIRE( p->endColumn() == 3 );
+		REQUIRE( p->endLine() == 22 );
 
 		REQUIRE( p->items().size() == 1 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 22 );
+		REQUIRE( t->endColumn() == 3 );
+		REQUIRE( t->endLine() == 22 );
 
 		REQUIRE( t->text() == u8"[1]:" );
 	}
@@ -2799,12 +2937,22 @@ TEST_CASE( "037" )
 		REQUIRE( doc->items().at( 13 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 13 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 24 );
+		REQUIRE( p->endColumn() == 4 );
+		REQUIRE( p->endLine() == 24 );
 
 		REQUIRE( p->items().size() == 1 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 24 );
+		REQUIRE( t->endColumn() == 4 );
+		REQUIRE( t->endLine() == 24 );
+		REQUIRE( t->isSpaceAfter() );
+		REQUIRE( t->isSpaceBefore() );
 
 		REQUIRE( t->text() == u8"[1]:" );
 	}
@@ -2813,12 +2961,20 @@ TEST_CASE( "037" )
 		REQUIRE( doc->items().at( 14 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 14 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 26 );
+		REQUIRE( p->endColumn() == 10 );
+		REQUIRE( p->endLine() == 26 );
 
 		REQUIRE( p->items().size() == 1 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 26 );
+		REQUIRE( t->endColumn() == 10 );
+		REQUIRE( t->endLine() == 26 );
 
 		REQUIRE( t->text() == u8"[text][link" );
 	}
@@ -2827,12 +2983,20 @@ TEST_CASE( "037" )
 		REQUIRE( doc->items().at( 15 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 15 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 28 );
+		REQUIRE( p->endColumn() == 6 );
+		REQUIRE( p->endLine() == 28 );
 
 		REQUIRE( p->items().size() == 1 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 28 );
+		REQUIRE( t->endColumn() == 6 );
+		REQUIRE( t->endLine() == 28 );
 
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == u8"[text]#" );
@@ -2842,12 +3006,20 @@ TEST_CASE( "037" )
 		REQUIRE( doc->items().at( 16 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 16 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 30 );
+		REQUIRE( p->endColumn() == 14 );
+		REQUIRE( p->endLine() == 30 );
 
 		REQUIRE( p->items().size() == 1 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 30 );
+		REQUIRE( t->endColumn() == 14 );
+		REQUIRE( t->endLine() == 30 );
 
 		REQUIRE( t->text() == u8"<www.google.com" );
 	}
