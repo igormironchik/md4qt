@@ -3189,6 +3189,10 @@ TEST_CASE( "038" )
 	}
 }
 
+/*
+****text****
+
+*/
 TEST_CASE( "039" )
 {
 	MD::Parser< TRAIT > parser;
@@ -3201,11 +3205,19 @@ TEST_CASE( "039" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 11 );
+	REQUIRE( p->endLine() == 0 );
 
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->startColumn() == 4 );
+	REQUIRE( t->startLine() == 0 );
+	REQUIRE( t->endColumn() == 7 );
+	REQUIRE( t->endLine() == 0 );
 
 	REQUIRE( t->opts() == MD::TextOption::BoldText );
 	REQUIRE( t->text() == u8"text" );
