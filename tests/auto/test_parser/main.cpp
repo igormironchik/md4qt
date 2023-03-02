@@ -2568,6 +2568,10 @@ TEST_CASE( "035" )
 	}
 }
 
+/*
+[Google]( www.google.com "Google Shmoogle..." )
+
+*/
 TEST_CASE( "036" )
 {
 	MD::Parser< TRAIT > parser;
@@ -2580,12 +2584,20 @@ TEST_CASE( "036" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 46 );
+	REQUIRE( p->endLine() == 0 );
 
 	REQUIRE( p->items().size() == 1 );
 
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
 
 	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( l->startColumn() == 0 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 46 );
+	REQUIRE( l->endLine() == 0 );
 
 	REQUIRE( l->url() == u8"www.google.com" );
 	REQUIRE( l->text() == u8"Google" );
