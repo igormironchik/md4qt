@@ -3223,6 +3223,11 @@ TEST_CASE( "039" )
 	REQUIRE( t->text() == u8"text" );
 }
 
+/*
+``Use this `code`
+in the code
+
+*/
 TEST_CASE( "040" )
 {
 	MD::Parser< TRAIT > parser;
@@ -3235,6 +3240,10 @@ TEST_CASE( "040" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 
 	auto dp = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( dp->startColumn() == 0 );
+	REQUIRE( dp->startLine() == 0 );
+	REQUIRE( dp->endColumn() == 10 );
+	REQUIRE( dp->endLine() == 1 );
 
 	REQUIRE( dp->items().size() == 3 );
 
@@ -3243,16 +3252,28 @@ TEST_CASE( "040" )
 	auto t1 = static_cast< MD::Text< TRAIT >* > ( dp->items().at( 0 ).get() );
 
 	REQUIRE( t1->text() == u8"``Use this" );
+	REQUIRE( t1->startColumn() == 0 );
+	REQUIRE( t1->startLine() == 0 );
+	REQUIRE( t1->endColumn() == 10 );
+	REQUIRE( t1->endLine() == 0 );
 
 	REQUIRE( dp->items().at( 1 )->type() == MD::ItemType::Code );
 
 	auto c1 = static_cast< MD::Code< TRAIT >* > ( dp->items().at( 1 ).get() );
+	REQUIRE( c1->startColumn() == 12 );
+	REQUIRE( c1->startLine() == 0 );
+	REQUIRE( c1->endColumn() == 15 );
+	REQUIRE( c1->endLine() == 0 );
 
 	REQUIRE( c1->text() == u8"code" );
 
 	REQUIRE( dp->items().at( 2 )->type() == MD::ItemType::Text );
 
 	auto t2 = static_cast< MD::Text< TRAIT >* > ( dp->items().at( 2 ).get() );
+	REQUIRE( t2->startColumn() == 0 );
+	REQUIRE( t2->startLine() == 1 );
+	REQUIRE( t2->endColumn() == 10 );
+	REQUIRE( t2->endLine() == 1 );
 
 	REQUIRE( t2->text() == u8"in the code" );
 }
