@@ -3623,6 +3623,14 @@ TEST_CASE( "044" )
 	REQUIRE( t->text() == u8"Quote" );
 }
 
+/*
+  [^footnote]: Paragraph in footnote
+
+    Paragraph in footnote
+
+	Paragraph in footnote
+
+*/
 TEST_CASE( "045" )
 {
 	MD::Parser< TRAIT > parser;
@@ -3659,18 +3667,32 @@ TEST_CASE( "045" )
 	auto f = fit->second;
 
 	REQUIRE( f->items().size() == 3 );
+	REQUIRE( f->startColumn() == 0 );
+	REQUIRE( f->startLine() == 0 );
+	REQUIRE( f->endColumn() == 21 );
+	REQUIRE( f->endLine() == 4 );
+
+	static const std::vector< long long int > start = { 14, 4, 1 };
 
 	for( int i = 0; i < 3; ++i )
 	{
 		REQUIRE( f->items().at( i )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( f->items().at( i ).get() );
+		REQUIRE( p->startColumn() == start.at( i ) );
+		REQUIRE( p->startLine() == 2 * i );
+		REQUIRE( p->endColumn() == start.at( i ) + 20 );
+		REQUIRE( p->endLine() == 2 * i );
 
 		REQUIRE( p->items().size() == 1 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->startColumn() == start.at( i ) );
+		REQUIRE( t->startLine() == 2 * i );
+		REQUIRE( t->endColumn() == start.at( i ) + 20 );
+		REQUIRE( t->endLine() == 2 * i );
 
 		REQUIRE( t->text() == u8"Paragraph in footnote" );
 	}

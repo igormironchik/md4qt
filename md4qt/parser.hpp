@@ -6380,6 +6380,11 @@ Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
 	if( !fr.data.empty() )
 	{
 		std::shared_ptr< Footnote< Trait > > f( new Footnote< Trait > );
+		f->setStartColumn( fr.data.front().first.virginPos( 0 ) );
+		f->setStartLine( fr.data.front().second.lineNumber );
+		f->setEndColumn( fr.data.back().first.virginPos(
+			fr.data.back().first.length()  - 1 ) );
+		f->setEndLine( fr.data.back().second.lineNumber );
 
 		const auto delims = collectDelimiters< Trait >( fr.data );
 
@@ -6402,8 +6407,9 @@ Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
 			if( !toSingleLine< Trait > ( id ).simplified().isEmpty() &&
 				id.front().first.asString().startsWith( '^' ) &&
 				it != delims.cend() &&
-				fr.data.at( it->m_line ).first.length() > it->m_pos + 1 &&
-				fr.data.at( it->m_line ).first[ it->m_pos + 1 ] == typename Trait::Char( ':' ) )
+				fr.data.at( it->m_line ).first.length() > it->m_pos + 2 &&
+				fr.data.at( it->m_line ).first[ it->m_pos + 1 ] == typename Trait::Char( ':' ) &&
+				fr.data.at( it->m_line ).first[ it->m_pos + 2 ].isSpace() )
 			{
 				{
 					typename MdBlock< Trait >::Data tmp;
@@ -6412,7 +6418,7 @@ Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
 					fr.data = tmp;
 				}
 
-				fr.data.front().first = fr.data.front().first.sliced( it->m_pos + 2 );
+				fr.data.front().first = fr.data.front().first.sliced( it->m_pos + 3 );
 
 				for( auto it = fr.data.begin(), last = fr.data.end(); it != last; ++it )
 				{
