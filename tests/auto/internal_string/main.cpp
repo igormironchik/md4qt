@@ -181,6 +181,44 @@ TEST_CASE( "replace_remove_5" )
 	REQUIRE( s.virginPos( 5 ) == 5 );
 }
 
+TEST_CASE( "replace_rmove_6" )
+{
+	TRAIT::InternalString s( "\tParagraph\t" );
+
+	REQUIRE( s.virginPos( 1 ) == 1 );
+
+	s.replace( "\t", "    " );
+
+	REQUIRE( s.asString() == "    Paragraph    " );
+
+	REQUIRE( s.virginPos( 0 ) == 0 );
+	REQUIRE( s.virginPos( 1 ) == 0 );
+	REQUIRE( s.virginPos( 2 ) == 0 );
+	REQUIRE( s.virginPos( 3 ) == 0 );
+	REQUIRE( s.virginPos( 4 ) == 1 );
+	REQUIRE( s.virginPos( 5 ) == 2 );
+	REQUIRE( s.virginPos( 13 ) == 10 );
+	REQUIRE( s.virginPos( 14 ) == 10 );
+	REQUIRE( s.virginPos( 15 ) == 10 );
+	REQUIRE( s.virginPos( 16 ) == 10 );
+	REQUIRE( s.virginPos( 17 ) == 11 );
+	REQUIRE( s.virginPos( 18 ) == 11 );
+
+	s.remove( 0, 4 );
+
+	REQUIRE( s.asString() == "Paragraph    " );
+
+	REQUIRE( s.virginPos( 0 ) == 1 );
+	REQUIRE( s.virginPos( 1 ) == 2 );
+	REQUIRE( s.virginPos( 2 ) == 3 );
+	REQUIRE( s.virginPos( 9 ) == 10 );
+	REQUIRE( s.virginPos( 10 ) == 10 );
+	REQUIRE( s.virginPos( 11 ) == 10 );
+	REQUIRE( s.virginPos( 12 ) == 10 );
+	REQUIRE( s.virginPos( 13 ) == 11 );
+	REQUIRE( s.virginPos( 14 ) == 11 );
+}
+
 TEST_CASE( "simplified" )
 {
 	TRAIT::InternalString s( "   a   b   c   " );

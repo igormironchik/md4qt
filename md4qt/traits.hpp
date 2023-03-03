@@ -103,6 +103,7 @@ public:
 	{
 		String tmp;
 		bool init = false;
+		const auto len = str.length();
 
 		for( long long int i = 0; i < str.size(); )
 		{
@@ -119,8 +120,7 @@ public:
 				{
 					if( !init )
 					{
-						changedPos.push_back( {} );
-						changedPos.back().first = 0;
+						changedPos.push_back( { { 0, len }, {} } );
 						init = true;
 					}
 
@@ -142,10 +142,11 @@ public:
 
 	InternalStringT & remove( long long int pos, long long int size )
 	{
+		const auto len = str.length();
+
 		str.remove( pos, size );
 
-		changedPos.push_back( {} );
-		changedPos.back().first = 0;
+		changedPos.push_back( { { 0, len }, {} } );
 		changedPos.back().second.push_back( { pos, size, 0 } );
 
 		return *this;
@@ -158,6 +159,8 @@ public:
 	{
 		if( isEmpty() )
 			return *this;
+
+		const auto len = str.length();
 
 		InternalStringT result = *this;
 		result.str.clear();
@@ -179,8 +182,7 @@ public:
 			{
 				if( !init )
 				{
-					result.changedPos.push_back( {} );
-					result.changedPos.back().first = 0;
+					result.changedPos.push_back( { { 0, len }, {} } );
 					init = true;
 				}
 
@@ -218,6 +220,7 @@ public:
 	std::vector< InternalStringT > split( const InternalStringT & sep ) const
 	{
 		std::vector< InternalStringT > result;
+		const auto len = str.length();
 
 		if( sep.isEmpty() )
 		{
@@ -225,8 +228,7 @@ public:
 			{
 				auto is = *this;
 				is.str = str[ i ];
-				is.changedPos.push_back( {} );
-				is.changedPos.back().first = i;
+				is.changedPos.push_back( { { i, len }, {} } );
 
 				result.push_back( is );
 			}
@@ -243,8 +245,7 @@ public:
 			{
 				auto is = *this;
 				is.str = str.sliced( pos, fpos - pos );
-				is.changedPos.push_back( {} );
-				is.changedPos.back().first = pos;
+				is.changedPos.push_back( { { pos, len }, {} } );
 
 				result.push_back( is );
 			}
@@ -256,8 +257,7 @@ public:
 		{
 			auto is = *this;
 			is.str = str.sliced( pos, str.length() - pos );
-			is.changedPos.push_back( {} );
-			is.changedPos.back().first = pos;
+			is.changedPos.push_back( { { pos, len }, {} } );
 
 			result.push_back( is );
 		}
@@ -268,8 +268,9 @@ public:
 	InternalStringT sliced( long long int pos, long long int len = -1 ) const
 	{
 		InternalStringT tmp = *this;
+		const auto oldLen = str.length();
 		tmp.str = tmp.str.sliced( pos, ( len == -1 ? tmp.str.length() - pos : len ) );
-		tmp.changedPos.push_back( { pos, {} } );
+		tmp.changedPos.push_back( { { pos, oldLen }, {} } );
 		if( len != -1 && len < length() - pos )
 			tmp.changedPos.back().second.push_back( { pos + len, length() - pos - len, 0 } );
 
@@ -279,16 +280,20 @@ public:
 	InternalStringT right( long long int n ) const
 	{
 		InternalStringT tmp = *this;
+		const auto len = str.length();
 		tmp.str = tmp.str.right( n );
-		tmp.changedPos.push_back( { length() - n, {} } );
+		tmp.changedPos.push_back( { { length() - n, len }, {} } );
 
 		return tmp;
 	}
 
 	InternalStringT & insert( long long int pos, Char ch )
 	{
+		const auto len = str.length();
+
 		str.insert( pos, ch );
-		changedPos.push_back( {} );
+
+		changedPos.push_back( { { 0, len }, {} } );
 		changedPos.back().second.push_back( { pos, 1, 2 } );
 
 		return *this;
@@ -303,11 +308,16 @@ private:
 		long long int len = -1;
 	};
 
-	std::vector< std::pair< long long int, std::vector< ChangedPos > > > changedPos;
+	struct LengthAndStartPos {
+		long long int firstPos = 0;
+		long long int length = 0;
+	};
+
+	std::vector< std::pair< LengthAndStartPos, std::vector< ChangedPos > > > changedPos;
 
 private:
 	long long int virginPosImpl( long long int pos,
-		const std::pair< long long int, std::vector< ChangedPos > > & changed ) const
+		const std::pair< LengthAndStartPos, std::vector< ChangedPos > > & changed ) const
 	{
 		long long int p = 0;
 
@@ -316,7 +326,15 @@ private:
 			if( c.pos + std::min( c.oldLen, c.len ) <= pos + p )
 			{
 				if( c.oldLen < c.len )
-					p -= ( c.len - c.oldLen );
+				{
+					if( c.len - c.oldLen >= pos )
+						p -= pos;
+					else if( c.pos - p + changed.first.firstPos > changed.first.length )
+						p -= ( pos + p + changed.first.firstPos - changed.first.length +
+								( pos >= changed.first.length - p + ( c.len - c.oldLen ) ? 0 : 1 ) );
+					else
+						p -= c.len - c.oldLen;
+				}
 				else
 					p += ( c.oldLen - c.len );
 			}
@@ -324,7 +342,7 @@ private:
 				break;
 		}
 
-		return pos + p + changed.first;
+		return pos + p + changed.first.firstPos;
 	}
 }; // class InternalString
 
