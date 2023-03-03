@@ -3374,6 +3374,11 @@ TEST_CASE( "041" )
 	}
 }
 
+/*
+* [Chapter 1](042-1.md)
+* [Chapter 1](042-1.md)
+
+*/
 TEST_CASE( "042" )
 {
 	MD::Parser< TRAIT > parser;
@@ -3386,6 +3391,10 @@ TEST_CASE( "042" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
 
 	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startColumn() == 0 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 22 );
+	REQUIRE( l->endLine() == 1 );
 
 	REQUIRE( l->items().size() == 2 );
 
@@ -3409,16 +3418,28 @@ TEST_CASE( "042" )
 		REQUIRE( l->items().at( i )->type() == MD::ItemType::ListItem );
 
 		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( i ).get() );
+		REQUIRE( li->startColumn() == 0 );
+		REQUIRE( li->startLine() == i );
+		REQUIRE( li->endColumn() == 22 );
+		REQUIRE( li->endLine() == i );
 
 		REQUIRE( li->items().size() == 1 );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).get() );
+		REQUIRE( p->startColumn() == 2 );
+		REQUIRE( p->startLine() == i );
+		REQUIRE( p->endColumn() == 22 );
+		REQUIRE( p->endLine() == i );
 
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
 
 		auto lnk = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( lnk->startColumn() == 2 );
+		REQUIRE( lnk->startLine() == i );
+		REQUIRE( lnk->endColumn() == 22 );
+		REQUIRE( lnk->endLine() == i );
 
 		REQUIRE( lnk->text() == u8"Chapter 1" );
 		REQUIRE( lnk->url() == wd + u8"/042-1.md" );
@@ -3434,11 +3455,19 @@ TEST_CASE( "042" )
 	REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::Paragraph );
 
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 4 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 10 );
+	REQUIRE( p->endLine() == 0 );
 
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->startColumn() == 0 );
+	REQUIRE( t->startLine() == 0 );
+	REQUIRE( t->endColumn() == 10 );
+	REQUIRE( t->endLine() == 0 );
 
 	REQUIRE( t->text() == u8"Paragraph 1" );
 }
