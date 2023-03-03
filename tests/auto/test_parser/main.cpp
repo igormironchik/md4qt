@@ -3539,6 +3539,13 @@ TEST_CASE( "042-1" )
 	}
 }
 
+/*
+* Item
+
+    > Quote
+
+
+*/
 TEST_CASE( "044" )
 {
 	MD::Parser< TRAIT > parser;
@@ -3551,39 +3558,67 @@ TEST_CASE( "044" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
 
 	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startColumn() == 0 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 10 );
+	REQUIRE( l->endLine() == 2 );
 
 	REQUIRE( l->items().size() == 1 );
 
 	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
 
 	auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( li->startColumn() == 0 );
+	REQUIRE( li->startLine() == 0 );
+	REQUIRE( li->endColumn() == 10 );
+	REQUIRE( li->endLine() == 2 );
 
 	REQUIRE( li->items().size() == 2 );
 	REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
 
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).get() );
+	REQUIRE( p->startColumn() == 2 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 5 );
+	REQUIRE( p->endLine() == 0 );
 
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->startColumn() == 2 );
+	REQUIRE( t->startLine() == 0 );
+	REQUIRE( t->endColumn() == 5 );
+	REQUIRE( t->endLine() == 0 );
 
 	REQUIRE( t->text() == u8"Item" );
 
 	REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Blockquote );
 
 	auto bq = static_cast< MD::Blockquote< TRAIT >* > ( li->items().at( 1 ).get() );
+	REQUIRE( bq->startColumn() == 2 );
+	REQUIRE( bq->startLine() == 2 );
+	REQUIRE( bq->endColumn() == 10 );
+	REQUIRE( bq->endLine() == 2 );
 
 	REQUIRE( bq->items().size() == 1 );
 
 	REQUIRE( bq->items().at( 0 )->type() == MD::ItemType::Paragraph );
 
 	p = static_cast< MD::Paragraph< TRAIT >* > ( bq->items().at( 0 ).get() );
+	REQUIRE( p->startColumn() == 6 );
+	REQUIRE( p->startLine() == 2 );
+	REQUIRE( p->endColumn() == 10 );
+	REQUIRE( p->endLine() == 2 );
 
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 	t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->startColumn() == 6 );
+	REQUIRE( t->startLine() == 2 );
+	REQUIRE( t->endColumn() == 10 );
+	REQUIRE( t->endLine() == 2 );
 
 	REQUIRE( t->text() == u8"Quote" );
 }

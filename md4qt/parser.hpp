@@ -6516,7 +6516,7 @@ Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
 		StringListStream< Trait > stream( tmp );
 
 		std::shared_ptr< Blockquote< Trait > > bq( new Blockquote< Trait > );
-		bq->setStartColumn( fr.data.at( 0 ).first.virginPos( pos ) - extra );
+		bq->setStartColumn( fr.data.at( 0 ).first.virginPos( 0 ) - extra );
 		bq->setStartLine( fr.data.at( 0 ).second.lineNumber );
 		bq->setEndColumn( fr.data.at( j - 1 ).first.virginPos(
 			fr.data.at( j - 1 ).first.length() - 1 ) );
