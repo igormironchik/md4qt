@@ -4371,6 +4371,16 @@ TEST_CASE( "055" )
 	REQUIRE( t->text() == u8"Text" );
 }
 
+/*
+	if( a > b )
+
+      do_something();
+
+    else
+
+      dont_do_anything();
+
+*/
 TEST_CASE( "056" )
 {
 	MD::Parser< TRAIT > parser;
@@ -4383,6 +4393,10 @@ TEST_CASE( "056" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Code );
 
 	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( c->startColumn() == 4 );
+	REQUIRE( c->startLine() == 0 );
+	REQUIRE( c->endColumn() == 24 );
+	REQUIRE( c->endLine() == 6 );
 
 	REQUIRE( c->isInlined() == false );
 	REQUIRE( c->text() ==
