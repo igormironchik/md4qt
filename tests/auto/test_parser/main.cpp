@@ -4432,6 +4432,16 @@ TEST_CASE( "057" )
 	REQUIRE( c->text() == u8"code\n\ncode" );
 }
 
+/*
+ * List 1
+
+   Paragraph
+
+ *  List 2
+
+    Paragraph
+
+*/
 TEST_CASE( "058" )
 {
 	MD::Parser< TRAIT > parser;
@@ -4444,6 +4454,10 @@ TEST_CASE( "058" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
 
 	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startColumn() == 1 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 12 );
+	REQUIRE( l->endLine() == 6 );
 
 	REQUIRE( l->items().size() == 2 );
 
@@ -4451,6 +4465,10 @@ TEST_CASE( "058" )
 	REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
 
 	auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).get() );
+	REQUIRE( li->startColumn() == 1 );
+	REQUIRE( li->startLine() == 4 );
+	REQUIRE( li->endColumn() == 12 );
+	REQUIRE( li->endLine() == 6 );
 
 	REQUIRE( li->items().size() == 2 );
 	REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
