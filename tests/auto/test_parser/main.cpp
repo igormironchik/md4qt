@@ -4244,6 +4244,10 @@ TEST_CASE( "053" )
 	}
 }
 
+/*
+```java
+
+*/
 TEST_CASE( "054" )
 {
 	MD::Parser< TRAIT > parser;
@@ -4256,8 +4260,13 @@ TEST_CASE( "054" )
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Code );
 		auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( c->syntax() == u8"java" );
 		REQUIRE( !c->isInlined() );
 		REQUIRE( c->text().isEmpty() );
+		REQUIRE( c->startColumn() == 7 );
+		REQUIRE( c->startLine() == 0 );
+		REQUIRE( c->endColumn() == 7 );
+		REQUIRE( c->endLine() == 0 );
 	}
 }
 
