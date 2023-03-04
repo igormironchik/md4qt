@@ -4270,6 +4270,16 @@ TEST_CASE( "054" )
 	}
 }
 
+/*
+  [^footnote]: Paragraph in footnote
+
+    Paragraph in footnote
+
+	Paragraph in footnote
+
+Text
+
+*/
 TEST_CASE( "055" )
 {
 	MD::Parser< TRAIT > parser;
@@ -4309,12 +4319,22 @@ TEST_CASE( "055" )
 	REQUIRE( f->type() == MD::ItemType::Footnote );
 
 	REQUIRE( f->items().size() == 3 );
+	REQUIRE( f->startColumn() == 0 );
+	REQUIRE( f->startLine() == 0 );
+	REQUIRE( f->endColumn() == 21 );
+	REQUIRE( f->endLine() == 4 );
+
+	static const std::vector< long long int > start = { 14, 4, 1 };
 
 	for( int i = 0; i < 3; ++i )
 	{
 		REQUIRE( f->items().at( i )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( f->items().at( i ).get() );
+		REQUIRE( p->startColumn() == start.at( i ) );
+		REQUIRE( p->startLine() == 2 * i );
+		REQUIRE( p->endColumn() == start.at( i ) + 20 );
+		REQUIRE( p->endLine() == 2 * i );
 
 		REQUIRE( p->items().size() == 1 );
 
@@ -4322,18 +4342,31 @@ TEST_CASE( "055" )
 
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 
+		REQUIRE( t->startColumn() == start.at( i ) );
+		REQUIRE( t->startLine() == 2 * i );
+		REQUIRE( t->endColumn() == start.at( i ) + 20 );
+		REQUIRE( t->endLine() == 2 * i );
+
 		REQUIRE( t->text() == u8"Paragraph in footnote" );
 	}
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 6 );
+	REQUIRE( p->endColumn() == 3 );
+	REQUIRE( p->endLine() == 6 );
 
 	REQUIRE( p->items().size() == 1 );
 
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->startColumn() == 0 );
+	REQUIRE( t->startLine() == 6 );
+	REQUIRE( t->endColumn() == 3 );
+	REQUIRE( t->endLine() == 6 );
 
 	REQUIRE( t->text() == u8"Text" );
 }

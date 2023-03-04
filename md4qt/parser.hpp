@@ -6405,6 +6405,14 @@ Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
 	const typename Trait::String & fileName,
 	bool collectRefLinks )
 {
+	{
+		const auto it = ( std::find_if( fr.data.rbegin(), fr.data.rend(),
+			[] ( const auto & s ) { return !s.first.simplified().isEmpty(); } ) ).base();
+
+		if( it != fr.data.end() )
+			fr.data.erase( it, fr.data.end() );
+	}
+
 	if( !fr.data.empty() )
 	{
 		std::shared_ptr< Footnote< Trait > > f( new Footnote< Trait > );
