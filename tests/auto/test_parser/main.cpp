@@ -3990,6 +3990,12 @@ TEST_CASE( "047" )
 	REQUIRE( table->columnAlignment( 1 ) == MD::Table< TRAIT >::AlignRight );
 }
 
+/*
+# Heading
+Paragraph
+# Heading
+
+*/
 TEST_CASE( "048" )
 {
 	MD::Parser< TRAIT > parser;
@@ -4001,17 +4007,35 @@ TEST_CASE( "048" )
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Heading );
 		auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 0 );
+		REQUIRE( h->endColumn() == 8 );
+		REQUIRE( h->endLine() == 0 );
+
 		REQUIRE( h->text().get() );
 		auto p = h->text().get();
+		REQUIRE( p->startColumn() == 2 );
+		REQUIRE( p->startLine() == 0 );
+		REQUIRE( p->endColumn() == 8 );
+		REQUIRE( p->endLine() == 0 );
+
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->text() == u8"Heading" );
+		REQUIRE( t->startColumn() == 2 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 8 );
+		REQUIRE( t->endLine() == 0 );
 	}
 
 	{
 		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
 		auto * p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 1 );
+		REQUIRE( p->endColumn() == 8 );
+		REQUIRE( p->endLine() == 1 );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 		REQUIRE( static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() )->text() ==
@@ -4019,12 +4043,26 @@ TEST_CASE( "048" )
 	}
 
 	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Heading );
-	auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 1 ).get() );
+	auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 3 ).get() );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 2 );
+	REQUIRE( h->endColumn() == 8 );
+	REQUIRE( h->endLine() == 2 );
+
 	REQUIRE( h->text().get() );
 	auto p = h->text().get();
+	REQUIRE( p->startColumn() == 2 );
+	REQUIRE( p->startLine() == 2 );
+	REQUIRE( p->endColumn() == 8 );
+	REQUIRE( p->endLine() == 2 );
+
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->startColumn() == 2 );
+	REQUIRE( t->startLine() == 2 );
+	REQUIRE( t->endColumn() == 8 );
+	REQUIRE( t->endLine() == 2 );
 	REQUIRE( t->text() == u8"Heading" );
 }
 
