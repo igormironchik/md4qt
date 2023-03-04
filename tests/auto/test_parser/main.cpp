@@ -4143,6 +4143,11 @@ TEST_CASE( "050" )
 	REQUIRE( l3->text() == u8"\\" );
 }
 
+/*
+[link1](051-1.md)
+[link2](051-2.md)
+
+*/
 TEST_CASE( "051" )
 {
 	MD::Parser< TRAIT > parser;
@@ -4183,6 +4188,12 @@ TEST_CASE( "051" )
 	REQUIRE( doc->items().at( 7 )->type() == MD::ItemType::Paragraph );
 }
 
+/*
+```code *bold _italic
+_```` *bold* _italic
+```
+
+*/
 TEST_CASE( "052" )
 {
 	MD::Parser< TRAIT > parser;
@@ -4196,6 +4207,10 @@ TEST_CASE( "052" )
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Code );
 
 		auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( c->startColumn() == 0 );
+		REQUIRE( c->startLine() == 1 );
+		REQUIRE( c->endColumn() == 19 );
+		REQUIRE( c->endLine() == 1 );
 
 		REQUIRE( c->isInlined() == false );
 		REQUIRE( c->text() == u8"_```` *bold* _italic" );
