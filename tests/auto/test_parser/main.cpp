@@ -4475,6 +4475,17 @@ TEST_CASE( "058" )
 	REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Paragraph );
 }
 
+/*
+> ## This is a header.
+>
+> 1.   This is the first list item.
+> 2.   This is the second list item.
+>
+> Here's some example code:
+>
+>     return shell_exec("echo $input | $markdown_script");
+
+*/
 TEST_CASE( "059" )
 {
 	MD::Parser< TRAIT > parser;
@@ -4487,13 +4498,45 @@ TEST_CASE( "059" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Blockquote );
 
 	auto b = static_cast< MD::Blockquote< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( b->startColumn() == 0 );
+	REQUIRE( b->startLine() == 0 );
+	REQUIRE( b->endColumn() == 57 );
+	REQUIRE( b->endLine() == 7 );
 
 	REQUIRE( b->items().size() == 4 );
 
 	REQUIRE( b->items().at( 0 )->type() == MD::ItemType::Heading );
+	{
+		auto i = static_cast< MD::Heading< TRAIT >* > ( b->items().at( 0 ).get() );
+		REQUIRE( i->startColumn() == 2 );
+		REQUIRE( i->startLine() == 0 );
+		REQUIRE( i->endColumn() == 21 );
+		REQUIRE( i->endLine() == 0 );
+	}
 	REQUIRE( b->items().at( 1 )->type() == MD::ItemType::List );
+	{
+		auto i = static_cast< MD::List< TRAIT >* > ( b->items().at( 1 ).get() );
+		REQUIRE( i->startColumn() == 2 );
+		REQUIRE( i->startLine() == 2 );
+		REQUIRE( i->endColumn() == 35 );
+		REQUIRE( i->endLine() == 3 );
+	}
 	REQUIRE( b->items().at( 2 )->type() == MD::ItemType::Paragraph );
+	{
+		auto i = static_cast< MD::Paragraph< TRAIT >* > ( b->items().at( 2 ).get() );
+		REQUIRE( i->startColumn() == 2 );
+		REQUIRE( i->startLine() == 5 );
+		REQUIRE( i->endColumn() == 26 );
+		REQUIRE( i->endLine() == 5 );
+	}
 	REQUIRE( b->items().at( 3 )->type() == MD::ItemType::Code );
+	{
+		auto i = static_cast< MD::Code< TRAIT >* > ( b->items().at( 3 ).get() );
+		REQUIRE( i->startColumn() == 6 );
+		REQUIRE( i->startLine() == 7 );
+		REQUIRE( i->endColumn() == 57 );
+		REQUIRE( i->endLine() == 7 );
+	}
 }
 
 TEST_CASE( "060" )
