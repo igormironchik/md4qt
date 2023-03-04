@@ -4218,6 +4218,11 @@ TEST_CASE( "052" )
 	}
 }
 
+/*
+```cpp
+```
+
+*/
 TEST_CASE( "053" )
 {
 	MD::Parser< TRAIT > parser;
@@ -4230,6 +4235,10 @@ TEST_CASE( "053" )
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Code );
 		auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( c->startColumn() == 6 );
+		REQUIRE( c->startLine() == 0 );
+		REQUIRE( c->endColumn() == 6 );
+		REQUIRE( c->endLine() == 0 );
 		REQUIRE( !c->isInlined() );
 		REQUIRE( c->text().isEmpty() );
 	}
