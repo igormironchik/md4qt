@@ -4403,6 +4403,14 @@ TEST_CASE( "056" )
 		u8"if( a > b )\n\n  do_something();\n\nelse\n\n  dont_do_anything();" );
 }
 
+/*
+```
+code
+
+code
+```
+
+*/
 TEST_CASE( "057" )
 {
 	MD::Parser< TRAIT > parser;
@@ -4415,6 +4423,10 @@ TEST_CASE( "057" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Code );
 
 	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( c->startColumn() == 0 );
+	REQUIRE( c->startLine() == 1 );
+	REQUIRE( c->endColumn() == 3 );
+	REQUIRE( c->endLine() == 3 );
 
 	REQUIRE( c->isInlined() == false );
 	REQUIRE( c->text() == u8"code\n\ncode" );
