@@ -2045,6 +2045,13 @@ Parser< Trait >::parseHeading( MdBlock< Trait > & fr,
 	if( !fr.data.empty() && !collectRefLinks )
 	{
 		auto line = fr.data.front().first;
+
+		std::shared_ptr< Heading< Trait > > h( new Heading< Trait > );
+		h->setStartColumn( line.virginPos( skipSpaces< Trait >( 0, line.asString() ) ) );
+		h->setStartLine( fr.data.front().second.lineNumber );
+		h->setEndColumn( line.virginPos( line.length() - 1 ) );
+		h->setEndLine( h->startLine() );
+
 		long long int pos = 0;
 		pos = skipSpaces< Trait >( pos, line.asString() );
 
@@ -2069,7 +2076,6 @@ Parser< Trait >::parseHeading( MdBlock< Trait > & fr,
 
 		findAndRemoveClosingSequence< Trait >( fr.data.front().first );
 
-		std::shared_ptr< Heading< Trait > > h( new Heading< Trait > );
 		h->setLevel( lvl );
 
 		if( !label.isEmpty() )
@@ -2406,13 +2412,17 @@ Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
 			fr.data.erase( fr.data.cbegin(), fr.data.cbegin() + horLines );
 
 			std::shared_ptr< Heading< Trait > > h( new Heading< Trait > );
+			h->setStartColumn( fr.data.front().first.virginPos( 0 ) );
+			h->setStartLine( fr.data.front().second.lineNumber );
+			auto lastHLineIt = fr.data.cbegin() + ( i - horLines );
+			h->setEndColumn( lastHLineIt->first.virginPos( lastHLineIt->first.length() - 1 ) );
+			h->setEndLine( lastHLineIt->second.lineNumber );
 			std::shared_ptr< Paragraph< Trait > > p( new Paragraph< Trait > );
 
 			h->setLevel( lvl );
 
 			typename MdBlock< Trait >::Data tmp;
-			std::copy( fr.data.cbegin(), fr.data.cbegin() + ( i - horLines ),
-				std::back_inserter( tmp ) );
+			std::copy( fr.data.cbegin(), lastHLineIt, std::back_inserter( tmp ) );
 
 			const auto ns1 = skipSpaces< Trait >( 0, tmp.front().first.asString() );
 

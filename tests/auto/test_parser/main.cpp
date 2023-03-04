@@ -3698,6 +3698,36 @@ TEST_CASE( "045" )
 	}
 }
 
+/*
+Heading 1
+=========
+Paragraph 1
+
+Heading 2
+---------
+Paragraph 2
+
+  # Heading 1
+
+Paragraph 1
+
+## Heading 2
+
+Paragraph 2
+
+Heading 1
+=========
+
+Paragraph 1
+
+Heading 2
+---------
+
+Paragraph 2
+
+### Heading 3 {#heading-3}
+
+*/
 TEST_CASE( "046" )
 {
 	MD::Parser< TRAIT > parser;
@@ -3707,51 +3737,87 @@ TEST_CASE( "046" )
 	REQUIRE( !doc->isEmpty() );
 	REQUIRE( doc->items().size() == 14 );
 
-	int idx = 1;
+	static const std::vector< long long int > hcolumn = { 0, 0, 2, 0, 0, 0 };
+	static const std::vector< long long int > hecolumn = { 8, 8, 12, 11, 8, 8 };
+	static const std::vector< long long int > sline = { 0, 4, 8, 12, 16, 21 };
+	static const std::vector< long long int > eline = { 1, 5, 8, 12, 17, 22 };
+	static const std::vector< long long int > pcolumn = { 0, 0, 4, 3, 0, 0 };
+	static const std::vector< long long int > pline = { 2, 6, 10, 14, 19, 24 };
+
+	int didx = 1;
 
 	for( int i = 1; i < 4; ++i )
 	{
 		for( int j = 1; j < 3; ++j )
 		{
-			REQUIRE( doc->items().at( idx )->type() == MD::ItemType::Heading );
+			REQUIRE( doc->items().at( didx )->type() == MD::ItemType::Heading );
 
-			auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( idx ).get() );
+			auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( didx ).get() );
+			const size_t idx = ( ( i - 1 ) * 2 ) + j - 1;
+			REQUIRE( h->startColumn() == hcolumn.at( idx ) );
+			REQUIRE( h->startLine() == sline.at( idx ) );
+			REQUIRE( h->endColumn() == hecolumn.at( idx ) );
+			REQUIRE( h->endLine() == eline.at( idx ) );
 
 			{
 				REQUIRE( h->level() == j );
 				REQUIRE( h->text().get() );
 				auto p = h->text().get();
+				REQUIRE( p->startColumn() == pcolumn.at( idx ) );
+				REQUIRE( p->startLine() == sline.at( idx ) );
+				REQUIRE( p->endColumn() == pcolumn.at( idx ) + 8 );
+				REQUIRE( p->endLine() == p->startLine() );
 				REQUIRE( p->items().size() == 1 );
 				REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 				auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 				REQUIRE( t->text() == u8"Heading " + to_string( j ) );
+				REQUIRE( t->startColumn() == pcolumn.at( idx ) );
+				REQUIRE( t->startLine() == sline.at( idx ) );
+				REQUIRE( t->endColumn() == pcolumn.at( idx ) + 8 );
+				REQUIRE( t->endLine() == t->startLine() );
 			}
 
-			++idx;
+			++didx;
 
-			REQUIRE( doc->items().at( idx )->type() == MD::ItemType::Paragraph );
+			REQUIRE( doc->items().at( didx )->type() == MD::ItemType::Paragraph );
 
-			auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( idx ).get() );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( didx ).get() );
+			REQUIRE( p->startColumn() == 0 );
+			REQUIRE( p->startLine() == pline.at( idx ) );
+			REQUIRE( p->endColumn() == 10 );
+			REQUIRE( p->endLine() == p->startLine() );
 
 			REQUIRE( p->items().size() == 1 );
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 			REQUIRE( static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() )->text() ==
 				u8"Paragraph " + to_string( j ) );
 
-			++idx;
+			++didx;
 		}
 	}
 
-	REQUIRE( doc->items().at( idx )->type() == MD::ItemType::Heading );
+	REQUIRE( doc->items().at( didx )->type() == MD::ItemType::Heading );
 
-	auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( idx ).get() );
+	auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( didx ).get() );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 26 );
+	REQUIRE( h->endColumn() == 25 );
+	REQUIRE( h->endLine() == 26 );
 
 	REQUIRE( h->level() == 3 );
 	REQUIRE( h->text().get() );
 	auto p = h->text().get();
+	REQUIRE( p->startColumn() == 4 );
+	REQUIRE( p->startLine() == 26 );
+	REQUIRE( p->endColumn() == 12 );
+	REQUIRE( p->endLine() == 26 );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->startColumn() == 4 );
+	REQUIRE( t->startLine() == 26 );
+	REQUIRE( t->endColumn() == 12 );
+	REQUIRE( t->endLine() == 26 );
 	REQUIRE( t->text() == u8"Heading 3" );
 	REQUIRE( h->isLabeled() );
 
