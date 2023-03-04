@@ -2128,10 +2128,11 @@ prepareTableData( typename Trait::InternalString s )
 }
 
 template< class Trait >
-inline typename Trait::InternalStringList
+inline std::pair< typename Trait::InternalStringList, std::vector< long long int > >
 splitTableRow( const typename Trait::InternalString & s )
 {
 	typename Trait::InternalStringList res;
+	std::vector< long long int > columns;
 
 	bool backslash = false;
 	long long int start = 0;
@@ -2148,6 +2149,7 @@ splitTableRow( const typename Trait::InternalString & s )
 		else if( s[ i ] == typename Trait::Char( '|' ) && !backslash )
 		{
 			res.push_back( prepareTableData< Trait >( s.sliced( start, i - start ).simplified() ) );
+			columns.push_back( s.virginPos( i ) );
 			start = i + 1;
 		}
 
@@ -2159,7 +2161,7 @@ splitTableRow( const typename Trait::InternalString & s )
 		res.push_back( prepareTableData< Trait >(
 			s.sliced( start, s.length() - start ).simplified() ) );
 
-	return res;
+	return { res, columns };
 }
 
 template< class Trait >
@@ -2177,6 +2179,11 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 	if( fr.data.size() >= 2 )
 	{
 		std::shared_ptr< Table< Trait > > table( new Table< Trait > );
+		table->setStartColumn( fr.data.front().first.virginPos( 0 ) );
+		table->setStartLine( fr.data.front().second.lineNumber );
+		table->setEndColumn( fr.data.back().first.virginPos(
+			fr.data.back().first.length() - 1 ) );
+		table->setEndLine( fr.data.back().second.lineNumber );
 
 		auto parseTableRow = [&] ( const typename Trait::InternalString & row,
 			long long int lineNumber )
@@ -2190,18 +2197,29 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 				line.remove( line.length() - 1, 1 );
 
 			auto columns = splitTableRow< Trait >( line );
+			columns.second.insert( columns.second.begin(), row.virginPos( 0 ) );
+			columns.second.push_back( row.virginPos( row.length() - 1 ) );
 
 			std::shared_ptr< TableRow< Trait > > tr( new TableRow< Trait > );
+			tr->setStartColumn( row.virginPos( 0 ) );
+			tr->setStartLine( lineNumber );
+			tr->setEndColumn( row.virginPos( row.length() - 1 ) );
+			tr->setEndLine( lineNumber );
 
-			int c = 0;
+			int col = 0;
 
-			for( auto it = columns.begin(), last = columns.end(); it != last; ++it, ++c )
+			for( auto it = columns.first.begin(), last = columns.first.end();
+				it != last; ++it, ++col )
 			{
-				if( c == columnsCount )
+				if( col == columnsCount )
 					break;
 
 				std::shared_ptr< TableCell< Trait > > c(
 					new TableCell< Trait > );
+				c->setStartColumn( columns.second.at( col ) );
+				c->setStartLine( lineNumber );
+				c->setEndColumn( columns.second.at( col + 1 ) );
+				c->setEndLine( lineNumber );
 
 				if( !it->isEmpty() )
 				{

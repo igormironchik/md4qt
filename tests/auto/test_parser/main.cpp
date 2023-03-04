@@ -3846,6 +3846,17 @@ TEST_CASE( "046" )
 	REQUIRE( hit->second.get() == h );
 }
 
+/*
+
+Column 1 | Column 2
+---------|---------
+Cell 1   | Cell 2
+
+| Column 1 | Column 2 |
+|:--------:|---------:|
+| Cell 1   | Cell 2   |
+
+*/
 TEST_CASE( "047" )
 {
 	MD::Parser< TRAIT > parser;
@@ -3855,16 +3866,28 @@ TEST_CASE( "047" )
 	REQUIRE( !doc->isEmpty() );
 	REQUIRE( doc->items().size() == 3 );
 
+	static const std::vector< long long int > scolumn = { 0, 2 };
+	static const std::vector< long long int > ecolumn1 = { 18, 22 };
+	static const std::vector< long long int > ecolumn2 = { 16, 22 };
+
 	for( int i = 1; i < 3; ++i )
 	{
 		REQUIRE( doc->items().at( i )->type() == MD::ItemType::Table );
 
 		auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( i ).get() );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == ( ( i - 1 ) * 4 ) + 1 );
+		REQUIRE( t->endColumn() == ecolumn2.at( i - 1 ) );
+		REQUIRE( t->endLine() == ( ( i - 1 ) * 4 ) + 3 );
 
 		REQUIRE( t->columnsCount() == 2 );
 		REQUIRE( t->rows().size() == 2 );
 
 		auto r0 = t->rows().at( 0 );
+		REQUIRE( r0->startColumn() == 0 );
+		REQUIRE( r0->startLine() == ( ( i - 1 ) * 4 ) + 1 );
+		REQUIRE( r0->endColumn() == ecolumn1.at( i - 1 ) ) ;
+		REQUIRE( r0->endLine() == r0->startLine() );
 
 		REQUIRE( r0->type() == MD::ItemType::TableRow );
 
@@ -3873,48 +3896,84 @@ TEST_CASE( "047" )
 		{
 			REQUIRE( r0->cells().at( 0 )->type() == MD::ItemType::TableCell );
 			auto c0 = static_cast< MD::TableCell< TRAIT >* > ( r0->cells().at( 0 ).get() );
+			REQUIRE( c0->startColumn() == 0 );
+			REQUIRE( c0->startLine() == r0->startLine() );
+			REQUIRE( c0->endColumn() == c0->startColumn() + 9 + scolumn.at( i - 1 ) ) ;
+			REQUIRE( c0->endLine() == c0->startLine() );
 
 			REQUIRE( c0->items().size() == 1 );
 			REQUIRE( c0->items().at( 0 )->type() == MD::ItemType::Text );
 
 			auto t0 = static_cast< MD::Text< TRAIT >* > ( c0->items().at( 0 ).get() );
+			REQUIRE( t0->startColumn() == scolumn.at( i - 1 ) );
+			REQUIRE( t0->startLine() == c0->startLine() );
+			REQUIRE( t0->endColumn() == t0->startColumn() + 7 );
+			REQUIRE( t0->endLine() == t0->startLine() );
 
 			REQUIRE( t0->text() == u8"Column 1" );
 		}
 
 		{
 			auto c1 = static_cast< MD::TableCell< TRAIT >* > ( r0->cells().at( 1 ).get() );
+			REQUIRE( c1->startColumn() == scolumn.at( i - 1 ) + 9 );
+			REQUIRE( c1->startLine() == r0->startLine() );
+			REQUIRE( c1->endColumn() == ecolumn1.at( i - 1 ) );
+			REQUIRE( c1->endLine() == c1->startLine() );
 
 			REQUIRE( c1->items().size() == 1 );
 			REQUIRE( c1->items().at( 0 )->type() == MD::ItemType::Text );
 
 			auto t1 = static_cast< MD::Text< TRAIT >* > ( c1->items().at( 0 ).get() );
+			REQUIRE( t1->startColumn() == scolumn.at( i - 1 ) + 9 + 2 );
+			REQUIRE( t1->startLine() == r0->startLine() );
+			REQUIRE( t1->endColumn() == c1->startColumn() + 9 );
+			REQUIRE( t1->endLine() == c1->startLine() );
 
 			REQUIRE( t1->text() == u8"Column 2" );
 		}
 
 		auto r1 = t->rows().at( 1 );
+		REQUIRE( r1->startColumn() == 0 );
+		REQUIRE( r1->startLine() == 3 + ( ( i - 1 ) * 4 ) );
+		REQUIRE( r1->endColumn() == ecolumn2.at( i - 1 ) );
+		REQUIRE( r1->endLine() == r1->startLine() );
 
 		REQUIRE( r1->cells().size() == 2 );
 
 		{
 			auto c0 = static_cast< MD::TableCell< TRAIT >* > ( r1->cells().at( 0 ).get() );
+			REQUIRE( c0->startColumn() == 0 );
+			REQUIRE( c0->startLine() == r1->startLine() );
+			REQUIRE( c0->endColumn() == c0->startColumn() + 9 + scolumn.at( i - 1 ) );
+			REQUIRE( c0->endLine() == c0->startLine() );
 
 			REQUIRE( c0->items().size() == 1 );
 			REQUIRE( c0->items().at( 0 )->type() == MD::ItemType::Text );
 
 			auto t0 = static_cast< MD::Text< TRAIT >* > ( c0->items().at( 0 ).get() );
+			REQUIRE( t0->startColumn() == scolumn.at( i -1 ) );
+			REQUIRE( t0->startLine() == r1->startLine() );
+			REQUIRE( t0->endColumn() == t0->startColumn() + 5 );
+			REQUIRE( t0->endLine() == t0->startLine() );
 
 			REQUIRE( t0->text() == u8"Cell 1" );
 		}
 
 		{
 			auto c1 = static_cast< MD::TableCell< TRAIT >* > ( r1->cells().at( 1 ).get() );
+			REQUIRE( c1->startColumn() == scolumn.at( i - 1 ) + 9 );
+			REQUIRE( c1->startLine() == r1->startLine() );
+			REQUIRE( c1->endColumn() == ecolumn2.at( i - 1 ) );
+			REQUIRE( c1->endLine() == c1->startLine() );
 
 			REQUIRE( c1->items().size() == 1 );
 			REQUIRE( c1->items().at( 0 )->type() == MD::ItemType::Text );
 
 			auto t1 = static_cast< MD::Text< TRAIT >* > ( c1->items().at( 0 ).get() );
+			REQUIRE( t1->startColumn() == scolumn.at( i - 1 ) + 9 + 2 );
+			REQUIRE( t1->startLine() == r1->startLine() );
+			REQUIRE( t1->endColumn() == t1->startColumn() + 5 );
+			REQUIRE( t1->endLine() == t1->startLine() );
 
 			REQUIRE( t1->text() == u8"Cell 2" );
 		}
