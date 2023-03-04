@@ -4088,6 +4088,13 @@ TEST_CASE( "049" )
 	REQUIRE( h->endLine() == 0 );
 }
 
+/*
+[a\]](#1)
+[b\\](#2)
+[c\-d](#3)
+[\\](#4)
+
+*/
 TEST_CASE( "050" )
 {
 	MD::Parser< TRAIT > parser;
@@ -4098,21 +4105,41 @@ TEST_CASE( "050" )
 
 	auto * p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 4 );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 7 );
+	REQUIRE( p->endLine() == 3 );
 
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
 	auto l0 = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( l0->startColumn() == 0 );
+	REQUIRE( l0->startLine() == 0 );
+	REQUIRE( l0->endColumn() == 8 );
+	REQUIRE( l0->endLine() == 0 );
 	REQUIRE( l0->text() == u8"a]" );
 
 	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Link );
 	auto l1 = static_cast< MD::Link< TRAIT >* > ( p->items().at( 1 ).get() );
+	REQUIRE( l1->startColumn() == 0 );
+	REQUIRE( l1->startLine() == 1 );
+	REQUIRE( l1->endColumn() == 8 );
+	REQUIRE( l1->endLine() == 1 );
 	REQUIRE( l1->text() == u8"b\\" );
 
 	REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Link );
 	auto l2 = static_cast< MD::Link< TRAIT >* > ( p->items().at( 2 ).get() );
+	REQUIRE( l2->startColumn() == 0 );
+	REQUIRE( l2->startLine() == 2 );
+	REQUIRE( l2->endColumn() == 9 );
+	REQUIRE( l2->endLine() == 2 );
 	REQUIRE( l2->text() == u8"c-d" );
 
 	REQUIRE( p->items().at( 3 )->type() == MD::ItemType::Link );
 	auto l3 = static_cast< MD::Link< TRAIT >* > ( p->items().at( 3 ).get() );
+	REQUIRE( l3->startColumn() == 0 );
+	REQUIRE( l3->startLine() == 3 );
+	REQUIRE( l3->endColumn() == 7 );
+	REQUIRE( l3->endLine() == 3 );
 	REQUIRE( l3->text() == u8"\\" );
 }
 
