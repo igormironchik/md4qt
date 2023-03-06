@@ -4934,6 +4934,12 @@ TEST_CASE( "065" )
 	}
 }
 
+/*
+```math
+x = {-b \pm \sqrt{b^2-4ac} \over 2a}
+```
+
+*/
 TEST_CASE( "066" )
 {
 	MD::Parser< TRAIT > parser;
@@ -4945,9 +4951,17 @@ TEST_CASE( "066" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 2 );
+	REQUIRE( p->endLine() == 2 );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Math );
 	auto m = static_cast< MD::Math< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( m->startColumn() == 0 );
+	REQUIRE( m->startLine() == 1 );
+	REQUIRE( m->endColumn() == 35 );
+	REQUIRE( m->endLine() == 1 );
 	REQUIRE( m->expr() == u8"x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}" );
 	REQUIRE( !m->isInline() );
 }
