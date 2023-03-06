@@ -4539,6 +4539,11 @@ TEST_CASE( "059" )
 	}
 }
 
+/*
+ * List
+   * List
+
+*/
 TEST_CASE( "060" )
 {
 	MD::Parser< TRAIT > parser;
@@ -4551,12 +4556,20 @@ TEST_CASE( "060" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
 
 	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startColumn() == 1 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 8 );
+	REQUIRE( l->endLine() == 1 );
 
 	REQUIRE( l->items().size() == 1 );
 
 	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
 
 	auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( li->startColumn() == 1 );
+	REQUIRE( li->startLine() == 0 );
+	REQUIRE( li->endColumn() == 8 );
+	REQUIRE( li->endLine() == 1 );
 
 	REQUIRE( li->items().size() == 2 );
 
