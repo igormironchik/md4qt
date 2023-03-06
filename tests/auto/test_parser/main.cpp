@@ -4577,6 +4577,12 @@ TEST_CASE( "060" )
 	REQUIRE( li->items().at( 1 )->type() == MD::ItemType::List );
 }
 
+/*
+*   A list item with a code block:
+
+        <code goes here>
+
+*/
 TEST_CASE( "061" )
 {
 	MD::Parser< TRAIT > parser;
@@ -4589,25 +4595,45 @@ TEST_CASE( "061" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
 
 	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startColumn() == 0 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 23 );
+	REQUIRE( l->endLine() == 2 );
 
 	REQUIRE( l->items().size() == 1 );
 
 	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
 
 	auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( li->startColumn() == 0 );
+	REQUIRE( li->startLine() == 0 );
+	REQUIRE( li->endColumn() == 23 );
+	REQUIRE( li->endLine() == 2 );
 
 	REQUIRE( li->items().size() == 2 );
 
 	REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).get() );
+	REQUIRE( p->startColumn() == 4 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 33 );
+	REQUIRE( p->endLine() == 0 );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->startColumn() == 4 );
+	REQUIRE( t->startLine() == 0 );
+	REQUIRE( t->endColumn() == 33 );
+	REQUIRE( t->endLine() == 0 );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
 	REQUIRE( t->text() == u8"A list item with a code block:" );
 
 	REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Code );
 	auto c = static_cast< MD::Code< TRAIT >* > ( li->items().at( 1 ).get() );
+	REQUIRE( c->startColumn() == 8 );
+	REQUIRE( c->startLine() == 2 );
+	REQUIRE( c->endColumn() == 23 );
+	REQUIRE( c->endLine() == 2 );
 	REQUIRE( c->isInlined() == false );
 	REQUIRE( c->syntax().isEmpty() );
 	REQUIRE( c->text() == u8"<code goes here>" );
