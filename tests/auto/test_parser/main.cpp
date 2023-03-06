@@ -4813,6 +4813,10 @@ TEST_CASE( "063" )
 	}
 }
 
+/*
+\\`
+
+*/
 TEST_CASE( "064" )
 {
 	MD::Parser< TRAIT > parser;
@@ -4824,9 +4828,17 @@ TEST_CASE( "064" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 2 );
+	REQUIRE( p->endLine() == 0 );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->startColumn() == 0 );
+	REQUIRE( t->startLine() == 0 );
+	REQUIRE( t->endColumn() == 2 );
+	REQUIRE( t->endLine() == 0 );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
 	REQUIRE( t->text() == u8"\\`" );
 }
