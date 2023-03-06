@@ -4843,6 +4843,11 @@ TEST_CASE( "064" )
 	REQUIRE( t->text() == u8"\\`" );
 }
 
+/*
+When $a \ne 0$, there are two solutions to $(ax^2 + bx + c = 0)$ and they are
+$$ x = {-b \pm \sqrt{b^2-4ac} \over 2a} $$
+
+*/
 TEST_CASE( "065" )
 {
 	MD::Parser< TRAIT > parser;
@@ -4854,11 +4859,21 @@ TEST_CASE( "065" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 41 );
+	REQUIRE( p->endLine() == 1 );
+
 	REQUIRE( p->items().size() == 6 );
 
 	{
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 4 );
+		REQUIRE( t->endLine() == 0 );
+		REQUIRE( t->isSpaceAfter() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == u8"When" );
 	}
@@ -4866,6 +4881,10 @@ TEST_CASE( "065" )
 	{
 		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Math );
 		auto m = static_cast< MD::Math< TRAIT >* > ( p->items().at( 1 ).get() );
+		REQUIRE( m->startColumn() == 6 );
+		REQUIRE( m->startLine() == 0 );
+		REQUIRE( m->endColumn() == 12 );
+		REQUIRE( m->endLine() == 0 );
 		REQUIRE( m->expr() == u8"a \\ne 0" );
 		REQUIRE( m->isInline() );
 	}
@@ -4873,6 +4892,10 @@ TEST_CASE( "065" )
 	{
 		REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 2 ).get() );
+		REQUIRE( t->startColumn() == 14 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 42 );
+		REQUIRE( t->endLine() == 0 );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == u8", there are two solutions to" );
 	}
@@ -4880,6 +4903,10 @@ TEST_CASE( "065" )
 	{
 		REQUIRE( p->items().at( 3 )->type() == MD::ItemType::Math );
 		auto m = static_cast< MD::Math< TRAIT >* > ( p->items().at( 3 ).get() );
+		REQUIRE( m->startColumn() == 44 );
+		REQUIRE( m->startLine() == 0 );
+		REQUIRE( m->endColumn() == 62 );
+		REQUIRE( m->endLine() == 0 );
 		REQUIRE( m->expr() == u8"(ax^2 + bx + c = 0)" );
 		REQUIRE( m->isInline() );
 	}
@@ -4887,6 +4914,10 @@ TEST_CASE( "065" )
 	{
 		REQUIRE( p->items().at( 4 )->type() == MD::ItemType::Text );
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 4 ).get() );
+		REQUIRE( t->startColumn() == 64 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 76 );
+		REQUIRE( t->endLine() == 0 );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == u8"and they are" );
 	}
@@ -4894,6 +4925,10 @@ TEST_CASE( "065" )
 	{
 		REQUIRE( p->items().at( 5 )->type() == MD::ItemType::Math );
 		auto m = static_cast< MD::Math< TRAIT >* > ( p->items().at( 5 ).get() );
+		REQUIRE( m->startColumn() == 2 );
+		REQUIRE( m->startLine() == 1 );
+		REQUIRE( m->endColumn() == 39 );
+		REQUIRE( m->endLine() == 1 );
 		REQUIRE( m->expr() == u8" x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a} " );
 		REQUIRE( !m->isInline() );
 	}

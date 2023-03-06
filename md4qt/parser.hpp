@@ -3127,6 +3127,12 @@ makeTextObject( const typename Trait::String & text, bool spaceBefore, bool spac
 
 	if( !s.isEmpty() )
 	{
+		if( endPos < 0 && endLine - 1 >= 0 )
+		{
+			endPos = po.fr.data.at( endLine - 1 ).first.length() - 1;
+			--endLine;
+		}
+
 		std::shared_ptr< Text< Trait > > t( new Text< Trait > );
 		t->setText( s );
 		t->setOpts( po.opts );
@@ -4265,7 +4271,7 @@ checkForMath( typename Delims< Trait >::const_iterator it,
 			m->setStartColumn( po.fr.data.at( it->m_line ).first.virginPos( it->m_pos + it->m_len ) );
 			m->setStartLine( po.fr.data.at( it->m_line ).second.lineNumber );
 			m->setEndColumn( po.fr.data.at( end->m_line ).first.virginPos( end->m_pos - 1 ) );
-			m->setStartLine( po.fr.data.at( end->m_line ).second.lineNumber );
+			m->setEndLine( po.fr.data.at( end->m_line ).second.lineNumber );
 			m->setInline( it->m_len == 1 );
 			m->setExpr( math );
 
