@@ -4639,6 +4639,16 @@ TEST_CASE( "061" )
 	REQUIRE( c->text() == u8"<code goes here>" );
 }
 
+/*
+**`**`*
+
+**``**``*
+
+**``**`**``*
+
+**`*`**`*
+
+*/
 TEST_CASE( "062" )
 {
 	MD::Parser< TRAIT > parser;
@@ -4652,14 +4662,26 @@ TEST_CASE( "062" )
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 0 );
+		REQUIRE( p->endColumn() == 6 );
+		REQUIRE( p->endLine() == 0 );
 
 		REQUIRE( p->items().size() == 2 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 		auto t1 = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t1->startColumn() == 0 );
+		REQUIRE( t1->startLine() == 0 );
+		REQUIRE( t1->endColumn() == 0 );
+		REQUIRE( t1->endLine() == 0 );
 		REQUIRE( t1->text() == u8"*" );
 
 		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Code );
 		auto c1 = static_cast< MD::Code< TRAIT >* > ( p->items().at( 1 ).get() );
+		REQUIRE( c1->startColumn() == 3 );
+		REQUIRE( c1->startLine() == 0 );
+		REQUIRE( c1->endColumn() == 4 );
+		REQUIRE( c1->endLine() == 0 );
 		REQUIRE( c1->text() == u8"**" );
 	}
 
@@ -4667,14 +4689,26 @@ TEST_CASE( "062" )
 		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 2 );
+		REQUIRE( p->endColumn() == 8 );
+		REQUIRE( p->endLine() == 2 );
 
 		REQUIRE( p->items().size() == 2 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 		auto t1 = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t1->startColumn() == 0 );
+		REQUIRE( t1->startLine() == 2 );
+		REQUIRE( t1->endColumn() == 0 );
+		REQUIRE( t1->endLine() == 2 );
 		REQUIRE( t1->text() == u8"*" );
 
 		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Code );
 		auto c1 = static_cast< MD::Code< TRAIT >* > ( p->items().at( 1 ).get() );
+		REQUIRE( c1->startColumn() == 4 );
+		REQUIRE( c1->startLine() == 2 );
+		REQUIRE( c1->endColumn() == 5 );
+		REQUIRE( c1->endLine() == 2 );
 		REQUIRE( c1->text() == u8"**" );
 	}
 
@@ -4682,14 +4716,26 @@ TEST_CASE( "062" )
 		REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 3 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 4 );
+		REQUIRE( p->endColumn() == 11 );
+		REQUIRE( p->endLine() == 4 );
 
 		REQUIRE( p->items().size() == 2 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 		auto t1 = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t1->startColumn() == 0 );
+		REQUIRE( t1->startLine() == 4 );
+		REQUIRE( t1->endColumn() == 0 );
+		REQUIRE( t1->endLine() == 4 );
 		REQUIRE( t1->text() == u8"*" );
 
 		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Code );
 		auto c1 = static_cast< MD::Code< TRAIT >* > ( p->items().at( 1 ).get() );
+		REQUIRE( c1->startColumn() == 4 );
+		REQUIRE( c1->startLine() == 4 );
+		REQUIRE( c1->endColumn() == 8 );
+		REQUIRE( c1->endLine() == 4 );
 		REQUIRE( c1->text() == u8"**`**" );
 	}
 
@@ -4697,15 +4743,27 @@ TEST_CASE( "062" )
 		REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 4 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 6 );
+		REQUIRE( p->endColumn() == 8 );
+		REQUIRE( p->endLine() == 6 );
 
 		REQUIRE( p->items().size() == 2 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Code );
 		auto c1 = static_cast< MD::Code< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( c1->startColumn() == 3 );
+		REQUIRE( c1->startLine() == 6 );
+		REQUIRE( c1->endColumn() == 3 );
+		REQUIRE( c1->endLine() == 6 );
 		REQUIRE( c1->text() == u8"*" );
 
 		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
 		auto t1 = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+		REQUIRE( t1->startColumn() == 7 );
+		REQUIRE( t1->startLine() == 6 );
+		REQUIRE( t1->endColumn() == 8 );
+		REQUIRE( t1->endLine() == 6 );
 		REQUIRE( t1->text() == u8"`*" );
 	}
 }
