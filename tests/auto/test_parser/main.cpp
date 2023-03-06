@@ -5067,6 +5067,13 @@ TEST_CASE( "067" )
 	}
 }
 
+/*
+<!-- Not
+finished
+HTML
+comment
+
+*/
 TEST_CASE( "068" )
 {
 	MD::Parser< TRAIT > parser;
@@ -5078,9 +5085,17 @@ TEST_CASE( "068" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 6 );
+	REQUIRE( p->endLine() == 3 );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->startColumn() == 0 );
+	REQUIRE( t->startLine() == 0 );
+	REQUIRE( t->endColumn() == 6 );
+	REQUIRE( t->endLine() == 3 );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
 	REQUIRE( t->text() == u8"<!-- Not finished HTML comment" );
 }
