@@ -4768,6 +4768,10 @@ TEST_CASE( "062" )
 	}
 }
 
+/*
+_**Lorem.**_ Aenean
+
+*/
 TEST_CASE( "063" )
 {
 	MD::Parser< TRAIT > parser;
@@ -4779,11 +4783,19 @@ TEST_CASE( "063" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 18 );
+	REQUIRE( p->endLine() == 0 );
 	REQUIRE( p->items().size() == 2 );
 
 	{
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->startColumn() == 3 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 8 );
+		REQUIRE( t->endLine() == 0 );
 		REQUIRE( t->opts() == ( MD::ItalicText | MD::BoldText ) );
 		REQUIRE( t->text() == u8"Lorem." );
 	}
@@ -4791,6 +4803,11 @@ TEST_CASE( "063" )
 	{
 		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+		REQUIRE( t->isSpaceBefore() );
+		REQUIRE( t->startColumn() == 12 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 18 );
+		REQUIRE( t->endLine() == 0 );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == u8"Aenean" );
 	}
