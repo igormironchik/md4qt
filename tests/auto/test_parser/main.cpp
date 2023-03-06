@@ -4966,6 +4966,17 @@ TEST_CASE( "066" )
 	REQUIRE( !m->isInline() );
 }
 
+/*
+Paragraph
+
+ * List
+item
+
+   ```
+   Code
+   ```
+
+*/
 TEST_CASE( "067" )
 {
 	MD::Parser< TRAIT > parser;
@@ -4979,12 +4990,20 @@ TEST_CASE( "067" )
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 0 );
+		REQUIRE( p->endColumn() == 8 );
+		REQUIRE( p->endLine() == 0 );
 
 		REQUIRE( p->items().size() == 1 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 8 );
+		REQUIRE( t->endLine() == 0 );
 
 		REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
 		REQUIRE( t->text() == u8"Paragraph" );
@@ -4993,12 +5012,20 @@ TEST_CASE( "067" )
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::List );
 
 	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 2 ).get() );
+	REQUIRE( l->startColumn() == 1 );
+	REQUIRE( l->startLine() == 2 );
+	REQUIRE( l->endColumn() == 5 );
+	REQUIRE( l->endLine() == 7 );
 
 	REQUIRE( l->items().size() == 1 );
 
 	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
 
 	auto item = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( item->startColumn() == 1 );
+	REQUIRE( item->startLine() == 2 );
+	REQUIRE( item->endColumn() == 5 );
+	REQUIRE( item->endLine() == 7 );
 
 	REQUIRE( item->listType() == MD::ListItem< TRAIT >::Unordered );
 
@@ -5008,12 +5035,20 @@ TEST_CASE( "067" )
 		REQUIRE( item->items().at( 0 )->type() == MD::ItemType::Paragraph );
 
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( item->items().at( 0 ).get() );
+		REQUIRE( p->startColumn() == 3 );
+		REQUIRE( p->startLine() == 2 );
+		REQUIRE( p->endColumn() == 3 );
+		REQUIRE( p->endLine() == 3 );
 
 		REQUIRE( p->items().size() == 1 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->startColumn() == 3 );
+		REQUIRE( t->startLine() == 2 );
+		REQUIRE( t->endColumn() == 3 );
+		REQUIRE( t->endLine() == 3 );
 
 		REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
 		REQUIRE( t->text() == u8"List item" );
@@ -5023,6 +5058,10 @@ TEST_CASE( "067" )
 		REQUIRE( item->items().at( 1 )->type() == MD::ItemType::Code );
 
 		auto c = static_cast< MD::Code< TRAIT >* > ( item->items().at( 1 ).get() );
+		REQUIRE( c->startColumn() == 3 );
+		REQUIRE( c->startLine() == 6 );
+		REQUIRE( c->endColumn() == 6 );
+		REQUIRE( c->endLine() == 6 );
 
 		REQUIRE( c->text() == u8"Code" );
 	}
