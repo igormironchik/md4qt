@@ -5169,6 +5169,14 @@ TEST_CASE( "070" )
 	REQUIRE( h->endLine() == 4 );
 }
 
+/*
+<pre>
+
+data
+
+</pre> Text
+
+*/
 TEST_CASE( "071" )
 {
 	MD::Parser< TRAIT > parser;
@@ -5181,6 +5189,10 @@ TEST_CASE( "071" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
 	auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( h->text() == u8"<pre>\n\ndata\n\n</pre> Text" );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 10 );
+	REQUIRE( h->endLine() == 4 );
 }
 
 TEST_CASE( "072" )
