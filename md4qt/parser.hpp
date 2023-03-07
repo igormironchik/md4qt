@@ -2540,6 +2540,13 @@ Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
 									pp->setStartColumn( start.first );
 									pp->setStartLine( start.second );
 								}
+								else
+								{
+									const auto start = nextPosition( fr, (*it)->endColumn(),
+										(*it)->endLine() );
+									pp->setStartColumn( start.first );
+									pp->setStartLine( start.second );
+								}
 
 								parent->appendItem( (*it) );
 							}

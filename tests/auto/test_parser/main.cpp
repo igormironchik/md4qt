@@ -5195,6 +5195,15 @@ TEST_CASE( "071" )
 	REQUIRE( h->endLine() == 4 );
 }
 
+/*
+<pre>
+
+data
+
+</pre>
+Text
+
+*/
 TEST_CASE( "072" )
 {
 	MD::Parser< TRAIT > parser;
@@ -5207,14 +5216,26 @@ TEST_CASE( "072" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
 	auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( h->text() == u8"<pre>\n\ndata\n\n</pre>" );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 5 );
+	REQUIRE( h->endLine() == 4 );
 
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 5 );
+	REQUIRE( p->endColumn() == 3 );
+	REQUIRE( p->endLine() == 5 );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
 	REQUIRE( t->text() == u8"Text" );
+	REQUIRE( t->startColumn() == 0 );
+	REQUIRE( t->startLine() == 5 );
+	REQUIRE( t->endColumn() == 3 );
+	REQUIRE( t->endLine() == 5 );
 }
 
 TEST_CASE( "073" )
