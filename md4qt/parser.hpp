@@ -2554,6 +2554,9 @@ Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
 								pp->appendItem( (*it) );
 						}
 
+						pp->setEndColumn( p->endColumn() );
+						pp->setEndLine( p->endLine() );
+
 						if( !pp->isEmpty() )
 						{
 							Paragraph< Trait > * prevP = nullptr;
