@@ -6322,6 +6322,21 @@ TEST_CASE( "098" )
 	REQUIRE( h->endLine() == 11 );
 }
 
+/*
+Text <![CDATA[
+function matchwo(a,b)
+{
+  if (a < b && a < 0) then {
+    return 1;
+
+  } else {
+
+    return 0;
+  }
+}
+]]>
+
+*/
 TEST_CASE( "099" )
 {
 	MD::Parser< TRAIT > parser;
@@ -6333,11 +6348,19 @@ TEST_CASE( "099" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 2 );
+	REQUIRE( p->endLine() == 11 );
 	REQUIRE( p->items().size() == 2 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
 	REQUIRE( t->text() == u8"Text" );
+	REQUIRE( t->startColumn() == 0 );
+	REQUIRE( t->startLine() == 0 );
+	REQUIRE( t->endColumn() == 4 );
+	REQUIRE( t->endLine() == 0 );
 
 	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
 	auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 1 ).get() );
@@ -6351,6 +6374,10 @@ TEST_CASE( "099" )
 										  "  }\n"
 										  "}\n"
 										  "]]>" );
+	REQUIRE( h->startColumn() == 5 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 2 );
+	REQUIRE( h->endLine() == 11 );
 }
 
 TEST_CASE( "100" )
