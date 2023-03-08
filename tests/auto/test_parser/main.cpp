@@ -5774,6 +5774,14 @@ TEST_CASE( "085" )
 	REQUIRE( h->endLine() == 4 );
 }
 
+/*
+<?php
+
+echo '>';
+
+?> Text
+
+*/
 TEST_CASE( "086" )
 {
 	MD::Parser< TRAIT > parser;
@@ -5786,6 +5794,10 @@ TEST_CASE( "086" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
 	auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( h->text() == u8"<?php\n\necho '>';\n\n?> Text" );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 6 );
+	REQUIRE( h->endLine() == 4 );
 }
 
 TEST_CASE( "087" )
