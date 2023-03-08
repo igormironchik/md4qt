@@ -6007,6 +6007,10 @@ TEST_CASE( "090" )
 	}
 }
 
+/*
+<!DOCTYPE html>
+
+*/
 TEST_CASE( "091" )
 {
 	MD::Parser< TRAIT > parser;
@@ -6019,6 +6023,10 @@ TEST_CASE( "091" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
 	auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( h->text() == u8"<!DOCTYPE html>" );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 14 );
+	REQUIRE( h->endLine() == 0 );
 }
 
 TEST_CASE( "092" )
