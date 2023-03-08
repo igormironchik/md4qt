@@ -5732,6 +5732,14 @@ TEST_CASE( "084" )
 	REQUIRE( h->endLine() == 4 );
 }
 
+/*
+Text <?php
+
+echo '>';
+
+?>
+
+*/
 TEST_CASE( "085" )
 {
 	MD::Parser< TRAIT > parser;
@@ -5743,15 +5751,27 @@ TEST_CASE( "085" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 1 );
+	REQUIRE( p->endLine() == 4 );
 	REQUIRE( p->items().size() == 2 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
 	REQUIRE( t->text() == u8"Text" );
+	REQUIRE( t->startColumn() == 0 );
+	REQUIRE( t->startLine() == 0 );
+	REQUIRE( t->endColumn() == 4 );
+	REQUIRE( t->endLine() == 0 );
 
 	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
 	auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 1 ).get() );
 	REQUIRE( h->text() == u8"<?php\n\necho '>';\n\n?>" );
+	REQUIRE( h->startColumn() == 5 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 1 );
+	REQUIRE( h->endLine() == 4 );
 }
 
 TEST_CASE( "086" )
