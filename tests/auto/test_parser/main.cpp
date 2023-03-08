@@ -6280,6 +6280,21 @@ TEST_CASE( "097" )
 	}
 }
 
+/*
+<![CDATA[
+function matchwo(a,b)
+{
+  if (a < b && a < 0) then {
+    return 1;
+
+  } else {
+
+    return 0;
+  }
+}
+]]>
+
+*/
 TEST_CASE( "098" )
 {
 	MD::Parser< TRAIT > parser;
@@ -6301,6 +6316,10 @@ TEST_CASE( "098" )
 										  "  }\n"
 										  "}\n"
 										  "]]>" );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 2 );
+	REQUIRE( h->endLine() == 11 );
 }
 
 TEST_CASE( "099" )
