@@ -6923,6 +6923,12 @@ TEST_CASE( "111" )
 	REQUIRE( h->endLine() == 2 );
 }
 
+/*
+<a href="www.google.com">
+Google
+</a>
+
+*/
 TEST_CASE( "112" )
 {
 	MD::Parser< TRAIT > parser;
@@ -6935,8 +6941,16 @@ TEST_CASE( "112" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
 	auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( h->text() == u8"<a href=\"www.google.com\">\nGoogle\n</a>" );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 3 );
+	REQUIRE( h->endLine() == 2 );
 }
 
+/*
+Text <a href="www.google.com">Google</a>
+
+*/
 TEST_CASE( "113" )
 {
 	MD::Parser< TRAIT > parser;
@@ -6948,6 +6962,10 @@ TEST_CASE( "113" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 39 );
+	REQUIRE( p->endLine() == 0 );
 	REQUIRE( p->items().size() == 4 );
 
 	{
@@ -6955,12 +6973,21 @@ TEST_CASE( "113" )
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == u8"Text" );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 4 );
+		REQUIRE( t->endLine() == 0 );
+		REQUIRE( t->isSpaceAfter() );
 	}
 
 	{
 		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
 		auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 1 ).get() );
 		REQUIRE( h->text() == u8"<a href=\"www.google.com\">" );
+		REQUIRE( h->startColumn() == 5 );
+		REQUIRE( h->startLine() == 0 );
+		REQUIRE( h->endColumn() == 29 );
+		REQUIRE( h->endLine() == 0 );
 	}
 
 	{
@@ -6968,12 +6995,22 @@ TEST_CASE( "113" )
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 2 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == u8"Google" );
+		REQUIRE( t->startColumn() == 30 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 35 );
+		REQUIRE( t->endLine() == 0 );
+		REQUIRE( !t->isSpaceBefore() );
+		REQUIRE( !t->isSpaceAfter() );
 	}
 
 	{
 		REQUIRE( p->items().at( 3 )->type() == MD::ItemType::RawHtml );
 		auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 3 ).get() );
 		REQUIRE( h->text() == u8"</a>" );
+		REQUIRE( h->startColumn() == 36 );
+		REQUIRE( h->startLine() == 0 );
+		REQUIRE( h->endColumn() == 39 );
+		REQUIRE( h->endLine() == 0 );
 	}
 }
 
