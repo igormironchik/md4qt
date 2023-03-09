@@ -7461,6 +7461,21 @@ TEST_CASE( "119" )
 	}
 }
 
+/*
+
+$$
+\[\mathrm{\mathbf{M}}(\alpha) =
+   \left(
+      \begin{matrix}
+         \cos(\alpha)+n_x^2\cdot (1-\cos(\alpha))  &  n_x\cdot n_y\cdot (1-\cos(\alpha))-n_z\cdot \sin(\alpha) &  n_x\cdot n_z\cdot (1-\cos(\alpha))+n_y\cdot \sin(\alpha)\\
+         n_x\cdot n_y\cdot (1-\cos(\alpha))+n_z\cdot \sin(\alpha) & \cos(\alpha)+n_y^2\cdot (1-\cos(\alpha))  &   n_y\cdot n_z\cdot (1-\cos(\alpha))-n_x\cdot \sin(\alpha)\\
+         n_z\cdot n_x\cdot (1-\cos(\alpha))-n_y\cdot \sin(\alpha) & n_z\cdot n_y\cdot (1-\cos(\alpha))+n_x\cdot \sin(\alpha)  & \cos(\alpha)+n_z^2\cdot (1-\cos(\alpha))
+      \end{matrix}
+   \right)
+\]
+$$
+
+*/
 TEST_CASE( "120" )
 {
 	MD::Parser< TRAIT > parser;
@@ -7473,6 +7488,10 @@ TEST_CASE( "120" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 1 );
+	REQUIRE( p->endColumn() == 1 );
+	REQUIRE( p->endLine() == 11 );
 
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Math );
 	auto m = static_cast< MD::Math< TRAIT >* > ( p->items().at( 0 ).get() );
@@ -7492,6 +7511,10 @@ TEST_CASE( "120" )
 		"      \\end{matrix}\n"
 		"   \\right)\n"
 		"\\]\n" );
+	REQUIRE( m->startColumn() == 0 );
+	REQUIRE( m->startLine() == 2 );
+	REQUIRE( m->endColumn() == 1 );
+	REQUIRE( m->endLine() == 10 );
 }
 
 TEST_CASE( "121" )

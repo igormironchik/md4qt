@@ -4287,10 +4287,25 @@ checkForMath( typename Delims< Trait >::const_iterator it,
 		if( !po.collectRefLinks )
 		{
 			std::shared_ptr< Math< Trait > > m( new Math< Trait > );
-			m->setStartColumn( po.fr.data.at( it->m_line ).first.virginPos( it->m_pos + it->m_len ) );
-			m->setStartLine( po.fr.data.at( it->m_line ).second.lineNumber );
-			m->setEndColumn( po.fr.data.at( end->m_line ).first.virginPos( end->m_pos - 1 ) );
-			m->setEndLine( po.fr.data.at( end->m_line ).second.lineNumber );
+
+			auto startLine = po.fr.data.at( it->m_line ).second.lineNumber;
+			auto startColumn = po.fr.data.at( it->m_line ).first.virginPos( it->m_pos + it->m_len );
+
+			if( it->m_pos + it->m_len >= po.fr.data.at( it->m_line ).first.length() )
+				std::tie( startColumn, startLine ) = nextPosition( po.fr, startColumn, startLine );
+
+			auto endColumn = po.fr.data.at( end->m_line ).first.virginPos( end->m_pos );
+			auto endLine = po.fr.data.at( end->m_line ).second.lineNumber;
+
+			if( endColumn == 0 )
+				std::tie( endColumn, endLine ) = prevPosition( po.fr, endColumn, endLine );
+			else
+				--endColumn;
+
+			m->setStartColumn( startColumn );
+			m->setStartLine( startLine );
+			m->setEndColumn( endColumn );
+			m->setEndLine( endLine );
 			m->setInline( it->m_len == 1 );
 			m->setExpr( math );
 
