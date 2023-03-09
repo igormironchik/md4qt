@@ -7079,6 +7079,13 @@ TEST_CASE( "114" )
 	}
 }
 
+/*
+<a href="www.google.com">
+Google
+</a>
+Text
+
+*/
 TEST_CASE( "115" )
 {
 	MD::Parser< TRAIT > parser;
@@ -7091,6 +7098,10 @@ TEST_CASE( "115" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
 	auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( h->text() == u8"<a href=\"www.google.com\">\nGoogle\n</a>\nText" );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 3 );
+	REQUIRE( h->endLine() == 3 );
 }
 
 TEST_CASE( "116" )
