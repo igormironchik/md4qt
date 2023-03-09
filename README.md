@@ -152,7 +152,7 @@ flag. And yes, I expect to receive UTF-8 encoded content...
 
 **How can I convert `MD::Document` into `HTML`?**
 
- * In the `master` branch were made commits with implementation of
+ * In the `main` branch were made commits with implementation of
 `MD::toHtml()` function. You can do the following:
 
    ```cpp
