@@ -6694,6 +6694,10 @@ TEST_CASE( "104" )
 	}
 }
 
+/*
+<form>
+
+*/
 TEST_CASE( "105" )
 {
 	MD::Parser< TRAIT > parser;
@@ -6706,6 +6710,10 @@ TEST_CASE( "105" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
 	auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( h->text() == u8"<form>" );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 5 );
+	REQUIRE( h->endLine() == 0 );
 }
 
 TEST_CASE( "106" )
