@@ -6614,6 +6614,23 @@ TEST_CASE( "103" )
 	}
 }
 
+/*
+Text
+<![CDATA[
+function matchwo(a,b)
+{
+  if (a < b && a < 0) then {
+    return 1;
+
+  } else {
+
+    return 0;
+  }
+}
+]]>
+Text
+
+*/
 TEST_CASE( "104" )
 {
 	MD::Parser< TRAIT > parser;
@@ -6626,11 +6643,19 @@ TEST_CASE( "104" )
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 0 );
+		REQUIRE( p->endColumn() == 3 );
+		REQUIRE( p->endLine() == 0 );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == u8"Text" );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 3 );
+		REQUIRE( t->endLine() == 0 );
 	}
 
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::RawHtml );
@@ -6645,15 +6670,27 @@ TEST_CASE( "104" )
 										  "  }\n"
 										  "}\n"
 										  "]]>" );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 1 );
+	REQUIRE( h->endColumn() == 2 );
+	REQUIRE( h->endLine() == 12 );
 
 	{
 		REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 3 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 13 );
+		REQUIRE( p->endColumn() == 3 );
+		REQUIRE( p->endLine() == 13 );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == u8"Text" );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 13 );
+		REQUIRE( t->endColumn() == 3 );
+		REQUIRE( t->endLine() == 13 );
 	}
 }
 
