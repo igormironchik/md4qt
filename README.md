@@ -178,7 +178,8 @@ flag. And yes, I expect to receive UTF-8 encoded content...
 **I need to know positions in the `Markdown` file of blocks/elements. How
 can I achieve this?**
 
- * Work in progress, be patient.
+ * Done in version `2.0.5`. This version is not released yet, but it's
+almost done (done, but not fully tested), and can be used from `main` branch.
 
 **Why is implementation of the following method so terrible?**
 
