@@ -3753,9 +3753,18 @@ eatRawHtml( long long int line, long long int pos, long long int toLine, long lo
 				toPos > 0 ? toPos : po.fr.data[ line ].first.length() ) );
 		}
 
-		po.html.html->setEndColumn( po.fr.data.at( toLine ).first.virginPos( toPos >= 0 ? toPos - 1 :
-			po.fr.data.at( toLine ).first.length() - 1 ) );
-		po.html.html->setEndLine( po.fr.data.at( toLine ).second.lineNumber );
+		auto endColumn = toPos;
+		auto endLine = toLine;
+
+		if( endColumn == 0 && endLine > 0 )
+		{
+			--endLine;
+			endColumn = po.fr.data.at( endLine ).first.length();
+		}
+
+		po.html.html->setEndColumn( po.fr.data.at( endLine ).first.virginPos(
+			endColumn >= 0 ? endColumn - 1 : po.fr.data.at( endLine ).first.length() - 1 ) );
+		po.html.html->setEndLine( po.fr.data.at( endLine ).second.lineNumber );
 
 		po.line = ( toPos >= 0 ? toLine : toLine + 1 );
 		po.pos = ( toPos >= 0 ? toPos : 0 );
