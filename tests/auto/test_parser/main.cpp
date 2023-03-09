@@ -7014,6 +7014,10 @@ TEST_CASE( "113" )
 	}
 }
 
+/*
+<a href="www.google.com">Google</a> Text
+
+*/
 TEST_CASE( "114" )
 {
 	MD::Parser< TRAIT > parser;
@@ -7025,12 +7029,20 @@ TEST_CASE( "114" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 39 );
+	REQUIRE( p->endLine() == 0 );
 	REQUIRE( p->items().size() == 4 );
 
 	{
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::RawHtml );
 		auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( h->text() == u8"<a href=\"www.google.com\">" );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 0 );
+		REQUIRE( h->endColumn() == 24 );
+		REQUIRE( h->endLine() == 0 );
 	}
 
 	{
@@ -7038,12 +7050,20 @@ TEST_CASE( "114" )
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == u8"Google" );
+		REQUIRE( t->startColumn() == 25 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 30 );
+		REQUIRE( t->endLine() == 0 );
 	}
 
 	{
 		REQUIRE( p->items().at( 2 )->type() == MD::ItemType::RawHtml );
 		auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 2 ).get() );
 		REQUIRE( h->text() == u8"</a>" );
+		REQUIRE( h->startColumn() == 31 );
+		REQUIRE( h->startLine() == 0 );
+		REQUIRE( h->endColumn() == 34 );
+		REQUIRE( h->endLine() == 0 );
 	}
 
 	{
@@ -7051,6 +7071,11 @@ TEST_CASE( "114" )
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 3 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == u8"Text" );
+		REQUIRE( t->startColumn() == 35 );
+		REQUIRE( t->isSpaceBefore() );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 39 );
+		REQUIRE( t->endLine() == 0 );
 	}
 }
 
