@@ -7360,18 +7360,31 @@ TEST_CASE( "118-1" )
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 		REQUIRE( p->items().size() == 5 );
+		REQUIRE( p->items().size() == 5 );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 0 );
+		REQUIRE( p->endColumn() == 3 );
+		REQUIRE( p->endLine() == 4 );
 
 		{
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == u8"Text" );
+			REQUIRE( t->startColumn() == 0 );
+			REQUIRE( t->startLine() == 0 );
+			REQUIRE( t->endColumn() == 3 );
+			REQUIRE( t->endLine() == 0 );
 		}
 
 		{
 			REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
 			auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 1 ).get() );
 			REQUIRE( h->text() == u8"<a href=\"www.google.com\">" );
+			REQUIRE( h->startColumn() == 0 );
+			REQUIRE( h->startLine() == 1 );
+			REQUIRE( h->endColumn() == 24 );
+			REQUIRE( h->endLine() == 1 );
 		}
 
 		{
@@ -7379,12 +7392,20 @@ TEST_CASE( "118-1" )
 			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 2 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == u8"Google" );
+			REQUIRE( t->startColumn() == 0 );
+			REQUIRE( t->startLine() == 2 );
+			REQUIRE( t->endColumn() == 5 );
+			REQUIRE( t->endLine() == 2 );
 		}
 
 		{
 			REQUIRE( p->items().at( 3 )->type() == MD::ItemType::RawHtml );
 			auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 3 ).get() );
 			REQUIRE( h->text() == u8"</a>" );
+			REQUIRE( h->startColumn() == 0 );
+			REQUIRE( h->startLine() == 3 );
+			REQUIRE( h->endColumn() == 3 );
+			REQUIRE( h->endLine() == 3 );
 		}
 
 		{
@@ -7392,6 +7413,10 @@ TEST_CASE( "118-1" )
 			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 4 ).get() );
 			REQUIRE( t->opts() == MD::TextWithoutFormat );
 			REQUIRE( t->text() == u8"Text" );
+			REQUIRE( t->startColumn() == 0 );
+			REQUIRE( t->startLine() == 4 );
+			REQUIRE( t->endColumn() == 3 );
+			REQUIRE( t->endLine() == 4 );
 		}
 	}
 	else
