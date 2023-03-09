@@ -7517,6 +7517,12 @@ TEST_CASE( "120" )
 	REQUIRE( m->endLine() == 10 );
 }
 
+/*
+> foo
+bar
+--
+
+*/
 TEST_CASE( "121" )
 {
 	MD::Parser< TRAIT > parser;
@@ -7529,15 +7535,27 @@ TEST_CASE( "121" )
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Blockquote );
 		auto b = static_cast< MD::Blockquote< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( b->startColumn() == 0 );
+		REQUIRE( b->startLine() == 0 );
+		REQUIRE( b->endColumn() == 1 );
+		REQUIRE( b->endLine() == 2 );
 		REQUIRE( b->items().size() == 1 );
 		REQUIRE( b->items().at( 0 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( b->items().at( 0 ).get() );
 		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->startColumn() == 2 );
+		REQUIRE( p->startLine() == 0 );
+		REQUIRE( p->endColumn() == 1 );
+		REQUIRE( p->endLine() == 2 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == u8"foo bar --" );
+		REQUIRE( t->startColumn() == 2 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 1 );
+		REQUIRE( t->endLine() == 2 );
 	}
 }
 
