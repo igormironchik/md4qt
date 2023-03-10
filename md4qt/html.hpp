@@ -705,7 +705,7 @@ footnotesToHtml( std::shared_ptr< Document< Trait > > doc,
 	typename Trait::String html;
 
 	if( !fns.empty() )
-		html.push_back( "<hr /><table><tbody>" );
+		html.push_back( "<section class=\"footnotes\"><ol>" );
 
 	int i = 1;
 
@@ -713,11 +713,9 @@ footnotesToHtml( std::shared_ptr< Document< Trait > > doc,
 
 	for( const auto & id : fns )
 	{
-		html.push_back( "<tr><td id=\"" );
+		html.push_back( "<li id=\"" );
 		html.push_back( id );
 		html.push_back( "\">" );
-		html.push_back( std::to_string( i ).c_str() );
-		html.push_back( "</td><td>" );
 		++i;
 
 		const auto fit = doc->footnotesMap().find( id );
@@ -768,12 +766,12 @@ footnotesToHtml( std::shared_ptr< Document< Trait > > doc,
 				}
 			}
 
-			html.push_back( "</td></tr>" );
+			html.push_back( "</li>" );
 		}
 	}
 
 	if( !fns.empty() )
-		html.push_back( "</tbody></table>\n" );
+		html.push_back( "</ol></section>\n" );
 
 	return html;
 }
@@ -788,7 +786,7 @@ toHtml( std::shared_ptr< Document< Trait > > doc )
 
 	typename Trait::template Vector< typename Trait::String > fns;
 
-	html.push_back( "<!DOCTYPE html>\n<html><head></head><body>" );
+	html.push_back( "<!DOCTYPE html>\n<html><head></head><body><article class=\"markdown-body\">" );
 
 	for( auto it = doc->items().cbegin(), last = doc->items().cend(); it != last; ++it )
 	{
@@ -850,7 +848,7 @@ toHtml( std::shared_ptr< Document< Trait > > doc )
 
 	html.push_back( details::footnotesToHtml( doc, fns ) );
 
-	html.push_back( "</body></html>\n" );
+	html.push_back( "</article></body></html>\n" );
 
 	return html;
 }
