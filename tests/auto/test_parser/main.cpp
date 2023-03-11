@@ -7705,3 +7705,87 @@ TEST_CASE( "123" )
 		REQUIRE( t->endLine() == 4 );
 	}
 }
+
+/*
+**Why is implementation of the following method so terrible?**
+
+ *
+   ```cpp
+   template< class Trait >
+   inline void
+   Parser< Trait >::parse( StringListStream< Trait > & stream,
+       std::shared_ptr< Block< Trait > > parent,
+       std::shared_ptr< Document< Trait > > doc,
+       typename Trait::StringList & linksToParse,
+       const typename Trait::String & workingPath,
+       const typename Trait::String & fileName,
+       bool collectRefLinks, bool top );
+   ```
+
+*/
+TEST_CASE( "124" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/124.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 3 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 61 );
+	REQUIRE( p->endLine() == 0 );
+
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->text() == u8"Why is implementation of the following method so terrible?" );
+	REQUIRE( t->startColumn() == 2 );
+	REQUIRE( t->startLine() == 0 );
+	REQUIRE( t->endColumn() == 59 );
+	REQUIRE( t->endLine() == 0 );
+
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::List );
+
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 2 ).get() );
+	REQUIRE( l->startColumn() == 1 );
+	REQUIRE( l->startLine() == 2 );
+	REQUIRE( l->endColumn() == 5 );
+	REQUIRE( l->endLine() == 13 );
+
+	REQUIRE( l->items().size() == 1 );
+
+	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+
+	auto item = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( item->startColumn() == 1 );
+	REQUIRE( item->startLine() == 2 );
+	REQUIRE( item->endColumn() == 5 );
+	REQUIRE( item->endLine() == 13 );
+
+	REQUIRE( item->listType() == MD::ListItem< TRAIT >::Unordered );
+
+	REQUIRE( item->items().size() == 1 );
+
+	REQUIRE( item->items().at( 0 )->type() == MD::ItemType::Code );
+
+	auto c = static_cast< MD::Code< TRAIT >* > ( item->items().at( 0 ).get() );
+	REQUIRE( c->startColumn() == 3 );
+	REQUIRE( c->startLine() == 4 );
+	REQUIRE( c->endColumn() == 39 );
+	REQUIRE( c->endLine() == 12 );
+	REQUIRE( c->syntax() == u8"cpp" );
+	REQUIRE( !c->isInlined() );
+	REQUIRE( c->text() == u8"template< class Trait >\n"
+						  "inline void\n"
+						  "Parser< Trait >::parse( StringListStream< Trait > & stream,\n"
+						  "    std::shared_ptr< Block< Trait > > parent,\n"
+						  "    std::shared_ptr< Document< Trait > > doc,\n"
+						  "    typename Trait::StringList & linksToParse,\n"
+						  "    const typename Trait::String & workingPath,\n"
+						  "    const typename Trait::String & fileName,\n"
+						  "    bool collectRefLinks, bool top );" );
+}

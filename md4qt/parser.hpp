@@ -1213,9 +1213,23 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 		if( lineType == BlockType::ListWithFirstEmptyLine )
 		{
-			type = lineType;
-			lineCounter = 1;
-			fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+			if( emptyLinesCount )
+			{
+				if( type != BlockType::List )
+					pf();
+
+				type = lineType;
+				lineCounter = 1;
+				fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+			}
+			else
+				fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+
+			if( type == BlockType::Unknown )
+			{
+				type = lineType;
+				lineCounter = 1;
+			}
 
 			continue;
 		}
