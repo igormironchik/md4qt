@@ -1215,10 +1215,13 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 		{
 			if( emptyLinesCount )
 			{
+				const auto tmp = indent;
+
 				if( type != BlockType::List )
 					pf();
 
 				type = lineType;
+				indents.insert( tmp );
 				lineCounter = 1;
 				fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 			}
@@ -1720,6 +1723,8 @@ posOfListItem( const typename Trait::String & s, bool ordered )
 
 	if( sc > 4 )
 		p = p - sc + 1;
+	else if( sc == 0 )
+		++p;
 
 	return p;
 }

@@ -7722,6 +7722,8 @@ TEST_CASE( "123" )
        bool collectRefLinks, bool top );
    ```
 
+   Implementation of the above method is so ugly because
+
 */
 TEST_CASE( "124" )
 {
@@ -7753,8 +7755,8 @@ TEST_CASE( "124" )
 	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 2 ).get() );
 	REQUIRE( l->startColumn() == 1 );
 	REQUIRE( l->startLine() == 2 );
-	REQUIRE( l->endColumn() == 5 );
-	REQUIRE( l->endLine() == 13 );
+	REQUIRE( l->endColumn() == 55 );
+	REQUIRE( l->endLine() == 15 );
 
 	REQUIRE( l->items().size() == 1 );
 
@@ -7763,12 +7765,12 @@ TEST_CASE( "124" )
 	auto item = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
 	REQUIRE( item->startColumn() == 1 );
 	REQUIRE( item->startLine() == 2 );
-	REQUIRE( item->endColumn() == 5 );
-	REQUIRE( item->endLine() == 13 );
+	REQUIRE( item->endColumn() == 55 );
+	REQUIRE( item->endLine() == 15 );
 
 	REQUIRE( item->listType() == MD::ListItem< TRAIT >::Unordered );
 
-	REQUIRE( item->items().size() == 1 );
+	REQUIRE( item->items().size() == 2 );
 
 	REQUIRE( item->items().at( 0 )->type() == MD::ItemType::Code );
 
@@ -7788,4 +7790,22 @@ TEST_CASE( "124" )
 						  "    const typename Trait::String & workingPath,\n"
 						  "    const typename Trait::String & fileName,\n"
 						  "    bool collectRefLinks, bool top );" );
+
+	REQUIRE( item->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	{
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( item->items().at( 1 ).get() );
+		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->startColumn() == 3 );
+		REQUIRE( p->startLine() == 15 );
+		REQUIRE( p->endColumn() == 55 );
+		REQUIRE( p->endLine() == 15 );
+
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->text() == u8"Implementation of the above method is so ugly because" );
+		REQUIRE( t->startColumn() == 3 );
+		REQUIRE( t->startLine() == 15 );
+		REQUIRE( t->endColumn() == 55 );
+		REQUIRE( t->endLine() == 15 );
+	}
 }
