@@ -53,7 +53,7 @@ jobs:
       run: conan install . -s build_type=Debug
 
     - name: Generate Makefiles
-      run: cmake -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_MD4QT_STL_TESTS=ON -DMD4QT_USE_CONAN=ON .
+      run: cmake -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_MD4QT_STL_TESTS=ON .
 
     - name: Build
       run: make
@@ -111,7 +111,7 @@ jobs:
       run: conan install .
 
     - name: Generate Makefiles
-      run: cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_MD4QT_STL_TESTS=ON -DMD4QT_USE_CONAN=ON .
+      run: cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_MD4QT_STL_TESTS=ON .
 
     - name: Build
       run: nmake
@@ -151,7 +151,7 @@ jobs:
       run: conan install . --build=missing
 
     - name: Generate Makefiles
-      run: cmake -DBUILD_MD4QT_STL_TESTS=ON -DCMAKE_BUILD_TYPE=Release -DMD4QT_USE_CONAN=ON .
+      run: cmake -DBUILD_MD4QT_STL_TESTS=ON -DCMAKE_BUILD_TYPE=Release .
 
     - name: Build
       run: make

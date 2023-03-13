@@ -27,11 +27,6 @@ set( CMAKE_CXX_STANDARD_REQUIRED ON )
 
 if( ${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME} )
 
-	if( MD4QT_USE_CONAN )
-		include( ${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake )
-		conan_basic_setup()
-	endif()
-
 	if( BUILD_MD4QT_QT_TESTS OR BUILD_MD4QT_STL_TESTS )
 		enable_testing()
 
