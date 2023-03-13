@@ -4,4 +4,3 @@ uriparser/0.9.7
 
 [generators]
 CMakeDeps
-cmake

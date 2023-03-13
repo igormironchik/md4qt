@@ -781,13 +781,16 @@ footnotesToHtml( std::shared_ptr< Document< Trait > > doc,
 
 template< class Trait >
 typename Trait::String
-toHtml( std::shared_ptr< Document< Trait > > doc )
+toHtml( std::shared_ptr< Document< Trait > > doc, bool wrapInBodyTag = true )
 {
 	typename Trait::String html;
 
 	typename Trait::template Vector< typename Trait::String > fns;
 
-	html.push_back( "<!DOCTYPE html>\n<html><head></head><body><article class=\"markdown-body\">" );
+	if( wrapInBodyTag )
+		html.push_back( "<!DOCTYPE html>\n<html><head></head><body>\n" );
+
+	html.push_back( "<article class=\"markdown-body\">" );
 
 	for( auto it = doc->items().cbegin(), last = doc->items().cend(); it != last; ++it )
 	{
@@ -849,7 +852,10 @@ toHtml( std::shared_ptr< Document< Trait > > doc )
 
 	html.push_back( details::footnotesToHtml( doc, fns ) );
 
-	html.push_back( "</article></body></html>\n" );
+	html.push_back( "</article>\n" );
+
+	if( wrapInBodyTag )
+		html.push_back( "</body></html>\n" );
 
 	return html;
 }
