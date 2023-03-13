@@ -152,7 +152,7 @@ flag. And yes, I expect to receive UTF-8 encoded content...
 
 **How can I convert `MD::Document` into `HTML`?**
 
- * In the `main` branch were made commits with implementation of
+ * In version `2.0.5n` were made commits with implementation of
 `MD::toHtml()` function. You can do the following:
 
    ```cpp
@@ -173,13 +173,12 @@ flag. And yes, I expect to receive UTF-8 encoded content...
    }
    ```
    
-   But this functionality is not tested yet.
-   
+   But this functionality is not fully tested yet.
+
 **I need to know positions in the `Markdown` file of blocks/elements. How
 can I achieve this?**
 
- * Done in version `2.0.5`. This version is not released yet, but it's
-almost done (done, but not fully tested), and can be used from `main` branch.
+ * Done in version `2.0.5`. But this functionality is not fully tested yet.
 
 **Why is implementation of the following method so terrible?**
 
