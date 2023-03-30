@@ -257,6 +257,12 @@ paragraphToHtml( Paragraph< Trait > * p, bool wrap,
 				break;
 
 			case ItemType::Math :
+            {
+				auto math = static_cast< Math< Trait >* > ( it->get() );
+				html.push_back( math->isInline() ? "$ " : "$$ " );
+				html.push_back( math->expr() );
+				html.push_back( math->isInline() ? " $" : " $$" );
+            }
 				break;
 
 			case ItemType::LineBreak :
