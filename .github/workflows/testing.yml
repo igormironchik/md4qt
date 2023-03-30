@@ -37,20 +37,19 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
-        version: '6.3.1'
+        version: '6.4.3'
 
     - run: sudo apt update
 
     - run: sudo apt install lcov
     
     - name: Install Conan
-      id: conan
       uses: turtlebrowser/get-conan@main
-      with:
-        version: 1.59.0
+      
+    - run: conan profile detect
       
     - name: Install dependencies with Conan
-      run: conan install . -s build_type=Debug
+      run: conan install . -s build_type=Debug -of . --build=missing
 
     - name: Generate Makefiles
       run: cmake -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_MD4QT_STL_TESTS=ON .
@@ -96,28 +95,24 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
-        version: '6.3.1'
-        
-    - name: Enable developer command prompt
-      uses: ilammy/msvc-dev-cmd@v1
+        version: '6.4.3'
       
     - name: Install Conan
-      id: conan
       uses: turtlebrowser/get-conan@main
-      with:
-        version: 1.59.0
+      
+    - run: conan profile detect
       
     - name: Install dependencies with Conan
-      run: conan install .
+      run: conan install . -of . --build=missing
 
     - name: Generate Makefiles
-      run: cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_MD4QT_STL_TESTS=ON .
+      run: cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_MD4QT_STL_TESTS=ON -S . -B .
 
     - name: Build
-      run: nmake
+      run: cmake --build . --config Release
 
     - name: Test
-      run: ctest --output-on-failure --verbose
+      run: ctest --output-on-failure --verbose -C Release
 
   macos:
     name: macos
@@ -139,16 +134,15 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
-        version: '6.3.1'
+        version: '6.4.3'
         
     - name: Install Conan
-      id: conan
       uses: turtlebrowser/get-conan@main
-      with:
-        version: 1.59.0
+      
+    - run: conan profile detect
       
     - name: Install dependencies with Conan
-      run: conan install . --build=missing
+      run: conan install . --build=missing -of .
 
     - name: Generate Makefiles
       run: cmake -DBUILD_MD4QT_STL_TESTS=ON -DCMAKE_BUILD_TYPE=Release .
