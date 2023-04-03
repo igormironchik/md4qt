@@ -170,7 +170,14 @@ imgToHtml( Image< Trait > * i )
 
 template< class Trait >
 typename Trait::String
-linkToHtml( Link< Trait > * l, std::shared_ptr< Document< Trait > > doc )
+paragraphToHtml( Paragraph< Trait > * p, bool wrap,
+	std::shared_ptr< Document< Trait > > doc,
+	typename Trait::template Vector< typename Trait::String > & fns );
+
+template< class Trait >
+typename Trait::String
+linkToHtml( Link< Trait > * l, std::shared_ptr< Document< Trait > > doc,
+	typename Trait::template Vector< typename Trait::String > & fns )
 {
 	typename Trait::String html;
 
@@ -191,6 +198,8 @@ linkToHtml( Link< Trait > * l, std::shared_ptr< Document< Trait > > doc )
 
 	if( !l->img()->isEmpty() )
 		html.push_back( imgToHtml( l->img().get() ) );
+	else if( l->p() )
+		html.push_back( paragraphToHtml( l->p().get(), false, doc, fns ) );
 	else if( !l->text().isEmpty() )
 		html.push_back( linkTextToHtml< Trait >( l->text(), l->opts() ) );
 
@@ -249,7 +258,7 @@ paragraphToHtml( Paragraph< Trait > * p, bool wrap,
 				break;
 
 			case ItemType::Link :
-				html.push_back( linkToHtml( static_cast< Link< Trait >* > ( it->get() ), doc ) );
+				html.push_back( linkToHtml( static_cast< Link< Trait >* > ( it->get() ), doc, fns ) );
 				break;
 
 			case ItemType::Image :
@@ -514,7 +523,7 @@ cellToHtml( TableCell< Trait > * l, std::shared_ptr< Document< Trait > > doc,
 
 			case ItemType::Link :
 				html.push_back( linkToHtml(
-					static_cast< Link< Trait >* > ( it->get() ), doc ) );
+					static_cast< Link< Trait >* > ( it->get() ), doc, fns ) );
 				break;
 
 			case ItemType::Image :
