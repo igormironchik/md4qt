@@ -101,6 +101,8 @@ jobs:
       
     - name: Install Conan
       uses: turtlebrowser/get-conan@main
+      with:
+        version: 2.0.2
       
     - run: conan profile detect
       
@@ -140,6 +142,8 @@ jobs:
         
     - name: Install Conan
       uses: turtlebrowser/get-conan@main
+      with:
+        version: 2.0.2
       
     - run: conan profile detect
       

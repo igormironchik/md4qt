@@ -39,6 +39,8 @@ jobs:
     - name: Install Conan
       id: conan
       uses: turtlebrowser/get-conan@main
+      with:
+        version: 2.0.2
       
     - name: Install dependencies with Conan
       run: conan install .
