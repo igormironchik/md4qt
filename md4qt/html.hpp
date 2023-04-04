@@ -741,43 +741,73 @@ footnotesToHtml( std::shared_ptr< Document< Trait > > doc,
 
 		if( fit != doc->footnotesMap().cend() )
 		{
+			int backRefPos = 0;
+
 			for( auto it = fit->second->items().cbegin(), last = fit->second->items().cend();
 				 it != last; ++it )
 			{
 				switch( (*it)->type() )
 				{
 					case ItemType::Heading :
+					{
 						html.push_back( headingToHtml(
 							static_cast< Heading< Trait >* > ( it->get() ), doc, tmp ) );
+
+						backRefPos = 0;
+					}
 						break;
 
 					case ItemType::Paragraph :
+					{
 						html.push_back( paragraphToHtml(
 							static_cast< Paragraph< Trait >* > ( it->get() ), true, doc, tmp ) );
+
+						backRefPos = 4;
+					}
 						break;
 
 					case ItemType::Code :
+					{
 						html.push_back( codeToHtml(
 							static_cast< Code< Trait >* > ( it->get() ) ) );
+
+						backRefPos = 0;
+					}
 						break;
 
 					case ItemType::Blockquote :
+					{
 						html.push_back( blockquoteToHtml(
 							static_cast< Blockquote< Trait >* > ( it->get() ), doc, tmp ) );
+
+						backRefPos = 0;
+					}
 						break;
 
 					case ItemType::List :
+					{
 						html.push_back( listToHtml(
 							static_cast< List< Trait >* > ( it->get() ), doc, tmp ) );
+
+						backRefPos = 0;
+					}
 						break;
 
 					case ItemType::Table :
+					{
 						html.push_back( tableToHtml(
 							static_cast< Table< Trait >* > ( it->get() ), doc, tmp ) );
+
+						backRefPos = 0;
+					}
 						break;
 
 					case ItemType::RawHtml :
+					{
 						html.push_back( static_cast< RawHtml< Trait >* > ( it->get() )->text() );
+
+						backRefPos = 0;
+					}
 						break;
 
 					default :
@@ -787,11 +817,15 @@ footnotesToHtml( std::shared_ptr< Document< Trait > > doc,
 
 			if( !hrefForRefBackImage.isEmpty() )
 			{
-				html.push_back( "<a href=\"#ref-" );
-				html.push_back( id );
-				html.push_back( "\"><img src=\"" );
-				html.push_back( hrefForRefBackImage );
-				html.push_back( "\" /></a>" );
+				typename Trait::String backRef;
+
+				backRef.push_back( "<a href=\"#ref-" );
+				backRef.push_back( id );
+				backRef.push_back( "\"><img src=\"" );
+				backRef.push_back( hrefForRefBackImage );
+				backRef.push_back( "\" /></a>" );
+
+				html.insert( html.length() - backRefPos, backRef );
 			}
 
 			html.push_back( "</li>" );
