@@ -224,6 +224,8 @@ footnoteRefToHtml( FootnoteRef< Trait > * ref,
 		html.push_back( "<sup>" );
 		html.push_back( "<a href=\"#" );
 		html.push_back( ref->id() );
+		html.push_back( "\" id=\"ref-" );
+		html.push_back( ref->id() );
 		html.push_back( "\">" );
 		html.push_back( std::to_string( fns.size() + 1 ).c_str() );
 		html.push_back( "</a></sup>" );
@@ -716,7 +718,8 @@ anchorToHtml( Anchor< Trait > * a )
 template< class Trait >
 typename Trait::String
 footnotesToHtml( std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns )
+	typename Trait::template Vector< typename Trait::String > & fns,
+	const typename Trait::String & hrefForRefBackImage = {} )
 {
 	typename Trait::String html;
 
@@ -782,6 +785,15 @@ footnotesToHtml( std::shared_ptr< Document< Trait > > doc,
 				}
 			}
 
+			if( !hrefForRefBackImage.isEmpty() )
+			{
+				html.push_back( "<a href=\"#ref-" );
+				html.push_back( id );
+				html.push_back( "\"><img src=\"" );
+				html.push_back( hrefForRefBackImage );
+				html.push_back( "\" /></a>" );
+			}
+
 			html.push_back( "</li>" );
 		}
 	}
@@ -796,7 +808,8 @@ footnotesToHtml( std::shared_ptr< Document< Trait > > doc,
 
 template< class Trait >
 typename Trait::String
-toHtml( std::shared_ptr< Document< Trait > > doc, bool wrapInBodyTag = true )
+toHtml( std::shared_ptr< Document< Trait > > doc, bool wrapInBodyTag = true,
+	const typename Trait::String & hrefForRefBackImage = {} )
 {
 	typename Trait::String html;
 
@@ -865,7 +878,7 @@ toHtml( std::shared_ptr< Document< Trait > > doc, bool wrapInBodyTag = true )
 		}
 	}
 
-	html.push_back( details::footnotesToHtml( doc, fns ) );
+	html.push_back( details::footnotesToHtml( doc, fns, hrefForRefBackImage ) );
 
 	html.push_back( "</article>\n" );
 
