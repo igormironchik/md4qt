@@ -172,12 +172,14 @@ template< class Trait >
 typename Trait::String
 paragraphToHtml( Paragraph< Trait > * p, bool wrap,
 	std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns );
+	typename Trait::template Vector< typename Trait::String > & fns,
+	const typename Trait::template Vector< typename Trait::String > & anchors );
 
 template< class Trait >
 typename Trait::String
 linkToHtml( Link< Trait > * l, std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns )
+	typename Trait::template Vector< typename Trait::String > & fns,
+	const typename Trait::template Vector< typename Trait::String > & anchors )
 {
 	typename Trait::String html;
 
@@ -188,9 +190,10 @@ linkToHtml( Link< Trait > * l, std::shared_ptr< Document< Trait > > doc,
 	if( lit != doc->labeledLinks().cend() )
 		url = lit->second->url();
 
-	if( typename Trait::Url( url ).isRelative() &&
-		!url.startsWith( typename Trait::String( "#" ) ) )
-			url = typename Trait::String( "#" ) + url;
+	const auto it = std::find( anchors.cbegin(), anchors.cend(), url );
+
+	if( it != anchors.cend() )
+		url = typename Trait::String( "#" ) + url;
 
 	html.push_back( "<a href=\"" );
 	html.push_back( url );
@@ -199,7 +202,7 @@ linkToHtml( Link< Trait > * l, std::shared_ptr< Document< Trait > > doc,
 	if( !l->img()->isEmpty() )
 		html.push_back( imgToHtml( l->img().get() ) );
 	else if( l->p() )
-		html.push_back( paragraphToHtml( l->p().get(), false, doc, fns ) );
+		html.push_back( paragraphToHtml( l->p().get(), false, doc, fns, anchors ) );
 	else if( !l->text().isEmpty() )
 		html.push_back( linkTextToHtml< Trait >( l->text(), l->opts() ) );
 
@@ -240,7 +243,8 @@ template< class Trait >
 typename Trait::String
 paragraphToHtml( Paragraph< Trait > * p, bool wrap,
 	std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns )
+	typename Trait::template Vector< typename Trait::String > & fns,
+	const typename Trait::template Vector< typename Trait::String > & anchors )
 {
 	typename Trait::String html;
 
@@ -260,7 +264,8 @@ paragraphToHtml( Paragraph< Trait > * p, bool wrap,
 				break;
 
 			case ItemType::Link :
-				html.push_back( linkToHtml( static_cast< Link< Trait >* > ( it->get() ), doc, fns ) );
+				html.push_back( linkToHtml( static_cast< Link< Trait >* > ( it->get() ),
+					doc, fns, anchors ) );
 				break;
 
 			case ItemType::Image :
@@ -300,7 +305,8 @@ template< class Trait >
 typename Trait::String
 headingToHtml( Heading< Trait > * h, const typename Trait::String & ht,
 	std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns )
+	typename Trait::template Vector< typename Trait::String > & fns,
+	const typename Trait::template Vector< typename Trait::String > & anchors )
 {
 	typename Trait::String html;
 
@@ -310,7 +316,7 @@ headingToHtml( Heading< Trait > * h, const typename Trait::String & ht,
 	html.push_back( ">" );
 
 	if( h->text().get() )
-		html.push_back( paragraphToHtml( h->text().get(), false, doc, fns ) );
+		html.push_back( paragraphToHtml( h->text().get(), false, doc, fns, anchors ) );
 
 	html.push_back( "</" );
 	html.push_back( ht );
@@ -322,7 +328,8 @@ headingToHtml( Heading< Trait > * h, const typename Trait::String & ht,
 template< class Trait >
 typename Trait::String
 headingToHtml( Heading< Trait > * h, std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns )
+	typename Trait::template Vector< typename Trait::String > & fns,
+	const typename Trait::template Vector< typename Trait::String > & anchors )
 {
 	typename Trait::String html;
 
@@ -337,7 +344,8 @@ headingToHtml( Heading< Trait > * h, std::shared_ptr< Document< Trait > > doc,
 		case 5 :
 		case 6 :
 			html.push_back( headingToHtml( h,
-				typename Trait::String( "h" ) + std::to_string( h->level() ).c_str(), doc, fns ) );
+				typename Trait::String( "h" ) + std::to_string( h->level() ).c_str(),
+				doc, fns, anchors ) );
 			break;
 
 		default :
@@ -380,22 +388,26 @@ codeToHtml( Code< Trait > * c )
 template< class Trait >
 typename Trait::String
 blockquoteToHtml( Blockquote< Trait > * b, std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns );
+	typename Trait::template Vector< typename Trait::String > & fns,
+	const typename Trait::template Vector< typename Trait::String > & anchors );
 
 template< class Trait >
 typename Trait::String
 listToHtml( List< Trait > * l, std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns );
+	typename Trait::template Vector< typename Trait::String > & fns,
+	const typename Trait::template Vector< typename Trait::String > & anchors );
 
 template< class Trait >
 typename Trait::String
 tableToHtml( Table< Trait > * t, std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns );
+	typename Trait::template Vector< typename Trait::String > & fns,
+	const typename Trait::template Vector< typename Trait::String > & anchors );
 
 template< class Trait >
 typename Trait::String
 listItemToHtml( ListItem< Trait > * i, std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns )
+	typename Trait::template Vector< typename Trait::String > & fns,
+	const typename Trait::template Vector< typename Trait::String > & anchors )
 {
 	typename Trait::String html;
 
@@ -407,12 +419,12 @@ listItemToHtml( ListItem< Trait > * i, std::shared_ptr< Document< Trait > > doc,
 		{
 			case ItemType::Heading :
 				html.push_back( headingToHtml(
-					static_cast< Heading< Trait >* > ( it->get() ), doc, fns ) );
+					static_cast< Heading< Trait >* > ( it->get() ), doc, fns, anchors ) );
 				break;
 
 			case ItemType::Paragraph :
 				html.push_back( paragraphToHtml(
-					static_cast< Paragraph< Trait >* > ( it->get() ), false, doc, fns ) );
+					static_cast< Paragraph< Trait >* > ( it->get() ), false, doc, fns, anchors ) );
 				break;
 
 			case ItemType::Code :
@@ -421,17 +433,17 @@ listItemToHtml( ListItem< Trait > * i, std::shared_ptr< Document< Trait > > doc,
 
 			case ItemType::Blockquote :
 				html.push_back( blockquoteToHtml(
-					static_cast< Blockquote< Trait >* > ( it->get() ), doc, fns ) );
+					static_cast< Blockquote< Trait >* > ( it->get() ), doc, fns, anchors ) );
 				break;
 
 			case ItemType::List :
 				html.push_back( listToHtml(
-					static_cast< List< Trait >* > ( it->get() ), doc, fns ) );
+					static_cast< List< Trait >* > ( it->get() ), doc, fns, anchors ) );
 				break;
 
 			case ItemType::Table :
 				html.push_back( tableToHtml(
-					static_cast< Table< Trait >* > ( it->get() ), doc, fns ) );
+					static_cast< Table< Trait >* > ( it->get() ), doc, fns, anchors ) );
 				break;
 
 			case ItemType::RawHtml :
@@ -451,7 +463,8 @@ listItemToHtml( ListItem< Trait > * i, std::shared_ptr< Document< Trait > > doc,
 template< class Trait >
 typename Trait::String
 listToHtml( List< Trait > * l, std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns )
+	typename Trait::template Vector< typename Trait::String > & fns,
+	const typename Trait::template Vector< typename Trait::String > & anchors )
 {
 	typename Trait::String html;
 
@@ -489,7 +502,7 @@ listToHtml( List< Trait > * l, std::shared_ptr< Document< Trait > > doc,
 				}
 			}
 
-			html.push_back( listItemToHtml( item, doc, fns ) );
+			html.push_back( listItemToHtml( item, doc, fns, anchors ) );
 		}
 	}
 
@@ -507,7 +520,8 @@ listToHtml( List< Trait > * l, std::shared_ptr< Document< Trait > > doc,
 template< class Trait >
 typename Trait::String
 cellToHtml( TableCell< Trait > * l, std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns )
+	typename Trait::template Vector< typename Trait::String > & fns,
+	const typename Trait::template Vector< typename Trait::String > & anchors )
 {
 	typename Trait::String html;
 
@@ -525,7 +539,7 @@ cellToHtml( TableCell< Trait > * l, std::shared_ptr< Document< Trait > > doc,
 
 			case ItemType::Link :
 				html.push_back( linkToHtml(
-					static_cast< Link< Trait >* > ( it->get() ), doc, fns ) );
+					static_cast< Link< Trait >* > ( it->get() ), doc, fns, anchors ) );
 				break;
 
 			case ItemType::Image :
@@ -583,7 +597,8 @@ tableAlignmentToHtml( typename Table< Trait >::Alignment a )
 template< class Trait >
 typename Trait::String
 tableToHtml( Table< Trait > * t, std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns )
+	typename Trait::template Vector< typename Trait::String > & fns,
+	const typename Trait::template Vector< typename Trait::String > & anchors )
 {
 	typename Trait::String html;
 
@@ -601,7 +616,7 @@ tableToHtml( Table< Trait > * t, std::shared_ptr< Document< Trait > > doc,
 			html.push_back( "<th" );
 			html.push_back( tableAlignmentToHtml< Trait >( t->columnAlignment( i ) ) );
 			html.push_back( ">\n" );
-			html.push_back( cellToHtml( th->get(), doc, fns ) );
+			html.push_back( cellToHtml( th->get(), doc, fns, anchors ) );
 			html.push_back( "\n</th>\n" );
 
 			++i;
@@ -620,7 +635,7 @@ tableToHtml( Table< Trait > * t, std::shared_ptr< Document< Trait > > doc,
 				html.push_back( "\n<td" );
 				html.push_back( tableAlignmentToHtml< Trait >( t->columnAlignment( i ) ) );
 				html.push_back( ">\n" );
-				html.push_back( cellToHtml( c->get(), doc, fns ) );
+				html.push_back( cellToHtml( c->get(), doc, fns, anchors ) );
 				html.push_back( "\n</td>\n" );
 
 				++i;
@@ -640,7 +655,8 @@ tableToHtml( Table< Trait > * t, std::shared_ptr< Document< Trait > > doc,
 template< class Trait >
 typename Trait::String
 blockquoteToHtml( Blockquote< Trait > * b, std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns )
+	typename Trait::template Vector< typename Trait::String > & fns,
+	const typename Trait::template Vector< typename Trait::String > & anchors )
 {
 	typename Trait::String html;
 
@@ -652,12 +668,12 @@ blockquoteToHtml( Blockquote< Trait > * b, std::shared_ptr< Document< Trait > > 
 		{
 			case ItemType::Heading :
 				html.push_back( headingToHtml(
-					static_cast< Heading< Trait >* > ( it->get() ), doc, fns ) );
+					static_cast< Heading< Trait >* > ( it->get() ), doc, fns, anchors ) );
 				break;
 
 			case ItemType::Paragraph :
 				html.push_back( paragraphToHtml(
-					static_cast< Paragraph< Trait >* > ( it->get() ), true, doc, fns ) );
+					static_cast< Paragraph< Trait >* > ( it->get() ), true, doc, fns, anchors ) );
 				break;
 
 			case ItemType::Code :
@@ -667,17 +683,17 @@ blockquoteToHtml( Blockquote< Trait > * b, std::shared_ptr< Document< Trait > > 
 
 			case ItemType::Blockquote :
 				html.push_back( blockquoteToHtml(
-					static_cast< Blockquote< Trait >* > ( it->get() ), doc, fns ) );
+					static_cast< Blockquote< Trait >* > ( it->get() ), doc, fns, anchors ) );
 				break;
 
 			case ItemType::List :
 				html.push_back( listToHtml(
-					static_cast< List< Trait >* > ( it->get() ), doc, fns ) );
+					static_cast< List< Trait >* > ( it->get() ), doc, fns, anchors ) );
 				break;
 
 			case ItemType::Table :
 				html.push_back( tableToHtml(
-					static_cast< Table< Trait >* > ( it->get() ), doc, fns ) );
+					static_cast< Table< Trait >* > ( it->get() ), doc, fns, anchors ) );
 				break;
 
 			case ItemType::HorizontalLine :
@@ -719,6 +735,7 @@ template< class Trait >
 typename Trait::String
 footnotesToHtml( std::shared_ptr< Document< Trait > > doc,
 	typename Trait::template Vector< typename Trait::String > & fns,
+	const typename Trait::template Vector< typename Trait::String > & anchors,
 	const typename Trait::String & hrefForRefBackImage = {} )
 {
 	typename Trait::String html;
@@ -751,7 +768,7 @@ footnotesToHtml( std::shared_ptr< Document< Trait > > doc,
 					case ItemType::Heading :
 					{
 						html.push_back( headingToHtml(
-							static_cast< Heading< Trait >* > ( it->get() ), doc, tmp ) );
+							static_cast< Heading< Trait >* > ( it->get() ), doc, tmp, anchors ) );
 
 						backRefPos = 0;
 					}
@@ -760,7 +777,8 @@ footnotesToHtml( std::shared_ptr< Document< Trait > > doc,
 					case ItemType::Paragraph :
 					{
 						html.push_back( paragraphToHtml(
-							static_cast< Paragraph< Trait >* > ( it->get() ), true, doc, tmp ) );
+							static_cast< Paragraph< Trait >* > ( it->get() ),
+								true, doc, tmp, anchors ) );
 
 						backRefPos = 4;
 					}
@@ -778,7 +796,8 @@ footnotesToHtml( std::shared_ptr< Document< Trait > > doc,
 					case ItemType::Blockquote :
 					{
 						html.push_back( blockquoteToHtml(
-							static_cast< Blockquote< Trait >* > ( it->get() ), doc, tmp ) );
+							static_cast< Blockquote< Trait >* > ( it->get() ),
+								doc, tmp, anchors ) );
 
 						backRefPos = 0;
 					}
@@ -787,7 +806,7 @@ footnotesToHtml( std::shared_ptr< Document< Trait > > doc,
 					case ItemType::List :
 					{
 						html.push_back( listToHtml(
-							static_cast< List< Trait >* > ( it->get() ), doc, tmp ) );
+							static_cast< List< Trait >* > ( it->get() ), doc, tmp, anchors ) );
 
 						backRefPos = 0;
 					}
@@ -796,7 +815,7 @@ footnotesToHtml( std::shared_ptr< Document< Trait > > doc,
 					case ItemType::Table :
 					{
 						html.push_back( tableToHtml(
-							static_cast< Table< Trait >* > ( it->get() ), doc, tmp ) );
+							static_cast< Table< Trait >* > ( it->get() ), doc, tmp, anchors ) );
 
 						backRefPos = 0;
 					}
@@ -854,18 +873,33 @@ toHtml( std::shared_ptr< Document< Trait > > doc, bool wrapInBodyTag = true,
 
 	html.push_back( "<article class=\"markdown-body\">" );
 
+	typename Trait::template Vector< typename Trait::String > anchors;
+
+	for( auto it = doc->items().cbegin(), last = doc->items().cend(); it != last; ++it )
+	{
+		switch( (*it)->type() )
+		{
+			case ItemType::Anchor :
+				anchors.push_back( static_cast< Anchor< Trait >* > ( it->get() )->label() );
+				break;
+
+			default:
+				break;
+		}
+	}
+
 	for( auto it = doc->items().cbegin(), last = doc->items().cend(); it != last; ++it )
 	{
 		switch( (*it)->type() )
 		{
 			case ItemType::Heading :
 				html.push_back( details::headingToHtml(
-					static_cast< Heading< Trait >* > ( it->get() ), doc, fns ) );
+					static_cast< Heading< Trait >* > ( it->get() ), doc, fns, anchors ) );
 				break;
 
 			case ItemType::Paragraph :
 				html.push_back( details::paragraphToHtml(
-					static_cast< Paragraph< Trait >* > ( it->get() ), true, doc, fns ) );
+					static_cast< Paragraph< Trait >* > ( it->get() ), true, doc, fns, anchors ) );
 				break;
 
 			case ItemType::Code :
@@ -875,17 +909,17 @@ toHtml( std::shared_ptr< Document< Trait > > doc, bool wrapInBodyTag = true,
 
 			case ItemType::Blockquote :
 				html.push_back( details::blockquoteToHtml(
-					static_cast< Blockquote< Trait >* > ( it->get() ), doc, fns ) );
+					static_cast< Blockquote< Trait >* > ( it->get() ), doc, fns, anchors ) );
 				break;
 
 			case ItemType::List :
 				html.push_back( details::listToHtml(
-					static_cast< List< Trait >* > ( it->get() ), doc, fns ) );
+					static_cast< List< Trait >* > ( it->get() ), doc, fns, anchors ) );
 				break;
 
 			case ItemType::Table :
 				html.push_back( details::tableToHtml(
-					static_cast< Table< Trait >* > ( it->get() ), doc, fns ) );
+					static_cast< Table< Trait >* > ( it->get() ), doc, fns, anchors ) );
 				break;
 
 			case ItemType::Anchor :
@@ -912,7 +946,7 @@ toHtml( std::shared_ptr< Document< Trait > > doc, bool wrapInBodyTag = true,
 		}
 	}
 
-	html.push_back( details::footnotesToHtml( doc, fns, hrefForRefBackImage ) );
+	html.push_back( details::footnotesToHtml( doc, fns, anchors, hrefForRefBackImage ) );
 
 	html.push_back( "</article>\n" );
 
