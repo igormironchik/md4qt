@@ -201,10 +201,12 @@ linkToHtml( Link< Trait > * l, std::shared_ptr< Document< Trait > > doc,
 
 	if( !l->img()->isEmpty() )
 		html.push_back( imgToHtml( l->img().get() ) );
-	else if( l->p() )
+	else if( l->p() && !l->p()->isEmpty() )
 		html.push_back( paragraphToHtml( l->p().get(), false, doc, fns, anchors ) );
 	else if( !l->text().isEmpty() )
 		html.push_back( linkTextToHtml< Trait >( l->text(), l->opts() ) );
+	else
+		html.push_back( linkTextToHtml< Trait >( l->url(), l->opts() ) );
 
 
 	html.push_back( "</a>" );
