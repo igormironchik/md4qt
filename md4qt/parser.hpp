@@ -831,7 +831,7 @@ Parser< Trait >::parse( typename Trait::TextStream & stream,
 {
 	std::shared_ptr< Document< Trait > > doc( new Document< Trait > );
 
-	parseStream( stream, typename Trait::String( "." ), fileName, false, doc,
+	parseStream( stream, typename Trait::String( "" ), fileName, false, doc,
 		typename Trait::StringList() );
 
 	clearCache();
@@ -1622,7 +1622,8 @@ Parser< Trait >::parseStream( typename Trait::TextStream & s,
 	typename Trait::StringList linksToParse;
 
 	doc->appendItem( std::shared_ptr< Anchor< Trait > > (
-		new Anchor< Trait >( workingPath + "/" + fileName ) ) );
+		new Anchor< Trait >( workingPath.isEmpty() ? fileName :
+			typename Trait::String( workingPath + "/" + fileName ) ) ) );
 
 	typename MdBlock< Trait >::Data data;
 
