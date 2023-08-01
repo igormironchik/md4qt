@@ -778,7 +778,8 @@ struct UnicodeStringTrait {
 	static bool fileExists( const String & fileName, const String & workingPath )
 	{
 		std::string path;
-		( workingPath + fileName ).toUTF8String( path );
+		( workingPath.isEmpty() ? fileName :
+			String( workingPath + "/" + fileName ) ).toUTF8String( path );
 
 		std::error_code er;
 
@@ -840,7 +841,8 @@ struct QStringTrait {
 	//! \return Does file exist.
 	static bool fileExists( const String & fileName, const String & workingPath )
 	{
-		return QFileInfo::exists( workingPath + fileName );
+		return QFileInfo::exists( ( workingPath.isEmpty() ? QString() : workingPath + "/" ) +
+			fileName );
 	}
 
 	//! \return Absolute file path.

@@ -1621,9 +1621,11 @@ Parser< Trait >::parseStream( typename Trait::TextStream & s,
 {
 	typename Trait::StringList linksToParse;
 
+	const auto path = workingPath.isEmpty() ? fileName :
+		typename Trait::String( workingPath + "/" + fileName );
+
 	doc->appendItem( std::shared_ptr< Anchor< Trait > > (
-		new Anchor< Trait >( workingPath.isEmpty() ? fileName :
-			typename Trait::String( workingPath + "/" + fileName ) ) ) );
+		new Anchor< Trait >( path ) ) );
 
 	typename MdBlock< Trait >::Data data;
 
@@ -1643,9 +1645,9 @@ Parser< Trait >::parseStream( typename Trait::TextStream & s,
 	StringListStream< Trait > stream( data );
 
 	parse( stream, doc, doc, linksToParse,
-		workingPath + "/", fileName, true, true );
+		workingPath, fileName, true, true );
 
-	m_parsedFiles.push_back( workingPath + "/" + fileName );
+	m_parsedFiles.push_back( path );
 
 	resolveLinks< Trait >( linksToParse, doc );
 
@@ -2100,7 +2102,8 @@ Parser< Trait >::parseHeading( MdBlock< Trait > & fr,
 
 		if( !label.isEmpty() )
 			h->setLabel( label.sliced( 1, label.length() - 2 ) + "/" +
-				workingPath + fileName );
+				( !workingPath.isEmpty() ? typename Trait::String( workingPath + "/" ) :
+					typename Trait::String( "" ) ) + fileName );
 
 		std::shared_ptr< Paragraph< Trait > > p( new Paragraph< Trait > );
 
@@ -2127,7 +2130,8 @@ Parser< Trait >::parseHeading( MdBlock< Trait > & fr,
 		{
 			typename Trait::String label = "#" + paragraphToLabel( h->text().get() );
 
-			label += "/" + workingPath + fileName;
+			label += "/" + ( !workingPath.isEmpty() ? typename Trait::String( workingPath + "/" ) :
+				typename Trait::String( "" ) ) + fileName;
 
 			h->setLabel( label );
 
@@ -2498,7 +2502,8 @@ Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
 
 				typename Trait::String label = "#" + paragraphToLabel( h->text().get() );
 
-				label += "/" + workingPath + fileName;
+				label += "/" + ( !workingPath.isEmpty() ? typename Trait::String( workingPath + "/" ) :
+					typename Trait::String() ) + fileName;
 
 				h->setLabel( label );
 
@@ -4745,13 +4750,13 @@ makeLink( const typename Trait::String & url, const typename MdBlock< Trait >::D
 		{
 			if( Trait::fileExists( u, po.workingPath ) )
 			{
-				u = Trait::absoluteFilePath( po.workingPath + u );
+				u = Trait::absoluteFilePath( po.workingPath + "/" + u );
 
 				po.linksToParse.push_back( u );
 			}
 		}
 		else
-			u = u + "/" + po.workingPath + po.fileName;
+			u = u + "/" + po.workingPath + "/" + po.fileName;
 	}
 
 	std::shared_ptr< Link< Trait > > link( new Link< Trait > );
@@ -4821,7 +4826,8 @@ createShortcutLink( const typename MdBlock< Trait >::Data & text,
 	bool doNotCreateTextOnFail )
 {
 	const auto u = "#" + toSingleLine< Trait >( text ).simplified().toCaseFolded().toUpper();
-	const auto url = u + "/" + po.workingPath + po.fileName;
+	const auto url = u + "/" + ( po.workingPath.isEmpty() ? typename Trait::String() :
+		typename Trait::String( po.workingPath + "/" ) ) + po.fileName;
 
 	po.wasRefLink = false;
 
@@ -4874,7 +4880,7 @@ makeImage( const typename Trait::String & url, const typename MdBlock< Trait >::
 		removeBackslashes< Trait >( replaceEntity< Trait >( url ) ).asString() );
 
 	if( Trait::fileExists( u, po.workingPath ) )
-		img->setUrl( po.workingPath + u );
+		img->setUrl( po.workingPath + "/" +  u );
 	else
 		img->setUrl( u );
 
@@ -4914,7 +4920,8 @@ createShortcutImage( const typename MdBlock< Trait >::Data & text,
 	bool doNotCreateTextOnFail )
 {
 	const auto url = "#" + toSingleLine< Trait >( text ).simplified().toCaseFolded().toUpper() +
-		"/" + po.workingPath + po.fileName;
+		"/" + ( po.workingPath.isEmpty() ? typename Trait::String() :
+			typename Trait::String( po.workingPath + "/" ) ) + po.fileName;
 
 	po.wasRefLink = false;
 
@@ -5352,7 +5359,8 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 				std::shared_ptr< FootnoteRef< Trait > > fnr(
 					new FootnoteRef< Trait >( "#" +
 						toSingleLine< Trait >( text ).simplified().toCaseFolded().toUpper() +
-						"/" + po.workingPath + po.fileName ) );
+						"/" + ( po.workingPath.isEmpty() ? typename Trait::String() :
+							typename Trait::String( po.workingPath + "/" ) ) + po.fileName ) );
 				fnr->setStartColumn( po.fr.data.at( start->m_line ).first.virginPos( start->m_pos ) );
 				fnr->setStartLine( po.fr.data.at( start->m_line ).second.lineNumber );
 				fnr->setEndColumn( po.fr.data.at( it->m_line ).first.virginPos(
@@ -5390,7 +5398,8 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 						{
 							const auto label = "#" +
 								toSingleLine< Trait >( text ).simplified().toCaseFolded().toUpper() +
-								"/" + po.workingPath + po.fileName;
+								"/" + ( po.workingPath.isEmpty() ? typename Trait::String() :
+									typename Trait::String( po.workingPath + "/" ) ) + po.fileName;
 
 							std::shared_ptr< Link< Trait > > link( new Link< Trait > );
 							link->setStartColumn( po.fr.data.at( start->m_line ).first
@@ -5406,7 +5415,9 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 							if( !url.isEmpty() )
 							{
 								if( Trait::fileExists( url, po.workingPath ) )
-									url = Trait::absoluteFilePath( po.workingPath + url );
+									url = Trait::absoluteFilePath( ( po.workingPath.isEmpty() ?
+										typename Trait::String() :
+										typename Trait::String( po.workingPath + "/" ) ) + url );
 							}
 
 							link->setUrl( url );
@@ -6254,8 +6265,8 @@ parseFormattedText( MdBlock< Trait > & fr,
 
 	const auto delims = collectDelimiters< Trait >( fr.data );
 
-	TextParsingOpts< Trait > po = { fr, p, doc, linksToParse, workingPath,
-		fileName, collectRefLinks, ignoreLineBreak, html };
+	TextParsingOpts< Trait > po = { fr, p, doc, linksToParse,
+		workingPath, fileName, collectRefLinks, ignoreLineBreak, html };
 
 	if( !delims.empty() )
 	{
@@ -6530,7 +6541,8 @@ Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
 
 				if( !f->isEmpty() )
 					doc->insertFootnote( "#" + toSingleLine< Trait > ( id ).simplified() +
-						"/" + workingPath + fileName, f );
+						"/" + ( !workingPath.isEmpty() ? typename Trait::String( workingPath + "/" ) :
+						typename Trait::String() ) + fileName, f );
 			}
 		}
 	}
