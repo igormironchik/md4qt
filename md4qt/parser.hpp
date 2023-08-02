@@ -1543,7 +1543,7 @@ Parser< UnicodeStringTrait >::parseFile( const UnicodeString & fileName,
 	bool recursive, std::shared_ptr< Document< UnicodeStringTrait > > doc,
 	const std::vector< UnicodeString > & ext, std::vector< UnicodeString > * parentLinks )
 {
-	if( UnicodeStringTrait::fileExists( fileName, "" ) )
+	if( UnicodeStringTrait::fileExists( fileName ) )
 	{
 		std::string fn;
 		fileName.toUTF8String( fn );
@@ -1603,7 +1603,7 @@ void resolveLinks( typename Trait::StringList & linksToParse,
 				continue;
 		}
 
-		if( Trait::fileExists( nextFileName, "" ) )
+		if( Trait::fileExists( nextFileName ) )
 			*it = Trait::absoluteFilePath( nextFileName );
 	}
 }
@@ -4748,7 +4748,13 @@ makeLink( const typename Trait::String & url, const typename MdBlock< Trait >::D
 	{
 		if( !u.startsWith( '#' ) )
 		{
-			if( Trait::fileExists( u, po.workingPath ) )
+			if( Trait::fileExists( u ) )
+			{
+				u = Trait::absoluteFilePath( u );
+
+				po.linksToParse.push_back( u );
+			}
+			else if( Trait::fileExists( u, po.workingPath ) )
 			{
 				u = Trait::absoluteFilePath( po.workingPath + "/" + u );
 
@@ -4879,7 +4885,9 @@ makeImage( const typename Trait::String & url, const typename MdBlock< Trait >::
 	typename Trait::String u = ( url.startsWith( '#' ) ? url :
 		removeBackslashes< Trait >( replaceEntity< Trait >( url ) ).asString() );
 
-	if( Trait::fileExists( u, po.workingPath ) )
+	if( Trait::fileExists( u ) )
+		img->setUrl( u );
+	else if( Trait::fileExists( u, po.workingPath ) )
 		img->setUrl( po.workingPath + "/" +  u );
 	else
 		img->setUrl( u );
@@ -5414,7 +5422,9 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 
 							if( !url.isEmpty() )
 							{
-								if( Trait::fileExists( url, po.workingPath ) )
+								if( Trait::fileExists( url ) )
+									url = Trait::absoluteFilePath( url );
+								else if( Trait::fileExists( url, po.workingPath ) )
 									url = Trait::absoluteFilePath( ( po.workingPath.isEmpty() ?
 										typename Trait::String() :
 										typename Trait::String( po.workingPath + "/" ) ) + url );
