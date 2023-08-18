@@ -7809,3 +7809,87 @@ TEST_CASE( "124" )
 		REQUIRE( t->endLine() == 15 );
 	}
 }
+
+/*
+* [Issues](#issues)<!-- endToc -->
+
+*/
+TEST_CASE( "125" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/125.md" );
+
+	typename TRAIT::String wd =
+#ifdef MD4QT_QT_SUPPORT
+		QDir().absolutePath()
+#else
+		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
+#endif
+		+ u8"/tests/parser/data";
+
+#ifndef MD4QT_QT_SUPPORT
+	std::string tmp;
+	wd.toUTF8String( tmp );
+	std::replace( tmp.begin(), tmp.end(), '\\', '/' );
+	wd = icu::UnicodeString::fromUTF8( tmp );
+#endif
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startColumn() == 0 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 33 );
+	REQUIRE( l->endLine() == 0 );
+
+	REQUIRE( l->items().size() == 1 );
+
+	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+
+	auto item = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( item->startColumn() == 0 );
+	REQUIRE( item->startLine() == 0 );
+	REQUIRE( item->endColumn() == 33 );
+	REQUIRE( item->endLine() == 0 );
+
+	REQUIRE( item->listType() == MD::ListItem< TRAIT >::Unordered );
+
+	REQUIRE( item->items().size() == 1 );
+
+	REQUIRE( item->items().at( 0 )->type() == MD::ItemType::Paragraph );
+
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( item->items().at( 0 ).get() );
+	REQUIRE( p->startColumn() == 2 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 33 );
+	REQUIRE( p->endLine() == 0 );
+
+	REQUIRE( p->items().size() == 2 );
+
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
+
+	{
+		auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
+
+		REQUIRE( l->text() == u8"Issues" );
+		REQUIRE( l->url() == u8"#issues/" + wd + u8"/125.md" );
+		REQUIRE( l->startColumn() == 2 );
+		REQUIRE( l->startLine() == 0 );
+		REQUIRE( l->endColumn() == 18 );
+		REQUIRE( l->endLine() == 0 );
+	}
+
+	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
+
+	auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 1 ).get() );
+
+	REQUIRE( h->text() == u8"<!-- endToc -->" );
+	REQUIRE( h->startColumn() == 19 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 33 );
+	REQUIRE( h->endLine() == 0 );
+}

@@ -1442,19 +1442,33 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 	auto finishHtml = [&] ()
 	{
-		if( html.html->isFreeTag() )
-			parent->appendItem( html.html );
-		else
+		if( !collectRefLinks || top )
 		{
-			if( parent->items().back()->type() == ItemType::Paragraph )
+			if( html.html->isFreeTag() )
+				parent->appendItem( html.html );
+			else
 			{
-				auto p = static_cast< Paragraph< Trait >* > ( parent->items().back().get() );
-
-				if( p->isDirty() )
+				if( parent->items().back()->type() == ItemType::Paragraph )
 				{
-					p->appendItem( html.html );
-					p->setEndColumn( html.html->endColumn() );
-					p->setEndLine( html.html->endLine() );
+					auto p = static_cast< Paragraph< Trait >* > ( parent->items().back().get() );
+
+					if( p->isDirty() )
+					{
+						p->appendItem( html.html );
+						p->setEndColumn( html.html->endColumn() );
+						p->setEndLine( html.html->endLine() );
+					}
+					else
+					{
+						std::shared_ptr< Paragraph< Trait > > p(
+							new Paragraph< Trait > );
+						p->appendItem( html.html );
+						p->setStartColumn( html.html->startColumn() );
+						p->setStartLine( html.html->startLine() );
+						p->setEndColumn( html.html->endColumn() );
+						p->setEndLine( html.html->endLine() );
+						doc->appendItem( p );
+					}
 				}
 				else
 				{
@@ -1467,17 +1481,6 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 					p->setEndLine( html.html->endLine() );
 					doc->appendItem( p );
 				}
-			}
-			else
-			{
-				std::shared_ptr< Paragraph< Trait > > p(
-					new Paragraph< Trait > );
-				p->appendItem( html.html );
-				p->setStartColumn( html.html->startColumn() );
-				p->setStartLine( html.html->startLine() );
-				p->setEndColumn( html.html->endColumn() );
-				p->setEndLine( html.html->endLine() );
-				doc->appendItem( p );
 			}
 		}
 
