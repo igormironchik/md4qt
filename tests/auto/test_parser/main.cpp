@@ -7893,3 +7893,259 @@ TEST_CASE( "125" )
 	REQUIRE( h->endColumn() == 33 );
 	REQUIRE( h->endLine() == 0 );
 }
+
+/*
+# Radiated 1G-6G
+Measured in GTEM using 12 Faces Method.
+<foo>
+## Results
+![Measurement Result](MeasurementResult)
+
+<Peaklist>
+<bar>
+
+## Observation
+No relevant emissions other than radio transmissions.
+
+## Images
+
+*/
+TEST_CASE( "126" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/126.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 9 );
+
+	{
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Heading );
+
+		auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 0 );
+		REQUIRE( h->endColumn() == 15 );
+		REQUIRE( h->endLine() == 0 );
+
+		{
+			REQUIRE( h->level() == 1 );
+			REQUIRE( h->text().get() );
+			auto p = h->text().get();
+			REQUIRE( p->startColumn() == 2 );
+			REQUIRE( p->startLine() == 0 );
+			REQUIRE( p->endColumn() == 15 );
+			REQUIRE( p->endLine() == p->startLine() );
+			REQUIRE( p->items().size() == 1 );
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( t->text() == u8"Radiated 1G-6G" );
+			REQUIRE( t->startColumn() == 2 );
+			REQUIRE( t->startLine() == 0 );
+			REQUIRE( t->endColumn() == 15 );
+			REQUIRE( t->endLine() == t->startLine() );
+		}
+	}
+
+	{
+		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
+
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 1 );
+		REQUIRE( p->endColumn() == 4 );
+		REQUIRE( p->endLine() == 2 );
+
+		REQUIRE( p->items().size() == 2 );
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+
+		REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
+		REQUIRE( t->text() == u8"Measured in GTEM using 12 Faces Method." );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 1 );
+		REQUIRE( t->endColumn() == 38 );
+		REQUIRE( t->endLine() == 1 );
+
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
+
+		auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 1 ).get() );
+
+		REQUIRE( h->text() == u8"<foo>" );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 2 );
+		REQUIRE( h->endColumn() == 4 );
+		REQUIRE( h->endLine() == 2 );
+	}
+
+	{
+		REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Heading );
+
+		auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 3 ).get() );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 3 );
+		REQUIRE( h->endColumn() == 9 );
+		REQUIRE( h->endLine() == 3 );
+
+		{
+			REQUIRE( h->level() == 2 );
+			REQUIRE( h->text().get() );
+			auto p = h->text().get();
+			REQUIRE( p->startColumn() == 3 );
+			REQUIRE( p->startLine() == 3 );
+			REQUIRE( p->endColumn() == 9 );
+			REQUIRE( p->endLine() == p->startLine() );
+			REQUIRE( p->items().size() == 1 );
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( t->text() == u8"Results" );
+			REQUIRE( t->startColumn() == 3 );
+			REQUIRE( t->startLine() == 3 );
+			REQUIRE( t->endColumn() == 9 );
+			REQUIRE( t->endLine() == t->startLine() );
+		}
+	}
+
+	{
+		REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::Paragraph );
+
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 4 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 4 );
+		REQUIRE( p->endColumn() == 39 );
+		REQUIRE( p->endLine() == 4 );
+
+		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Image );
+
+		auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 0 ).get() );
+
+		REQUIRE( i->text() == u8"Measurement Result" );
+		REQUIRE( i->url() == u8"MeasurementResult" );
+		REQUIRE( i->startColumn() == 0 );
+		REQUIRE( i->startLine() == 4 );
+		REQUIRE( i->endColumn() == 39 );
+		REQUIRE( i->endLine() == 4 );
+	}
+
+	{
+		REQUIRE( doc->items().at( 5 )->type() == MD::ItemType::RawHtml );
+
+		auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 5 ).get() );
+
+		REQUIRE( h->text() == u8"<Peaklist>\n<bar>" );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 6 );
+		REQUIRE( h->endColumn() == 4 );
+		REQUIRE( h->endLine() == 7 );
+	}
+
+	{
+		REQUIRE( doc->items().at( 6 )->type() == MD::ItemType::Heading );
+
+		auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 6 ).get() );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 9 );
+		REQUIRE( h->endColumn() == 13 );
+		REQUIRE( h->endLine() == 9 );
+
+		{
+			REQUIRE( h->level() == 2 );
+			REQUIRE( h->text().get() );
+			auto p = h->text().get();
+			REQUIRE( p->startColumn() == 3 );
+			REQUIRE( p->startLine() == 9 );
+			REQUIRE( p->endColumn() == 13 );
+			REQUIRE( p->endLine() == p->startLine() );
+			REQUIRE( p->items().size() == 1 );
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( t->text() == u8"Observation" );
+			REQUIRE( t->startColumn() == 3 );
+			REQUIRE( t->startLine() == 9 );
+			REQUIRE( t->endColumn() == 13 );
+			REQUIRE( t->endLine() == t->startLine() );
+		}
+	}
+
+	{
+		REQUIRE( doc->items().at( 7 )->type() == MD::ItemType::Paragraph );
+
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 7 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 10 );
+		REQUIRE( p->endColumn() == 52 );
+		REQUIRE( p->endLine() == 10 );
+
+		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+
+		REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
+		REQUIRE( t->text() == u8"No relevant emissions other than radio transmissions." );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 10 );
+		REQUIRE( t->endColumn() == 52 );
+		REQUIRE( t->endLine() == 10 );
+	}
+
+	{
+		REQUIRE( doc->items().at( 8 )->type() == MD::ItemType::Heading );
+
+		auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 8 ).get() );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 12 );
+		REQUIRE( h->endColumn() == 8 );
+		REQUIRE( h->endLine() == 12 );
+
+		{
+			REQUIRE( h->level() == 2 );
+			REQUIRE( h->text().get() );
+			auto p = h->text().get();
+			REQUIRE( p->startColumn() == 3 );
+			REQUIRE( p->startLine() == 12 );
+			REQUIRE( p->endColumn() == 8 );
+			REQUIRE( p->endLine() == p->startLine() );
+			REQUIRE( p->items().size() == 1 );
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( t->text() == u8"Images" );
+			REQUIRE( t->startColumn() == 3 );
+			REQUIRE( t->startLine() == 12 );
+			REQUIRE( t->endColumn() == 8 );
+			REQUIRE( t->endLine() == t->startLine() );
+		}
+	}
+}
+
+/*
+<?php
+
+echo ''
+
+echo ''
+
+echo ''
+
+*/
+TEST_CASE( "127" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/127.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+
+	auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
+
+	REQUIRE( h->text() == u8"<?php\n\necho ''\n\necho ''\n\necho ''" );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 6 );
+	REQUIRE( h->endLine() == 6 );
+}

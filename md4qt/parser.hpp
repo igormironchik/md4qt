@@ -1845,6 +1845,17 @@ Parser< Trait >::parseFragment( MdBlock< Trait > & fr,
 			workingPath, fileName, collectRefLinks, html );
 	else
 	{
+		if( html.html )
+		{
+			if( !collectRefLinks )
+				parent->appendItem( html.html );
+
+			html.html.reset();
+			html.htmlBlockType = -1;
+			html.continueHtml = false;
+			html.onLine = false;
+		}
+
 		switch( whatIsTheLine( fr.data.front().first ) )
 		{
 			case BlockType::Text :
@@ -3744,13 +3755,14 @@ findIt( typename Delims< Trait >::const_iterator it, typename Delims< Trait >::c
 template< class Trait >
 inline void
 eatRawHtml( long long int line, long long int pos, long long int toLine, long long int toPos,
-	TextParsingOpts< Trait > & po, bool finish, int htmlRule, bool onLine )
+	TextParsingOpts< Trait > & po, bool finish, int htmlRule, bool onLine,
+	bool continueEating = false )
 {
 	if( line <= toLine )
 	{
 		typename Trait::String h = po.html.html->text();
 
-		if( !h.isEmpty() )
+		if( !h.isEmpty() && !continueEating )
 		{
 			for( long long int i = 0; i < po.fr.emptyLinesBefore; ++i )
 				h.push_back( typename Trait::Char( '\n' ) );
@@ -3838,26 +3850,29 @@ finishRule1HtmlTag( typename Delims< Trait >::const_iterator it,
 		"/textarea"
 	};
 
-	if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less && skipFirst )
-		std::tie( std::ignore, std::ignore, std::ignore, po.html.onLine, std::ignore ) =
-			isHtmlTag( it->m_line, it->m_pos, po, 1 );
-
-	for( it = ( skipFirst && it != last ? std::next( it ) : it ); it != last; ++it )
+	if( it != last )
 	{
-		if( it->m_type == Delimiter::Less )
+		if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less && skipFirst )
+			std::tie( std::ignore, std::ignore, std::ignore, po.html.onLine, std::ignore ) =
+				isHtmlTag( it->m_line, it->m_pos, po, 1 );
+
+		for( it = ( skipFirst && it != last ? std::next( it ) : it ); it != last; ++it )
 		{
-			typename Trait::String tag;
-			bool closed = false;
-
-			std::tie( tag, closed ) = readHtmlTag( it, po );
-
-			if( closed )
+			if( it->m_type == Delimiter::Less )
 			{
-				if( finish.find( tag.toLower() ) != finish.cend() )
-				{
-					eatRawHtml( po.line, po.pos, it->m_line, -1, po, true, 1, po.html.onLine );
+				typename Trait::String tag;
+				bool closed = false;
 
-					return;
+				std::tie( tag, closed ) = readHtmlTag( it, po );
+
+				if( closed )
+				{
+					if( finish.find( tag.toLower() ) != finish.cend() )
+					{
+						eatRawHtml( po.line, po.pos, it->m_line, -1, po, true, 1, po.html.onLine );
+
+						return;
+					}
 				}
 			}
 		}
@@ -3872,56 +3887,61 @@ finishRule2HtmlTag( typename Delims< Trait >::const_iterator it,
 	typename Delims< Trait >::const_iterator last,
 	TextParsingOpts< Trait > & po )
 {
-	bool finish = true;
-	bool onLine = po.html.onLine;
-
-	if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less )
+	if( it != last )
 	{
-		size_t i = 0;
+		bool finish = true;
+		bool onLine = po.html.onLine;
 
-		const auto & s = po.fr.data[ it->m_line ].first.asString();
-
-		long long int p = 0;
-
-		while( ( p = s.indexOf( c_startComment, p ) ) != it->m_pos )
+		if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less )
 		{
-			++i;
-			++p;
+			size_t i = 0;
+
+			const auto & s = po.fr.data[ it->m_line ].first.asString();
+
+			long long int p = 0;
+
+			while( ( p = s.indexOf( c_startComment, p ) ) != it->m_pos )
+			{
+				++i;
+				++p;
+			}
+
+			finish = po.fr.data[ it->m_line ].second.htmlCommentClosed[ i ];
+
+			onLine = ( it->m_pos == skipSpaces< Trait >( 0, po.fr.data[ it->m_line ].first.asString() ) );
+			po.html.onLine = onLine;
 		}
 
-		finish = po.fr.data[ it->m_line ].second.htmlCommentClosed[ i ];
-
-		onLine = ( it->m_pos == skipSpaces< Trait >( 0, po.fr.data[ it->m_line ].first.asString() ) );
-		po.html.onLine = onLine;
-	}
-
-	if( finish )
-	{
-		for( ; it != last; ++it )
+		if( finish )
 		{
-			if( it->m_type == Delimiter::Greater )
+			for( ; it != last; ++it )
 			{
-				if( it->m_pos > 1 && po.fr.data[ it->m_line ].first[ it->m_pos - 1 ] ==
-						typename Trait::Char( '-' ) &&
-					po.fr.data[ it->m_line ].first[ it->m_pos - 2 ] == typename Trait::Char( '-' ) )
+				if( it->m_type == Delimiter::Greater )
 				{
-					eatRawHtml( po.line, po.pos, it->m_line, po.fr.data[ it->m_line ].first.length(),
-						po, true, 2, onLine );
+					if( it->m_pos > 1 && po.fr.data[ it->m_line ].first[ it->m_pos - 1 ] ==
+							typename Trait::Char( '-' ) &&
+						po.fr.data[ it->m_line ].first[ it->m_pos - 2 ] == typename Trait::Char( '-' ) )
+					{
+						eatRawHtml( po.line, po.pos, it->m_line, po.fr.data[ it->m_line ].first.length(),
+							po, true, 2, onLine );
 
-					return;
+						return;
+					}
 				}
 			}
-		}
 
-		eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 2, onLine );
+			eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 2, onLine );
+		}
+		else
+		{
+			po.html.html.reset();
+			po.html.htmlBlockType = -1;
+			po.html.continueHtml = false;
+			po.html.onLine = false;
+		}
 	}
 	else
-	{
-		po.html.html.reset();
-		po.html.htmlBlockType = -1;
-		po.html.continueHtml = false;
-		po.html.onLine = false;
-	}
+		eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 2, po.html.onLine );
 }
 
 template< class Trait >
@@ -3932,30 +3952,33 @@ finishRule3HtmlTag( typename Delims< Trait >::const_iterator it,
 {
 	bool onLine = po.html.onLine;
 
-	if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less )
+	if( it != last )
 	{
-		onLine = ( it->m_pos == skipSpaces< Trait >( 0, po.fr.data[ it->m_line ].first.asString() ) );
-		po.html.onLine = onLine;
-	}
-
-	for( ; it != last; ++it )
-	{
-		if( it->m_type == Delimiter::Greater )
+		if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less )
 		{
-			if( it->m_pos > 0 && po.fr.data[ it->m_line ].first[ it->m_pos - 1 ] ==
-				typename Trait::Char( '?' ) )
+			onLine = ( it->m_pos == skipSpaces< Trait >( 0, po.fr.data[ it->m_line ].first.asString() ) );
+			po.html.onLine = onLine;
+		}
+
+		for( ; it != last; ++it )
+		{
+			if( it->m_type == Delimiter::Greater )
 			{
-				long long int i = it->m_pos + 1;
-
-				for( ; i < po.fr.data[ it->m_line ].first.length(); ++i )
+				if( it->m_pos > 0 && po.fr.data[ it->m_line ].first[ it->m_pos - 1 ] ==
+					typename Trait::Char( '?' ) )
 				{
-					if( po.fr.data[ it->m_line ].first[ i ] == typename Trait::Char( '<' ) )
-						break;
+					long long int i = it->m_pos + 1;
+
+					for( ; i < po.fr.data[ it->m_line ].first.length(); ++i )
+					{
+						if( po.fr.data[ it->m_line ].first[ i ] == typename Trait::Char( '<' ) )
+							break;
+					}
+
+					eatRawHtml( po.line, po.pos, it->m_line, i , po, true, 3, onLine );
+
+					return;
 				}
-
-				eatRawHtml( po.line, po.pos, it->m_line, i , po, true, 3, onLine );
-
-				return;
 			}
 		}
 	}
@@ -3969,29 +3992,32 @@ finishRule4HtmlTag( typename Delims< Trait >::const_iterator it,
 	typename Delims< Trait >::const_iterator last,
 	TextParsingOpts< Trait > & po )
 {
-	bool onLine = po.html.onLine;
-
-	if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less )
+	if( it != last )
 	{
-		onLine = ( it->m_pos == skipSpaces< Trait >( 0, po.fr.data[ it->m_line ].first.asString() ) );
-		po.html.onLine = onLine;
-	}
+		bool onLine = po.html.onLine;
 
-	for( ; it != last; ++it )
-	{
-		if( it->m_type == Delimiter::Greater )
+		if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less )
 		{
-			long long int i = it->m_pos + 1;
+			onLine = ( it->m_pos == skipSpaces< Trait >( 0, po.fr.data[ it->m_line ].first.asString() ) );
+			po.html.onLine = onLine;
+		}
 
-			for( ; i < po.fr.data[ it->m_line ].first.length(); ++i )
+		for( ; it != last; ++it )
+		{
+			if( it->m_type == Delimiter::Greater )
 			{
-				if( po.fr.data[ it->m_line ].first[ i ] == typename Trait::Char( '<' ) )
-					break;
+				long long int i = it->m_pos + 1;
+
+				for( ; i < po.fr.data[ it->m_line ].first.length(); ++i )
+				{
+					if( po.fr.data[ it->m_line ].first[ i ] == typename Trait::Char( '<' ) )
+						break;
+				}
+
+				eatRawHtml( po.line, po.pos, it->m_line, i , po, true, 4, onLine );
+
+				return;
 			}
-
-			eatRawHtml( po.line, po.pos, it->m_line, i , po, true, 4, onLine );
-
-			return;
 		}
 	}
 
@@ -4004,33 +4030,36 @@ finishRule5HtmlTag( typename Delims< Trait >::const_iterator it,
 	typename Delims< Trait >::const_iterator last,
 	TextParsingOpts< Trait > & po )
 {
-	bool onLine = po.html.onLine;
-
-	if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less )
+	if( it != last )
 	{
-		onLine = ( it->m_pos == skipSpaces< Trait >( 0, po.fr.data[ it->m_line ].first.asString() ) );
-		po.html.onLine = onLine;
-	}
+		bool onLine = po.html.onLine;
 
-	for( ; it != last; ++it )
-	{
-		if( it->m_type == Delimiter::Greater )
+		if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less )
 		{
-			if( it->m_pos > 1 && po.fr.data[ it->m_line ].first[ it->m_pos - 1 ] ==
-					typename Trait::Char( ']' ) &&
-				po.fr.data[ it->m_line ].first[ it->m_pos - 2 ] == typename Trait::Char( ']' ) )
+			onLine = ( it->m_pos == skipSpaces< Trait >( 0, po.fr.data[ it->m_line ].first.asString() ) );
+			po.html.onLine = onLine;
+		}
+
+		for( ; it != last; ++it )
+		{
+			if( it->m_type == Delimiter::Greater )
 			{
-				long long int i = it->m_pos + 1;
-
-				for( ; i < po.fr.data[ it->m_line ].first.length(); ++i )
+				if( it->m_pos > 1 && po.fr.data[ it->m_line ].first[ it->m_pos - 1 ] ==
+						typename Trait::Char( ']' ) &&
+					po.fr.data[ it->m_line ].first[ it->m_pos - 2 ] == typename Trait::Char( ']' ) )
 				{
-					if( po.fr.data[ it->m_line ].first[ i ] == typename Trait::Char( '<' ) )
-						break;
+					long long int i = it->m_pos + 1;
+
+					for( ; i < po.fr.data[ it->m_line ].first.length(); ++i )
+					{
+						if( po.fr.data[ it->m_line ].first[ i ] == typename Trait::Char( '<' ) )
+							break;
+					}
+
+					eatRawHtml( po.line, po.pos, it->m_line, i , po, true, 5, onLine );
+
+					return;
 				}
-
-				eatRawHtml( po.line, po.pos, it->m_line, i , po, true, 5, onLine );
-
-				return;
 			}
 		}
 	}
@@ -4232,50 +4261,61 @@ finishRule7HtmlTag( typename Delims< Trait >::const_iterator it,
 	typename Delims< Trait >::const_iterator last,
 	TextParsingOpts< Trait > & po )
 {
-	const auto start = it;
-	long long int l = -1, p = -1;
-	bool onLine = false;
-	bool ok = false;
-
-	std::tie( ok, l, p, onLine, std::ignore ) = isHtmlTag( it->m_line, it->m_pos,
-		po, 7 );
-
-	onLine = onLine && it->m_line == 0 && l == start->m_line;
-
-	if( ok )
+	if( it != last )
 	{
-		eatRawHtml( po.line, po.pos, l, ++p, po, !onLine, 7, onLine );
+		const auto start = it;
+		long long int l = -1, p = -1;
+		bool onLine = false;
+		bool ok = false;
 
-		po.html.onLine = onLine;
+		std::tie( ok, l, p, onLine, std::ignore ) = isHtmlTag( it->m_line, it->m_pos,
+			po, 7 );
 
-		it = findIt( it, last, po );
+		onLine = onLine && it->m_line == 0 && l == start->m_line;
 
-		if( onLine )
+		if( ok )
 		{
-			for( ; it != last; ++it )
+			eatRawHtml( po.line, po.pos, l, ++p, po, !onLine, 7, onLine );
+
+			po.html.onLine = onLine;
+
+			it = findIt( it, last, po );
+
+			if( onLine )
 			{
-				if( it->m_type == Delimiter::Less )
+				for( ; it != last; ++it )
 				{
-					const auto rule = htmlTagRule( it, last, po );
-
-					if( rule != -1 && rule != 7 )
+					if( it->m_type == Delimiter::Less )
 					{
-						eatRawHtml( po.line, po.pos, it->m_line, it->m_pos, po, true, 7, onLine );
+						const auto rule = htmlTagRule( it, last, po );
 
-						return std::prev( it );
+						if( rule != -1 && rule != 7 )
+						{
+							eatRawHtml( po.line, po.pos, it->m_line, it->m_pos, po, true, 7,
+								onLine, true );
+
+							return std::prev( it );
+						}
 					}
 				}
+
+				eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 7,
+					onLine, true );
+
+				return std::prev( last );
 			}
-
-			eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 7, onLine );
-
-			return std::prev( last );
+			else
+				return findIt( it, last, po );
 		}
 		else
-			return findIt( it, last, po );
+			return it;
 	}
 	else
-		return it;
+	{
+		eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, true, 7, true );
+
+		return last;
+	}
 }
 
 template< class Trait >
