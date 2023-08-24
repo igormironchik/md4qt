@@ -4817,7 +4817,8 @@ makeLink( const typename Trait::String & url, const typename MdBlock< Trait >::D
 			}
 		}
 		else
-			u = u + "/" + po.workingPath + "/" + po.fileName;
+			u = u + ( po.workingPath.isEmpty() ? typename Trait::String() : "/" + po.workingPath ) +
+				"/" + po.fileName;
 	}
 
 	std::shared_ptr< Link< Trait > > link( new Link< Trait > );
