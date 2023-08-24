@@ -1372,7 +1372,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			continue;
 		}
 
-		// Something new and this is not a code block or a list, blockquote.
+		// Something new and first block is not a code block or a list, blockquote.
 		if( type != lineType && type != BlockType::Code && type != BlockType::List &&
 			type != BlockType::Blockquote && type != BlockType::ListWithFirstEmptyLine )
 		{
@@ -1425,6 +1425,18 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
 
 			pf();
+		}
+		else if( type != lineType && lineType == BlockType::Code &&
+			!( ( type == BlockType::List || type == BlockType::ListWithFirstEmptyLine ) &&
+				indentInList( &indents, ns ) ) )
+		{
+			pf();
+
+			fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+
+			type = lineType;
+
+			startOfCode = startSequence< Trait >( line.asString() );
 		}
 		else
 			fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );

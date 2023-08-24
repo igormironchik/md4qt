@@ -8149,3 +8149,108 @@ TEST_CASE( "127" )
 	REQUIRE( h->endColumn() == 6 );
 	REQUIRE( h->endLine() == 6 );
 }
+
+/*
+- full example
+```C++
+#include <iostream>
+
+int main() { return 0; }
+```
+
+# Heading
+
+*/
+TEST_CASE( "128" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/128.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 4 );
+
+	{
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+
+		auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( l->startColumn() == 0 );
+		REQUIRE( l->startLine() == 0 );
+		REQUIRE( l->endColumn() == 13 );
+		REQUIRE( l->endLine() == 0 );
+
+		REQUIRE( l->items().size() == 1 );
+
+		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+
+		auto item = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+		REQUIRE( item->startColumn() == 0 );
+		REQUIRE( item->startLine() == 0 );
+		REQUIRE( item->endColumn() == 13 );
+		REQUIRE( item->endLine() == 0 );
+
+		REQUIRE( item->listType() == MD::ListItem< TRAIT >::Unordered );
+
+		REQUIRE( item->items().size() == 1 );
+
+		REQUIRE( item->items().at( 0 )->type() == MD::ItemType::Paragraph );
+
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( item->items().at( 0 ).get() );
+		REQUIRE( p->startColumn() == 2 );
+		REQUIRE( p->startLine() == 0 );
+		REQUIRE( p->endColumn() == 13 );
+		REQUIRE( p->endLine() == 0 );
+
+		REQUIRE( p->items().size() == 1 );
+
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+
+		REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
+		REQUIRE( t->text() == u8"full example" );
+		REQUIRE( t->startColumn() == 2 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 13 );
+		REQUIRE( t->endLine() == 0 );
+	}
+
+	{
+		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Code );
+
+		auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 2 ).get() );
+
+		REQUIRE( !c->isInlined() );
+		REQUIRE( c->text() == u8"#include <iostream>\n\nint main() { return 0; }" );
+		REQUIRE( c->startColumn() == 0 );
+		REQUIRE( c->startLine() == 2 );
+		REQUIRE( c->endColumn() == 23 );
+		REQUIRE( c->endLine() == 4 );
+	}
+
+	{
+		REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Heading );
+
+		auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 3 ).get() );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 7 );
+		REQUIRE( h->endColumn() == 8 );
+		REQUIRE( h->endLine() == 7 );
+
+		REQUIRE( h->level() == 1 );
+		REQUIRE( h->text().get() );
+		auto p = h->text().get();
+		REQUIRE( p->startColumn() == 2 );
+		REQUIRE( p->startLine() == 7 );
+		REQUIRE( p->endColumn() == 8 );
+		REQUIRE( p->endLine() == p->startLine() );
+		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->text() == u8"Heading" );
+		REQUIRE( t->startColumn() == 2 );
+		REQUIRE( t->startLine() == 7 );
+		REQUIRE( t->endColumn() == 8 );
+		REQUIRE( t->endLine() == t->startLine() );
+	}
+}
