@@ -5083,21 +5083,13 @@ TEST_CASE( "068" )
 	REQUIRE( doc->isEmpty() == false );
 	REQUIRE( doc->items().size() == 2 );
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->startColumn() == 0 );
-	REQUIRE( p->startLine() == 0 );
-	REQUIRE( p->endColumn() == 6 );
-	REQUIRE( p->endLine() == 3 );
-	REQUIRE( p->items().size() == 1 );
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->startColumn() == 0 );
-	REQUIRE( t->startLine() == 0 );
-	REQUIRE( t->endColumn() == 6 );
-	REQUIRE( t->endLine() == 3 );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"<!-- Not finished HTML comment" );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 6 );
+	REQUIRE( h->endLine() == 3 );
+	REQUIRE( h->text() == u8"<!-- Not\nfinished\nHTML\ncomment" );
 }
 
 /*
@@ -8253,4 +8245,154 @@ TEST_CASE( "128" )
 		REQUIRE( t->endColumn() == 8 );
 		REQUIRE( t->endLine() == t->startLine() );
 	}
+}
+
+/*
+<!--[![Downloads](https://pepy.tech/badge/ludwig)](https://pepy.tech/project/ludwig)-->
+
+*/
+TEST_CASE( "129" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/129.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( h->text() == u8"<!--[![Downloads](https://pepy.tech/badge/ludwig)](https://pepy.tech/project/ludwig)-->" );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 86 );
+	REQUIRE( h->endLine() == h->startLine() );
+}
+
+/*
+<!--[![Downloads](https://pepy.tech/badge/ludwig)](https://pepy.tech/project/ludwig)
+text
+
+text
+
+*/
+TEST_CASE( "130" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/130.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( h->text() == u8"<!--[![Downloads](https://pepy.tech/badge/ludwig)](https://pepy.tech/project/ludwig)\ntext\n\ntext" );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 3 );
+	REQUIRE( h->endLine() == 3 );
+}
+
+/*
+> <!--
+> text
+>
+
+text
+
+*/
+TEST_CASE( "131" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/131.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 3 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Blockquote );
+	auto b = static_cast< MD::Blockquote< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( b->items().size() == 1 );
+	REQUIRE( b->startColumn() == 0 );
+	REQUIRE( b->startLine() == 0 );
+	REQUIRE( b->endColumn() == 1 );
+	REQUIRE( b->endLine() == 2 );
+	REQUIRE( b->items().at( 0 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml< TRAIT >* > ( b->items().at( 0 ).get() );
+	REQUIRE( h->text() == u8"<!--\ntext" );
+	REQUIRE( h->startColumn() == 2 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 5 );
+	REQUIRE( h->endLine() == 1 );
+
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 4 );
+	REQUIRE( p->endColumn() == 3 );
+	REQUIRE( p->endLine() == 4 );
+	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->text() == u8"text" );
+	REQUIRE( t->startColumn() == 0 );
+	REQUIRE( t->startLine() == 4 );
+	REQUIRE( t->endColumn() == 3 );
+	REQUIRE( t->endLine() == 4 );
+}
+
+/*
+* <!--
+* text
+
+text
+
+*/
+TEST_CASE( "132" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/132.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 3 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->items().size() == 2 );
+	REQUIRE( l->startColumn() == 0 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 5 );
+	REQUIRE( l->endLine() == 1 );
+	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+	auto i = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( i->items().size() == 1 );
+	REQUIRE( i->startColumn() == 0 );
+	REQUIRE( i->startLine() == 0 );
+	REQUIRE( i->endColumn() == 5 );
+	REQUIRE( i->endLine() == 0 );
+	REQUIRE( i->items().at( 0 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml< TRAIT>* > ( i->items().at( 0 ).get() );
+	REQUIRE( h->text() == u8"<!--" );
+	REQUIRE( h->startColumn() == 2 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 5 );
+	REQUIRE( h->endLine() == 0 );
+	REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
+
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 3 );
+	REQUIRE( p->endColumn() == 3 );
+	REQUIRE( p->endLine() == 3 );
+	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->text() == u8"text" );
+	REQUIRE( t->startColumn() == 0 );
+	REQUIRE( t->startLine() == 3 );
+	REQUIRE( t->endColumn() == 3 );
+	REQUIRE( t->endLine() == 3 );
 }

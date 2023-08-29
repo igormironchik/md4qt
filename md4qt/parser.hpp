@@ -182,6 +182,17 @@ struct RawHtmlBlock {
 }; // struct RawHtmlBlock
 
 
+template< class Trait >
+inline void
+resetHtmlTag( RawHtmlBlock< Trait > & html )
+{
+	html.html.reset();
+	html.htmlBlockType = -1;
+	html.continueHtml = false;
+	html.onLine = false;
+}
+
+
 //
 // MdLineData
 //
@@ -189,7 +200,8 @@ struct RawHtmlBlock {
 //! Internal structure.
 struct MdLineData {
 	long long int lineNumber = -1;
-	std::vector< bool > htmlCommentClosed = {};
+	// std::pair< closed, valid >
+	std::vector< std::pair< bool, bool > > htmlCommentData = {};
 }; // struct MdLineData
 
 
@@ -1025,16 +1037,13 @@ private:
 template< class Trait >
 inline bool
 checkForEndHtmlComments( const typename Trait::String & line, long long int pos,
-	std::vector< bool > & res )
+	std::vector< std::pair< bool, bool > > & res )
 {
-	long long int e = line.indexOf( "--", pos );
+	long long int e = line.indexOf( "-->", pos );
 
 	if( e != -1 )
 	{
-		if( e + 2 < line.size() && line[ e + 2 ] == typename Trait::Char( '>' ) )
-			res.push_back( isHtmlComment< Trait >( line.sliced( 0, e + 3 ) ) );
-		else
-			res.push_back( false );
+		res.push_back( { true, isHtmlComment< Trait >( line.sliced( 0, e + 3 ) ) } );
 
 		return true;
 	}
@@ -1045,11 +1054,11 @@ checkForEndHtmlComments( const typename Trait::String & line, long long int pos,
 template< class Trait >
 inline void
 checkForHtmlComments( const typename Trait::String & line, StringListStream< Trait > & stream,
-	std::vector< bool > & res )
+	std::vector< std::pair< bool, bool > > & res )
 {
 	long long int p = 0, l = stream.currentLineNumber();
 
-	bool addFalse = false;
+	bool add = false;
 
 	while( ( p = line.indexOf( c_startComment, p ) ) != -1 )
 	{
@@ -1057,6 +1066,8 @@ checkForHtmlComments( const typename Trait::String & line, StringListStream< Tra
 
 		if( !checkForEndHtmlComments< Trait >( c, 4, res ) )
 		{
+			add = true;
+
 			for( ; l < stream.size(); ++l )
 			{
 				c.push_back( typename Trait::Char( ' ' ) );
@@ -1064,17 +1075,15 @@ checkForHtmlComments( const typename Trait::String & line, StringListStream< Tra
 
 				if( checkForEndHtmlComments< Trait >( c, 4, res ) )
 				{
-					addFalse = false;
+					add = false;
 
 					break;
 				}
-				else
-					addFalse = true;
 			}
 		}
 
-		if( addFalse )
-			res.push_back( false );
+		if( add )
+			res.push_back( { false, false } );
 
 		++p;
 	}
@@ -1102,7 +1111,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 	long long int indent = 0;
 	RawHtmlBlock< Trait > html;
 	long long int emptyLinesBefore = 0;
-	std::vector< bool > htmlCommentClosed;
+	std::vector< std::pair< bool, bool > > htmlCommentData;
 
 	// Parse fragment and clear internal cache.
 	auto pf = [&]()
@@ -1141,14 +1150,14 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				if( line.isEmpty() || line.asString().startsWith( "    " ) ||
 					line.asString().startsWith( '\t' ) )
 				{
-					fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+					fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 				}
 				else
 				{
 					pf();
 
 					type = whatIsTheLine( line );
-					fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+					fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 
 					break;
 				}
@@ -1162,7 +1171,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 	while( !stream.atEnd() )
 	{
-		htmlCommentClosed.clear();
+		htmlCommentData.clear();
 
 		const auto currentLineNumber = stream.currentLineNumber();
 
@@ -1172,7 +1181,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 		line.replace( typename Trait::Char( 0 ), Trait::utf16ToString( &c_zeroReplaceWith[ 0 ] ) );
 
-		checkForHtmlComments( line.asString(), stream, htmlCommentClosed );
+		checkForHtmlComments( line.asString(), stream, htmlCommentData );
 
 		const long long int prevIndent = indent;
 
@@ -1196,7 +1205,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			{
 				pf();
 
-				fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+				fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 				type = lineType;
 
 				continue;
@@ -1223,10 +1232,10 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				type = lineType;
 				indents.insert( tmp );
 				lineCounter = 1;
-				fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+				fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 			}
 			else
-				fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+				fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 
 			if( type == BlockType::Unknown )
 			{
@@ -1247,7 +1256,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			if( type == BlockType::Code )
 				startOfCode = startSequence< Trait >( line.asString() );
 
-			fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+			fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 
 			if( type == BlockType::Heading )
 				pf();
@@ -1271,7 +1280,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 					if( isFootnote< Trait >( fragment.front().first.asString() ) )
 					{
 						fragment.push_back( { typename Trait::String(),
-							{ currentLineNumber, htmlCommentClosed } } );
+							{ currentLineNumber, htmlCommentData } } );
 
 						eatFootnote();
 					}
@@ -1292,7 +1301,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 				case BlockType::Code :
 				{
-					fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+					fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 					emptyLinesCount = 0;
 
 					continue;
@@ -1320,7 +1329,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 					fragment.push_back( { typename Trait::String(),
 						{ currentLineNumber - emptyLinesCount + i, {} } } );
 
-				fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+				fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 
 				emptyLineInList = false;
 				emptyLinesCount = 0;
@@ -1332,7 +1341,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				pf();
 
 				type = lineType;
-				fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+				fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 				emptyLinesCount = 0;
 
 				continue;
@@ -1366,7 +1375,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 					startOfCode = startSequence< Trait >( line.asString() );
 			}
 
-			fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+			fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 			emptyLinesCount = 0;
 
 			continue;
@@ -1377,7 +1386,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			type != BlockType::Blockquote && type != BlockType::ListWithFirstEmptyLine )
 		{
 			if( type == BlockType::Text && lineType == BlockType::CodeIndentedBySpaces )
-				fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+				fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 			else
 			{
 				if( type == BlockType::Text &&
@@ -1390,7 +1399,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 					{
 						if( num > 1 )
 						{
-							fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+							fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 
 							continue;
 						}
@@ -1413,7 +1422,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 					else if( type == BlockType::Code )
 						startOfCode = startSequence< Trait >( line.asString() );
 
-					fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+					fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 				}
 			}
 		}
@@ -1422,7 +1431,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			startSequence< Trait >( line.asString() ).contains( startOfCode ) &&
 			isCodeFences< Trait >( line.asString(), true ) )
 		{
-			fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+			fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 
 			pf();
 		}
@@ -1432,14 +1441,14 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 		{
 			pf();
 
-			fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+			fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 
 			type = lineType;
 
 			startOfCode = startSequence< Trait >( line.asString() );
 		}
 		else
-			fragment.push_back( { line, { currentLineNumber, htmlCommentClosed } } );
+			fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 
 		emptyLinesCount = 0;
 	}
@@ -1496,16 +1505,12 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			}
 		}
 
-		html.html.reset();
-		html.htmlBlockType = -1;
-		html.continueHtml = false;
+		resetHtmlTag( html );
 	};
 
 	if( top )
 	{
-		html.html.reset();
-		html.htmlBlockType = -1;
-		html.continueHtml = false;
+		resetHtmlTag( html );
 
 		for( long long int i = 0; i < (long long int) splitted.size(); ++i )
 		{
@@ -1862,10 +1867,7 @@ Parser< Trait >::parseFragment( MdBlock< Trait > & fr,
 			if( !collectRefLinks )
 				parent->appendItem( html.html );
 
-			html.html.reset();
-			html.htmlBlockType = -1;
-			html.continueHtml = false;
-			html.onLine = false;
+			resetHtmlTag( html );
 		}
 
 		switch( whatIsTheLine( fr.data.front().first ) )
@@ -3840,9 +3842,7 @@ eatRawHtml( long long int line, long long int pos, long long int toLine, long lo
 			if( !po.collectRefLinks )
 				po.parent->appendItem( po.html.html );
 
-			po.html.html.reset();
-			po.html.htmlBlockType = -1;
-			po.html.continueHtml = false;
+			resetHtmlTag( po.html );
 		}
 	}
 	else
@@ -3901,7 +3901,7 @@ finishRule2HtmlTag( typename Delims< Trait >::const_iterator it,
 {
 	if( it != last )
 	{
-		bool finish = true;
+		std::pair< bool, bool > commentData = { true, true };
 		bool onLine = po.html.onLine;
 
 		if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less )
@@ -3918,13 +3918,13 @@ finishRule2HtmlTag( typename Delims< Trait >::const_iterator it,
 				++p;
 			}
 
-			finish = po.fr.data[ it->m_line ].second.htmlCommentClosed[ i ];
+			commentData = po.fr.data[ it->m_line ].second.htmlCommentData[ i ];
 
 			onLine = ( it->m_pos == skipSpaces< Trait >( 0, po.fr.data[ it->m_line ].first.asString() ) );
 			po.html.onLine = onLine;
 		}
 
-		if( finish )
+		if( commentData.first && commentData.second )
 		{
 			for( ; it != last; ++it )
 			{
@@ -3943,14 +3943,14 @@ finishRule2HtmlTag( typename Delims< Trait >::const_iterator it,
 			}
 
 			eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 2, onLine );
+
+			return;
 		}
+
+		if( !commentData.first )
+			eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 2, onLine );
 		else
-		{
-			po.html.html.reset();
-			po.html.htmlBlockType = -1;
-			po.html.continueHtml = false;
-			po.html.onLine = false;
-		}
+			resetHtmlTag( po.html );
 	}
 	else
 		eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 2, po.html.onLine );
@@ -4149,7 +4149,7 @@ htmlTagRule( typename Delims< Trait >::const_iterator it,
 
 	std::tie( tag, std::ignore ) = readHtmlTag( it, po );
 
-	if( tag == "![CDATA[" )
+	if( tag.startsWith( "![CDATA[" ) )
 		return 5;
 
 	tag = tag.toLower();
@@ -4175,12 +4175,6 @@ htmlTagRule( typename Delims< Trait >::const_iterator it,
 		!( tag[ 0 ].unicode() >= 97 && tag[ 0 ].unicode() <= 122 ) )
 			return -1;
 
-	for( long long int i = 1; i < tag.size(); ++i )
-	{
-		if( !c_validHtmlTagLetters.contains( tag[ i ] ) )
-			return -1;
-	}
-
 	static const std::set< typename Trait::String > rule1 = {
 		"pre", "script",
 		"style", "textarea"
@@ -4188,7 +4182,7 @@ htmlTagRule( typename Delims< Trait >::const_iterator it,
 
 	if( !closing && rule1.find( tag ) != rule1.cend() )
 		return 1;
-	else if( tag == "!--" )
+	else if( tag.startsWith( "!--" ) )
 		return 2;
 	else if( tag.startsWith( "?" ) )
 		return 3;
@@ -4224,6 +4218,12 @@ htmlTagRule( typename Delims< Trait >::const_iterator it,
 			"track", "ul"
 		};
 
+		for( long long int i = 1; i < tag.size(); ++i )
+		{
+			if( !c_validHtmlTagLetters.contains( tag[ i ] ) )
+				return -1;
+		}
+
 		if( rule6.find( tag ) != rule6.cend() )
 			return 6;
 		else
@@ -4253,8 +4253,7 @@ checkForRawHtml( typename Delims< Trait >::const_iterator it,
 
 	if( rule == -1 )
 	{
-		po.html.htmlBlockType = -1;
-		po.html.html.reset();
+		resetHtmlTag( po.html );
 
 		return it;
 	}
@@ -4722,10 +4721,7 @@ checkForLinkText( typename Delims< Trait >::const_iterator it,
 	const auto r =  readTextBetweenSquareBrackets( start, it, last, po, false );
 
 	po.collectRefLinks = collectRefLinks;
-	po.html.html.reset();
-	po.html.htmlBlockType = -1;
-	po.html.continueHtml = false;
-	po.html.onLine = false;
+	resetHtmlTag( po.html );
 	po.line = l;
 	po.pos = p;
 
@@ -6216,10 +6212,7 @@ checkForStyle( typename Delims< Trait >::const_iterator first,
 	if( !count )
 		count = 1;
 
-	po.html.html.reset();
-	po.html.htmlBlockType = -1;
-	po.html.continueHtml = false;
-	po.html.onLine = false;
+	resetHtmlTag( po.html );
 
 	return it + ( count - 1 );
 }
@@ -6347,10 +6340,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 					if( !collectRefLinks )
 						p->appendItem( html.html );
 
-					html.html.reset();
-					html.htmlBlockType = -1;
-					html.continueHtml = false;
-					html.onLine = false;
+					resetHtmlTag( po.html );
 				}
 
 				if( it->m_line > po.line || it->m_pos > po.pos )
@@ -6497,10 +6487,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 			p->setEndLine( html.html->endLine() );
 		}
 
-		html.html.reset();
-		html.htmlBlockType = -1;
-		html.continueHtml = false;
-		html.onLine = false;
+		resetHtmlTag( html );
 	}
 
 	if( !collectRefLinks )
