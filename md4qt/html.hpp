@@ -292,6 +292,16 @@ paragraphToHtml( Paragraph< Trait > * p, bool wrap,
 					static_cast< FootnoteRef< Trait >* > ( it->get() ), doc, fns ) );
 				break;
 
+			case ItemType::RawHtml :
+			{
+				auto * r = static_cast< RawHtml< Trait >* > ( it->get() );
+
+				html.push_back( "\n" );
+				html.push_back( r->text() );
+				html.push_back( "\n" );
+			}
+				break;
+
 			default :
 				break;
 		}
