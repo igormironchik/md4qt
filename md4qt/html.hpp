@@ -423,7 +423,17 @@ listItemToHtml( ListItem< Trait > * i, std::shared_ptr< Document< Trait > > doc,
 {
 	typename Trait::String html;
 
-	html.push_back( "<li>\n" );
+	html.push_back( "<li" );
+
+	if( i->isTaskList() )
+	{
+		html.push_back( " class=\"task-list-item\"><input type=\"checkbox\" id=\"\" disabled=\"\" class=\"task-list-item-checkbox\"" );
+
+		if( i->isChecked() )
+			html.push_back( " checked=\"\"" );
+	}
+
+	html.push_back( ">\n" );
 
 	for( auto it = i->items().cbegin(), last = i->items().cend(); it != last; ++it )
 	{
@@ -497,9 +507,23 @@ listToHtml( List< Trait > * l, std::shared_ptr< Document< Trait > > doc,
 				first = false;
 
 				if( type == ListItem< Trait >::Ordered )
-					html.push_back( "<ol>\n" );
+				{
+					html.push_back( "<ol" );
+
+					if( item->isTaskList() )
+						html.push_back( " class=\"contains-task-list\"" );
+
+					html.push_back( ">\n" );
+				}
 				else
-					html.push_back( "<ul>\n" );
+				{
+					html.push_back( "<ul" );
+
+					if( item->isTaskList() )
+						html.push_back( " class=\"contains-task-list\"" );
+
+					html.push_back( ">\n" );
+				}
 			}
 			else
 			{
