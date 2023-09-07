@@ -8396,3 +8396,59 @@ TEST_CASE( "132" )
 	REQUIRE( t->endColumn() == 3 );
 	REQUIRE( t->endLine() == 3 );
 }
+
+/*
+[Standalone GPU-Ready solution](#standalone-gpu-ready-solution)
+[Files in `work/data` too](#files-in-workdata-too)
+
+# Standalone GPU-Ready solution
+
+# Files in `work/data` too
+
+*/
+TEST_CASE( "133" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/133.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 4 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 49 );
+	REQUIRE( p->endLine() == 1 );
+	REQUIRE( p->items().size() == 2 );
+
+	typename TRAIT::String wd =
+#ifdef MD4QT_QT_SUPPORT
+		QDir().absolutePath()
+#else
+		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
+#endif
+		+ u8"/tests/parser/data";
+
+#ifndef MD4QT_QT_SUPPORT
+	std::string tmp;
+	wd.toUTF8String( tmp );
+	std::replace( tmp.begin(), tmp.end(), '\\', '/' );
+	wd = icu::UnicodeString::fromUTF8( tmp );
+#endif
+
+	{
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
+		auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( l->url() == u8"#standalone-gpu-ready-solution/" + wd + u8"/133.md" );
+		REQUIRE( doc->labeledHeadings().find( l->url() ) != doc->labeledHeadings().cend() );
+	}
+
+	{
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Link );
+		auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 1 ).get() );
+		REQUIRE( l->url() == u8"#files-in-workdata-too/" + wd + u8"/133.md" );
+		REQUIRE( doc->labeledHeadings().find( l->url() ) != doc->labeledHeadings().cend() );
+	}
+}

@@ -2013,6 +2013,25 @@ findAndRemoveHeaderLabel( typename Trait::String & s )
 
 template< class Trait >
 inline typename Trait::String
+stringToLabel( const typename Trait::String & s )
+{
+	typename Trait::String res;
+
+	for( long long int i = 0; i < s.length(); ++i )
+	{
+		const auto c = s[ i ];
+
+		if( c.isLetter() || c.isDigit() || c == typename Trait::Char( '-' ) )
+			res.push_back( c.toLower() );
+		else if( c.isSpace() )
+			res.push_back( "-" );
+	}
+
+	return res;
+}
+
+template< class Trait >
+inline typename Trait::String
 paragraphToLabel( Paragraph< Trait > * p )
 {
 	typename Trait::String l;
@@ -2022,24 +2041,82 @@ paragraphToLabel( Paragraph< Trait > * p )
 
 	for( auto it = p->items().cbegin(), last = p->items().cend(); it != last; ++it )
 	{
-		if( (*it)->type() == ItemType::Text )
+		switch( (*it)->type() )
 		{
-			if( !l.isEmpty() )
-				l.push_back( "-" );
-
-			auto t = static_cast< Text< Trait >* > ( it->get() );
-
-			const auto tmp = t->text().simplified();
-
-			for( long long int i = 0; i < tmp.length(); ++i )
+			case ItemType::Text :
 			{
-				const auto c = tmp[ i ];
+				auto t = static_cast< Text< Trait >* > ( it->get() );
+				const auto text = t->text().simplified();
 
-				if( c.isLetter() || c.isDigit() )
-					l.push_back( c.toLower() );
-				else if( c.isSpace() )
+				if( !l.isEmpty() && !text.isEmpty() )
 					l.push_back( "-" );
+
+				l.push_back( stringToLabel< Trait >( text ) );
 			}
+				break;
+
+			case ItemType::Image :
+			{
+				auto i = static_cast< Image< Trait >* > ( it->get() );
+
+				if( !i->p()->isEmpty() )
+				{
+					const auto label = paragraphToLabel( i->p().get() );
+
+					if( !label.isEmpty() && !l.isEmpty() )
+						l.push_back( "-" );
+
+					l.push_back( label );
+				}
+				else if( !i->text().simplified().isEmpty() )
+				{
+					if( !l.isEmpty() )
+						l.push_back( "-" );
+
+					l.push_back( stringToLabel< Trait >( i->text().simplified() ) );
+				}
+			}
+				break;
+
+			case ItemType::Link :
+			{
+				auto link = static_cast< Link< Trait >* > ( it->get() );
+
+				if( !link->p()->isEmpty() )
+				{
+					const auto label = paragraphToLabel( link->p().get() );
+
+					if( !label.isEmpty() && !l.isEmpty() )
+						l.push_back( "-" );
+
+					l.push_back( label );
+				}
+				else if( !link->text().simplified().isEmpty() )
+				{
+					if( !l.isEmpty() )
+						l.push_back( "-" );
+
+					l.push_back( stringToLabel< Trait >( link->text().simplified() ) );
+				}
+			}
+				break;
+
+			case ItemType::Code :
+			{
+				auto c = static_cast< Code< Trait >* > ( it->get() );
+
+				if( !c->text().simplified().isEmpty() )
+				{
+					if( !l.isEmpty() )
+						l.push_back( "-" );
+
+					l.push_back( stringToLabel< Trait >( c->text().simplified() ) );
+				}
+			}
+				break;
+
+			default :
+				break;
 		}
 	}
 
