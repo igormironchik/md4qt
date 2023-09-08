@@ -6,6 +6,11 @@ if( ENABLE_COVERAGE )
 	set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage" )
 endif( ENABLE_COVERAGE )
 
+if( MSVC )
+	add_compile_options( /bigobj )
+	add_compile_options( /utf-8 )
+endif()
+
 set( SRC main.cpp )
 
 file( GLOB MD_FILES data/*.md )
