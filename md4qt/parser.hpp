@@ -73,10 +73,11 @@ namespace MD {
 static const char * c_startComment = "<!--";
 
 inline bool
-indentInList( const std::set< long long int > * indents, long long int indent )
+indentInList( const std::vector< long long int > * indents, long long int indent )
 {
-	if( indents )
-		return ( indents->find( indent ) != indents->cend() );
+	if( indents && !indents->empty() )
+		return ( std::find_if( indents->cbegin(), indents->cend(),
+			[indent] ( const auto & v ) { return ( indent >= v && indent <= v + 3 ); } ) != indents->cend() );
 	else
 		return false;
 };
@@ -725,6 +726,7 @@ private:
 
 	enum class BlockType {
 		Unknown,
+		EmptyLine,
 		Text,
 		List,
 		ListWithFirstEmptyLine,
@@ -736,8 +738,8 @@ private:
 
 public:
 	static BlockType whatIsTheLine( typename Trait::InternalString & str, bool inList = false,
-		long long int * indent = nullptr,
-		bool calcIndent = false, const std::set< long long int > * indents = nullptr );
+		long long int * indent = nullptr, bool emptyLinePreceded = false,
+		bool calcIndent = false, const std::vector< long long int > * indents = nullptr );
 	static void parseFragment( MdBlock< Trait > & fr, std::shared_ptr< Block< Trait > > parent,
 		std::shared_ptr< Document< Trait > > doc,
 		typename Trait::StringList & linksToParse, const typename Trait::String & workingPath,
@@ -1104,15 +1106,18 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 	typename MdBlock< Trait >::Data fragment;
 
-	BlockType type = BlockType::Unknown;
 	bool emptyLineInList = false;
 	long long int emptyLinesCount = 0;
 	long long int lineCounter = 0;
-	std::set< long long int > indents;
+	std::vector< long long int > indents;
 	long long int indent = 0;
 	RawHtmlBlock< Trait > html;
 	long long int emptyLinesBefore = 0;
 	std::vector< std::pair< bool, bool > > htmlCommentData;
+	typename Trait::String startOfCode;
+	BlockType type = BlockType::EmptyLine;
+	BlockType lineType = BlockType::Unknown;
+	BlockType prevLineType = BlockType::Unknown;
 
 	// Parse fragment and clear internal cache.
 	auto pf = [&]()
@@ -1131,7 +1136,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				fragment.clear();
 			}
 
-			type = BlockType::Unknown;
+			type = BlockType::EmptyLine;
 			emptyLineInList = false;
 			emptyLinesCount = 0;
 			lineCounter = 0;
@@ -1168,8 +1173,6 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				pf();
 		};
 
-	typename Trait::String startOfCode;
-
 	while( !stream.atEnd() )
 	{
 		htmlCommentData.clear();
@@ -1186,15 +1189,28 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 		const long long int prevIndent = indent;
 
-		BlockType lineType = whatIsTheLine( line, emptyLineInList, &indent,
-			true, &indents );
+		if( lineType != BlockType::Unknown )
+			prevLineType = lineType;
 
-		if( prevIndent != indent )
-			indents.insert( indent );
+		lineType = whatIsTheLine( line,
+			( emptyLineInList || type == BlockType::List || type == BlockType::ListWithFirstEmptyLine ),
+			&indent, lineType == BlockType::EmptyLine, true, &indents );
 
 		const long long int currentIndent = indent;
 
 		const auto ns = skipSpaces< Trait >( 0, line.asString() );
+
+		const auto indentInListValue = indentInList( &indents,
+			ns - ( lineType == BlockType::CodeIndentedBySpaces ? 4 : 0 ) );
+
+		if( indent != prevIndent &&
+			( lineType == BlockType::List || lineType == BlockType::ListWithFirstEmptyLine ) )
+		{
+			if( indents.empty() )
+				indents.push_back( indent );
+			else if( indentInListValue )
+				indents.push_back( indent );
+		}
 
 		if( type == BlockType::CodeIndentedBySpaces && ns > 3 )
 			lineType = BlockType::CodeIndentedBySpaces;
@@ -1231,14 +1247,14 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 					pf();
 
 				type = lineType;
-				indents.insert( tmp );
+				indents.push_back( tmp );
 				lineCounter = 1;
 				fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 			}
 			else
 				fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 
-			if( type == BlockType::Unknown )
+			if( type == BlockType::EmptyLine )
 			{
 				type = lineType;
 				lineCounter = 1;
@@ -1248,7 +1264,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 		}
 
 		// First line of the fragment.
-		if( ns != line.length() && type == BlockType::Unknown )
+		if( ns != line.length() && type == BlockType::EmptyLine )
 		{
 			type = lineType;
 
@@ -1264,7 +1280,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 			continue;
 		}
-		else if( ns == line.length() && type == BlockType::Unknown )
+		else if( ns == line.length() && type == BlockType::EmptyLine )
 			continue;
 
 		++lineCounter;
@@ -1323,8 +1339,12 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 		//! Empty new line in list.
 		else if( emptyLineInList )
 		{
-			if( indentInList( &indents, ns ) || lineType == BlockType::List ||
-				lineType == BlockType::CodeIndentedBySpaces )
+			const auto possibleLineType =
+				whatIsTheLine( line, false, nullptr, true, false, &indents );
+
+			if( ( indentInListValue && ( possibleLineType != BlockType::CodeIndentedBySpaces ||
+					( possibleLineType == BlockType::CodeIndentedBySpaces && ns >= indent ) ) ) ||
+				lineType == BlockType::List || lineType == BlockType::CodeIndentedBySpaces )
 			{
 				for( long long int i = 0; i < emptyLinesCount; ++i )
 					fragment.push_back( { typename Trait::String(),
@@ -1341,7 +1361,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			{
 				pf();
 
-				type = lineType;
+				type = possibleLineType;
 				fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 				emptyLinesCount = 0;
 
@@ -1371,7 +1391,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				type = lineType;
 
 				if( type == BlockType::List || type == BlockType::ListWithFirstEmptyLine )
-					indents.insert( currentIndent );
+					indents.push_back( currentIndent );
 				else if( type == BlockType::Code )
 					startOfCode = startSequence< Trait >( line.asString() );
 			}
@@ -1419,7 +1439,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				if( !line.isEmpty() && ns < line.length() )
 				{
 					if( type == BlockType::List || type == BlockType::ListWithFirstEmptyLine )
-						indents.insert( currentIndent );
+						indents.push_back( currentIndent );
 					else if( type == BlockType::Code )
 						startOfCode = startSequence< Trait >( line.asString() );
 
@@ -1436,10 +1456,20 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 			pf();
 		}
-		else if( type != lineType && lineType == BlockType::Code &&
-			!( ( type == BlockType::List || type == BlockType::ListWithFirstEmptyLine ) &&
-				indentInList( &indents, ns ) ) )
-		{
+		else if( type != lineType &&
+			// Not continue of code, list, blockquote or list with first empty line.
+			( ( type != BlockType::Code &&
+				type != BlockType::List &&
+				type != BlockType::Blockquote &&
+				!( type == BlockType::ListWithFirstEmptyLine && indentInListValue ) ) ||
+			// Or code in list and not enough indentantion.
+				( ( lineType == BlockType::Code || lineType == BlockType::CodeIndentedBySpaces ) &&
+					( type == BlockType::List || type == BlockType::ListWithFirstEmptyLine ) &&
+						!indentInListValue ) ||
+			// Or continuation of list with first empty line with not enough indentantion.
+				( prevLineType == BlockType::ListWithFirstEmptyLine &&
+					!indentInListValue ) ) )
+		{		
 			pf();
 
 			fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
@@ -1756,8 +1786,8 @@ posOfListItem( const typename Trait::String & s, bool ordered )
 template< class Trait >
 inline typename Parser< Trait >::BlockType
 Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
-	bool inList, long long int * indent, bool calcIndent,
-	const std::set< long long int > * indents )
+	bool inList, long long int * indent, bool emptyLinePreceded, bool calcIndent,
+	const std::vector< long long int > * indents )
 {
 	str.replace( typename Trait::Char( '\t' ), typename Trait::String( 4, ' ' ) );
 
@@ -1794,7 +1824,8 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 			if( ( ( ( s.asString().startsWith( '-' ) ||
 					s.asString().startsWith( '+' ) || s.asString().startsWith( '*' ) ) &&
 				( ( s.length() > 1 && s[ 1 ] == typename Trait::Char( ' ' ) ) || s.length() == 1 ) ) ||
-				orderedList ) && ( first < 4  || indentInList( indents, first ) ) )
+				orderedList ) &&
+				( first < 4  || ( emptyLinePreceded ? false : indentInList( indents, first ) ) ) )
 			{
 				if( calcIndent && indent )
 					*indent = posOfListItem< Trait >( str.asString(), orderedList );
@@ -1806,7 +1837,7 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 			}
 			else if( str.asString().startsWith( typename Trait::String( ( indent ? *indent : 4 ), ' ' ) ) )
 			{
-				if( str.asString().startsWith( "    " ) )
+				if( str.asString().startsWith( typename Trait::String( ( indent ? *indent + 4 : 8 ), ' ' ) ) )
 					return BlockType::CodeIndentedBySpaces;
 			}
 		}
@@ -1820,7 +1851,8 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 			if( ( ( ( s.asString().startsWith( '-' ) ||
 					s.asString().startsWith( '+' ) || s.asString().startsWith( '*' ) ) &&
 				( ( s.length() > 1 && s[ 1 ] == typename Trait::Char( ' ' ) ) || s.length() == 1 ) ) ||
-				orderedList ) && ( first < 4  || indentInList( indents, first ) ) )
+				orderedList ) &&
+				( first < 4  || ( emptyLinePreceded ? false : indentInList( indents, first ) ) ) )
 			{
 				if( calcIndent && indent )
 					*indent = posOfListItem< Trait >( str.asString(), orderedList );
@@ -1843,7 +1875,7 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 		}
 	}
 	else
-		return BlockType::Unknown;
+		return BlockType::EmptyLine;
 
 	return BlockType::Text;
 }
@@ -6779,7 +6811,7 @@ Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
 	{
 		long long int i = 0, j = 0;
 
-		BlockType bt = BlockType::Unknown;
+		BlockType bt = BlockType::EmptyLine;
 
 		for( auto it = fr.data.begin(), last = fr.data.end(); it != last; ++it, ++i )
 		{

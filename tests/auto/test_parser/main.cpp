@@ -8751,3 +8751,128 @@ TEST_CASE( "137" )
 	REQUIRE( dt->endColumn() == 11 );
 	REQUIRE( dt->endLine() == 2 );
 }
+
+/*
+1.
+   Monday
+
+   fgh
+
+   ```
+   code
+   ```
+2.
+Tuesday
+3.
+Wednesday
+
+*/
+TEST_CASE( "138" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/138.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 3 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startColumn() == 0 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 1 );
+	REQUIRE( l->endLine() == 8 );
+
+	REQUIRE( l->items().size() == 1 );
+
+	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+
+	auto i1 = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( i1->startColumn() == 0 );
+	REQUIRE( i1->startLine() == 0 );
+	REQUIRE( i1->endColumn() == 5 );
+	REQUIRE( i1->endLine() == 7 );
+
+	REQUIRE( i1->listType() == MD::ListItem< TRAIT >::Ordered );
+
+	REQUIRE( i1->items().size() == 3 );
+
+	{
+		REQUIRE( i1->items().at( 0 )->type() == MD::ItemType::Paragraph );
+
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( i1->items().at( 0 ).get() );
+		REQUIRE( p->startColumn() == 3 );
+		REQUIRE( p->startLine() == 1 );
+		REQUIRE( p->endColumn() == 8 );
+		REQUIRE( p->endLine() == 1 );
+
+		REQUIRE( p->items().size() == 1 );
+
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+
+		REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
+		REQUIRE( t->text() == u8"Monday" );
+		REQUIRE( t->startColumn() == 3 );
+		REQUIRE( t->startLine() == 1 );
+		REQUIRE( t->endColumn() == 8 );
+		REQUIRE( t->endLine() == 1 );
+	}
+
+	{
+		REQUIRE( i1->items().at( 1 )->type() == MD::ItemType::Paragraph );
+
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( i1->items().at( 1 ).get() );
+		REQUIRE( p->startColumn() == 3 );
+		REQUIRE( p->startLine() == 3 );
+		REQUIRE( p->endColumn() == 5 );
+		REQUIRE( p->endLine() == 3 );
+
+		REQUIRE( p->items().size() == 1 );
+
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+
+		REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
+		REQUIRE( t->text() == u8"fgh" );
+		REQUIRE( t->startColumn() == 3 );
+		REQUIRE( t->startLine() == 3 );
+		REQUIRE( t->endColumn() == 5 );
+		REQUIRE( t->endLine() == 3 );
+	}
+
+	{
+		REQUIRE( i1->items().at( 2 )->type() == MD::ItemType::Code );
+
+		auto c = static_cast< MD::Code< TRAIT >* > ( i1->items().at( 2 ).get() );
+		REQUIRE( c->startColumn() == 3 );
+		REQUIRE( c->startLine() == 6 );
+		REQUIRE( c->endColumn() == 6 );
+		REQUIRE( c->endLine() == 6 );
+		REQUIRE( c->text() == u8"code" );
+	}
+
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
+
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 9 );
+	REQUIRE( p->endColumn() == 8 );
+	REQUIRE( p->endLine() == 11 );
+
+	REQUIRE( p->items().size() == 1 );
+
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+
+	REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
+	REQUIRE( t->text() == u8"Tuesday 3. Wednesday" );
+	REQUIRE( t->startColumn() == 0 );
+	REQUIRE( t->startLine() == 9 );
+	REQUIRE( t->endColumn() == 8 );
+	REQUIRE( t->endLine() == 11 );
+}
