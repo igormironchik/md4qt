@@ -7190,7 +7190,9 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 
 	for( auto last = fr.data.end(); it != last; ++it, ++pos )
 	{
-		std::tie( ok, std::ignore, std::ignore ) = listItemData< Trait >( it->first.asString() );
+		std::tie( ok, std::ignore, std::ignore ) = listItemData< Trait >(
+			it->first.asString().startsWith( typename Trait::String( indent, ' ' ) ) ?
+				it->first.asString().sliced( indent ) : it->first.asString() );
 
 		if( ok )
 		{
@@ -7209,7 +7211,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 			{
 				const auto ns = skipSpaces< Trait >( 0, it->first.asString() );
 				std::tie( ok, std::ignore, std::ignore ) = listItemData< Trait >(
-					it->first.asString() );
+					( ns >= indent ? it->first.asString().sliced( indent ) : it->first.asString() ) );
 
 				if( ok || ns > indent || ns == it->first.length() )
 					nestedList.push_back( *it );
