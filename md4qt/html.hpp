@@ -446,7 +446,8 @@ listItemToHtml( ListItem< Trait > * i, std::shared_ptr< Document< Trait > > doc,
 
 			case ItemType::Paragraph :
 				html.push_back( paragraphToHtml(
-					static_cast< Paragraph< Trait >* > ( it->get() ), true, doc, fns, anchors ) );
+					static_cast< Paragraph< Trait >* > ( it->get() ), i->items().size() > 1,
+						doc, fns, anchors ) );
 				break;
 
 			case ItemType::Code :
