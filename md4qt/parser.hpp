@@ -1248,6 +1248,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 				type = lineType;
 				indents.push_back( tmp );
+				indent = tmp;
 				lineCounter = 1;
 				fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 			}
@@ -1391,7 +1392,10 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				type = lineType;
 
 				if( type == BlockType::List || type == BlockType::ListWithFirstEmptyLine )
+				{
 					indents.push_back( currentIndent );
+					indent = currentIndent;
+				}
 				else if( type == BlockType::Code )
 					startOfCode = startSequence< Trait >( line.asString() );
 			}
@@ -1439,7 +1443,10 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				if( !line.isEmpty() && ns < line.length() )
 				{
 					if( type == BlockType::List || type == BlockType::ListWithFirstEmptyLine )
+					{
 						indents.push_back( currentIndent );
+						indent = currentIndent;
+					}
 					else if( type == BlockType::Code )
 						startOfCode = startSequence< Trait >( line.asString() );
 
