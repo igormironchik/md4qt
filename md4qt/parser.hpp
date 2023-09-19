@@ -2832,6 +2832,15 @@ template< class Trait >
 using Delims = typename Trait::template Vector< Delimiter >;
 
 template< class Trait >
+inline bool
+isAsciiPunct( typename Trait::Char ch )
+{
+	static const typename Trait::String ascii = u8"!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+
+	return ascii.contains( ch );
+}
+
+template< class Trait >
 inline Delims< Trait >
 collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 {
@@ -2874,7 +2883,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 						typename Trait::String style;
 
 						const bool punctBefore = ( i > 0 ? str[ i - 1 ].isPunct() ||
-							str[ i - 1 ] == typename Trait::Char( '~' ) : false );
+							isAsciiPunct< Trait >( str[ i - 1 ] ) : false );
 						const bool alNumBefore =
 							( i > 0 ? str[ i - 1 ].isLetterOrNumber() : false );
 
@@ -2897,7 +2906,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 							( i < str.length() ? str[ i ].isSpace() : true );
 						const bool punctAfter =
 							( i < str.length() ? str[ i ].isPunct() ||
-								str[ i ] == typename Trait::Char( '~' ) : false );
+								isAsciiPunct< Trait >( str[ i ] ) : false );
 						const bool leftFlanking =
 							( ( space || punctBefore ) && punctAfter ) ||
 							( !spaceAfter && !punctAfter );
@@ -2930,7 +2939,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 						typename Trait::String style;
 
 						const bool punctBefore = ( i > 0 ? str[ i - 1 ].isPunct() ||
-							str[ i - 1 ] == typename Trait::Char( '~' ) : false );
+							isAsciiPunct< Trait >( str[ i - 1 ] ) : false );
 
 						while( i < str.length() && str[ i ] == typename Trait::Char( '~' ) )
 						{
@@ -2944,7 +2953,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 								( i < str.length() ? str[ i ].isSpace() : true );
 							const bool punctAfter =
 								( i < str.length() ? str[ i ].isPunct() ||
-									str[ i ] == typename Trait::Char( '~' ) : false );
+									isAsciiPunct< Trait >( str[ i ] ) : false );
 							const bool leftFlanking =
 								( ( space || punctBefore ) && punctAfter ) ||
 								( !spaceAfter && !punctAfter );
@@ -4470,7 +4479,7 @@ finishRule7HtmlTag( typename Delims< Trait >::const_iterator it,
 				return std::prev( last );
 			}
 			else
-				return findIt( it, last, po );
+				return it;
 		}
 		else
 			return it;

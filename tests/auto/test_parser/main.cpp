@@ -9045,3 +9045,58 @@ TEST_CASE( "140" )
 		REQUIRE( t->endLine() == 6 );
 	}
 }
+
+/*
+![sample code output](https://raw.githubusercontent.com/wiki/ocornut/imgui/web/v160/code_sample_02_jp.png)
+<br>_(settings: Dark style (left), Light style (right) / Font: NotoSansCJKjp-Medium, 20px / Rounding: 5)_
+
+*/
+TEST_CASE( "141" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/141.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 104 );
+	REQUIRE( p->endLine() == 1 );
+
+	REQUIRE( p->items().size() == 3 );
+
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Image );
+
+	auto i = static_cast< MD::Image< TRAIT >* > ( p->items().at( 0 ).get() );
+
+	REQUIRE( i->startColumn() == 0 );
+	REQUIRE( i->startLine() == 0 );
+	REQUIRE( i->endColumn() == 105 );
+	REQUIRE( i->endLine() == 0 );
+
+	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
+
+	auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 1 ).get() );
+
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 1 );
+	REQUIRE( h->endColumn() == 3 );
+	REQUIRE( h->endLine() == 1 );
+
+	REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 2 ).get() );
+
+	REQUIRE( t->opts() == MD::TextOption::ItalicText );
+	REQUIRE( t->text() == u8"(settings: Dark style (left), Light style (right) "
+		"/ Font: NotoSansCJKjp-Medium, 20px / Rounding: 5)" );
+	REQUIRE( t->startColumn() == 5 );
+	REQUIRE( t->startLine() == 1 );
+	REQUIRE( t->endColumn() == 103 );
+	REQUIRE( t->endLine() == 1 );
+}
