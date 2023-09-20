@@ -52,7 +52,7 @@ headingIdToHtml( Heading< Trait > * h )
 	{
 		html.push_back( " id=\"" );
 		auto label = h->label();
-		if( label.startsWith( typename Trait::Char( '#' ) ) )
+		if( label.startsWith( typename Trait::String( "#" ) ) )
 			label.remove( 0, 1 );
 		html.push_back( label );
 		html.push_back( "\"" );
@@ -194,6 +194,16 @@ linkToHtml( Link< Trait > * l, std::shared_ptr< Document< Trait > > doc,
 
 	if( it != anchors.cend() )
 		url = typename Trait::String( "#" ) + url;
+
+	if( url.startsWith( typename Trait::String( "#" ) ) &&
+		doc->labeledHeadings().find( url ) == doc->labeledHeadings().cend() )
+	{
+		auto path = static_cast< Anchor< Trait >* > ( doc->items().at( 0 ).get() )->label();
+		const auto sp = path.lastIndexOf( typename Trait::String( "/" ) );
+		path.remove( sp, path.length() - sp );
+		const auto p = url.indexOf( path ) - 1;
+		url.remove( p, url.length() - p );
+	}
 
 	html.push_back( "<a href=\"" );
 	html.push_back( url );
@@ -446,8 +456,9 @@ listItemToHtml( ListItem< Trait > * i, std::shared_ptr< Document< Trait > > doc,
 
 			case ItemType::Paragraph :
 				html.push_back( paragraphToHtml(
-					static_cast< Paragraph< Trait >* > ( it->get() ), i->items().size() > 1,
-						doc, fns, anchors ) );
+					static_cast< Paragraph< Trait >* > ( it->get() ),
+					( i->items().size() > 1 && i->items().at( 1 )->type() != ItemType::List ),
+					doc, fns, anchors ) );
 				break;
 
 			case ItemType::Code :
