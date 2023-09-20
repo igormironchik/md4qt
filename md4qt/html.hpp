@@ -190,12 +190,9 @@ linkToHtml( Link< Trait > * l, std::shared_ptr< Document< Trait > > doc,
 	if( lit != doc->labeledLinks().cend() )
 		url = lit->second->url();
 
-	const auto it = std::find( anchors.cbegin(), anchors.cend(), url );
-
-	if( it != anchors.cend() )
+	if( std::find( anchors.cbegin(), anchors.cend(), url ) != anchors.cend() )
 		url = typename Trait::String( "#" ) + url;
-
-	if( url.startsWith( typename Trait::String( "#" ) ) &&
+	else if( url.startsWith( typename Trait::String( "#" ) ) &&
 		doc->labeledHeadings().find( url ) == doc->labeledHeadings().cend() )
 	{
 		auto path = static_cast< Anchor< Trait >* > ( doc->items().at( 0 ).get() )->label();
