@@ -73,11 +73,13 @@ namespace MD {
 static const char * c_startComment = "<!--";
 
 inline bool
-indentInList( const std::vector< long long int > * indents, long long int indent )
+indentInList( const std::vector< long long int > * indents, long long int indent,
+	bool codeIndentedBySpaces )
 {
 	if( indents && !indents->empty() )
 		return ( std::find_if( indents->cbegin(), indents->cend(),
-			[indent] ( const auto & v ) { return ( indent >= v && indent <= v + 3 ); } ) != indents->cend() );
+			[indent, codeIndentedBySpaces] ( const auto & v ) { return ( indent >= v &&
+				( codeIndentedBySpaces ? true : indent <= v + 3 ) ); } ) != indents->cend() );
 	else
 		return false;
 };
@@ -1201,7 +1203,8 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 		const auto ns = skipSpaces< Trait >( 0, line.asString() );
 
 		const auto indentInListValue = indentInList( &indents,
-			ns - ( lineType == BlockType::CodeIndentedBySpaces ? 4 : 0 ) );
+			ns - ( lineType == BlockType::CodeIndentedBySpaces ? 4 : 0 ),
+			lineType == BlockType::CodeIndentedBySpaces );
 
 		if( indent != prevIndent &&
 			( lineType == BlockType::List || lineType == BlockType::ListWithFirstEmptyLine ) )
@@ -1463,10 +1466,9 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 			pf();
 		}
-		else if( type != lineType &&
+		else if( type != lineType && type != BlockType::Code &&
 			// Not continue of code, list, blockquote or list with first empty line.
-			( ( type != BlockType::Code &&
-				type != BlockType::List &&
+			( ( type != BlockType::List &&
 				type != BlockType::Blockquote &&
 				!( type == BlockType::ListWithFirstEmptyLine && indentInListValue ) ) ||
 			// Or code in list and not enough indentantion.
@@ -1832,7 +1834,7 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 					s.asString().startsWith( '+' ) || s.asString().startsWith( '*' ) ) &&
 				( ( s.length() > 1 && s[ 1 ] == typename Trait::Char( ' ' ) ) || s.length() == 1 ) ) ||
 				orderedList ) &&
-				( first < 4  || ( emptyLinePreceded ? false : indentInList( indents, first ) ) ) )
+				( first < 4  || ( emptyLinePreceded ? false : indentInList( indents, first, false ) ) ) )
 			{
 				if( calcIndent && indent )
 					*indent = posOfListItem< Trait >( str.asString(), orderedList );
@@ -1859,7 +1861,7 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 					s.asString().startsWith( '+' ) || s.asString().startsWith( '*' ) ) &&
 				( ( s.length() > 1 && s[ 1 ] == typename Trait::Char( ' ' ) ) || s.length() == 1 ) ) ||
 				orderedList ) &&
-				( first < 4  || ( emptyLinePreceded ? false : indentInList( indents, first ) ) ) )
+				( first < 4  || ( emptyLinePreceded ? false : indentInList( indents, first, false ) ) ) )
 			{
 				if( calcIndent && indent )
 					*indent = posOfListItem< Trait >( str.asString(), orderedList );
