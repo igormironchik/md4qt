@@ -27,31 +27,59 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/../../..
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../3rdparty )
 
+file( GLOB MAIN *.cpp )
+
 if( BUILD_MD4QT_QT_TESTS )
 	find_package( Qt6Core REQUIRED )
 
-	add_executable( test.md_parser.qt ${SRC} )
-	target_compile_definitions( test.md_parser.qt PUBLIC TRAIT=MD::QStringTrait )
-	target_compile_definitions( test.md_parser.qt PUBLIC MD4QT_QT_SUPPORT )
+	foreach( main ${MAIN} )
+		set( NUMSTRING "" )
 
-	target_link_libraries( test.md_parser.qt Qt6::Core )
+		math( EXPR COUNTER "${COUNTER}+1" OUTPUT_FORMAT DECIMAL )
+		string( LENGTH ${COUNTER} COUNTER_DIGITS_COUNT )
 
-	add_test( NAME test.md_parser.qt
-		COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.qt
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../bin )
+		if( COUNTER_DIGITS_COUNT LESS 2 )
+			string( APPEND NUMSTRING "0" )
+		endif()
+
+		string( APPEND NUMSTRING ${COUNTER} )
+
+		add_executable( test.md_parser.qt.${NUMSTRING} ${main} )
+		target_compile_definitions( test.md_parser.qt.${NUMSTRING} PUBLIC TRAIT=MD::QStringTrait )
+		target_compile_definitions( test.md_parser.qt.${NUMSTRING} PUBLIC MD4QT_QT_SUPPORT )
+
+		target_link_libraries( test.md_parser.qt.${NUMSTRING} Qt6::Core )
+
+		add_test( NAME test.md_parser.qt.${NUMSTRING}
+			COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.qt.${NUMSTRING}
+			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../bin )
+	endforeach()
 endif()
 
 if( BUILD_MD4QT_STL_TESTS )
 	find_package( ICU REQUIRED )
 	find_package( uriparser REQUIRED )
 
-	add_executable( test.md_parser.stl ${SRC} )
-	target_compile_definitions( test.md_parser.stl PUBLIC TRAIT=MD::UnicodeStringTrait )
-	target_compile_definitions( test.md_parser.stl PUBLIC MD4QT_ICU_STL_SUPPORT )
+	foreach( main ${MAIN} )
+		set( NUMSTRING "" )
 
-	target_link_libraries( test.md_parser.stl icu::icu uriparser::uriparser )
+		math( EXPR COUNTER "${COUNTER}+1" OUTPUT_FORMAT DECIMAL )
+		string( LENGTH ${COUNTER} COUNTER_DIGITS_COUNT )
 
-	add_test( NAME test.md_parser.stl
-		COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.stl
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../bin )
+		if( COUNTER_DIGITS_COUNT LESS 2 )
+			string( APPEND NUMSTRING "0" )
+		endif()
+
+		string( APPEND NUMSTRING ${COUNTER} )
+
+		add_executable( test.md_parser.icu.${NUMSTRING} ${main} )
+		target_compile_definitions( test.md_parser.icu.${NUMSTRING} PUBLIC TRAIT=MD::UnicodeStringTrait )
+		target_compile_definitions( test.md_parser.icu.${NUMSTRING} PUBLIC MD4QT_ICU_STL_SUPPORT )
+
+		target_link_libraries( test.md_parser.icu.${NUMSTRING} icu::icu uriparser::uriparser )
+
+		add_test( NAME test.md_parser.icu.${NUMSTRING}
+			COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.icu.${NUMSTRING}
+			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../bin )
+	endforeach()
 endif()

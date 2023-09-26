@@ -13,40 +13,68 @@ endif()
 
 file( GLOB MD_FILES 0.30/*.md )
 file( COPY ${MD_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/tests/commonmark/0.30 )
-file( GLOB HPP *.hpp )
-file( GLOB INL *.inl )
-
-set( SRC main.cpp ${HPP} ${INL} )
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/../../..
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../3rdparty )
 
+file( GLOB INL *.inl )
+
 if( BUILD_MD4QT_QT_TESTS )
 	find_package( Qt6Core REQUIRED )
 
-	add_executable( test.md_parser.commonmark.qt ${SRC} )
-	target_compile_definitions( test.md_parser.commonmark.qt PUBLIC TRAIT=MD::QStringTrait )
-	target_compile_definitions( test.md_parser.commonmark.qt PUBLIC MD4QT_QT_SUPPORT )
+	set( COUNTER "0" )
 
-	target_link_libraries( test.md_parser.commonmark.qt Qt6::Core )
+	foreach( inl ${INL} )
+		set( NUMSTRING "" )
 
-	add_test( NAME test.md_parser.commonmark.qt
-		COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.commonmark.qt
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../bin )
+		math( EXPR COUNTER "${COUNTER}+1" OUTPUT_FORMAT DECIMAL )
+		string( LENGTH ${COUNTER} COUNTER_DIGITS_COUNT )
+
+		if( COUNTER_DIGITS_COUNT LESS 2 )
+			string( APPEND NUMSTRING "0" )
+		endif()
+
+		string( APPEND NUMSTRING ${COUNTER} )
+
+		add_executable( test.md_parser.commonmark.qt.${NUMSTRING} main${NUMSTRING}.cpp ${inl} load.hpp )
+		target_compile_definitions( test.md_parser.commonmark.qt.${NUMSTRING} PUBLIC TRAIT=MD::QStringTrait )
+		target_compile_definitions( test.md_parser.commonmark.qt.${NUMSTRING} PUBLIC MD4QT_QT_SUPPORT )
+
+		target_link_libraries( test.md_parser.commonmark.qt.${NUMSTRING} Qt6::Core )
+
+		add_test( NAME test.md_parser.commonmark.qt.${NUMSTRING}
+			COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.commonmark.qt.${NUMSTRING}
+			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../bin )
+	endforeach()
 endif()
 
 if( BUILD_MD4QT_STL_TESTS )
 	find_package( ICU REQUIRED )
 	find_package( uriparser REQUIRED )
 
-	add_executable( test.md_parser.commonmark.stl ${SRC} )
-	target_compile_definitions( test.md_parser.commonmark.stl PUBLIC TRAIT=MD::UnicodeStringTrait )
-	target_compile_definitions( test.md_parser.commonmark.stl PUBLIC MD4QT_ICU_STL_SUPPORT )
+	set( COUNTER "0" )
 
-	target_link_libraries( test.md_parser.commonmark.stl icu::icu uriparser::uriparser )
+	foreach( inl ${INL} )
+		set( NUMSTRING "" )
 
-	add_test( NAME test.md_parser.commonmark.stl
-		COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.commonmark.stl
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../bin )
+		math( EXPR COUNTER "${COUNTER}+1" OUTPUT_FORMAT DECIMAL )
+		string( LENGTH ${COUNTER} COUNTER_DIGITS_COUNT )
+
+		if( COUNTER_DIGITS_COUNT LESS 2 )
+			string( APPEND NUMSTRING "0" )
+		endif()
+
+		string( APPEND NUMSTRING ${COUNTER} )
+
+		add_executable( test.md_parser.commonmark.icu.${NUMSTRING} main${NUMSTRING}.cpp ${inl} load.hpp )
+		target_compile_definitions( test.md_parser.commonmark.icu.${NUMSTRING} PUBLIC TRAIT=MD::UnicodeStringTrait )
+		target_compile_definitions( test.md_parser.commonmark.icu.${NUMSTRING} PUBLIC MD4QT_ICU_STL_SUPPORT )
+
+		target_link_libraries( test.md_parser.commonmark.icu.${NUMSTRING} icu::icu uriparser::uriparser )
+
+		add_test( NAME test.md_parser.commonmark.icu.${NUMSTRING}
+			COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.commonmark.icu.${NUMSTRING}
+			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../bin )
+	endforeach()
 endif()
