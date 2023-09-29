@@ -38,12 +38,87 @@
 // C++ include.
 #include <vector>
 
-using data_t = std::vector< std::pair< long long int, int > >;
+using data_t = std::vector< std::pair< std::pair< long long int, bool >, int > >;
 
 TEST_CASE( "emphasis_sequence" )
 {
 	{
-		const data_t d = { { 2, 0 }, { 2, 2 }, { 1, 1 }, { -1, 1 }, { 2, 2 }, { -2, 0 } };
+		const data_t d = { { { 2, false }, 1 }, { { 1, false }, 1 }, { { -2, false }, 1 } };
+
+		bool closed = false;
+		size_t idx = 0;
+		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+
+		REQUIRE( !closed );
+
+		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 1 );
+
+		REQUIRE( closed );
+		REQUIRE( idx == 2 );
+	}
+
+	{
+		const data_t d = { { { 2, false }, 1 }, { { 2, false }, 1 }, { { -4, false }, 1 } };
+
+		bool closed = false;
+		size_t idx = 0;
+		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+
+		REQUIRE( closed );
+		REQUIRE( idx == 2 );
+
+		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 1 );
+
+		REQUIRE( closed );
+		REQUIRE( idx == 2 );
+	}
+
+	{
+		const data_t d = { { { 2, false }, 1 }, { { 2, false }, 1 }, { { 1, false }, 1 },
+			{ { -4, false }, 1 } };
+
+		bool closed = false;
+		size_t idx = 0;
+		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+
+		REQUIRE( !closed );
+
+		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 1 );
+
+		REQUIRE( closed );
+		REQUIRE( idx == 3 );
+
+		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 2 );
+
+		REQUIRE( closed );
+		REQUIRE( idx == 3 );
+	}
+
+	{
+		const data_t d = { { { 2, false }, 1 }, { { 2, false }, 1 }, { { 1, false }, 1 },
+			{ { -5, false }, 1 } };
+
+		bool closed = false;
+		size_t idx = 0;
+		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+
+		REQUIRE( closed );
+		REQUIRE( idx == 3 );
+
+		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 1 );
+
+		REQUIRE( closed );
+		REQUIRE( idx == 3 );
+
+		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 2 );
+
+		REQUIRE( closed );
+		REQUIRE( idx == 3 );
+	}
+
+	{
+		const data_t d = { { { 2, false }, 0 }, { { 2, false }, 2 }, { { 1, false }, 1 },
+			{ { -1, false }, 1 }, { { 2, false }, 2 }, { { -2, false }, 0 } };
 
 		bool closed = false;
 		size_t idx = 0;
@@ -58,11 +133,13 @@ TEST_CASE( "emphasis_sequence" )
 
 		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 2 );
 
-		REQUIRE( !closed );
+		REQUIRE( closed );
+		REQUIRE( idx == 3 );
 	}
 
 	{
-		const data_t d = { { 2, 0 }, { 2, 2 }, { 1, 1 }, { 1, 1 }, { -2, 2 }, { -2, 0 } };
+		const data_t d = { { { 2, false }, 0 }, { { 2, false }, 2 }, { { 1, false }, 1 },
+			{ { 1, false }, 1 }, { { -2, false }, 2 }, { { -2, false }, 0 } };
 
 		bool closed = false;
 		size_t idx = 0;
@@ -82,7 +159,8 @@ TEST_CASE( "emphasis_sequence" )
 	}
 
 	{
-		const data_t d = { { 2, 0 }, { 2, 1 }, { 1, 2 }, { -1, 2 }, { -2, 1 }, { -2, 0 } };
+		const data_t d = { { { 2, false }, 0 }, { { 2, false }, 1 }, { { 1, false }, 2 },
+			{ { -1, false }, 2 }, { { -2, false }, 1 }, { { -2, false }, 0 } };
 
 		bool closed = false;
 		size_t idx = 0;
@@ -103,7 +181,8 @@ TEST_CASE( "emphasis_sequence" )
 	}
 
 	{
-		const data_t d = { { 2, 0 }, { 2, 1 }, { 1, 2 }, { -2, 0 }, { -1, 2 }, { -2, 1 } };
+		const data_t d = { { { 2, false }, 0 }, { { 2, false }, 1 }, { { 1, false }, 2 },
+			{ { -2, false }, 0 }, { { -1, false }, 2 }, { { -2, false }, 1 } };
 
 		bool closed = false;
 		size_t idx = 0;
@@ -122,7 +201,25 @@ TEST_CASE( "emphasis_sequence" )
 	}
 
 	{
-		const data_t d = { { 2, 0 }, { 2, 1 }, { -2, 1 }, { 1, 2 }, { -2, 0 }, { -1, 2 } };
+		const data_t d = { { { 1, false }, 0 }, { { 2, false }, 0 }, { { -2, false }, 0 },
+			{ { -1, false }, 0 } };
+
+		bool closed = false;
+		size_t idx = 0;
+		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+
+		REQUIRE( closed );
+		REQUIRE( idx == 3 );
+
+		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 1 );
+
+		REQUIRE( closed );
+		REQUIRE( idx == 2 );
+	}
+
+	{
+		const data_t d = { { { 2, false }, 0 }, { { 2, false }, 1 }, { { -2, false }, 1 },
+			{ { 1, false }, 2 }, { { -2, false }, 0 }, { { -1, false }, 2 } };
 
 		bool closed = false;
 		size_t idx = 0;
@@ -142,7 +239,7 @@ TEST_CASE( "emphasis_sequence" )
 	}
 
 	{
-		const data_t d = { { 1, 1 }, { 1, 1 }, { -2, 1 } };
+		const data_t d = { { { 1, false }, 1 }, { { 1, false }, 1 }, { { -2, false }, 1 } };
 
 		bool closed = false;
 		size_t idx = 0;
@@ -158,7 +255,7 @@ TEST_CASE( "emphasis_sequence" )
 	}
 
 	{
-		const data_t d = { { 2, 1 }, { -1, 1 }, { -1, 1 } };
+		const data_t d = { { { 2, false }, 1 }, { { -1, false }, 1 }, { { -1, false }, 1 } };
 
 		bool closed = false;
 		size_t idx = 0;
@@ -169,7 +266,7 @@ TEST_CASE( "emphasis_sequence" )
 	}
 
 	{
-		const data_t d = { { 2, 1 } };
+		const data_t d = { { { 2, false }, 1 } };
 
 		bool closed = false;
 		size_t idx = 0;
@@ -179,7 +276,8 @@ TEST_CASE( "emphasis_sequence" )
 	}
 
 	{
-		const data_t d = { { 2, 1 }, { 1, 0 }, { 2, 1 }, { -4, 1 } };
+		const data_t d = { { { 2, false }, 1 }, { { 1, false }, 0 }, { { 2, false }, 1 },
+			{ { -4, false }, 1 } };
 
 		bool closed = false;
 		size_t idx = 0;
@@ -190,7 +288,8 @@ TEST_CASE( "emphasis_sequence" )
 	}
 
 	{
-		const data_t d = { { 4, 1 }, { 1, 0 }, { -2, 1 }, { -2, 1 } };
+		const data_t d = { { { 4, false }, 1 }, { { 1, false }, 0 }, { { -2, false }, 1 },
+			{ { -2, false }, 1 } };
 
 		bool closed = false;
 		size_t idx = 0;
@@ -198,6 +297,17 @@ TEST_CASE( "emphasis_sequence" )
 
 		REQUIRE( closed );
 		REQUIRE( idx == 3 );
+	}
+
+	{
+		const data_t d = { { { 1, false }, 1 }, { { -2, true }, 1 }, { { -1, false }, 1 } };
+
+		bool closed = false;
+		size_t idx = 0;
+		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+
+		REQUIRE( closed );
+		REQUIRE( idx == 2 );
 	}
 }
 

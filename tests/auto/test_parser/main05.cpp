@@ -1756,3 +1756,199 @@ TEST_CASE( "143" )
 
 	REQUIRE( c->text() == u8"/**\n * Code\n *\n * Code\n */" );
 }
+
+/*
+**text (*).**
+
+*/
+TEST_CASE( "144" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/144.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 12 );
+	REQUIRE( p->endLine() == 0 );
+
+	REQUIRE( p->items().size() == 1 );
+
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+
+	REQUIRE( t->startColumn() == 2 );
+	REQUIRE( t->startLine() == 0 );
+	REQUIRE( t->endColumn() == 10 );
+	REQUIRE( t->endLine() == 0 );
+
+	REQUIRE( t->opts() == MD::BoldText );
+	REQUIRE( t->text() == u8"text (*)." );
+}
+
+/*
+text******text***
+
+*/
+TEST_CASE( "145" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/145.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 16 );
+	REQUIRE( p->endLine() == 0 );
+
+	REQUIRE( p->items().size() == 2 );
+
+	{
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 6 );
+		REQUIRE( t->endLine() == 0 );
+
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == u8"text***" );
+	}
+
+	{
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+
+		REQUIRE( t->startColumn() == 10 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 13 );
+		REQUIRE( t->endLine() == 0 );
+
+		REQUIRE( t->opts() == ( MD::BoldText | MD::ItalicText ) );
+		REQUIRE( t->text() == u8"text" );
+	}
+}
+
+/*
+******text***
+
+*/
+TEST_CASE( "146" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/146.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 12 );
+	REQUIRE( p->endLine() == 0 );
+
+	REQUIRE( p->items().size() == 2 );
+
+	{
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 2 );
+		REQUIRE( t->endLine() == 0 );
+
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == u8"***" );
+	}
+
+	{
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+
+		REQUIRE( t->startColumn() == 6 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 9 );
+		REQUIRE( t->endLine() == 0 );
+
+		REQUIRE( t->opts() == ( MD::BoldText | MD::ItalicText ) );
+		REQUIRE( t->text() == u8"text" );
+	}
+}
+
+/*
+***text******
+
+*/
+TEST_CASE( "147" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/147.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 12 );
+	REQUIRE( p->endLine() == 0 );
+
+	REQUIRE( p->items().size() == 2 );
+
+	{
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+
+		REQUIRE( t->startColumn() == 3 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 6 );
+		REQUIRE( t->endLine() == 0 );
+
+		REQUIRE( t->opts() == ( MD::BoldText | MD::ItalicText ) );
+		REQUIRE( t->text() == u8"text" );
+	}
+
+	{
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+
+		REQUIRE( t->startColumn() == 10 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 12 );
+		REQUIRE( t->endLine() == 0 );
+
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == u8"***" );
+	}
+}
