@@ -2104,3 +2104,37 @@ TEST_CASE( "151" )
 	REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::Heading );
 	REQUIRE( doc->items().at( 5 )->type() == MD::ItemType::List );
 }
+
+/*
+* list
+
+> quote
+
+* list
+
+# head
+
+* list
+
+  > quote
+
+* list
+
+  # head
+
+*/
+TEST_CASE( "152" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/152.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 6 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Blockquote );
+	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::List );
+	REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::Heading );
+	REQUIRE( doc->items().at( 5 )->type() == MD::ItemType::List );
+}
