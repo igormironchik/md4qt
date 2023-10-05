@@ -1952,3 +1952,155 @@ TEST_CASE( "147" )
 		REQUIRE( t->text() == u8"***" );
 	}
 }
+
+/*
+  - [link](#link) **text**
+
+    - `item 1`
+    - `item 2`
+
+    <br />
+
+    ```
+    code
+    ```
+
+*/
+TEST_CASE( "148" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/148.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+
+	REQUIRE( l->startColumn() == 2 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 6 );
+	REQUIRE( l->endLine() == 9 );
+
+	REQUIRE( l->items().size() == 1 );
+
+	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+
+	auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+
+	REQUIRE( li->items().size() == 4 );
+
+	REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
+
+	{
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).get() );
+		REQUIRE( p->startColumn() == 4 );
+		REQUIRE( p->startLine() == 0 );
+		REQUIRE( p->endColumn() == 25 );
+		REQUIRE( p->endLine() == 0 );
+
+		REQUIRE( p->items().size() == 2 );
+
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
+		auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( l->startColumn() == 4 );
+		REQUIRE( l->startLine() == 0 );
+		REQUIRE( l->endColumn() == 16 );
+		REQUIRE( l->endLine() == 0 );
+
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+		REQUIRE( t->startColumn() == 20 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 23 );
+		REQUIRE( t->endLine() == 0 );
+		REQUIRE( t->opts() == MD::BoldText );
+		REQUIRE( t->text() == u8"text" );
+		REQUIRE( t->isSpaceBefore() );
+		REQUIRE( t->isSpaceAfter() );
+	}
+
+	REQUIRE( li->items().at( 1 )->type() == MD::ItemType::List );
+
+	{
+		auto l = static_cast< MD::List< TRAIT >* > ( li->items().at( 1 ).get() );
+		REQUIRE( l->startColumn() == 4 );
+		REQUIRE( l->startLine() == 2 );
+		REQUIRE( l->endColumn() == 0 );
+		REQUIRE( l->endLine() == 4 );
+	}
+
+	REQUIRE( li->items().at( 2 )->type() == MD::ItemType::RawHtml );
+
+	REQUIRE( li->items().at( 3 )->type() == MD::ItemType::Code );
+
+	auto c = static_cast< MD::Code< TRAIT >* > ( li->items().at( 3 ).get() );
+	REQUIRE( c->startColumn() == 4 );
+	REQUIRE( c->startLine() == 8 );
+	REQUIRE( c->endColumn() == 7 );
+	REQUIRE( c->endLine() == 8 );
+	REQUIRE( c->text() == u8"code" );
+}
+
+/*
+* list
+> quote
+
+*/
+TEST_CASE( "149" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/149.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 3 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Blockquote );
+}
+
+/*
+* list
+  > quote
+
+*/
+TEST_CASE( "150" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/150.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+}
+
+/*
+* list
+> quote
+* list
+# head
+* list
+  > quote
+* list
+  # head
+
+*/
+TEST_CASE( "151" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/151.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 6 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Blockquote );
+	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::List );
+	REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::Heading );
+	REQUIRE( doc->items().at( 5 )->type() == MD::ItemType::List );
+}

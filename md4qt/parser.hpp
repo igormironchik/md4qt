@@ -727,11 +727,13 @@ private:
 		CodeIndentedBySpaces,
 		Code,
 		Blockquote,
-		Heading
+		Heading,
+		SomethingInList
 	}; // enum BlockType
 
 public:
 	static BlockType whatIsTheLine( typename Trait::InternalString & str, bool inList = false,
+		bool inListWithFirstEmptyLine = false,
 		long long int * indent = nullptr, bool emptyLinePreceded = false,
 		bool calcIndent = false, const std::vector< long long int > * indents = nullptr );
 	static void parseFragment( MdBlock< Trait > & fr, std::shared_ptr< Block< Trait > > parent,
@@ -1188,6 +1190,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 		lineType = whatIsTheLine( line,
 			( emptyLineInList || type == BlockType::List || type == BlockType::ListWithFirstEmptyLine ),
+			prevLineType == BlockType::ListWithFirstEmptyLine,
 			&indent, lineType == BlockType::EmptyLine, true, &indents );
 
 		const long long int currentIndent = indent;
@@ -1335,12 +1338,9 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 		//! Empty new line in list.
 		else if( emptyLineInList )
 		{
-			const auto possibleLineType =
-				whatIsTheLine( line, false, nullptr, true, false, &indents );
-
-			if( ( indentInListValue && ( possibleLineType != BlockType::CodeIndentedBySpaces ||
-					( possibleLineType == BlockType::CodeIndentedBySpaces && ns >= indent ) ) ) ||
-				lineType == BlockType::List || lineType == BlockType::CodeIndentedBySpaces )
+			if( indentInListValue || lineType == BlockType::List ||
+				lineType == BlockType::ListWithFirstEmptyLine ||
+				lineType == BlockType::SomethingInList )
 			{
 				for( long long int i = 0; i < emptyLinesCount; ++i )
 					fragment.push_back( { typename Trait::String(),
@@ -1357,7 +1357,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			{
 				pf();
 
-				type = possibleLineType;
+				type = whatIsTheLine( line, false, false, nullptr, true, false, &indents );
 				fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 				emptyLinesCount = 0;
 
@@ -1458,18 +1458,9 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 			pf();
 		}
-		else if( type != lineType && type != BlockType::Code &&
-			// Not continue of code, list, blockquote or list with first empty line.
-			( ( type != BlockType::List &&
-				type != BlockType::Blockquote &&
-				!( type == BlockType::ListWithFirstEmptyLine && indentInListValue ) ) ||
-			// Or code in list and not enough indentantion.
-				( ( lineType == BlockType::Code || lineType == BlockType::CodeIndentedBySpaces ) &&
-					( type == BlockType::List || type == BlockType::ListWithFirstEmptyLine ) &&
-						!indentInListValue ) ||
-			// Or continuation of list with first empty line with not enough indentantion.
-				( prevLineType == BlockType::ListWithFirstEmptyLine &&
-					!indentInListValue ) ) )
+		else if( type != lineType && type != BlockType::Code && type != BlockType::Blockquote &&
+			( ( type == BlockType::List || type == BlockType::ListWithFirstEmptyLine ) &&
+				lineType != BlockType::SomethingInList ) )
 		{		
 			pf();
 
@@ -1776,7 +1767,7 @@ posOfListItem( const typename Trait::String & s, bool ordered )
 			++sc;
 	}
 
-	if( sc > 4 )
+	if( p == s.length() || sc > 4 )
 		p = p - sc + 1;
 	else if( sc == 0 )
 		++p;
@@ -1787,7 +1778,7 @@ posOfListItem( const typename Trait::String & s, bool ordered )
 template< class Trait >
 inline typename Parser< Trait >::BlockType
 Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
-	bool inList, long long int * indent, bool emptyLinePreceded, bool calcIndent,
+	bool inList, bool inListWithFirstEmptyLine, long long int * indent, bool emptyLinePreceded, bool calcIndent,
 	const std::vector< long long int > * indents )
 {
 	str.replace( typename Trait::Char( '\t' ), typename Trait::String( 4, ' ' ) );
@@ -1798,9 +1789,11 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 	{
 		auto s = str.sliced( first );
 
-		if( s.asString().startsWith( '>' ) && first < 4 )
-			return BlockType::Blockquote;
-		else if( s.asString().startsWith( '#' ) && first < 4 )
+		const bool isBlockquote = s.asString().startsWith( '>' );
+		const bool indentIn = indentInList( indents, first, false );
+		bool isHeading = false;
+
+		if( s.asString().startsWith( '#' ) )
 		{
 			long long int c = 0;
 
@@ -1808,38 +1801,49 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 				++c;
 
 			if( c <= 6 && ( ( c < s.length() && s[ c ].isSpace() ) || c == s.length() ) )
-				return BlockType::Heading;
-			else
-				return BlockType::Text;
+				isHeading = true;
 		}
-
-		if( first < 4 && isHorizontalLine< Trait >( s.asString() ) )
-			return BlockType::Text;
 
 		if( inList )
 		{
 			bool isFirstLineEmpty = false;
 			const auto orderedList = isOrderedList< Trait >( str.asString(),
 				nullptr, nullptr, nullptr, &isFirstLineEmpty );
+			const bool code = ( ( emptyLinePreceded && first >= 4 &&
+				( indents && !indents->empty() ? indents->front() < first : true ) ) ||
+				isCodeFences< Trait >( str.asString() ) );
+			const bool indentInLastIndent = ( indent ? first >= *indent : false );
+			const bool isHLine = isHorizontalLine< Trait >( s.asString() ) &&
+				!( s[ 0 ] == typename Trait::Char( '-' ) && indentIn );
 
 			if( ( ( ( s.asString().startsWith( '-' ) ||
 					s.asString().startsWith( '+' ) || s.asString().startsWith( '*' ) ) &&
 				( ( s.length() > 1 && s[ 1 ] == typename Trait::Char( ' ' ) ) || s.length() == 1 ) ) ||
 				orderedList ) &&
-				( first < 4  || ( emptyLinePreceded ? false : indentInList( indents, first, false ) ) ) )
+				( first < 4  || ( emptyLinePreceded ? false : indentIn ) ) )
 			{
 				if( calcIndent && indent )
 					*indent = posOfListItem< Trait >( str.asString(), orderedList );
 
-				if( s.length() == 1 || isFirstLineEmpty )
+				if( s.simplified().length() == 1 || isFirstLineEmpty )
 					return BlockType::ListWithFirstEmptyLine;
 				else
 					return BlockType::List;
 			}
-			else if( str.asString().startsWith( typename Trait::String( ( indent ? *indent : 4 ), ' ' ) ) )
+			else if( emptyLinePreceded )
 			{
-				if( str.asString().startsWith( typename Trait::String( ( indent ? *indent + 4 : 8 ), ' ' ) ) )
-					return BlockType::CodeIndentedBySpaces;
+				if( indentInList( indents, first, true ) && ( !code || indentInLastIndent ) )
+					return BlockType::SomethingInList;
+			}
+			else if( !emptyLinePreceded )
+			{
+				if( ( !code || indentInLastIndent ) && !isHLine && !inListWithFirstEmptyLine &&
+					!isBlockquote && !isHeading )
+						return BlockType::SomethingInList;
+				else if( inListWithFirstEmptyLine && indentInList( indents, first, true ) )
+					return BlockType::SomethingInList;
+				else if( ( isBlockquote || isHeading ) && indentIn )
+					return BlockType::SomethingInList;
 			}
 		}
 		else
@@ -1848,32 +1852,32 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 
 			const auto orderedList = isOrderedList< Trait >( str.asString(),
 				nullptr, nullptr, nullptr, &isFirstLineEmpty );
+			const bool isHLine = first < 4 && isHorizontalLine< Trait >( s.asString() );
 
-			if( ( ( ( s.asString().startsWith( '-' ) ||
+			if( !isHLine && ( ( ( s.asString().startsWith( '-' ) ||
 					s.asString().startsWith( '+' ) || s.asString().startsWith( '*' ) ) &&
 				( ( s.length() > 1 && s[ 1 ] == typename Trait::Char( ' ' ) ) || s.length() == 1 ) ) ||
 				orderedList ) &&
-				( first < 4  || ( emptyLinePreceded ? false : indentInList( indents, first, false ) ) ) )
+				( first < 4  || ( emptyLinePreceded ? false : indentIn ) ) )
 			{
 				if( calcIndent && indent )
 					*indent = posOfListItem< Trait >( str.asString(), orderedList );
 
-				if( s.length() == 1 || isFirstLineEmpty )
+				if( s.simplified().length() == 1 || isFirstLineEmpty )
 					return BlockType::ListWithFirstEmptyLine;
 				else
 					return BlockType::List;
 			}
-			else if( str.asString().startsWith( "    " ) || str.asString().startsWith( '\t' ) )
-				return BlockType::CodeIndentedBySpaces;
 		}
 
-		if( s.asString().startsWith( "```" ) || s.asString().startsWith( "~~~" ) )
-		{
-			if( isCodeFences< Trait >( str.asString() ) )
-				return BlockType::Code;
-			else
-				return BlockType::Text;
-		}
+		if( str.asString().startsWith( typename Trait::String( 4, ' ' ) ) )
+			return BlockType::CodeIndentedBySpaces;
+		else if( isCodeFences< Trait >( str.asString() ) )
+			return BlockType::Code;
+		else if( isBlockquote )
+			return BlockType::Blockquote;
+		else if( isHeading )
+			return BlockType::Heading;
 	}
 	else
 		return BlockType::EmptyLine;
@@ -3143,7 +3147,8 @@ struct TextParsingOpts {
 	bool collectRefLinks;
 	bool ignoreLineBreak;
 	RawHtmlBlock< Trait > & html;
-
+	std::shared_ptr< Text< Trait > > lastText;
+	bool isSpaceBefore = false;
 	bool wasRefLink = false;
 	bool tableDetected = false;
 	long long int line = 0;
@@ -3337,6 +3342,8 @@ makeTextObject( const typename Trait::String & text, bool spaceBefore, bool spac
 
 		po.wasRefLink = false;
 		po.parent->appendItem( t );
+
+		po.lastText = t;
 	}
 }
 
@@ -3417,7 +3424,9 @@ makeText(
 	bool spaceBefore = ( po.pos > 0 && po.pos < po.fr.data.at( po.line ).first.length() ?
 		po.fr.data.at( po.line ).first[ po.pos - 1 ].isSpace() ||
 			po.fr.data.at( po.line ).first[ po.pos ].isSpace() :
-		true );
+		true ) || po.isSpaceBefore;
+
+	po.isSpaceBefore = false;
 
 	bool lineBreak = ( !po.ignoreLineBreak && po.line != (long long int) ( po.fr.data.size() - 1 ) &&
 		( po.line == lastLine ?
@@ -6352,6 +6361,11 @@ checkForStyle( typename Delims< Trait >::const_iterator first,
 			po.pos = j->m_pos + j->m_len;
 			po.line = j->m_line;
 
+			if( po.lastText )
+				po.lastText->setSpaceAfter( po.lastText->isSpaceAfter() ||
+					( po.pos < po.fr.data[ po.line ].first.length() ?
+						po.fr.data[ po.line ].first[ po.pos ].isSpace() : true ) );
+
 			return j;
 		}
 	}
@@ -6384,6 +6398,10 @@ checkForStyle( typename Delims< Trait >::const_iterator first,
 
 					po.pos = it->m_pos + len;
 					po.line = it->m_line;
+
+					po.isSpaceBefore = ( it->m_pos > 0 ?
+						po.fr.data[ it->m_line ].first[ it->m_pos - 1 ].isSpace() : true ) ||
+						po.isSpaceBefore;
 				}
 				else if( !po.collectRefLinks )
 					makeText( it->m_line, it->m_pos + len, po );
@@ -7042,7 +7060,7 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 		list->setStartColumn( fr.data.front().first.virginPos( p ) );
 		list->setStartLine( fr.data.front().second.lineNumber );
 		list->setEndColumn( fr.data.back().first.virginPos(
-			fr.data.back().first.length() - 1 ) );
+			fr.data.back().first.length() ? fr.data.back().first.length() - 1 : 0 ) );
 		list->setEndLine( fr.data.back().second.lineNumber );
 
 		typename MdBlock< Trait >::Data listItem;

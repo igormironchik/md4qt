@@ -32,6 +32,8 @@ file( GLOB MAIN *.cpp )
 if( BUILD_MD4QT_QT_TESTS )
 	find_package( Qt6Core REQUIRED )
 
+	set( COUNTER "0" )
+
 	foreach( main ${MAIN} )
 		set( NUMSTRING "" )
 
@@ -59,6 +61,8 @@ endif()
 if( BUILD_MD4QT_STL_TESTS )
 	find_package( ICU REQUIRED )
 	find_package( uriparser REQUIRED )
+
+	set( COUNTER "0" )
 
 	foreach( main ${MAIN} )
 		set( NUMSTRING "" )
