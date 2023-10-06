@@ -1467,7 +1467,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			}
 		}
 		// End of code block.
-		else if( type == BlockType::Code && type == lineType &&
+		else if( type == BlockType::Code && type == lineType && !startOfCode.isEmpty() &&
 			startSequence< Trait >( line.asString() ).contains( startOfCode ) &&
 			isCodeFences< Trait >( line.asString(), true ) )
 		{
