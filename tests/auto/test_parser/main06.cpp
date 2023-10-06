@@ -257,3 +257,44 @@ TEST_CASE( "155" )
 	REQUIRE( c->endLine() == 12 );
 	REQUIRE( c->text() == u8"int i;" );
 }
+
+/*
+<a id='column-width'></a>(<a href='#column-width'>link</a>)
+
+*/
+TEST_CASE( "156" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/156.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 58 );
+	REQUIRE( p->endLine() == 0 );
+	REQUIRE( p->items().size() == 7 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::RawHtml );
+	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+	auto t1 = static_cast< MD::Text< TRAIT >* > ( p->items().at( 2 ).get() );
+	REQUIRE( t1->text() == u8"(" );
+	REQUIRE( !t1->isSpaceBefore() );
+	REQUIRE( !t1->isSpaceAfter() );
+	REQUIRE( p->items().at( 3 )->type() == MD::ItemType::RawHtml );
+	REQUIRE( p->items().at( 4 )->type() == MD::ItemType::Text );
+	auto t2 = static_cast< MD::Text< TRAIT >* > ( p->items().at( 4 ).get() );
+	REQUIRE( t2->text() == u8"link" );
+	REQUIRE( !t2->isSpaceBefore() );
+	REQUIRE( !t2->isSpaceAfter() );
+	REQUIRE( p->items().at( 5 )->type() == MD::ItemType::RawHtml );
+	REQUIRE( p->items().at( 6 )->type() == MD::ItemType::Text );
+	auto t3 = static_cast< MD::Text< TRAIT >* > ( p->items().at( 6 ).get() );
+	REQUIRE( t3->text() == u8")" );
+	REQUIRE( !t3->isSpaceBefore() );
+	REQUIRE( !t3->isSpaceAfter() );
+}

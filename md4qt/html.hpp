@@ -291,7 +291,7 @@ paragraphToHtml( Paragraph< Trait > * p, bool wrap,
 				break;
 
 			case ItemType::LineBreak :
-				html.push_back( "<br />\n" );
+				html.push_back( "<br />" );
 				break;
 
 			case ItemType::FootnoteRef :
@@ -303,9 +303,7 @@ paragraphToHtml( Paragraph< Trait > * p, bool wrap,
 			{
 				auto * r = static_cast< RawHtml< Trait >* > ( it->get() );
 
-				html.push_back( "\n" );
 				html.push_back( r->text() );
-				html.push_back( "\n" );
 			}
 				break;
 
