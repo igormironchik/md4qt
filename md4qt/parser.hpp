@@ -1143,6 +1143,8 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			lineCounter = 0;
 			indents.clear();
 			indent = 0;
+			startOfCode.clear();
+			startOfCodeInList.clear();
 		};
 
 	// Eat footnote.
@@ -1370,6 +1372,10 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				type = whatIsTheLine( line, false, false, false, nullptr,
 					nullptr, true, false, &indents );
 				fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
+
+				if( type == BlockType::Code )
+					startOfCode = startSequence< Trait >( line.asString() );
+
 				emptyLinesCount = 0;
 
 				continue;
