@@ -33,6 +33,7 @@ if( BUILD_MD4QT_QT_TESTS )
 	find_package( Qt6Core REQUIRED )
 
 	set( COUNTER "0" )
+	set( PCH_TARGET "" )
 
 	foreach( main ${MAIN} )
 		set( NUMSTRING "" )
@@ -49,6 +50,18 @@ if( BUILD_MD4QT_QT_TESTS )
 		add_executable( test.md_parser.qt.${NUMSTRING} ${main} )
 		target_compile_definitions( test.md_parser.qt.${NUMSTRING} PUBLIC TRAIT=MD::QStringTrait )
 		target_compile_definitions( test.md_parser.qt.${NUMSTRING} PUBLIC MD4QT_QT_SUPPORT )
+		target_compile_definitions( test.md_parser.qt.${NUMSTRING} PUBLIC DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN )
+
+		if( "${PCH_TARGET}" STREQUAL "" )
+			set( PCH_TARGET "test.md_parser.qt.${NUMSTRING}" )
+			target_precompile_headers( ${PCH_TARGET} PRIVATE
+				<doctest/doctest.h>
+				<md4qt/parser.hpp>
+				<md4qt/traits.hpp> )
+		else()
+			target_precompile_headers( test.md_parser.qt.${NUMSTRING}
+				REUSE_FROM ${PCH_TARGET} )
+		endif()
 
 		target_link_libraries( test.md_parser.qt.${NUMSTRING} Qt6::Core )
 
@@ -63,6 +76,7 @@ if( BUILD_MD4QT_STL_TESTS )
 	find_package( uriparser REQUIRED )
 
 	set( COUNTER "0" )
+	set( PCH_TARGET "" )
 
 	foreach( main ${MAIN} )
 		set( NUMSTRING "" )
@@ -79,6 +93,18 @@ if( BUILD_MD4QT_STL_TESTS )
 		add_executable( test.md_parser.icu.${NUMSTRING} ${main} )
 		target_compile_definitions( test.md_parser.icu.${NUMSTRING} PUBLIC TRAIT=MD::UnicodeStringTrait )
 		target_compile_definitions( test.md_parser.icu.${NUMSTRING} PUBLIC MD4QT_ICU_STL_SUPPORT )
+		target_compile_definitions( test.md_parser.icu.${NUMSTRING} PUBLIC DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN )
+
+		if( "${PCH_TARGET}" STREQUAL "" )
+			set( PCH_TARGET "test.md_parser.icu.${NUMSTRING}" )
+			target_precompile_headers( ${PCH_TARGET} PRIVATE
+				<doctest/doctest.h>
+				<md4qt/parser.hpp>
+				<md4qt/traits.hpp> )
+		else()
+			target_precompile_headers( test.md_parser.icu.${NUMSTRING}
+				REUSE_FROM ${PCH_TARGET} )
+		endif()
 
 		target_link_libraries( test.md_parser.icu.${NUMSTRING} icu::icu uriparser::uriparser )
 

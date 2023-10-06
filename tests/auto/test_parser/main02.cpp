@@ -31,7 +31,6 @@
 #include <md4qt/parser.hpp>
 #include <md4qt/traits.hpp>
 
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 // doctest include.
 #include <doctest/doctest.h>
 
