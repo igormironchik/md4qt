@@ -28,6 +28,10 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
+// doctest include.
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include <doctest/doctest.h>
+
 // 4.8 Paragraphs
 
 TEST_CASE( "219" )

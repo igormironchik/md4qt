@@ -28,6 +28,10 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
+// doctest include.
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include <doctest/doctest.h>
+
 // 2.4 Backslash escapes
 
 TEST_CASE( "012" )

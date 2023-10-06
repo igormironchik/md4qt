@@ -28,6 +28,10 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
+// doctest include.
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include <doctest/doctest.h>
+
 // 2.5 Entity and numeric character references
 
 TEST_CASE( "25" )

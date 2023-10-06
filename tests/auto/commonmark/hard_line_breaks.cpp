@@ -28,6 +28,10 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
+// doctest include.
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include <doctest/doctest.h>
+
 // 6.7 Hard line breaks
 
 TEST_CASE( "633" )

@@ -28,13 +28,9 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifdef MD4QT_QT_SUPPORT
-#include <QDir>
-#include <QTextStream>
-#include <QFile>
-#else
-#include <filesystem>
-#endif
+// doctest include.
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include <doctest/doctest.h>
 
 inline typename TRAIT::String
 to_string( int i )
