@@ -734,7 +734,8 @@ private:
 
 public:
 	static BlockType whatIsTheLine( typename Trait::InternalString & str, bool inList = false,
-		bool inListWithFirstEmptyLine = false,
+		bool inListWithFirstEmptyLine = false, bool fensedCodeInList = false,
+		typename Trait::String * startOfCode = nullptr,
 		long long int * indent = nullptr, bool emptyLinePreceded = false,
 		bool calcIndent = false, const std::vector< long long int > * indents = nullptr );
 	static void parseFragment( MdBlock< Trait > & fr, std::shared_ptr< Block< Trait > > parent,
@@ -1113,6 +1114,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 	long long int emptyLinesBefore = 0;
 	std::vector< std::pair< bool, bool > > htmlCommentData;
 	typename Trait::String startOfCode;
+	typename Trait::String startOfCodeInList;
 	BlockType type = BlockType::EmptyLine;
 	BlockType lineType = BlockType::Unknown;
 	BlockType prevLineType = BlockType::Unknown;
@@ -1193,8 +1195,8 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 		lineType = whatIsTheLine( line,
 			( emptyLineInList || type == BlockType::List || type == BlockType::ListWithFirstEmptyLine ),
-			prevLineType == BlockType::ListWithFirstEmptyLine,
-			&indent, lineType == BlockType::EmptyLine, true, &indents );
+			prevLineType == BlockType::ListWithFirstEmptyLine, fensedCodeInList,
+			&startOfCodeInList, &indent, lineType == BlockType::EmptyLine, true, &indents );
 
 		if( ( type == BlockType::List || type == BlockType::ListWithFirstEmptyLine ) &&
 			lineType == BlockType::FensedCodeInList )
@@ -1365,7 +1367,8 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			{
 				pf();
 
-				type = whatIsTheLine( line, false, false, nullptr, true, false, &indents );
+				type = whatIsTheLine( line, false, false, false, nullptr,
+					nullptr, true, false, &indents );
 				fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
 				emptyLinesCount = 0;
 
@@ -1786,7 +1789,9 @@ posOfListItem( const typename Trait::String & s, bool ordered )
 template< class Trait >
 inline typename Parser< Trait >::BlockType
 Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
-	bool inList, bool inListWithFirstEmptyLine, long long int * indent, bool emptyLinePreceded, bool calcIndent,
+	bool inList, bool inListWithFirstEmptyLine, bool fensedCodeInList,
+	typename Trait::String * startOfCode,
+	long long int * indent, bool emptyLinePreceded, bool calcIndent,
 	const std::vector< long long int > * indents )
 {
 	str.replace( typename Trait::Char( '\t' ), typename Trait::String( 4, ' ' ) );
@@ -1825,8 +1830,27 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 			const bool isHLine = isHorizontalLine< Trait >( s.asString() ) &&
 				!( s[ 0 ] == typename Trait::Char( '-' ) && indentIn );
 
+			if( fensedCodeInList )
+			{
+				if( indentIn )
+				{
+					if( fensedCode )
+					{
+						if( startOfCode && startSequence< Trait > ( s.asString() ).contains( *startOfCode ) )
+							return BlockType::FensedCodeInList;
+					}
+
+					return BlockType::SomethingInList;
+				}
+			}
+
 			if( fensedCode && indentIn )
+			{
+				if( startOfCode )
+					*startOfCode = startSequence< Trait >( s.asString() );
+
 				return BlockType::FensedCodeInList;
+			}
 			else if( ( ( ( s.asString().startsWith( '-' ) ||
 					s.asString().startsWith( '+' ) || s.asString().startsWith( '*' ) ) &&
 				( ( s.length() > 1 && s[ 1 ] == typename Trait::Char( ' ' ) ) || s.length() == 1 ) ) ||
