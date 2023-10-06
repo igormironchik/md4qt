@@ -370,7 +370,7 @@ isCodeFences( const typename Trait::String & s, bool closing = false )
 {
 	auto p = skipSpaces< Trait >( 0, s );
 
-	if( p > 3 )
+	if( p > 3 || p == s.length() )
 		return false;
 
 	const auto ch = s[ p ];
@@ -728,7 +728,8 @@ private:
 		Code,
 		Blockquote,
 		Heading,
-		SomethingInList
+		SomethingInList,
+		FensedCodeInList
 	}; // enum BlockType
 
 public:
@@ -1103,6 +1104,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 	typename MdBlock< Trait >::Data fragment;
 
 	bool emptyLineInList = false;
+	bool fensedCodeInList = false;
 	long long int emptyLinesCount = 0;
 	long long int lineCounter = 0;
 	std::vector< long long int > indents;
@@ -1134,6 +1136,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 			type = BlockType::EmptyLine;
 			emptyLineInList = false;
+			fensedCodeInList = false;
 			emptyLinesCount = 0;
 			lineCounter = 0;
 			indents.clear();
@@ -1193,6 +1196,10 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			prevLineType == BlockType::ListWithFirstEmptyLine,
 			&indent, lineType == BlockType::EmptyLine, true, &indents );
 
+		if( ( type == BlockType::List || type == BlockType::ListWithFirstEmptyLine ) &&
+			lineType == BlockType::FensedCodeInList )
+				fensedCodeInList = !fensedCodeInList;
+
 		const long long int currentIndent = indent;
 
 		const auto ns = skipSpaces< Trait >( 0, line.asString() );
@@ -1202,7 +1209,8 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			lineType == BlockType::CodeIndentedBySpaces );
 
 		if( indent != prevIndent &&
-			( lineType == BlockType::List || lineType == BlockType::ListWithFirstEmptyLine ) )
+			( lineType == BlockType::List || lineType == BlockType::ListWithFirstEmptyLine ) &&
+			!fensedCodeInList )
 		{
 			if( indents.empty() )
 				indents.push_back( indent );
@@ -1460,7 +1468,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 		}
 		else if( type != lineType && type != BlockType::Code && type != BlockType::Blockquote &&
 			( ( type == BlockType::List || type == BlockType::ListWithFirstEmptyLine ) &&
-				lineType != BlockType::SomethingInList ) )
+				lineType != BlockType::SomethingInList && lineType != BlockType::FensedCodeInList ) )
 		{		
 			pf();
 
@@ -1809,14 +1817,17 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 			bool isFirstLineEmpty = false;
 			const auto orderedList = isOrderedList< Trait >( str.asString(),
 				nullptr, nullptr, nullptr, &isFirstLineEmpty );
+			const bool fensedCode = isCodeFences< Trait >( s.asString() );
 			const bool code = ( ( emptyLinePreceded && first >= 4 &&
-				( indents && !indents->empty() ? indents->front() < first : true ) ) ||
-				isCodeFences< Trait >( str.asString() ) );
+					( indents && !indents->empty() ? indents->front() < first : true ) ) ||
+				fensedCode );
 			const bool indentInLastIndent = ( indent ? first >= *indent : false );
 			const bool isHLine = isHorizontalLine< Trait >( s.asString() ) &&
 				!( s[ 0 ] == typename Trait::Char( '-' ) && indentIn );
 
-			if( ( ( ( s.asString().startsWith( '-' ) ||
+			if( fensedCode && indentIn )
+				return BlockType::FensedCodeInList;
+			else if( ( ( ( s.asString().startsWith( '-' ) ||
 					s.asString().startsWith( '+' ) || s.asString().startsWith( '*' ) ) &&
 				( ( s.length() > 1 && s[ 1 ] == typename Trait::Char( ' ' ) ) || s.length() == 1 ) ) ||
 				orderedList ) &&
@@ -7249,57 +7260,87 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 		item->setChecked( checked );
 	}
 
+	bool fensedCode = false;
+	typename Trait::String startOfCode;
+
 	for( auto last = fr.data.end(); it != last; ++it, ++pos )
 	{
-		std::tie( ok, std::ignore, std::ignore ) = listItemData< Trait >(
-			it->first.asString().startsWith( typename Trait::String( indent, ' ' ) ) ?
-				it->first.asString().sliced( indent ) : it->first.asString() );
-
-		if( ok )
+		if( !fensedCode )
 		{
-			StringListStream< Trait > stream( data );
+			fensedCode = isCodeFences< Trait >(
+				it->first.asString().startsWith( typename Trait::String( indent, ' ' ) ) ?
+					it->first.asString().sliced( indent ) : it->first.asString() );
 
-			parse( stream, item, doc, linksToParse, workingPath, fileName,
-				collectRefLinks );
+			if( fensedCode )
+				startOfCode = startSequence< Trait >( it->first.asString() );
+		}
+		else if( fensedCode && isCodeFences< Trait >(
+				it->first.asString().startsWith( typename Trait::String( indent, ' ' ) ) ?
+					it->first.asString().sliced( indent ) : it->first.asString(), true ) &&
+			startSequence< Trait >( it->first.asString() ).contains( startOfCode ) )
+		{
+			fensedCode = false;
+		}
 
-			data.clear();
+		if( !fensedCode )
+		{
+			std::tie( ok, std::ignore, std::ignore ) = listItemData< Trait >(
+				it->first.asString().startsWith( typename Trait::String( indent, ' ' ) ) ?
+					it->first.asString().sliced( indent ) : it->first.asString() );
 
-			typename MdBlock< Trait >::Data nestedList;
-			nestedList.push_back( *it );
-			++it;
-
-			for( ; it != last; ++it )
+			if( ok )
 			{
-				const auto ns = skipSpaces< Trait >( 0, it->first.asString() );
-				std::tie( ok, std::ignore, std::ignore ) = listItemData< Trait >(
-					( ns >= indent ? it->first.asString().sliced( indent ) : it->first.asString() ) );
+				StringListStream< Trait > stream( data );
 
-				if( ok || ns > indent || ns == it->first.length() )
-					nestedList.push_back( *it );
-				else
-					break;
+				parse( stream, item, doc, linksToParse, workingPath, fileName,
+					collectRefLinks );
+
+				data.clear();
+
+				typename MdBlock< Trait >::Data nestedList;
+				nestedList.push_back( *it );
+				++it;
+
+				for( ; it != last; ++it )
+				{
+					const auto ns = skipSpaces< Trait >( 0, it->first.asString() );
+					std::tie( ok, std::ignore, std::ignore ) = listItemData< Trait >(
+						( ns >= indent ? it->first.asString().sliced( indent ) : it->first.asString() ) );
+
+					if( ok || ns > indent || ns == it->first.length() )
+						nestedList.push_back( *it );
+					else
+						break;
+				}
+
+				for( auto it = nestedList.begin(), last = nestedList.end(); it != last; ++it )
+				{
+					if( it->first.asString().startsWith( typename Trait::String( indent, ' ' ) ) )
+						it->first = it->first.sliced( indent );
+				}
+
+				MdBlock< Trait > block = { nestedList, 0 };
+
+				parseList( block, item, doc, linksToParse, workingPath, fileName,
+					collectRefLinks, html );
+
+				for( ; it != last; ++it )
+				{
+					if( it->first.asString().startsWith( typename Trait::String( indent, ' ' ) ) )
+						it->first = it->first.sliced( indent );
+
+					data.push_back( *it );
+				}
+
+				break;
 			}
-
-			for( auto it = nestedList.begin(), last = nestedList.end(); it != last; ++it )
-			{
-				if( it->first.asString().startsWith( typename Trait::String( indent, ' ' ) ) )
-					it->first = it->first.sliced( indent );
-			}
-
-			MdBlock< Trait > block = { nestedList, 0 };
-
-			parseList( block, item, doc, linksToParse, workingPath, fileName,
-				collectRefLinks, html );
-
-			for( ; it != last; ++it )
+			else
 			{
 				if( it->first.asString().startsWith( typename Trait::String( indent, ' ' ) ) )
 					it->first = it->first.sliced( indent );
 
 				data.push_back( *it );
 			}
-
-			break;
 		}
 		else
 		{
