@@ -28,10 +28,6 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "load.hpp"
-
-#include <doctest/doctest.h>
-
 // 2.5 Entity and numeric character references
 
 TEST_CASE( "25" )

@@ -28,10 +28,6 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "load.hpp"
-
-#include <doctest/doctest.h>
-
 // 2.4 Backslash escapes
 
 TEST_CASE( "012" )

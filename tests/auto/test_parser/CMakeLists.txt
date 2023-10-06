@@ -57,7 +57,9 @@ if( BUILD_MD4QT_QT_TESTS )
 			target_precompile_headers( ${PCH_TARGET} PRIVATE
 				<doctest/doctest.h>
 				<md4qt/parser.hpp>
-				<md4qt/traits.hpp> )
+				<md4qt/traits.hpp>
+				<fstream>
+				<cstring> )
 		else()
 			target_precompile_headers( test.md_parser.qt.${NUMSTRING}
 				REUSE_FROM ${PCH_TARGET} )
@@ -100,7 +102,9 @@ if( BUILD_MD4QT_STL_TESTS )
 			target_precompile_headers( ${PCH_TARGET} PRIVATE
 				<doctest/doctest.h>
 				<md4qt/parser.hpp>
-				<md4qt/traits.hpp> )
+				<md4qt/traits.hpp>
+				<fstream>
+				<cstring> )
 		else()
 			target_precompile_headers( test.md_parser.icu.${NUMSTRING}
 				REUSE_FROM ${PCH_TARGET} )

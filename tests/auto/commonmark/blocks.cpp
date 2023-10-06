@@ -28,10 +28,6 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "load.hpp"
-
-#include <doctest/doctest.h>
-
 // 3 Blocks and inlines
 
 // 3.1Precedence

@@ -29,7 +29,6 @@
 */
 
 #include "1.hpp"
-#include <md4qt/parser.hpp>
 
 void
 A::parse()

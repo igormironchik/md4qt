@@ -28,10 +28,6 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "load.hpp"
-
-#include <doctest/doctest.h>
-
 // 6.8 Soft line breaks
 
 TEST_CASE( "648" )

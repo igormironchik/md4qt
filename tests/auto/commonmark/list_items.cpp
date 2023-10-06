@@ -28,10 +28,6 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "load.hpp"
-
-#include <doctest/doctest.h>
-
 // 5.2 List items
 
 TEST_CASE( "253" )

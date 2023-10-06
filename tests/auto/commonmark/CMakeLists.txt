@@ -18,7 +18,7 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/../../..
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../3rdparty )
 
-file( GLOB INL *.inl )
+file( GLOB INL *.cpp )
 
 if( BUILD_MD4QT_QT_TESTS )
 	find_package( Qt6Core REQUIRED )
@@ -38,7 +38,7 @@ if( BUILD_MD4QT_QT_TESTS )
 
 		string( APPEND NUMSTRING ${COUNTER} )
 
-		add_executable( test.md_parser.commonmark.qt.${NUMSTRING} main${NUMSTRING}.cpp ${inl} load.hpp )
+		add_executable( test.md_parser.commonmark.qt.${NUMSTRING} ${inl} )
 		target_compile_definitions( test.md_parser.commonmark.qt.${NUMSTRING} PUBLIC TRAIT=MD::QStringTrait )
 		target_compile_definitions( test.md_parser.commonmark.qt.${NUMSTRING} PUBLIC MD4QT_QT_SUPPORT )
 		target_compile_definitions( test.md_parser.commonmark.qt.${NUMSTRING} PUBLIC DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN )
@@ -81,7 +81,7 @@ if( BUILD_MD4QT_STL_TESTS )
 
 		string( APPEND NUMSTRING ${COUNTER} )
 
-		add_executable( test.md_parser.commonmark.icu.${NUMSTRING} main${NUMSTRING}.cpp ${inl} load.hpp )
+		add_executable( test.md_parser.commonmark.icu.${NUMSTRING} ${inl} )
 		target_compile_definitions( test.md_parser.commonmark.icu.${NUMSTRING} PUBLIC TRAIT=MD::UnicodeStringTrait )
 		target_compile_definitions( test.md_parser.commonmark.icu.${NUMSTRING} PUBLIC MD4QT_ICU_STL_SUPPORT )
 		target_compile_definitions( test.md_parser.commonmark.icu.${NUMSTRING} PUBLIC DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN )

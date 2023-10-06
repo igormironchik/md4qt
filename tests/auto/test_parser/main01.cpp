@@ -28,15 +28,6 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <md4qt/parser.hpp>
-#include <md4qt/traits.hpp>
-
-// doctest include.
-#include <doctest/doctest.h>
-
-#include <fstream>
-#include <cstring>
-
 #ifdef MD4QT_QT_SUPPORT
 #include <QDir>
 #include <QTextStream>

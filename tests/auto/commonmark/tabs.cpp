@@ -28,10 +28,6 @@
 	OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "load.hpp"
-
-#include <doctest/doctest.h>
-
 #ifndef MD4QT_QT_SUPPORT
 #include <filesystem>
 #endif
