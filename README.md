@@ -179,34 +179,3 @@ flag. And yes, I expect to receive UTF-8 encoded content...
 can I achieve this?**
 
  * Done in version `2.0.5`. But this functionality is not fully tested yet.
-
-**Why is implementation of the following method so terrible?**
-
- *
-   ```cpp
-   template< class Trait >
-   inline void
-   Parser< Trait >::parse( StringListStream< Trait > & stream,
-       std::shared_ptr< Block< Trait > > parent,
-       std::shared_ptr< Document< Trait > > doc,
-       typename Trait::StringList & linksToParse,
-       const typename Trait::String & workingPath,
-       const typename Trait::String & fileName,
-       bool collectRefLinks, bool top );
-   ```
-   
-   Implementation of the above method is so ugly because `md4qt` was started from
-   the simplest `Markdown` parser, that didn't follow all features of `CommonMark`.
-   I started to follow standard and did a lot of iterations to suit all cases, but I
-   wasn't a professional at `Markdown` syntax, and did parsing with splitting text
-   on blocks first. I caught a lot of problems with such approach, look, for example,
-   at handling `HTML`.
-   
-   But this code works correctly, it tested. OK, OK, I can rewrite the parsing, code will
-   be cleaner, more understandable, easier to read. But performance will not be increased,
-   it will be the same (+/-). I just don't want to spend a lot of time to rewrite something
-   that works to be easier to understand.
-   
-   Possibly I will do it later, but now for my own needs - it's OK for me. I don't see
-   a lot of users of `md4qt` library, as `cmark-gfm` already exists. So, let it be so for now.
-   It fast enough, it's simple to use, and it works correctly.
