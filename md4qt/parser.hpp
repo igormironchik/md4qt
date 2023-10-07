@@ -812,6 +812,47 @@ public:
 		bool collectRefLinks,
 		bool top = false );
 
+	struct ParserContext {
+		typename Trait::template Vector< MdBlock< Trait > > splitted;
+		typename MdBlock< Trait >::Data fragment;
+		bool emptyLineInList = false;
+		bool fensedCodeInList = false;
+		long long int emptyLinesCount = 0;
+		long long int lineCounter = 0;
+		std::vector< long long int > indents;
+		long long int indent = 0;
+		RawHtmlBlock< Trait > html;
+		long long int emptyLinesBefore = 0;
+		std::vector< std::pair< bool, bool > > htmlCommentData;
+		typename Trait::String startOfCode;
+		typename Trait::String startOfCodeInList;
+		BlockType type = BlockType::EmptyLine;
+		BlockType lineType = BlockType::Unknown;
+		BlockType prevLineType = BlockType::Unknown;
+	}; // struct ParserContext
+
+	static void parseFragment( ParserContext & ctx,
+		std::shared_ptr< Block< Trait > > parent,
+		std::shared_ptr< Document< Trait > > doc,
+		typename Trait::StringList & linksToParse,
+		const typename Trait::String & workingPath,
+		const typename Trait::String & fileName,
+		bool collectRefLinks );
+
+	static void eatFootnote( ParserContext & ctx,
+		StringListStream< Trait> & stream,
+		std::shared_ptr< Block< Trait > > parent,
+		std::shared_ptr< Document< Trait > > doc,
+		typename Trait::StringList & linksToParse,
+		const typename Trait::String & workingPath,
+		const typename Trait::String & fileName,
+		bool collectRefLinks );
+
+	static void finishHtml( ParserContext & ctx,
+		std::shared_ptr< Block< Trait > > parent,
+		std::shared_ptr< Document< Trait > > doc,
+		bool collectRefLinks, bool top );
+
 private:
 	typename Trait::StringList m_parsedFiles;
 
@@ -1092,6 +1133,130 @@ checkForHtmlComments( const typename Trait::String & line, StringListStream< Tra
 
 template< class Trait >
 inline void
+Parser< Trait >::parseFragment( typename Parser< Trait >::ParserContext & ctx,
+	std::shared_ptr< Block< Trait > > parent,
+	std::shared_ptr< Document< Trait > > doc,
+	typename Trait::StringList & linksToParse,
+	const typename Trait::String & workingPath,
+	const typename Trait::String & fileName,
+	bool collectRefLinks )
+{
+	if( !ctx.fragment.empty() )
+	{
+		MdBlock< Trait > block = { ctx.fragment, ctx.emptyLinesBefore, ctx.emptyLinesCount > 0 };
+
+		ctx.emptyLinesBefore = ctx.emptyLinesCount;
+
+		ctx.splitted.push_back( block );
+
+		parseFragment( block, parent, doc, linksToParse,
+			workingPath, fileName, collectRefLinks, ctx.html );
+
+		ctx.fragment.clear();
+	}
+
+	ctx.type = BlockType::EmptyLine;
+	ctx.emptyLineInList = false;
+	ctx.fensedCodeInList = false;
+	ctx.emptyLinesCount = 0;
+	ctx.lineCounter = 0;
+	ctx.indents.clear();
+	ctx.indent = 0;
+	ctx.startOfCode.clear();
+	ctx.startOfCodeInList.clear();
+}
+
+template< class Trait >
+inline void
+Parser< Trait >::eatFootnote( typename Parser< Trait >::ParserContext & ctx,
+	StringListStream< Trait > & stream,
+	std::shared_ptr< Block< Trait > > parent,
+	std::shared_ptr< Document< Trait > > doc,
+	typename Trait::StringList & linksToParse,
+	const typename Trait::String & workingPath,
+	const typename Trait::String & fileName,
+	bool collectRefLinks )
+{
+	while( !stream.atEnd() )
+	{
+		const auto currentLineNumber = stream.currentLineNumber();
+
+		auto line = stream.readLine();
+
+		if( line.isEmpty() || line.asString().startsWith( "    " ) ||
+			line.asString().startsWith( '\t' ) )
+		{
+			ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
+		}
+		else
+		{
+			parseFragment( ctx, parent, doc, linksToParse, workingPath, fileName, collectRefLinks );
+
+			ctx.type = whatIsTheLine( line );
+			ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
+
+			break;
+		}
+	}
+
+	if( stream.atEnd() && !ctx.fragment.empty() )
+		parseFragment( ctx, parent, doc, linksToParse, workingPath, fileName, collectRefLinks );
+}
+
+template< class Trait >
+inline void
+Parser< Trait >::finishHtml( ParserContext & ctx,
+	std::shared_ptr< Block< Trait > > parent,
+	std::shared_ptr< Document< Trait > > doc,
+	bool collectRefLinks, bool top )
+{
+	if( !collectRefLinks || top )
+	{
+		if( ctx.html.html->isFreeTag() )
+			parent->appendItem( ctx.html.html );
+		else
+		{
+			if( parent->items().back()->type() == ItemType::Paragraph )
+			{
+				auto p = static_cast< Paragraph< Trait >* > ( parent->items().back().get() );
+
+				if( p->isDirty() )
+				{
+					p->appendItem( ctx.html.html );
+					p->setEndColumn( ctx.html.html->endColumn() );
+					p->setEndLine( ctx.html.html->endLine() );
+				}
+				else
+				{
+					std::shared_ptr< Paragraph< Trait > > p(
+						new Paragraph< Trait > );
+					p->appendItem( ctx.html.html );
+					p->setStartColumn( ctx.html.html->startColumn() );
+					p->setStartLine( ctx.html.html->startLine() );
+					p->setEndColumn( ctx.html.html->endColumn() );
+					p->setEndLine( ctx.html.html->endLine() );
+					doc->appendItem( p );
+				}
+			}
+			else
+			{
+				std::shared_ptr< Paragraph< Trait > > p(
+					new Paragraph< Trait > );
+				p->appendItem( ctx.html.html );
+				p->setStartColumn( ctx.html.html->startColumn() );
+				p->setStartLine( ctx.html.html->startLine() );
+				p->setEndColumn( ctx.html.html->endColumn() );
+				p->setEndLine( ctx.html.html->endLine() );
+				doc->appendItem( p );
+			}
+		}
+	}
+
+	resetHtmlTag( ctx.html );
+}
+
+template< class Trait >
+inline void
 Parser< Trait >::parse( StringListStream< Trait > & stream,
 	std::shared_ptr< Block< Trait > > parent,
 	std::shared_ptr< Document< Trait > > doc,
@@ -1100,85 +1265,11 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 	const typename Trait::String & fileName,
 	bool collectRefLinks, bool top )
 {
-	typename Trait::template Vector< MdBlock< Trait > > splitted;
-
-	typename MdBlock< Trait >::Data fragment;
-
-	bool emptyLineInList = false;
-	bool fensedCodeInList = false;
-	long long int emptyLinesCount = 0;
-	long long int lineCounter = 0;
-	std::vector< long long int > indents;
-	long long int indent = 0;
-	RawHtmlBlock< Trait > html;
-	long long int emptyLinesBefore = 0;
-	std::vector< std::pair< bool, bool > > htmlCommentData;
-	typename Trait::String startOfCode;
-	typename Trait::String startOfCodeInList;
-	BlockType type = BlockType::EmptyLine;
-	BlockType lineType = BlockType::Unknown;
-	BlockType prevLineType = BlockType::Unknown;
-
-	// Parse fragment and clear internal cache.
-	auto pf = [&]()
-		{
-			if( !fragment.empty() )
-			{
-				MdBlock< Trait > block = { fragment, emptyLinesBefore, emptyLinesCount > 0 };
-
-				emptyLinesBefore = emptyLinesCount;
-
-				splitted.push_back( block );
-
-				parseFragment( block, parent, doc, linksToParse,
-					workingPath, fileName, collectRefLinks, html );
-
-				fragment.clear();
-			}
-
-			type = BlockType::EmptyLine;
-			emptyLineInList = false;
-			fensedCodeInList = false;
-			emptyLinesCount = 0;
-			lineCounter = 0;
-			indents.clear();
-			indent = 0;
-			startOfCode.clear();
-			startOfCodeInList.clear();
-		};
-
-	// Eat footnote.
-	auto eatFootnote = [&]()
-		{
-			while( !stream.atEnd() )
-			{
-				const auto currentLineNumber = stream.currentLineNumber();
-
-				auto line = stream.readLine();
-
-				if( line.isEmpty() || line.asString().startsWith( "    " ) ||
-					line.asString().startsWith( '\t' ) )
-				{
-					fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
-				}
-				else
-				{
-					pf();
-
-					type = whatIsTheLine( line );
-					fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
-
-					break;
-				}
-			}
-
-			if( stream.atEnd() && !fragment.empty() )
-				pf();
-		};
+	ParserContext ctx;
 
 	while( !stream.atEnd() )
 	{
-		htmlCommentData.clear();
+		ctx.htmlCommentData.clear();
 
 		const auto currentLineNumber = stream.currentLineNumber();
 
@@ -1188,129 +1279,136 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 		line.replace( typename Trait::Char( 0 ), Trait::utf16ToString( &c_zeroReplaceWith[ 0 ] ) );
 
-		checkForHtmlComments( line.asString(), stream, htmlCommentData );
+		checkForHtmlComments( line.asString(), stream, ctx.htmlCommentData );
 
-		const long long int prevIndent = indent;
+		const long long int prevIndent = ctx.indent;
 
-		if( lineType != BlockType::Unknown )
-			prevLineType = lineType;
+		if( ctx.lineType != BlockType::Unknown )
+			ctx.prevLineType = ctx.lineType;
 
-		lineType = whatIsTheLine( line,
-			( emptyLineInList || type == BlockType::List || type == BlockType::ListWithFirstEmptyLine ),
-			prevLineType == BlockType::ListWithFirstEmptyLine, fensedCodeInList,
-			&startOfCodeInList, &indent, lineType == BlockType::EmptyLine, true, &indents );
+		ctx.lineType = whatIsTheLine( line,
+			( ctx.emptyLineInList || ctx.type == BlockType::List ||
+				ctx.type == BlockType::ListWithFirstEmptyLine ),
+			ctx.prevLineType == BlockType::ListWithFirstEmptyLine, ctx.fensedCodeInList,
+			&ctx.startOfCodeInList, &ctx.indent, ctx.lineType == BlockType::EmptyLine,
+			true, &ctx.indents );
 
-		if( ( type == BlockType::List || type == BlockType::ListWithFirstEmptyLine ) &&
-			lineType == BlockType::FensedCodeInList )
-				fensedCodeInList = !fensedCodeInList;
+		if( ( ctx.type == BlockType::List || ctx.type == BlockType::ListWithFirstEmptyLine ) &&
+			ctx.lineType == BlockType::FensedCodeInList )
+				ctx.fensedCodeInList = !ctx.fensedCodeInList;
 
-		const long long int currentIndent = indent;
+		const long long int currentIndent = ctx.indent;
 
 		const auto ns = skipSpaces< Trait >( 0, line.asString() );
 
-		const auto indentInListValue = indentInList( &indents,
-			ns - ( lineType == BlockType::CodeIndentedBySpaces ? 4 : 0 ),
-			lineType == BlockType::CodeIndentedBySpaces );
+		const auto indentInListValue = indentInList( &ctx.indents,
+			ns - ( ctx.lineType == BlockType::CodeIndentedBySpaces ? 4 : 0 ),
+			ctx.lineType == BlockType::CodeIndentedBySpaces );
 
-		if( indent != prevIndent &&
-			( lineType == BlockType::List || lineType == BlockType::ListWithFirstEmptyLine ) &&
-			!fensedCodeInList )
+		if( ctx.indent != prevIndent &&
+			( ctx.lineType == BlockType::List ||
+				ctx.lineType == BlockType::ListWithFirstEmptyLine ) &&
+			!ctx.fensedCodeInList )
 		{
-			if( indents.empty() )
-				indents.push_back( indent );
+			if( ctx.indents.empty() )
+				ctx.indents.push_back( ctx.indent );
 			else if( indentInListValue )
-				indents.push_back( indent );
+				ctx.indents.push_back( ctx.indent );
 		}
 
-		if( type == BlockType::CodeIndentedBySpaces && ns > 3 )
-			lineType = BlockType::CodeIndentedBySpaces;
+		if( ctx.type == BlockType::CodeIndentedBySpaces && ns > 3 )
+			ctx.lineType = BlockType::CodeIndentedBySpaces;
 
-		if( type == BlockType::ListWithFirstEmptyLine && lineCounter == 2 &&
-			lineType != BlockType::ListWithFirstEmptyLine && lineType != BlockType::List )
+		if( ctx.type == BlockType::ListWithFirstEmptyLine && ctx.lineCounter == 2 &&
+			ctx.lineType != BlockType::ListWithFirstEmptyLine && ctx.lineType != BlockType::List )
 		{
-			if( emptyLinesCount > 0 )
+			if( ctx.emptyLinesCount > 0 )
 			{
-				pf();
+				parseFragment( ctx, parent, doc, linksToParse,
+					workingPath, fileName, collectRefLinks );
 
-				fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
-				type = lineType;
+				ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
+				ctx.type = ctx.lineType;
 
 				continue;
 			}
 			else
 			{
-				emptyLineInList = false;
-				emptyLinesCount = 0;
+				ctx.emptyLineInList = false;
+				ctx.emptyLinesCount = 0;
 			}
 		}
 
-		if( type == BlockType::ListWithFirstEmptyLine && lineCounter == 2 )
-			type = BlockType::List;
+		if( ctx.type == BlockType::ListWithFirstEmptyLine && ctx.lineCounter == 2 )
+			ctx.type = BlockType::List;
 
-		if( lineType == BlockType::ListWithFirstEmptyLine )
+		if( ctx.lineType == BlockType::ListWithFirstEmptyLine )
 		{
-			if( emptyLinesCount )
+			if( ctx.emptyLinesCount )
 			{
-				const auto tmp = indent;
+				const auto tmp = ctx.indent;
 
-				if( type != BlockType::List )
-					pf();
+				if( ctx.type != BlockType::List )
+					parseFragment( ctx, parent, doc, linksToParse,
+						workingPath, fileName, collectRefLinks );
 
-				type = lineType;
-				indents.push_back( tmp );
-				indent = tmp;
-				lineCounter = 1;
-				fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
+				ctx.type = ctx.lineType;
+				ctx.indents.push_back( tmp );
+				ctx.indent = tmp;
+				ctx.lineCounter = 1;
+				ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
 			}
 			else
-				fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
+				ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
 
-			if( type == BlockType::EmptyLine )
+			if( ctx.type == BlockType::EmptyLine )
 			{
-				type = lineType;
-				lineCounter = 1;
+				ctx.type = ctx.lineType;
+				ctx.lineCounter = 1;
 			}
 
 			continue;
 		}
 
 		// First line of the fragment.
-		if( ns != line.length() && type == BlockType::EmptyLine )
+		if( ns != line.length() && ctx.type == BlockType::EmptyLine )
 		{
-			type = lineType;
+			ctx.type = ctx.lineType;
 
-			++lineCounter;
+			++ctx.lineCounter;
 
-			if( type == BlockType::Code )
-				startOfCode = startSequence< Trait >( line.asString() );
+			if( ctx.type == BlockType::Code )
+				ctx.startOfCode = startSequence< Trait >( line.asString() );
 
-			fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
+			ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
 
-			if( type == BlockType::Heading )
-				pf();
+			if( ctx.type == BlockType::Heading )
+				parseFragment( ctx, parent, doc, linksToParse,
+					workingPath, fileName, collectRefLinks );
 
 			continue;
 		}
-		else if( ns == line.length() && type == BlockType::EmptyLine )
+		else if( ns == line.length() && ctx.type == BlockType::EmptyLine )
 			continue;
 
-		++lineCounter;
+		++ctx.lineCounter;
 
 		// Got new empty line.
 		if( ns == line.length() )
 		{
-			++emptyLinesCount;
+			++ctx.emptyLinesCount;
 
-			switch( type )
+			switch( ctx.type )
 			{
 				case BlockType::Text :
 				{
-					if( isFootnote< Trait >( fragment.front().first.asString() ) )
+					if( isFootnote< Trait >( ctx.fragment.front().first.asString() ) )
 					{
-						fragment.push_back( { typename Trait::String(),
-							{ currentLineNumber, htmlCommentData } } );
+						ctx.fragment.push_back( { typename Trait::String(),
+							{ currentLineNumber, ctx.htmlCommentData } } );
 
-						eatFootnote();
+						eatFootnote( ctx, stream, parent, doc, linksToParse,
+							workingPath, fileName, collectRefLinks );
 					}
 
 					continue;
@@ -1318,7 +1416,8 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 				case BlockType::Blockquote :
 				{
-					pf();
+					parseFragment( ctx, parent, doc, linksToParse,
+						workingPath, fileName, collectRefLinks );
 
 					continue;
 				}
@@ -1329,8 +1428,8 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 				case BlockType::Code :
 				{
-					fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
-					emptyLinesCount = 0;
+					ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
+					ctx.emptyLinesCount = 0;
 
 					continue;
 				}
@@ -1338,7 +1437,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 				case BlockType::List :
 				case BlockType::ListWithFirstEmptyLine :
 				{
-					emptyLineInList = true;
+					ctx.emptyLineInList = true;
 
 					continue;
 				}
@@ -1348,87 +1447,89 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			}
 		}
 		//! Empty new line in list.
-		else if( emptyLineInList )
+		else if( ctx.emptyLineInList )
 		{
-			if( indentInListValue || lineType == BlockType::List ||
-				lineType == BlockType::ListWithFirstEmptyLine ||
-				lineType == BlockType::SomethingInList )
+			if( indentInListValue || ctx.lineType == BlockType::List ||
+				ctx.lineType == BlockType::ListWithFirstEmptyLine ||
+				ctx.lineType == BlockType::SomethingInList )
 			{
-				for( long long int i = 0; i < emptyLinesCount; ++i )
-					fragment.push_back( { typename Trait::String(),
-						{ currentLineNumber - emptyLinesCount + i, {} } } );
+				for( long long int i = 0; i < ctx.emptyLinesCount; ++i )
+					ctx.fragment.push_back( { typename Trait::String(),
+						{ currentLineNumber - ctx.emptyLinesCount + i, {} } } );
 
-				fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
+				ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
 
-				emptyLineInList = false;
-				emptyLinesCount = 0;
+				ctx.emptyLineInList = false;
+				ctx.emptyLinesCount = 0;
 
 				continue;
 			}
 			else
 			{
-				pf();
+				parseFragment( ctx, parent, doc, linksToParse,
+					workingPath, fileName, collectRefLinks );
 
-				type = whatIsTheLine( line, false, false, false, nullptr,
-					nullptr, true, false, &indents );
-				fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
+				ctx.type = whatIsTheLine( line, false, false, false, nullptr,
+					nullptr, true, false, &ctx.indents );
+				ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
 
-				if( type == BlockType::Code )
-					startOfCode = startSequence< Trait >( line.asString() );
+				if( ctx.type == BlockType::Code )
+					ctx.startOfCode = startSequence< Trait >( line.asString() );
 
-				emptyLinesCount = 0;
+				ctx.emptyLinesCount = 0;
 
 				continue;
 			}
 		}
-		else if( emptyLinesCount > 0 )
+		else if( ctx.emptyLinesCount > 0 )
 		{
-			if( type == BlockType::CodeIndentedBySpaces &&
-				lineType == BlockType::CodeIndentedBySpaces )
+			if( ctx.type == BlockType::CodeIndentedBySpaces &&
+				ctx.lineType == BlockType::CodeIndentedBySpaces )
 			{
-				const auto indent = skipSpaces< Trait >( 0, fragment.front().first.asString() );
+				const auto indent = skipSpaces< Trait >( 0, ctx.fragment.front().first.asString() );
 
-				for( long long int i = 0; i < emptyLinesCount; ++i )
-					fragment.push_back( { typename Trait::String( indent, ' ' ),
-						{ currentLineNumber - emptyLinesCount + i, {} } } );
+				for( long long int i = 0; i < ctx.emptyLinesCount; ++i )
+					ctx.fragment.push_back( { typename Trait::String( indent, ' ' ),
+						{ currentLineNumber - ctx.emptyLinesCount + i, {} } } );
 			}
 			else
 			{
-				const auto empty = emptyLinesCount;
+				const auto empty = ctx.emptyLinesCount;
 
-				pf();
+				parseFragment( ctx, parent, doc, linksToParse,
+					workingPath, fileName, collectRefLinks );
 
-				if( html.htmlBlockType >= 6 )
-					html.continueHtml = ( empty <= 0 );
+				if( ctx.html.htmlBlockType >= 6 )
+					ctx.html.continueHtml = ( empty <= 0 );
 
-				type = lineType;
+				ctx.type = ctx.lineType;
 
-				if( type == BlockType::List || type == BlockType::ListWithFirstEmptyLine )
+				if( ctx.type == BlockType::List || ctx.type == BlockType::ListWithFirstEmptyLine )
 				{
-					indents.push_back( currentIndent );
-					indent = currentIndent;
+					ctx.indents.push_back( currentIndent );
+					ctx.indent = currentIndent;
 				}
-				else if( type == BlockType::Code )
-					startOfCode = startSequence< Trait >( line.asString() );
+				else if( ctx.type == BlockType::Code )
+					ctx.startOfCode = startSequence< Trait >( line.asString() );
 			}
 
-			fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
-			emptyLinesCount = 0;
+			ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
+			ctx.emptyLinesCount = 0;
 
 			continue;
 		}
 
 		// Something new and first block is not a code block or a list, blockquote.
-		if( type != lineType && type != BlockType::Code && type != BlockType::List &&
-			type != BlockType::Blockquote && type != BlockType::ListWithFirstEmptyLine )
+		if( ctx.type != ctx.lineType && ctx.type != BlockType::Code && ctx.type != BlockType::List &&
+			ctx.type != BlockType::Blockquote && ctx.type != BlockType::ListWithFirstEmptyLine )
 		{
-			if( type == BlockType::Text && lineType == BlockType::CodeIndentedBySpaces )
-				fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
+			if( ctx.type == BlockType::Text && ctx.lineType == BlockType::CodeIndentedBySpaces )
+				ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
 			else
 			{
-				if( type == BlockType::Text &&
-					( lineType == BlockType::ListWithFirstEmptyLine ||
-						lineType == BlockType::List ) )
+				if( ctx.type == BlockType::Text &&
+					( ctx.lineType == BlockType::ListWithFirstEmptyLine ||
+						ctx.lineType == BlockType::List ) )
 				{
 					int num = 0;
 
@@ -1436,137 +1537,92 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 					{
 						if( num > 1 )
 						{
-							fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
+							ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
 
 							continue;
 						}
 					}
 				}
 
-				const auto empty = emptyLinesCount;
+				const auto empty = ctx.emptyLinesCount;
 
-				pf();
+				parseFragment( ctx, parent, doc, linksToParse,
+					workingPath, fileName, collectRefLinks );
 
-				if( html.htmlBlockType >= 6 )
-					html.continueHtml = ( empty <= 0 );
+				if( ctx.html.htmlBlockType >= 6 )
+					ctx.html.continueHtml = ( empty <= 0 );
 
-				type = lineType;
+				ctx.type = ctx.lineType;
 
 				if( !line.isEmpty() && ns < line.length() )
 				{
-					if( type == BlockType::List || type == BlockType::ListWithFirstEmptyLine )
+					if( ctx.type == BlockType::List || ctx.type == BlockType::ListWithFirstEmptyLine )
 					{
-						indents.push_back( currentIndent );
-						indent = currentIndent;
+						ctx.indents.push_back( currentIndent );
+						ctx.indent = currentIndent;
 					}
-					else if( type == BlockType::Code )
-						startOfCode = startSequence< Trait >( line.asString() );
+					else if( ctx.type == BlockType::Code )
+						ctx.startOfCode = startSequence< Trait >( line.asString() );
 
-					fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
+					ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
 				}
 			}
 		}
 		// End of code block.
-		else if( type == BlockType::Code && type == lineType && !startOfCode.isEmpty() &&
-			startSequence< Trait >( line.asString() ).contains( startOfCode ) &&
+		else if( ctx.type == BlockType::Code && ctx.type == ctx.lineType && !ctx.startOfCode.isEmpty() &&
+			startSequence< Trait >( line.asString() ).contains( ctx.startOfCode ) &&
 			isCodeFences< Trait >( line.asString(), true ) )
 		{
-			fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
+			ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
 
-			pf();
+			parseFragment( ctx, parent, doc, linksToParse, workingPath, fileName, collectRefLinks );
 		}
-		else if( type != lineType && type != BlockType::Code && type != BlockType::Blockquote &&
-			( ( type == BlockType::List || type == BlockType::ListWithFirstEmptyLine ) &&
-				lineType != BlockType::SomethingInList && lineType != BlockType::FensedCodeInList ) )
+		else if( ctx.type != ctx.lineType && ctx.type != BlockType::Code &&
+			ctx.type != BlockType::Blockquote &&
+			( ( ctx.type == BlockType::List || ctx.type == BlockType::ListWithFirstEmptyLine ) &&
+				ctx.lineType != BlockType::SomethingInList && ctx.lineType != BlockType::FensedCodeInList ) )
 		{		
-			pf();
+			parseFragment( ctx, parent, doc, linksToParse, workingPath, fileName, collectRefLinks );
 
-			fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
+			ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
 
-			type = lineType;
+			ctx.type = ctx.lineType;
 
-			startOfCode = startSequence< Trait >( line.asString() );
+			ctx.startOfCode = startSequence< Trait >( line.asString() );
 		}
 		else
-			fragment.push_back( { line, { currentLineNumber, htmlCommentData } } );
+			ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
 
-		emptyLinesCount = 0;
+		ctx.emptyLinesCount = 0;
 	}
 
-	if( !fragment.empty() )
+	if( !ctx.fragment.empty() )
 	{
-		if( type == BlockType::Code )
-			fragment.push_back( { startOfCode, { -1, {} } } );
+		if( ctx.type == BlockType::Code )
+			ctx.fragment.push_back( { ctx.startOfCode, { -1, {} } } );
 
-		pf();
+		parseFragment( ctx, parent, doc, linksToParse, workingPath, fileName, collectRefLinks );
 	}
-
-	auto finishHtml = [&] ()
-	{
-		if( !collectRefLinks || top )
-		{
-			if( html.html->isFreeTag() )
-				parent->appendItem( html.html );
-			else
-			{
-				if( parent->items().back()->type() == ItemType::Paragraph )
-				{
-					auto p = static_cast< Paragraph< Trait >* > ( parent->items().back().get() );
-
-					if( p->isDirty() )
-					{
-						p->appendItem( html.html );
-						p->setEndColumn( html.html->endColumn() );
-						p->setEndLine( html.html->endLine() );
-					}
-					else
-					{
-						std::shared_ptr< Paragraph< Trait > > p(
-							new Paragraph< Trait > );
-						p->appendItem( html.html );
-						p->setStartColumn( html.html->startColumn() );
-						p->setStartLine( html.html->startLine() );
-						p->setEndColumn( html.html->endColumn() );
-						p->setEndLine( html.html->endLine() );
-						doc->appendItem( p );
-					}
-				}
-				else
-				{
-					std::shared_ptr< Paragraph< Trait > > p(
-						new Paragraph< Trait > );
-					p->appendItem( html.html );
-					p->setStartColumn( html.html->startColumn() );
-					p->setStartLine( html.html->startLine() );
-					p->setEndColumn( html.html->endColumn() );
-					p->setEndLine( html.html->endLine() );
-					doc->appendItem( p );
-				}
-			}
-		}
-
-		resetHtmlTag( html );
-	};
 
 	if( top )
 	{
-		resetHtmlTag( html );
+		resetHtmlTag( ctx.html );
 
-		for( long long int i = 0; i < (long long int) splitted.size(); ++i )
+		for( long long int i = 0; i < (long long int) ctx.splitted.size(); ++i )
 		{
-			parseFragment( splitted[ i ], parent, doc, linksToParse,
-				workingPath, fileName, false, html );
+			parseFragment( ctx.splitted[ i ], parent, doc, linksToParse,
+				workingPath, fileName, false, ctx.html );
 
-			if( html.htmlBlockType >= 6 )
-				html.continueHtml = ( !splitted[ i ].emptyLineAfter );
+			if( ctx.html.htmlBlockType >= 6 )
+				ctx.html.continueHtml = ( !ctx.splitted[ i ].emptyLineAfter );
 
-			if( html.html.get() && !html.continueHtml )
-				finishHtml();
+			if( ctx.html.html.get() && !ctx.html.continueHtml )
+				finishHtml( ctx, parent, doc, collectRefLinks, top );
 		}
 	}
 
-	if( html.html.get() )
-		finishHtml();
+	if( ctx.html.html.get() )
+		finishHtml( ctx, parent, doc, collectRefLinks, top );
 }
 
 #ifdef MD4QT_QT_SUPPORT
