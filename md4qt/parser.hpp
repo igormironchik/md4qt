@@ -1400,28 +1400,6 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 		if( ctx.type == BlockType::ListWithFirstEmptyLine && ctx.lineCounter == 2 )
 			ctx.type = BlockType::List;
 
-		if( ctx.lineType == BlockType::ListWithFirstEmptyLine )
-		{
-			if( ctx.emptyLinesCount )
-			{
-				if( ctx.type != BlockType::List )
-					parseFragment( ctx, parent, doc, linksToParse,
-						workingPath, fileName, collectRefLinks );
-
-				makeLineMain( ctx, line, 0, currentIndent, ns, currentLineNumber );
-			}
-			else
-				ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
-
-			if( ctx.type == BlockType::EmptyLine )
-			{
-				ctx.type = ctx.lineType;
-				ctx.lineCounter = 1;
-			}
-
-			continue;
-		}
-
 		// First line of the fragment.
 		if( ns != line.length() && ctx.type == BlockType::EmptyLine )
 		{
@@ -1558,16 +1536,25 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			{
 				if( ctx.type == BlockType::Text && isListType( ctx.lineType ) )
 				{
-					int num = 0;
-
-					if( isOrderedList< Trait >( line.asString(), &num ) )
+					if( ctx.lineType != BlockType::ListWithFirstEmptyLine )
 					{
-						if( num > 1 )
-						{
-							ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
+						int num = 0;
 
-							continue;
+						if( isOrderedList< Trait >( line.asString(), &num ) )
+						{
+							if( num > 1 )
+							{
+								ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
+
+								continue;
+							}
 						}
+					}
+					else
+					{
+						ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
+
+						continue;
 					}
 				}
 
@@ -1588,9 +1575,10 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 			parseFragment( ctx, parent, doc, linksToParse, workingPath, fileName, collectRefLinks );
 		}
-		else if( ctx.type != ctx.lineType && ctx.type != BlockType::Code &&
-			ctx.type != BlockType::Blockquote && isListType( ctx.type ) &&
-			ctx.lineType != BlockType::SomethingInList && ctx.lineType != BlockType::FensedCodeInList )
+		else if( ctx.type != ctx.lineType && isListType( ctx.type ) &&
+			ctx.lineType != BlockType::SomethingInList &&
+			ctx.lineType != BlockType::FensedCodeInList &&
+			!isListType( ctx.lineType ) )
 		{		
 			parseFragment( ctx, parent, doc, linksToParse, workingPath, fileName, collectRefLinks );
 
