@@ -860,6 +860,8 @@ public:
 		long long int ns,
 		long long int currentLineNumber );
 
+	static bool isListType( BlockType t );
+
 private:
 	typename Trait::StringList m_parsedFiles;
 
@@ -1302,6 +1304,21 @@ Parser< Trait >::makeLineMain( ParserContext & ctx,
 }
 
 template< class Trait >
+inline bool
+Parser< Trait >::isListType( BlockType t )
+{
+	switch( t )
+	{
+		case BlockType::List :
+		case BlockType::ListWithFirstEmptyLine :
+			return true;
+
+		default :
+			return false;
+	}
+}
+
+template< class Trait >
 inline void
 Parser< Trait >::parse( StringListStream< Trait > & stream,
 	std::shared_ptr< Block< Trait > > parent,
@@ -1333,15 +1350,13 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			ctx.prevLineType = ctx.lineType;
 
 		ctx.lineType = whatIsTheLine( line,
-			( ctx.emptyLineInList || ctx.type == BlockType::List ||
-				ctx.type == BlockType::ListWithFirstEmptyLine ),
+			( ctx.emptyLineInList || isListType( ctx.type ) ),
 			ctx.prevLineType == BlockType::ListWithFirstEmptyLine, ctx.fensedCodeInList,
 			&ctx.startOfCodeInList, &ctx.indent, ctx.lineType == BlockType::EmptyLine,
 			true, &ctx.indents );
 
-		if( ( ctx.type == BlockType::List || ctx.type == BlockType::ListWithFirstEmptyLine ) &&
-			ctx.lineType == BlockType::FensedCodeInList )
-				ctx.fensedCodeInList = !ctx.fensedCodeInList;
+		if( isListType( ctx.type ) && ctx.lineType == BlockType::FensedCodeInList )
+			ctx.fensedCodeInList = !ctx.fensedCodeInList;
 
 		const long long int currentIndent = ctx.indent;
 
@@ -1351,9 +1366,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			ns - ( ctx.lineType == BlockType::CodeIndentedBySpaces ? 4 : 0 ),
 			ctx.lineType == BlockType::CodeIndentedBySpaces );
 
-		if( ctx.indent != prevIndent &&
-			( ctx.lineType == BlockType::List ||
-				ctx.lineType == BlockType::ListWithFirstEmptyLine ) &&
+		if( ctx.indent != prevIndent && isListType( ctx.lineType )  &&
 			!ctx.fensedCodeInList )
 		{
 			if( ctx.indents.empty() )
@@ -1366,7 +1379,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			ctx.lineType = BlockType::CodeIndentedBySpaces;
 
 		if( ctx.type == BlockType::ListWithFirstEmptyLine && ctx.lineCounter == 2 &&
-			ctx.lineType != BlockType::ListWithFirstEmptyLine && ctx.lineType != BlockType::List )
+			!isListType( ctx.lineType ) )
 		{
 			if( ctx.emptyLinesCount > 0 )
 			{
@@ -1481,8 +1494,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 		//! Empty new line in list.
 		else if( ctx.emptyLineInList )
 		{
-			if( indentInListValue || ctx.lineType == BlockType::List ||
-				ctx.lineType == BlockType::ListWithFirstEmptyLine ||
+			if( indentInListValue || isListType( ctx.lineType ) ||
 				ctx.lineType == BlockType::SomethingInList )
 			{
 				for( long long int i = 0; i < ctx.emptyLinesCount; ++i )
@@ -1537,16 +1549,14 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 		}
 
 		// Something new and first block is not a code block or a list, blockquote.
-		if( ctx.type != ctx.lineType && ctx.type != BlockType::Code && ctx.type != BlockType::List &&
-			ctx.type != BlockType::Blockquote && ctx.type != BlockType::ListWithFirstEmptyLine )
+		if( ctx.type != ctx.lineType && ctx.type != BlockType::Code &&
+			!isListType( ctx.type ) && ctx.type != BlockType::Blockquote )
 		{
 			if( ctx.type == BlockType::Text && ctx.lineType == BlockType::CodeIndentedBySpaces )
 				ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
 			else
 			{
-				if( ctx.type == BlockType::Text &&
-					( ctx.lineType == BlockType::ListWithFirstEmptyLine ||
-						ctx.lineType == BlockType::List ) )
+				if( ctx.type == BlockType::Text && isListType( ctx.lineType ) )
 				{
 					int num = 0;
 
@@ -1579,9 +1589,8 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			parseFragment( ctx, parent, doc, linksToParse, workingPath, fileName, collectRefLinks );
 		}
 		else if( ctx.type != ctx.lineType && ctx.type != BlockType::Code &&
-			ctx.type != BlockType::Blockquote &&
-			( ( ctx.type == BlockType::List || ctx.type == BlockType::ListWithFirstEmptyLine ) &&
-				ctx.lineType != BlockType::SomethingInList && ctx.lineType != BlockType::FensedCodeInList ) )
+			ctx.type != BlockType::Blockquote && isListType( ctx.type ) &&
+			ctx.lineType != BlockType::SomethingInList && ctx.lineType != BlockType::FensedCodeInList )
 		{		
 			parseFragment( ctx, parent, doc, linksToParse, workingPath, fileName, collectRefLinks );
 
