@@ -9,6 +9,21 @@ tables, footnotes, tasks lists, strikethroughs, LaTeX Math injections.
 
 This library parses Markdown into tree structure.
 
+* [Example](#example)
+* [Benchmark](#benchmark)
+* [Q/A](#qa)
+  * [Why another AST Markdown parser?](#why-another-ast-markdown-parser)
+  * [What should I know about links in the document?](#what-should-i-know-about-links-in-the-document)
+  * [What is the second argument of `MD::Parser::parse()`?](#what-is-the-second-argument-of-mdparserparse-)
+  * [What is an `MD::Anchor`?](#what-is-an-mdanchor-)
+  * [Does the library throw exceptions?](#does-the-library-throw-exceptions)
+  * [Why `MD::Parser` and `MD::Document` are templates?](#why-mdparser-and-mddocument-are-templates)
+  * [So, how can I use `md4qt` with `Qt6` and `ICU`?](#so-how-can-i-use-md4qt-with-qt6-and-icu-)
+  * [`ICU` is slower then `Qt6`? Really?](#icu-is-slower-then-qt6--really)
+  * [Why is parsing wrong on Windows with `std::ifstream`?](#why-is-parsing-wrong-on-windows-with-stdifstream-)
+  * [How can I convert `MD::Document` into `HTML`?](#how-can-i-convert-mddocument-into-html-)
+  * [I need to know positions in the `Markdown` file of blocks/elements. How can I achieve this?](#i-need-to-know-positions-in-the-markdown-file-of-blockselements-how-can-i-achieve-this)
+
 # Example
 
 ```cpp
@@ -50,7 +65,8 @@ major extensions. Conclusion why it's slower you can read [here](tests/md_benchm
 
 # Q/A
 
-**Why another AST Markdown parser?**
+Why another AST Markdown parser?
+---
 
  * When I wrote this library I knew about `md4c` parser, but not about `cmark-gfm`.
  `md4c` was not suitable for my purposes, whereas `cmark-gfm` could do
@@ -64,7 +80,8 @@ major extensions. Conclusion why it's slower you can read [here](tests/md_benchm
    And one more cherry on the cake - `md4qt` can parse Markdown recursively.
    What it is described bellow.
 
-**What should I know about links in the document?**
+What should I know about links in the document?
+---
 
  * In some cases in Markdown link's URL is something document related. So, when
 you got a `MD::Link` in the document check if the labeled links of the
@@ -82,21 +99,24 @@ labeled links, look:
        url = it->second->url();
    ```
 
-**What is the second argument of `MD::Parser::parse()`?**
+What is the second argument of `MD::Parser::parse()`?
+---
 
  * Second argument of `MD::Parser::parse()` is a flag that tells to the
 parser to process Markdown files recursively or no. If parsing is recursive
 then if in the targeted Markdown file exist links to other Markdown files,
 then they will be parsed too and will exist in the resulting document.
 
-**What is an `MD::Anchor`?**
+What is an `MD::Anchor`?
+---
 
  * As `md4qt` supports recursive Markdown parsing, then in the resulting
 document can be represented more then one Markdown file. Each file in the
 document starts with `MD::Anchor`, it just shows that during traverse through
 the document you reached new file.
 
-**Does the library throw exceptions?**
+Does the library throw exceptions?
+---
 
  * No. This library doesn't use exceptions. Any text is a valid Markdown, so I
 don't need to inform user about errors. Qt itself doesn't use exceptions too.
@@ -105,7 +125,8 @@ example. Possibly with `MD::UnicodeStringTrait` you will catch more standard
 exceptions, possibly I missed something somewhere, but I tried to negotiate
 all possible exceptions.
 
-**Why `MD::Parser` and `MD::Document` are templates?**
+Why `MD::Parser` and `MD::Document` are templates?
+---
 
  * Since version `2.0.0` `md4qt` can be built not only with `Qt6`, but with
 `STL` too. The code of the parser is the same in both cases. I just added two
@@ -117,7 +138,8 @@ standard is a pain, it's still not enough powerful to implement all
 things without very big effort. But if somebody want to make such pure
 C++ `STL` trait - you are more then WELCOME with such PR.
 
-**So, how can I use `md4qt` with `Qt6` and `ICU`?**
+So, how can I use `md4qt` with `Qt6` and `ICU`?
+---
 
  * To build with `ICU` support you need to define `MD4QT_ICU_STL_SUPPORT`
 before including `md4qt/parser.hpp`. In this case you will get access to
@@ -132,8 +154,9 @@ parameter. You will receive in dependencies `C++ STL`, `ICU` and
    
    You can define both to have ability to use `md4qt` with `Qt6` and
    `ICU`.
-   
-**`ICU` is slower then `Qt6`? Really?**
+
+`ICU` is slower then `Qt6`? Really?
+---
 
  * Don't believe anybody, just build built-in `md_benchamrk` and have a
 look. Dry numbers says, that `Qt6` `QString` ~2 times faster
@@ -144,13 +167,15 @@ parser's code and profiler says that most of the run-time is spent
 on such operations. `QString` just more optimized for access separate
 character then `icu::UnicodeString`...
 
-**Why is parsing wrong on Windows with `std::ifstream`?**
+Why is parsing wrong on Windows with `std::ifstream`?
+---
 
  * Such problem can occur on Windows with MSVC if you open file in text
 mode, so for `MD::Parser` always open `std::ifstream` with `std::ios::binary`
 flag. And yes, I expect to receive UTF-8 encoded content...
 
-**How can I convert `MD::Document` into `HTML`?**
+How can I convert `MD::Document` into `HTML`?
+---
 
  * In version `2.0.5` were made commits with implementation of
 `MD::toHtml()` function. You can do the following:
@@ -175,7 +200,8 @@ flag. And yes, I expect to receive UTF-8 encoded content...
    
    But this functionality is not fully tested yet.
 
-**I need to know positions in the `Markdown` file of blocks/elements. How
-can I achieve this?**
+I need to know positions in the `Markdown` file of blocks/elements. How
+can I achieve this?
+---
 
  * Done in version `2.0.5`. But this functionality is not fully tested yet.
