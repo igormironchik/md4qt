@@ -70,21 +70,41 @@ TEST_CASE( "220" )
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-		REQUIRE( p->items().size() == 1 );
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == u8"aaa bbb" );
+		REQUIRE( p->items().size() == 2 );
+
+		{
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8"aaa" );
+		}
+
+		{
+			REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8"bbb" );
+		}
 	}
 
 	{
 		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
-		REQUIRE( p->items().size() == 1 );
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == u8"ccc ddd" );
+		REQUIRE( p->items().size() == 2 );
+
+		{
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8"ccc" );
+		}
+
+		{
+			REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8"ddd" );
+		}
 	}
 }
 
@@ -124,11 +144,21 @@ TEST_CASE( "222" )
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-		REQUIRE( p->items().size() == 1 );
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == u8"aaa bbb" );
+		REQUIRE( p->items().size() == 2 );
+
+		{
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8"aaa" );
+		}
+
+		{
+			REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8"bbb" );
+		}
 	}
 }
 
@@ -141,11 +171,28 @@ TEST_CASE( "223" )
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-		REQUIRE( p->items().size() == 1 );
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == u8"aaa bbb ccc" );
+		REQUIRE( p->items().size() == 3 );
+
+		{
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8"aaa" );
+		}
+
+		{
+			REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8"bbb" );
+		}
+
+		{
+			REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 2 ).get() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8"ccc" );
+		}
 	}
 }
 
@@ -158,11 +205,21 @@ TEST_CASE( "224" )
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-		REQUIRE( p->items().size() == 1 );
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == u8"aaa bbb" );
+		REQUIRE( p->items().size() == 2 );
+
+		{
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8"aaa" );
+		}
+
+		{
+			REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8"bbb" );
+		}
 	}
 }
 

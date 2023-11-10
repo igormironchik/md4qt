@@ -43,11 +43,21 @@ TEST_CASE( "253" )
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-		REQUIRE( p->items().size() == 1 );
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == u8"A paragraph with two lines." );
+		REQUIRE( p->items().size() == 2 );
+
+		{
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8"A paragraph" );
+		}
+
+		{
+			REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8"with two lines." );
+		}
 	}
 
 	{
@@ -89,11 +99,21 @@ TEST_CASE( "254" )
 	{
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).get() );
-		REQUIRE( p->items().size() == 1 );
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == u8"A paragraph with two lines." );
+		REQUIRE( p->items().size() == 2 );
+
+		{
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8"A paragraph" );
+		}
+
+		{
+			REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8"with two lines." );
+		}
 	}
 
 	{
@@ -1127,19 +1147,37 @@ TEST_CASE( "285" )
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-		REQUIRE( p->items().size() == 1 );
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( t->text() == u8"foo *" );
+		REQUIRE( p->items().size() == 2 );
+
+		{
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( t->text() == u8"foo" );
+		}
+
+		{
+			REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+			REQUIRE( t->text() == u8"*" );
+		}
 	}
 
 	{
 		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
-		REQUIRE( p->items().size() == 1 );
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( t->text() == u8"foo 1." );
+		REQUIRE( p->items().size() == 2 );
+
+		{
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( t->text() == u8"foo" );
+		}
+
+		{
+			REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+			REQUIRE( t->text() == u8"1." );
+		}
 	}
 }
 
@@ -1164,10 +1202,19 @@ void tests_286_288( int test )
 		{
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
 			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).get() );
-			REQUIRE( p->items().size() == 1 );
-			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-			REQUIRE( t->text() == u8"A paragraph with two lines." );
+			REQUIRE( p->items().size() == 2 );
+
+			{
+				REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+				auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+				REQUIRE( t->text() == u8"A paragraph" );
+			}
+
+			{
+				REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+				auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+				REQUIRE( t->text() == u8"with two lines." );
+			}
 		}
 
 		{
@@ -1243,10 +1290,19 @@ TEST_CASE( "291" )
 		{
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
 			auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).get() );
-			REQUIRE( p->items().size() == 1 );
-			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-			REQUIRE( t->text() == u8"A paragraph with two lines." );
+			REQUIRE( p->items().size() == 2 );
+
+			{
+				REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+				auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+				REQUIRE( t->text() == u8"A paragraph" );
+			}
+
+			{
+				REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+				auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+				REQUIRE( t->text() == u8"with two lines." );
+			}
 		}
 	}
 }
@@ -1278,10 +1334,19 @@ void test_292_293( int test )
 			REQUIRE( b->items().size() == 1 );
 			REQUIRE( b->items().at( 0 )->type() == MD::ItemType::Paragraph );
 			auto p = static_cast< MD::Paragraph< TRAIT >* > ( b->items().at( 0 ).get() );
-			REQUIRE( p->items().size() == 1 );
-			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-			REQUIRE( t->text() == u8"Blockquote continued here." );
+			REQUIRE( p->items().size() == 2 );
+
+			{
+				REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+				auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+				REQUIRE( t->text() == u8"Blockquote" );
+			}
+
+			{
+				REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+				auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+				REQUIRE( t->text() == u8"continued here." );
+			}
 		}
 	}
 }

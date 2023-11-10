@@ -67,20 +67,44 @@ TEST_CASE( "121" )
 		REQUIRE( b->items().size() == 1 );
 		REQUIRE( b->items().at( 0 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( b->items().at( 0 ).get() );
-		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().size() == 3 );
 		REQUIRE( p->startColumn() == 2 );
 		REQUIRE( p->startLine() == 0 );
 		REQUIRE( p->endColumn() == 1 );
 		REQUIRE( p->endLine() == 2 );
 
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == u8"foo bar --" );
-		REQUIRE( t->startColumn() == 2 );
-		REQUIRE( t->startLine() == 0 );
-		REQUIRE( t->endColumn() == 1 );
-		REQUIRE( t->endLine() == 2 );
+		{
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8"foo" );
+			REQUIRE( t->startColumn() == 2 );
+			REQUIRE( t->startLine() == 0 );
+			REQUIRE( t->endColumn() == 4 );
+			REQUIRE( t->endLine() == 0 );
+		}
+
+		{
+			REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8"bar" );
+			REQUIRE( t->startColumn() == 0 );
+			REQUIRE( t->startLine() == 1 );
+			REQUIRE( t->endColumn() == 2 );
+			REQUIRE( t->endLine() == 1 );
+		}
+
+		{
+			REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 2 ).get() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8"--" );
+			REQUIRE( t->startColumn() == 0 );
+			REQUIRE( t->startLine() == 2 );
+			REQUIRE( t->endColumn() == 1 );
+			REQUIRE( t->endLine() == 2 );
+		}
 	}
 }
 
@@ -1114,7 +1138,7 @@ TEST_CASE( "135" )
 	REQUIRE( dp->endColumn() == 3 );
 	REQUIRE( dp->endLine() == 3 );
 
-	REQUIRE( dp->items().size() == 2 );
+	REQUIRE( dp->items().size() == 3 );
 	REQUIRE( dp->items().at( 0 )->type() == MD::ItemType::Code );
 	auto c = static_cast< MD::Code< TRAIT >* > ( dp->items().at( 0 ).get() );
 	REQUIRE( c->text() == u8"Text | Column 1 |" );
@@ -1123,14 +1147,27 @@ TEST_CASE( "135" )
 	REQUIRE( c->endColumn() == 11 );
 	REQUIRE( c->endLine() == 1 );
 
-	REQUIRE( dp->items().at( 1 )->type() == MD::ItemType::Text );
-	auto dt = static_cast< MD::Text< TRAIT >* > ( dp->items().at( 1 ).get() );
-	REQUIRE( dt->opts() == MD::TextOption::TextWithoutFormat );
-	REQUIRE( dt->text() == u8"| -------- | Text" );
-	REQUIRE( dt->startColumn() == 0 );
-	REQUIRE( dt->startLine() == 2 );
-	REQUIRE( dt->endColumn() == 3 );
-	REQUIRE( dt->endLine() == 3 );
+	{
+		REQUIRE( dp->items().at( 1 )->type() == MD::ItemType::Text );
+		auto dt = static_cast< MD::Text< TRAIT >* > ( dp->items().at( 1 ).get() );
+		REQUIRE( dt->opts() == MD::TextOption::TextWithoutFormat );
+		REQUIRE( dt->text() == u8"| -------- |" );
+		REQUIRE( dt->startColumn() == 0 );
+		REQUIRE( dt->startLine() == 2 );
+		REQUIRE( dt->endColumn() == 11 );
+		REQUIRE( dt->endLine() == 2 );
+	}
+
+	{
+		REQUIRE( dp->items().at( 2 )->type() == MD::ItemType::Text );
+		auto dt = static_cast< MD::Text< TRAIT >* > ( dp->items().at( 2 ).get() );
+		REQUIRE( dt->opts() == MD::TextOption::TextWithoutFormat );
+		REQUIRE( dt->text() == u8"Text" );
+		REQUIRE( dt->startColumn() == 0 );
+		REQUIRE( dt->startLine() == 3 );
+		REQUIRE( dt->endColumn() == 3 );
+		REQUIRE( dt->endLine() == 3 );
+	}
 }
 
 /*
@@ -1396,18 +1433,46 @@ TEST_CASE( "138" )
 	REQUIRE( p->endColumn() == 8 );
 	REQUIRE( p->endLine() == 11 );
 
-	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().size() == 3 );
 
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	{
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 
-	REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
-	REQUIRE( t->text() == u8"Tuesday 3. Wednesday" );
-	REQUIRE( t->startColumn() == 0 );
-	REQUIRE( t->startLine() == 9 );
-	REQUIRE( t->endColumn() == 8 );
-	REQUIRE( t->endLine() == 11 );
+		REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
+		REQUIRE( t->text() == u8"Tuesday" );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 9 );
+		REQUIRE( t->endColumn() == 6 );
+		REQUIRE( t->endLine() == 9 );
+	}
+
+	{
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+
+		REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
+		REQUIRE( t->text() == u8"3." );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 10 );
+		REQUIRE( t->endColumn() == 1 );
+		REQUIRE( t->endLine() == 10 );
+	}
+
+	{
+		REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 2 ).get() );
+
+		REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
+		REQUIRE( t->text() == u8"Wednesday" );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 11 );
+		REQUIRE( t->endColumn() == 8 );
+		REQUIRE( t->endLine() == 11 );
+	}
 }
 
 /*
@@ -1541,18 +1606,33 @@ TEST_CASE( "140" )
 		REQUIRE( p->endColumn() == 7 );
 		REQUIRE( p->endLine() == 3 );
 
-		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().size() == 2 );
 
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		{
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 
-		REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
-		REQUIRE( t->text() == u8"Text Text" );
-		REQUIRE( t->startColumn() == 4 );
-		REQUIRE( t->startLine() == 2 );
-		REQUIRE( t->endColumn() == 7 );
-		REQUIRE( t->endLine() == 3 );
+			REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
+			REQUIRE( t->text() == u8"Text" );
+			REQUIRE( t->startColumn() == 4 );
+			REQUIRE( t->startLine() == 2 );
+			REQUIRE( t->endColumn() == 7 );
+			REQUIRE( t->endLine() == 2 );
+		}
+
+		{
+			REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+
+			REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
+			REQUIRE( t->text() == u8"Text" );
+			REQUIRE( t->startColumn() == 4 );
+			REQUIRE( t->startLine() == 3 );
+			REQUIRE( t->endColumn() == 7 );
+			REQUIRE( t->endLine() == 3 );
+		}
 	}
 
 	{
@@ -1564,18 +1644,33 @@ TEST_CASE( "140" )
 		REQUIRE( p->endColumn() == 7 );
 		REQUIRE( p->endLine() == 6 );
 
-		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().size() == 2 );
 
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		{
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 
-		REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
-		REQUIRE( t->text() == u8"Text Text" );
-		REQUIRE( t->startColumn() == 4 );
-		REQUIRE( t->startLine() == 5 );
-		REQUIRE( t->endColumn() == 7 );
-		REQUIRE( t->endLine() == 6 );
+			REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
+			REQUIRE( t->text() == u8"Text" );
+			REQUIRE( t->startColumn() == 4 );
+			REQUIRE( t->startLine() == 5 );
+			REQUIRE( t->endColumn() == 7 );
+			REQUIRE( t->endLine() == 5 );
+		}
+
+		{
+			REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+
+			REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
+			REQUIRE( t->text() == u8"Text" );
+			REQUIRE( t->startColumn() == 4 );
+			REQUIRE( t->startLine() == 6 );
+			REQUIRE( t->endColumn() == 7 );
+			REQUIRE( t->endLine() == 6 );
+		}
 	}
 }
 

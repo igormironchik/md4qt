@@ -374,3 +374,61 @@ TEST_CASE( "test_column_alignment" )
 
 	REQUIRE( t.columnAlignment( 0 ) == MD::Table< TRAIT >::AlignRight );
 }
+
+TEST_CASE( "paragraph_to_label" )
+{
+	{
+		MD::Paragraph< TRAIT > p;
+		auto c = std::make_shared< MD::Code< TRAIT > > ( u8"ICU", true );
+		c->setStartColumn( 0 );
+		c->setStartLine( 0 );
+		c->setEndColumn( 3 );
+		c->setEndLine( 0 );
+		p.appendItem( c );
+		auto t = std::make_shared< MD::Text< TRAIT > > ();
+		t->setText( u8"?" );
+		t->setStartColumn( 5 );
+		t->setStartLine( 0 );
+		t->setEndColumn( 5 );
+		t->setEndLine( 0 );
+		t->setSpaceBefore( false );
+		t->setSpaceAfter( true );
+		p.appendItem( t );
+
+		REQUIRE( MD::paragraphToLabel( &p ) == u8"icu" );
+	}
+
+	{
+		MD::Paragraph< TRAIT > p;
+		auto c = std::make_shared< MD::Code< TRAIT > > ( u8"ICU", true );
+		c->setStartColumn( 0 );
+		c->setStartLine( 0 );
+		c->setEndColumn( 3 );
+		c->setEndLine( 0 );
+		p.appendItem( c );
+
+		{
+			auto t = std::make_shared< MD::Text< TRAIT > > ();
+			t->setText( u8"," );
+			t->setStartColumn( 5 );
+			t->setStartLine( 0 );
+			t->setEndColumn( 5 );
+			t->setEndLine( 0 );
+			t->setSpaceBefore( false );
+			t->setSpaceAfter( true );
+			p.appendItem( t );
+		}
+
+		auto t = std::make_shared< MD::Text< TRAIT > > ();
+		t->setText( u8"text" );
+		t->setStartColumn( 0 );
+		t->setStartLine( 1 );
+		t->setEndColumn( 3 );
+		t->setEndLine( 1 );
+		t->setSpaceBefore( true );
+		t->setSpaceAfter( true );
+		p.appendItem( t );
+
+		REQUIRE( MD::paragraphToLabel( &p ) == u8"icutext" );
+	}
+}

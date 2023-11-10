@@ -2168,19 +2168,21 @@ paragraphToLabel( Paragraph< Trait > * p )
 	if( !p )
 		return l;
 
+	long long int line = -1;
+
 	for( auto it = p->items().cbegin(), last = p->items().cend(); it != last; ++it )
 	{
+		typename Trait::String tmp;
+		const bool newLine = ( (*it)->startLine() != line );
+		line = (*it)->endLine();
+
 		switch( (*it)->type() )
 		{
 			case ItemType::Text :
 			{
 				auto t = static_cast< Text< Trait >* > ( it->get() );
 				const auto text = t->text().simplified();
-
-				if( !l.isEmpty() && !text.isEmpty() )
-					l.push_back( "-" );
-
-				l.push_back( stringToLabel< Trait >( text ) );
+				tmp = stringToLabel< Trait >( text );
 			}
 				break;
 
@@ -2189,21 +2191,9 @@ paragraphToLabel( Paragraph< Trait > * p )
 				auto i = static_cast< Image< Trait >* > ( it->get() );
 
 				if( !i->p()->isEmpty() )
-				{
-					const auto label = paragraphToLabel( i->p().get() );
-
-					if( !label.isEmpty() && !l.isEmpty() )
-						l.push_back( "-" );
-
-					l.push_back( label );
-				}
+					tmp = paragraphToLabel( i->p().get() );
 				else if( !i->text().simplified().isEmpty() )
-				{
-					if( !l.isEmpty() )
-						l.push_back( "-" );
-
-					l.push_back( stringToLabel< Trait >( i->text().simplified() ) );
-				}
+					tmp = stringToLabel< Trait >( i->text().simplified() );
 			}
 				break;
 
@@ -2212,21 +2202,9 @@ paragraphToLabel( Paragraph< Trait > * p )
 				auto link = static_cast< Link< Trait >* > ( it->get() );
 
 				if( !link->p()->isEmpty() )
-				{
-					const auto label = paragraphToLabel( link->p().get() );
-
-					if( !label.isEmpty() && !l.isEmpty() )
-						l.push_back( "-" );
-
-					l.push_back( label );
-				}
+					tmp = paragraphToLabel( link->p().get() );
 				else if( !link->text().simplified().isEmpty() )
-				{
-					if( !l.isEmpty() )
-						l.push_back( "-" );
-
-					l.push_back( stringToLabel< Trait >( link->text().simplified() ) );
-				}
+					tmp = stringToLabel< Trait >( link->text().simplified() );
 			}
 				break;
 
@@ -2235,18 +2213,18 @@ paragraphToLabel( Paragraph< Trait > * p )
 				auto c = static_cast< Code< Trait >* > ( it->get() );
 
 				if( !c->text().simplified().isEmpty() )
-				{
-					if( !l.isEmpty() )
-						l.push_back( "-" );
-
-					l.push_back( stringToLabel< Trait >( c->text().simplified() ) );
-				}
+					tmp = stringToLabel< Trait >( c->text().simplified() );
 			}
 				break;
 
 			default :
 				break;
 		}
+
+		if( !l.isEmpty() && !tmp.isEmpty() && !newLine )
+			l.push_back( "-" );
+
+		l.push_back( tmp );
 	}
 
 	return l;
@@ -3556,12 +3534,27 @@ makeText(
 			( po.line == lastLine ? lastPos - po.pos :
 				po.fr.data.at( po.line ).first.length() - po.pos ) );
 		text.push_back( s );
+
+		po.pos = ( po.line == lastLine ? lastPos : po.fr.data.at( po.line ).first.length() );
+
+		bool isSpaceAfter = po.pos > 0 ? po.fr.data.at( po.line ).first[ po.pos - 1 ].isSpace() ||
+			po.pos == po.fr.data.at( po.line ).first.length() : true;
+		isSpaceAfter = !isSpaceAfter && po.pos < po.fr.data.at( po.line ).first.length() ?
+			po.fr.data.at( po.line ).first[ po.pos ].isSpace() : isSpaceAfter;
+
+		makeTextObject( text, spaceBefore, isSpaceAfter, po,
+			doNotEscape, startPos, startLine,
+			po.line == lastLine ? lastPos - 1 : po.fr.data.at( po.line ).first.length() - 1,
+			po.line );
+
+		text.clear();
 	}
 
 	if( po.line != lastLine )
 	{
-		text.push_back( typename Trait::Char( ' ' ) );
 		++po.line;
+		startPos = 0;
+		startLine = po.line;
 
 		for( ; po.line < lastLine; ++po.line )
 		{
@@ -3573,10 +3566,15 @@ makeText(
 				po.fr.data.at( po.line ).first.asString() );
 			text.push_back( s );
 
-			text.push_back( typename Trait::Char( ' ' ) );
-
 			if( lineBreak )
 				makeTOWLB();
+			else
+				makeTextObject( text, true, true, po,
+					doNotEscape, 0, po.line,
+					po.fr.data.at( po.line ).first.length() - 1,
+					po.line );
+
+			text.clear();
 		}
 
 		lineBreak = ( !po.ignoreLineBreak && po.line != (long long int) ( po.fr.data.size() - 1 ) &&
@@ -3598,12 +3596,13 @@ makeText(
 
 	po.pos = lastPos;
 
-	bool isSpaceAfter = po.pos > 0 ? po.fr.data.at( po.line ).first[ po.pos - 1 ].isSpace() : true;
+	bool isSpaceAfter = po.pos > 0 ? po.fr.data.at( po.line ).first[ po.pos - 1 ].isSpace() ||
+		po.pos == po.fr.data.at( po.line ).first.length() : true;
 	isSpaceAfter = !isSpaceAfter && po.pos < po.fr.data.at( po.line ).first.length() ?
 		po.fr.data.at( po.line ).first[ po.pos ].isSpace() : isSpaceAfter;
 
-	makeTextObject( text, spaceBefore, isSpaceAfter, po,
-		doNotEscape, startPos, startLine, lastPos - 1, lastLine );
+	makeTextObject( text, true, isSpaceAfter, po,
+		doNotEscape, 0, lastLine, lastPos - 1, lastLine );
 }
 
 template< class Trait >
@@ -6566,6 +6565,8 @@ optimizeParagraph( std::shared_ptr< Paragraph< Trait > > & p )
 
 	auto start = p->items().cend();
 
+	long long int line = -1;
+
 	for( auto it = p->items().cbegin(), last = p->items().cend(); it != last; ++it )
 	{
 		if( (*it)->type() == ItemType::Text )
@@ -6576,12 +6577,14 @@ optimizeParagraph( std::shared_ptr< Paragraph< Trait > > & p )
 			{
 				start = it;
 				opts = t->opts();
+				line = t->endLine();
 			}
-			else if( opts != t->opts() )
+			else if( opts != t->opts() || t->startLine() != line )
 			{
 				np->appendItem( concatenateText< Trait >( start, it ) );
 				start = it;
 				opts = t->opts();
+				line = t->endLine();
 			}
 		}
 		else
@@ -6591,6 +6594,7 @@ optimizeParagraph( std::shared_ptr< Paragraph< Trait > > & p )
 				np->appendItem( concatenateText< Trait >( start, it ) );
 				start = last;
 				opts = TextWithoutFormat;
+				line = (*it)->endLine();
 			}
 
 			np->appendItem( (*it) );

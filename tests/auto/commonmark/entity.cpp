@@ -43,14 +43,31 @@ TEST_CASE( "25" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().size() == 3 );
 
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	static const char16_t str[ 19 ] = { 0x0026, 0x0020, 0x00A9, 0x0020, 0x00C6, 0x0020, 0x010E,
-		0x0020, 0x00BE, 0x0020, 0x210B, 0x0020, 0x2146, 0x0020, 0x2232, 0x0020, 0x2267, 0x0338, 0 };
-	REQUIRE( t->text() == TRAIT::utf16ToString( &str[ 0 ] ) );
+	{
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		static const char16_t str[] = { 0x0026, 0x0020, 0x00A9, 0x0020, 0x00C6, 0x0020, 0x010E, 0 };
+		REQUIRE( t->text() == TRAIT::utf16ToString( &str[ 0 ] ) );
+	}
+
+	{
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		static const char16_t str[] = { 0x00BE, 0x0020, 0x210B, 0x0020, 0x2146, 0 };
+		REQUIRE( t->text() == TRAIT::utf16ToString( &str[ 0 ] ) );
+	}
+
+	{
+		REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 2 ).get() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		static const char16_t str[] = { 0x2232, 0x0020, 0x2267, 0x0338, 0 };
+		REQUIRE( t->text() == TRAIT::utf16ToString( &str[ 0 ] ) );
+	}
 }
 
 TEST_CASE( "26" )
@@ -97,13 +114,35 @@ TEST_CASE( "28" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().size() == 4 );
 
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() ==
-		u8"&nbsp &x; &#; &#x; &#87654321; &#abcdef0; &ThisIsNotDefined; &hi?;" );
+	{
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == u8"&nbsp &x; &#; &#x;" );
+	}
+
+	{
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == u8"&#87654321;" );
+	}
+
+	{
+		REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 2 ).get() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == u8"&#abcdef0;" );
+	}
+
+	{
+		REQUIRE( p->items().at( 3 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 3 ).get() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == u8"&ThisIsNotDefined; &hi?;" );
+	}
 }
 
 TEST_CASE( "29" )

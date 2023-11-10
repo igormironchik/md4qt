@@ -296,5 +296,5 @@ TEST_CASE( "156" )
 	auto t3 = static_cast< MD::Text< TRAIT >* > ( p->items().at( 6 ).get() );
 	REQUIRE( t3->text() == u8")" );
 	REQUIRE( !t3->isSpaceBefore() );
-	REQUIRE( !t3->isSpaceAfter() );
+	REQUIRE( t3->isSpaceAfter() );
 }

@@ -78,14 +78,21 @@ TEST_CASE( "014" )
 
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 
-	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().size() == 9 );
 
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t1 = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t1->opts() == MD::TextWithoutFormat );
-	REQUIRE( t1->text() == u8"*not emphasized* <br/> not a tag [not a link](/foo) "
-		"`not code` 1. not a list * not a list # not a heading [foo]: /url \"not a reference\" "
-		"&ouml; not a character entity" );
+	std::vector< typename TRAIT::String > data = { u8"*not emphasized*",
+		u8"<br/> not a tag", u8"[not a link](/foo)",
+		u8"`not code`", u8"1. not a list", u8"* not a list",
+		u8"# not a heading", u8"[foo]: /url \"not a reference\"",
+		u8"&ouml; not a character entity" };
+
+	for( size_t i = 0; i < p->items().size(); ++i )
+	{
+		REQUIRE( p->items().at( i )->type() == MD::ItemType::Text );
+		auto t1 = static_cast< MD::Text< TRAIT >* > ( p->items().at( i ).get() );
+		REQUIRE( t1->opts() == MD::TextWithoutFormat );
+		REQUIRE( t1->text() == data.at( i ) );
+	}
 }
 
 TEST_CASE( "015" )

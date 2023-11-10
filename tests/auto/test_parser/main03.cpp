@@ -505,18 +505,33 @@ TEST_CASE( "067" )
 		REQUIRE( p->endColumn() == 3 );
 		REQUIRE( p->endLine() == 3 );
 
-		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().size() == 2 );
 
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		{
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( t->startColumn() == 3 );
-		REQUIRE( t->startLine() == 2 );
-		REQUIRE( t->endColumn() == 3 );
-		REQUIRE( t->endLine() == 3 );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( t->startColumn() == 3 );
+			REQUIRE( t->startLine() == 2 );
+			REQUIRE( t->endColumn() == 6 );
+			REQUIRE( t->endLine() == 2 );
 
-		REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
-		REQUIRE( t->text() == u8"List item" );
+			REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
+			REQUIRE( t->text() == u8"List" );
+		}
+
+		{
+			REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+			REQUIRE( t->startColumn() == 0 );
+			REQUIRE( t->startLine() == 3 );
+			REQUIRE( t->endColumn() == 3 );
+			REQUIRE( t->endLine() == 3 );
+
+			REQUIRE( t->opts() == MD::TextOption::TextWithoutFormat );
+			REQUIRE( t->text() == u8"item" );
+		}
 	}
 
 	{
