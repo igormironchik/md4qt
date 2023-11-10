@@ -2152,7 +2152,7 @@ stringToLabel( const typename Trait::String & s )
 
 		if( c.isLetter() || c.isDigit() || c == typename Trait::Char( '-' ) )
 			res.push_back( c.toLower() );
-		else if( c.isSpace() )
+		else if( c.isSpace() && !res.isEmpty() )
 			res.push_back( "-" );
 	}
 

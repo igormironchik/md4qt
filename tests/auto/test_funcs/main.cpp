@@ -431,4 +431,28 @@ TEST_CASE( "paragraph_to_label" )
 
 		REQUIRE( MD::paragraphToLabel( &p ) == u8"icutext" );
 	}
+
+	{
+		MD::Paragraph< TRAIT > p;
+		auto c = std::make_shared< MD::Code< TRAIT > > ( u8"text", true );
+		c->setStartColumn( 0 );
+		c->setStartLine( 0 );
+		c->setEndColumn( 3 );
+		c->setEndLine( 0 );
+		p.appendItem( c );
+
+		{
+			auto t = std::make_shared< MD::Text< TRAIT > > ();
+			t->setText( u8"? text?" );
+			t->setStartColumn( 5 );
+			t->setStartLine( 0 );
+			t->setEndColumn( 11 );
+			t->setEndLine( 0 );
+			t->setSpaceBefore( false );
+			t->setSpaceAfter( true );
+			p.appendItem( t );
+		}
+
+		REQUIRE( MD::paragraphToLabel( &p ) == u8"text-text" );
+	}
 }
