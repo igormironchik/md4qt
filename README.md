@@ -14,15 +14,15 @@ This library parses Markdown into tree structure.
 * [Q/A](#qa)
   * [Why another AST Markdown parser?](#why-another-ast-markdown-parser)
   * [What should I know about links in the document?](#what-should-i-know-about-links-in-the-document)
-  * [What is the second argument of `MD::Parser::parse()`?](#what-is-the-second-argument-of-mdparserparse-)
-  * [What is an `MD::Anchor`?](#what-is-an-mdanchor-)
+  * [What is the second argument of `MD::Parser::parse()`?](#what-is-the-second-argument-of-mdparserparse)
+  * [What is an `MD::Anchor`?](#what-is-an-mdanchor)
   * [Does the library throw exceptions?](#does-the-library-throw-exceptions)
   * [Why `MD::Parser` and `MD::Document` are templates?](#why-mdparser-and-mddocument-are-templates)
-  * [So, how can I use `md4qt` with `Qt6` and `ICU`?](#so-how-can-i-use-md4qt-with-qt6-and-icu-)
+  * [So, how can I use `md4qt` with `Qt6` and `ICU`?](#so-how-can-i-use-md4qt-with-qt6-and-icu)
   * [`ICU` is slower then `Qt6`? Really?](#icu-is-slower-then-qt6--really)
-  * [Why is parsing wrong on Windows with `std::ifstream`?](#why-is-parsing-wrong-on-windows-with-stdifstream-)
-  * [How can I convert `MD::Document` into `HTML`?](#how-can-i-convert-mddocument-into-html-)
-  * [I need to know positions in the `Markdown` file of blocks/elements. How can I achieve this?](#i-need-to-know-positions-in-the-markdown-file-of-blockselements-how-can-i-achieve-this)
+  * [Why is parsing wrong on Windows with `std::ifstream`?](#why-is-parsing-wrong-on-windows-with-stdifstream)
+  * [How can I convert `MD::Document` into `HTML`?](#how-can-i-convert-mddocument-into-html)
+  * [I need to know positions in the `Markdown` file of blocks/elements. How can I achieve this?](#i-need-to-know-positions-in-the-markdown-file-of-blockselements-howcan-i-achieve-this)
 
 # Example
 
