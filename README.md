@@ -132,11 +132,7 @@ Why `MD::Parser` and `MD::Document` are templates?
 `STL` too. The code of the parser is the same in both cases. I just added two
 ready traits to support different C++ worlds. With `STL` I use `ICU` library
 for Unicode handling, and `uriparser` library to parse and check URLs.
-These dependencies can be installed with the Conan package manager. I did
-an attempt to make pure C++ `STL` solution, but handling Unicode in C++
-standard is a pain, it's still not enough powerful to implement all
-things without very big effort. But if somebody want to make such pure
-C++ `STL` trait - you are more then WELCOME with such PR.
+These dependencies can be installed with the Conan package manager.
 
 So, how can I use `md4qt` with `Qt6` and `ICU`?
 ---
