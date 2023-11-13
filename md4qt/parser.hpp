@@ -3862,7 +3862,7 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 	}
 
 	if( p >= po.fr.data[ l ].first.length() )
-		return { false, line, pos, false, tag };
+		return { false, line, pos, first, tag };
 
 	bool closing = false;
 
@@ -3904,7 +3904,7 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 			return { true, l, p + 1, onLine, tag };
 		}
 		else
-			return { false, line, pos, false, tag };
+			return { false, line, pos, first, tag };
 	}
 
 	if( p < po.fr.data[ l ].first.length() && po.fr.data[ l ].first[ p ] ==
@@ -3924,7 +3924,7 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 	skipSpacesInHtml< Trait >( l, p, po.fr.data );
 
 	if( l >= (long long int) po.fr.data.size() )
-		return { false, line, pos, false, tag };
+		return { false, line, pos, first, tag };
 
 	if( po.fr.data[ l ].first[ p ] == typename Trait::Char( '>' ) )
 	{
@@ -3951,10 +3951,10 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 		firstAttr = false;
 
 		if( closing && attr )
-			return { false, line, pos, false, tag };
+			return { false, line, pos, first, tag };
 
 		if( !ok )
-			return { false, line, pos, false, tag };
+			return { false, line, pos, first, tag };
 	}
 
 	if( po.fr.data[ l ].first[ p ] == typename Trait::Char( '/' ) )
@@ -3964,7 +3964,7 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 		skipSpacesInHtml< Trait >( l, p, po.fr.data );
 
 		if( l >= (long long int) po.fr.data.size() )
-			return { false, line, pos, false, tag };
+			return { false, line, pos, first, tag };
 	}
 
 	if( po.fr.data[ l ].first[ p ] == typename Trait::Char( '>' ) )
@@ -3980,7 +3980,7 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 		return { true, l, p, onLine, tag };
 	}
 
-	return { false, line, pos, false, {} };
+	return { false, line, pos, first, {} };
 }
 
 template< class Trait >
@@ -4079,7 +4079,7 @@ eatRawHtml( long long int line, long long int pos, long long int toLine, long lo
 		po.line = ( toPos >= 0 ? toLine : toLine + 1 );
 		po.pos = ( toPos >= 0 ? toPos : 0 );
 
-		if( po.line < (long long int) po.fr.data.size() &&
+		if( po.line + 1 < (long long int) po.fr.data.size() &&
 			po.pos >= po.fr.data.at( po.line ).first.length() )
 		{
 			++po.line;
@@ -4096,7 +4096,11 @@ eatRawHtml( long long int line, long long int pos, long long int toLine, long lo
 		if( po.html.onLine || htmlRule == 7 || po.line < (long long int) po.fr.data.size() )
 		{
 			if( !po.collectRefLinks )
+			{
 				po.parent->appendItem( po.html.html );
+				po.parent->setEndColumn( po.html.html->endColumn() );
+				po.parent->setEndLine( po.html.html->endLine() );
+			}
 
 			resetHtmlTag( po.html );
 		}
@@ -4120,29 +4124,47 @@ finishRule1HtmlTag( typename Delims< Trait >::const_iterator it,
 
 	if( it != last )
 	{
+		bool ok = false;
+		long long int l = -1, p = -1;
+
 		if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less && skipFirst )
-			std::tie( std::ignore, std::ignore, std::ignore, po.html.onLine, std::ignore ) =
+			std::tie( ok, l, p, po.html.onLine, std::ignore ) =
 				isHtmlTag( it->m_line, it->m_pos, po, 1 );
 
-		for( it = ( skipFirst && it != last ? std::next( it ) : it ); it != last; ++it )
+		if( po.html.onLine )
 		{
-			if( it->m_type == Delimiter::Less )
+			for( it = ( skipFirst && it != last ? std::next( it ) : it ); it != last; ++it )
 			{
-				typename Trait::String tag;
-				bool closed = false;
-
-				std::tie( tag, closed ) = readHtmlTag( it, po );
-
-				if( closed )
+				if( it->m_type == Delimiter::Less )
 				{
-					if( finish.find( tag.toLower() ) != finish.cend() )
-					{
-						eatRawHtml( po.line, po.pos, it->m_line, -1, po, true, 1, po.html.onLine );
+					typename Trait::String tag;
+					bool closed = false;
 
-						return;
+					std::tie( tag, closed ) = readHtmlTag( it, po );
+
+					if( closed )
+					{
+						if( finish.find( tag.toLower() ) != finish.cend() )
+						{
+							eatRawHtml( po.line, po.pos, it->m_line, -1, po, true, 1, po.html.onLine );
+
+							return;
+						}
 					}
 				}
 			}
+		}
+		else if( ok )
+		{
+			eatRawHtml( po.line, po.pos, l, p + 1, po, true, 1, false );
+
+			return;
+		}
+		else
+		{
+			resetHtmlTag( po.html );
+
+			return;
 		}
 	}
 

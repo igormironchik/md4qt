@@ -298,3 +298,264 @@ TEST_CASE( "156" )
 	REQUIRE( !t3->isSpaceBefore() );
 	REQUIRE( t3->isSpaceAfter() );
 }
+
+/*
+<br><pre>
+<b>To get started, [view our webpage](https://cockatrice.github.io/)</b><br>
+</pre><br>
+
+*/
+TEST_CASE( "157" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/157.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+
+	REQUIRE( p->items().size() == 9 );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 9 );
+	REQUIRE( p->endLine() == 2 );
+
+	{
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT > * > ( p->items().at( 0 ).get() );
+		REQUIRE( h->text() == u8"<br>" );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 0 );
+		REQUIRE( h->endColumn() == 3 );
+		REQUIRE( h->endLine() == 0 );
+	}
+
+	{
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT > * > ( p->items().at( 1 ).get() );
+		REQUIRE( h->text() == u8"<pre>" );
+		REQUIRE( h->startColumn() == 4 );
+		REQUIRE( h->startLine() == 0 );
+		REQUIRE( h->endColumn() == 8 );
+		REQUIRE( h->endLine() == 0 );
+	}
+
+	{
+		REQUIRE( p->items().at( 2 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT > * > ( p->items().at( 2 ).get() );
+		REQUIRE( h->text() == u8"<b>" );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 1 );
+		REQUIRE( h->endColumn() == 2 );
+		REQUIRE( h->endLine() == 1 );
+	}
+
+	{
+		REQUIRE( p->items().at( 3 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT > * > ( p->items().at( 3 ).get() );
+		REQUIRE( t->text() == u8"To get started," );
+		REQUIRE( t->startColumn() == 3 );
+		REQUIRE( t->startLine() == 1 );
+		REQUIRE( t->endColumn() == 18 );
+		REQUIRE( t->endLine() == 1 );
+		REQUIRE( !t->isSpaceBefore() );
+		REQUIRE( t->isSpaceAfter() );
+	}
+
+	{
+		REQUIRE( p->items().at( 4 )->type() == MD::ItemType::Link );
+		auto l = static_cast< MD::Link< TRAIT > * > ( p->items().at( 4 ).get() );
+		REQUIRE( l->text() == u8"view our webpage" );
+		REQUIRE( l->url() == u8"https://cockatrice.github.io/" );
+		REQUIRE( l->startColumn() == 19 );
+		REQUIRE( l->startLine() == 1 );
+		REQUIRE( l->endColumn() == 67 );
+		REQUIRE( l->endLine() == 1 );
+	}
+
+	{
+		REQUIRE( p->items().at( 5 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT > * > ( p->items().at( 5 ).get() );
+		REQUIRE( h->text() == u8"</b>" );
+		REQUIRE( h->startColumn() == 68 );
+		REQUIRE( h->startLine() == 1 );
+		REQUIRE( h->endColumn() == 71 );
+		REQUIRE( h->endLine() == 1 );
+	}
+
+	{
+		REQUIRE( p->items().at( 6 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT > * > ( p->items().at( 6 ).get() );
+		REQUIRE( h->text() == u8"<br>" );
+		REQUIRE( h->startColumn() == 72 );
+		REQUIRE( h->startLine() == 1 );
+		REQUIRE( h->endColumn() == 75 );
+		REQUIRE( h->endLine() == 1 );
+	}
+
+	{
+		REQUIRE( p->items().at( 7 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT > * > ( p->items().at( 7 ).get() );
+		REQUIRE( h->text() == u8"</pre>" );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 2 );
+		REQUIRE( h->endColumn() == 5 );
+		REQUIRE( h->endLine() == 2 );
+	}
+
+	{
+		REQUIRE( p->items().at( 8 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT > * > ( p->items().at( 8 ).get() );
+		REQUIRE( h->text() == u8"<br>" );
+		REQUIRE( h->startColumn() == 6 );
+		REQUIRE( h->startLine() == 2 );
+		REQUIRE( h->endColumn() == 9 );
+		REQUIRE( h->endLine() == 2 );
+	}
+}
+
+/*
+<br><pre
+<b>To get started, [view our webpage](https://cockatrice.github.io/)</b><br>
+</pre><br>
+
+*/
+TEST_CASE( "158" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/158.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+
+	REQUIRE( p->items().size() == 9 );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 9 );
+	REQUIRE( p->endLine() == 2 );
+
+	{
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT > * > ( p->items().at( 0 ).get() );
+		REQUIRE( h->text() == u8"<br>" );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 0 );
+		REQUIRE( h->endColumn() == 3 );
+		REQUIRE( h->endLine() == 0 );
+	}
+
+	{
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT > * > ( p->items().at( 1 ).get() );
+		REQUIRE( t->text() == u8"<pre" );
+		REQUIRE( t->startColumn() == 4 );
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 7 );
+		REQUIRE( t->endLine() == 0 );
+		REQUIRE( !t->isSpaceBefore() );
+		REQUIRE( t->isSpaceAfter() );
+	}
+
+	{
+		REQUIRE( p->items().at( 2 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT > * > ( p->items().at( 2 ).get() );
+		REQUIRE( h->text() == u8"<b>" );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 1 );
+		REQUIRE( h->endColumn() == 2 );
+		REQUIRE( h->endLine() == 1 );
+	}
+
+	{
+		REQUIRE( p->items().at( 3 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT > * > ( p->items().at( 3 ).get() );
+		REQUIRE( t->text() == u8"To get started," );
+		REQUIRE( t->startColumn() == 3 );
+		REQUIRE( t->startLine() == 1 );
+		REQUIRE( t->endColumn() == 18 );
+		REQUIRE( t->endLine() == 1 );
+		REQUIRE( !t->isSpaceBefore() );
+		REQUIRE( t->isSpaceAfter() );
+	}
+
+	{
+		REQUIRE( p->items().at( 4 )->type() == MD::ItemType::Link );
+		auto l = static_cast< MD::Link< TRAIT > * > ( p->items().at( 4 ).get() );
+		REQUIRE( l->text() == u8"view our webpage" );
+		REQUIRE( l->url() == u8"https://cockatrice.github.io/" );
+		REQUIRE( l->startColumn() == 19 );
+		REQUIRE( l->startLine() == 1 );
+		REQUIRE( l->endColumn() == 67 );
+		REQUIRE( l->endLine() == 1 );
+	}
+
+	{
+		REQUIRE( p->items().at( 5 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT > * > ( p->items().at( 5 ).get() );
+		REQUIRE( h->text() == u8"</b>" );
+		REQUIRE( h->startColumn() == 68 );
+		REQUIRE( h->startLine() == 1 );
+		REQUIRE( h->endColumn() == 71 );
+		REQUIRE( h->endLine() == 1 );
+	}
+
+	{
+		REQUIRE( p->items().at( 6 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT > * > ( p->items().at( 6 ).get() );
+		REQUIRE( h->text() == u8"<br>" );
+		REQUIRE( h->startColumn() == 72 );
+		REQUIRE( h->startLine() == 1 );
+		REQUIRE( h->endColumn() == 75 );
+		REQUIRE( h->endLine() == 1 );
+	}
+
+	{
+		REQUIRE( p->items().at( 7 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT > * > ( p->items().at( 7 ).get() );
+		REQUIRE( h->text() == u8"</pre>" );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 2 );
+		REQUIRE( h->endColumn() == 5 );
+		REQUIRE( h->endLine() == 2 );
+	}
+
+	{
+		REQUIRE( p->items().at( 8 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT > * > ( p->items().at( 8 ).get() );
+		REQUIRE( h->text() == u8"<br>" );
+		REQUIRE( h->startColumn() == 6 );
+		REQUIRE( h->startLine() == 2 );
+		REQUIRE( h->endColumn() == 9 );
+		REQUIRE( h->endLine() == 2 );
+	}
+}
+
+/*
+<pre
+</pre>
+
+*/
+TEST_CASE( "159" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/159.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml< TRAIT > * > ( doc->items().at( 1 ).get() );
+	REQUIRE( h->text() == u8"<pre\n</pre>" );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 5 );
+	REQUIRE( h->endLine() == 1 );
+}
