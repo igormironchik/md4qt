@@ -260,8 +260,15 @@ paragraphToHtml( Paragraph< Trait > * p, bool wrap,
 	if( wrap )
 		html.push_back( "<p>" );
 
+	long long int l = ( !p->items().isEmpty() ? p->items().at( 0 )->startLine() : -1 );
+
 	for( auto it = p->items().begin(), last = p->items().end(); it != last; ++it )
 	{
+		if( (*it)->startLine() != l )
+			html.push_back( "\n" );
+
+		l = (*it)->endLine();
+
 		switch( (*it)->type() )
 		{
 			case ItemType::Text :
