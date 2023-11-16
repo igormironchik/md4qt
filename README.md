@@ -11,6 +11,7 @@ This library parses Markdown into tree structure.
 
 * [Example](#example)
 * [Benchmark](#benchmark)
+* [Playground](#playground)
 * [Q/A](#qa)
   * [Why another AST Markdown parser?](#why-another-ast-markdown-parser)
   * [What should I know about links in the document?](#what-should-i-know-about-links-in-the-document)
@@ -62,6 +63,14 @@ Approximate benchmark with [md4c](https://github.com/mity/md4c) and
 [cmark-gfm](https://github.com/github/cmark-gfm) says, that Qt6 version of `md4qt` is slower ~5-7 times.
 But you will get complete C++ tree structure of the Markdown document with all
 major extensions. Conclusion why it's slower you can read [here](tests/md_benchmark/README.md).
+
+# Playground
+
+You can play with `md4qt` in action in
+[`Markdown` Editor/Viewer](https://github.com/igormironchik/md-editor),
+[`Markdown` to `PDF` converter](https://github.com/igormironchik/md-pdf),
+binaries of which for `Windows` and `Linux` you can get
+[here](https://github.com/igormironchik/markdown).
 
 # Q/A
 
