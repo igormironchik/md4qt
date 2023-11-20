@@ -584,3 +584,63 @@ TEST_CASE( "160" )
 	REQUIRE( h->endColumn() == 93 );
 	REQUIRE( h->endLine() == 2 );
 }
+
+/*
+  + To use set up channels in a GH workflow
+    ```yaml
+    - name: ...
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        # ... your options
+        channels: bblanchon,pypdfium2-team
+        channel-priority: strict
+    ```
+
+*/
+TEST_CASE( "161" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/161.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->items().size() == 1 );
+	REQUIRE( l->startColumn() == 2 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 6 );
+	REQUIRE( l->endLine() == 8 );
+
+	{
+		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+		auto i = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+		REQUIRE( i->items().size() == 2 );
+		REQUIRE( i->startColumn() == 2 );
+		REQUIRE( i->startLine() == 0 );
+		REQUIRE( i->endColumn() == 6 );
+		REQUIRE( i->endLine() == 8 );
+
+		REQUIRE( i->items().at( 0 )->type() == MD::ItemType::Paragraph );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( i->items().at( 0 ).get() );
+		REQUIRE( p->startColumn() == 4 );
+		REQUIRE( p->startLine() == 0 );
+		REQUIRE( p->endColumn() == 42 );
+		REQUIRE( p->endLine() == 0 );
+
+		REQUIRE( i->items().at( 1 )->type() == MD::ItemType::Code );
+		auto c = static_cast< MD::Code< TRAIT >* > ( i->items().at( 1 ).get() );
+		REQUIRE( c->startColumn() == 4 );
+		REQUIRE( c->startLine() == 2 );
+		REQUIRE( c->endColumn() == 31 );
+		REQUIRE( c->endLine() == 7 );
+		REQUIRE( c->text() == u8"- name: ...\n"
+			"  uses: conda-incubator/setup-miniconda@v2\n"
+			"  with:\n"
+			"    # ... your options\n"
+			"    channels: bblanchon,pypdfium2-team\n"
+			"    channel-priority: strict" );
+	}
+}

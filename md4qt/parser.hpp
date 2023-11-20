@@ -1901,7 +1901,7 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 
 			if( fensedCodeInList )
 			{
-				if( indentIn )
+				if( indentInList( indents, first, true ) )
 				{
 					if( fensedCode )
 					{
