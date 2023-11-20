@@ -559,3 +559,28 @@ TEST_CASE( "159" )
 	REQUIRE( h->endColumn() == 5 );
 	REQUIRE( h->endLine() == 1 );
 }
+
+/*
+[^pdfium_docs]: Unfortunately, no recent HTML-rendered docs are available for PDFium at the moment.
+
+<!-- TODO write something about weakref.finalize(); add example on creating a C page array -->
+
+*/
+TEST_CASE( "160" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/160.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml< TRAIT > * > ( doc->items().at( 1 ).get() );
+	REQUIRE( h->text() == u8"<!-- TODO write something about weakref.finalize(); "
+		"add example on creating a C page array -->" );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 2 );
+	REQUIRE( h->endColumn() == 93 );
+	REQUIRE( h->endLine() == 2 );
+}

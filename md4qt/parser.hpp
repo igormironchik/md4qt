@@ -803,7 +803,7 @@ public:
 		const typename Trait::String & fileName, bool collectRefLinks, bool ignoreLineBreak,
 		RawHtmlBlock< Trait > & html );
 
-	static void parse( StringListStream< Trait> & stream,
+	static void parse( StringListStream< Trait > & stream,
 		std::shared_ptr< Block< Trait > > parent,
 		std::shared_ptr< Document< Trait > > doc,
 		typename Trait::StringList & linksToParse,
@@ -840,7 +840,7 @@ public:
 		bool collectRefLinks );
 
 	static void eatFootnote( ParserContext & ctx,
-		StringListStream< Trait> & stream,
+		StringListStream< Trait > & stream,
 		std::shared_ptr< Block< Trait > > parent,
 		std::shared_ptr< Document< Trait > > doc,
 		typename Trait::StringList & linksToParse,
@@ -861,6 +861,9 @@ public:
 		long long int currentLineNumber );
 
 	static bool isListType( BlockType t );
+
+	static typename Trait::InternalString readLine( ParserContext & ctx,
+		StringListStream< Trait > & stream );
 
 private:
 	typename Trait::StringList m_parsedFiles;
@@ -1190,7 +1193,7 @@ Parser< Trait >::eatFootnote( typename Parser< Trait >::ParserContext & ctx,
 	{
 		const auto currentLineNumber = stream.currentLineNumber();
 
-		auto line = stream.readLine();
+		auto line = readLine( ctx, stream );
 
 		if( line.isEmpty() || line.asString().startsWith( "    " ) ||
 			line.asString().startsWith( '\t' ) )
@@ -1319,6 +1322,24 @@ Parser< Trait >::isListType( BlockType t )
 }
 
 template< class Trait >
+typename Trait::InternalString
+Parser< Trait >::readLine( typename Parser< Trait >::ParserContext & ctx,
+	StringListStream< Trait > & stream )
+{
+	ctx.htmlCommentData.clear();
+
+	auto line = stream.readLine();
+
+	static const char16_t c_zeroReplaceWith[ 2 ] = { 0xFFFD, 0 };
+
+	line.replace( typename Trait::Char( 0 ), Trait::utf16ToString( &c_zeroReplaceWith[ 0 ] ) );
+
+	checkForHtmlComments( line.asString(), stream, ctx.htmlCommentData );
+
+	return line;
+}
+
+template< class Trait >
 inline void
 Parser< Trait >::parse( StringListStream< Trait > & stream,
 	std::shared_ptr< Block< Trait > > parent,
@@ -1332,17 +1353,9 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 	while( !stream.atEnd() )
 	{
-		ctx.htmlCommentData.clear();
-
 		const auto currentLineNumber = stream.currentLineNumber();
 
-		auto line = stream.readLine();
-
-		static const char16_t c_zeroReplaceWith[ 2 ] = { 0xFFFD, 0 };
-
-		line.replace( typename Trait::Char( 0 ), Trait::utf16ToString( &c_zeroReplaceWith[ 0 ] ) );
-
-		checkForHtmlComments( line.asString(), stream, ctx.htmlCommentData );
+		auto line = readLine( ctx, stream );
 
 		const long long int prevIndent = ctx.indent;
 
@@ -3363,7 +3376,7 @@ removeBackslashes( const typename MdBlock< Trait >::Data & d )
 	auto tmp = d;
 
 	for( auto & line : tmp )
-		line.first = removeBackslashes< Trait>( line.first );
+		line.first = removeBackslashes< Trait >( line.first );
 
 	return tmp;
 }
