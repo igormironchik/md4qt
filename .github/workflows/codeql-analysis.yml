@@ -40,7 +40,7 @@ jobs:
       run: conan install .
 
     - name: Generate Makefiles
-      run: cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_MD4QT_STL_TESTS=ON .
+      run: cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_MD4QT_STL_TESTS=ON -DBUILD_MD2HTML_APP=ON .
 
     - name: Build
       run: make
