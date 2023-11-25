@@ -718,6 +718,7 @@ private:
 		typename Trait::StringList * parentLinks = nullptr );
 	void clearCache();
 
+public:
 	enum class BlockType {
 		Unknown,
 		EmptyLine,
@@ -732,7 +733,6 @@ private:
 		FensedCodeInList
 	}; // enum BlockType
 
-public:
 	static BlockType whatIsTheLine( typename Trait::InternalString & str, bool inList = false,
 		bool inListWithFirstEmptyLine = false, bool fensedCodeInList = false,
 		typename Trait::String * startOfCode = nullptr,
@@ -3229,10 +3229,11 @@ struct TextParsingOpts {
 	bool collectRefLinks;
 	bool ignoreLineBreak;
 	RawHtmlBlock< Trait > & html;
-	std::shared_ptr< Text< Trait > > lastText;
+	std::shared_ptr< Text< Trait > > lastText = {};
 	bool isSpaceBefore = false;
 	bool wasRefLink = false;
 	bool tableDetected = false;
+	bool htmlDetected = false;
 	long long int line = 0;
 	long long int pos = 0;
 	long long int startTableLine = -1;
@@ -3483,7 +3484,10 @@ checkForTableInParagraph( TextParsingOpts< Trait > & po,
 template< class Trait >
 inline void
 makeText(
-	// Inclusive.
+	// Inclusive. Don't pass lastLine > actual line position with 0 lastPos. Pass as is,
+	// i.e. if line length is 18 and you need whole line then pass lastLine = index of line,
+	//	and lastPos = 18, or you may crash here if you will pass lastLine = index of line + 1
+	// and lastPos = 0...
 	long long int lastLine,
 	// Not inclusive
 	long long int lastPos,
@@ -4394,6 +4398,8 @@ finishRawHtmlTag( typename Delims< Trait >::const_iterator it,
 	typename Delims< Trait >::const_iterator last,
 	TextParsingOpts< Trait > & po, bool skipFirst )
 {
+	po.htmlDetected = true;
+
 	switch( po.html.htmlBlockType )
 	{
 		case 1 :
@@ -4424,6 +4430,7 @@ finishRawHtmlTag( typename Delims< Trait >::const_iterator it,
 			return finishRule7HtmlTag( it, last, po );
 
 		default :
+			po.htmlDetected = false;
 			break;
 	}
 
@@ -6662,6 +6669,72 @@ parseTableInParagraph( TextParsingOpts< Trait > & po,
 	po.line = po.fr.data.size();
 }
 
+inline void
+normalizePos( long long int & pos, long long int & line,
+	long long int length, long long int linesCount )
+{
+	if( pos != 0 )
+	{
+		if( line < linesCount )
+		{
+			if( pos == length )
+			{
+				pos = 0;
+				++line;
+			}
+		}
+	}
+}
+
+template< class Trait >
+inline bool
+isListOrQuoteAfterHtml( TextParsingOpts< Trait > & po )
+{
+	if( po.htmlDetected )
+	{
+		bool dontClearDetection = false;
+
+		long long int line = po.line;
+		long long int pos = po.pos;
+
+		normalizePos( pos, line, line < po.fr.data.size() ? po.fr.data[ line ].first.length() : 0,
+			po.fr.data.size() );
+
+		if( pos == 0 )
+		{
+			if( line < po.fr.data.size() )
+			{
+				const auto type = Parser< Trait >::whatIsTheLine(
+					po.fr.data[ line ].first );
+
+				if( type == Parser< Trait >::BlockType::List )
+				{
+					int num = 0;
+
+					if( isOrderedList< Trait >( po.fr.data[ line ].first.asString(),
+						&num ) )
+					{
+						if( num == 1 )
+							return true;
+					}
+					else
+						return true;
+				}
+				else if( type == Parser< Trait >::BlockType::Blockquote )
+					return true;
+				else if( type == Parser< Trait >::BlockType::ListWithFirstEmptyLine ||
+					type == Parser< Trait >::BlockType::EmptyLine )
+						dontClearDetection = true;
+			}
+		}
+
+		if( !dontClearDetection )
+			po.htmlDetected = false;
+	}
+
+	return false;
+}
+
 template< class Trait >
 inline void
 parseFormattedText( MdBlock< Trait > & fr,
@@ -6700,6 +6773,9 @@ parseFormattedText( MdBlock< Trait > & fr,
 
 					resetHtmlTag( po.html );
 				}
+
+				if( isListOrQuoteAfterHtml( po ) )
+					break;
 
 				if( it->m_line > po.line || it->m_pos > po.pos )
 				{
@@ -6855,24 +6931,40 @@ parseFormattedText( MdBlock< Trait > & fr,
 
 	if( !po.tableDetected )
 	{
-		long long int lastLine = -1;
-		long long int lastPos = -1;
+		long long int lastLine = po.fr.data.size() - 1;
+		long long int lastPos = po.fr.data.back().first.length();
 
 		checkForTableInParagraph( po, lastLine, lastPos );
 
-		if( lastLine < 0 )
+		if( po.tableDetected )
 		{
-			lastLine = po.fr.data.size() - 1;
-			lastPos = po.fr.data[ lastLine ].first.length();
-		}
+			if( !collectRefLinks )
+				makeText( lastLine, lastPos, po );
 
-		if( !collectRefLinks )
-			makeText( lastLine, lastPos, po );
+			parseTableInParagraph( po, pt, doc,
+				linksToParse, workingPath, fileName, collectRefLinks );
+		}
 	}
 
-	if( po.tableDetected )
-		parseTableInParagraph( po, pt, doc,
-			linksToParse, workingPath, fileName, collectRefLinks );
+	while( po.htmlDetected && !po.tableDetected && po.line < po.fr.data.size() )
+	{
+		if( !isListOrQuoteAfterHtml( po ) )
+		{
+			if( !collectRefLinks )
+				makeText( po.line, po.fr.data[ po.line ].first.length(), po );
+
+			po.pos = 0;
+			++po.line;
+		}
+		else
+			break;
+	}
+
+	if( !po.htmlDetected && po.line <= po.fr.data.size() - 1 )
+	{
+		if( !collectRefLinks )
+			makeText( po.fr.data.size() - 1, po.fr.data.back().first.length(), po );
+	}
 
 	if( !p->isEmpty() )
 	{
@@ -6886,6 +6978,22 @@ parseFormattedText( MdBlock< Trait > & fr,
 
 	if( !pt->isEmpty() && !collectRefLinks )
 		parent->appendItem( pt->items().front() );
+
+	normalizePos( po.pos, po.line, po.line < po.fr.data.size() ?
+		po.fr.data[ po.line ].first.length() : 0,
+		po.fr.data.size() );
+
+	if( po.htmlDetected && po.line < po.fr.data.size() )
+	{
+		typename MdBlock< Trait >::Data tmp;
+		std::copy( fr.data.cbegin() + po.line, fr.data.cend(),
+			std::back_inserter( tmp ) );
+
+		StringListStream< Trait > stream( tmp );
+
+		Parser< Trait >::parse( stream, parent, doc, linksToParse,
+			workingPath, fileName, collectRefLinks );
+	}
 }
 
 template< class Trait >

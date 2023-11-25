@@ -644,3 +644,106 @@ TEST_CASE( "161" )
 			"    channel-priority: strict" );
 	}
 }
+
+/*
+<!--
+- -->
+
+- list
+
+*/
+TEST_CASE( "162" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/162.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 3 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 4 );
+	REQUIRE( h->endLine() == 1 );
+	REQUIRE( h->text() == u8"<!--\n- -->" );
+
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 2 ).get() );
+	REQUIRE( l->items().size() == 1 );
+	REQUIRE( l->startColumn() == 0 );
+	REQUIRE( l->startLine() == 3 );
+	REQUIRE( l->endColumn() == 5 );
+	REQUIRE( l->endLine() == 3 );
+	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+	auto i = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( i->startColumn() == 0 );
+	REQUIRE( i->startLine() == 3 );
+	REQUIRE( i->endColumn() == 5 );
+	REQUIRE( i->endLine() == 3 );
+	REQUIRE( i->items().size() == 1 );
+	REQUIRE( i->items().at( 0 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( i->items().at( 0 ).get() );
+	REQUIRE( p->startColumn() == 2 );
+	REQUIRE( p->startLine() == 3 );
+	REQUIRE( p->endColumn() == 5 );
+	REQUIRE( p->endLine() == 3 );
+	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->startColumn() == 2 );
+	REQUIRE( t->startLine() == 3 );
+	REQUIRE( t->endColumn() == 5 );
+	REQUIRE( t->endLine() == 3 );
+	REQUIRE( t->opts() == MD::TextWithoutFormat );
+	REQUIRE( t->text() == u8"list" );
+}
+
+/*
+<!--
+> -->
+>
+> list
+
+*/
+TEST_CASE( "163" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/163.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 3 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 4 );
+	REQUIRE( h->endLine() == 1 );
+	REQUIRE( h->text() == u8"<!--\n> -->" );
+
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Blockquote );
+	auto b = static_cast< MD::Blockquote< TRAIT >* > ( doc->items().at( 2 ).get() );
+	REQUIRE( b->startColumn() == 0 );
+	REQUIRE( b->startLine() == 2 );
+	REQUIRE( b->endColumn() == 5 );
+	REQUIRE( b->endLine() == 3 );
+	REQUIRE( b->items().size() == 1 );
+	REQUIRE( b->items().at( 0 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( b->items().at( 0 ).get() );
+	REQUIRE( p->startColumn() == 2 );
+	REQUIRE( p->startLine() == 3 );
+	REQUIRE( p->endColumn() == 5 );
+	REQUIRE( p->endLine() == 3 );
+	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->startColumn() == 2 );
+	REQUIRE( t->startLine() == 3 );
+	REQUIRE( t->endColumn() == 5 );
+	REQUIRE( t->endLine() == 3 );
+	REQUIRE( t->opts() == MD::TextWithoutFormat );
+	REQUIRE( t->text() == u8"list" );
+}
