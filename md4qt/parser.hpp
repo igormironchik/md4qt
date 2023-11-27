@@ -3886,6 +3886,8 @@ findIt( typename Delims< Trait >::const_iterator it, typename Delims< Trait >::c
 	{
 		if( ( it->m_line == po.line && it->m_pos < po.pos ) || it->m_line < po.line )
 			ret = it;
+		else
+			break;
 	}
 
 	return ret;
