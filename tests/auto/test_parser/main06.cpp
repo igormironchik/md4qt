@@ -851,3 +851,53 @@ TEST_CASE( "165" )
 		REQUIRE( p->items().at( 2 )->type() == MD::ItemType::RawHtml );
 	}
 }
+
+/*
+heading
+---
+    code
+
+
+    code
+
+*/
+TEST_CASE( "166" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/166.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 3 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Heading );
+	auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 2 );
+	REQUIRE( h->endLine() == 1 );
+	REQUIRE( h->level() == 2 );
+	REQUIRE( h->text().get() );
+	auto p = h->text().get();
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 6 );
+	REQUIRE( p->endLine() == 0 );
+	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->text() == u8"heading" );
+	REQUIRE( t->startColumn() == 0 );
+	REQUIRE( t->startLine() == 0 );
+	REQUIRE( t->endColumn() == 6 );
+	REQUIRE( t->endLine() == 0 );
+
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Code );
+	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 2 ).get() );
+	REQUIRE( c->startColumn() == 4 );
+	REQUIRE( c->startLine() == 2 );
+	REQUIRE( c->endColumn() == 7 );
+	REQUIRE( c->endLine() == 5 );
+	REQUIRE( c->text() == u8"code\n\n\ncode" );
+	REQUIRE( !c->isInlined() );
+}
