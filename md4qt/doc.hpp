@@ -279,7 +279,7 @@ private:
 
 //! Text.
 template< typename Trait >
-class Text final
+class Text
 	:	public Item< Trait >
 {
 public:
@@ -400,7 +400,7 @@ private:
 //! Line break.
 template< class Trait >
 class LineBreak final
-	:	public Item< Trait >
+	:	public Text< Trait >
 {
 public:
 	LineBreak() = default;
@@ -412,6 +412,7 @@ public:
 	}
 
 private:
+
 	DISABLE_COPY( LineBreak )
 }; // class LineBreak
 
@@ -870,9 +871,10 @@ class Code final
 	:	public Item< Trait >
 {
 public:
-	explicit Code( const typename Trait::String & t, bool inl = false )
+	explicit Code( const typename Trait::String & t, bool fensedCode, bool inl )
 		:	m_text( t )
 		,	m_inlined( inl )
+		,	m_fensed( fensedCode )
 	{
 	}
 
@@ -886,6 +888,11 @@ public:
 	const typename Trait::String & text() const
 	{
 		return m_text;
+	}
+
+	void setText( const typename Trait::String & t )
+	{
+		m_text = t;
 	}
 
 	bool isInlined() const
@@ -903,9 +910,19 @@ public:
 		m_syntax = s;
 	}
 
+protected:
+	template< class T >
+	friend struct UnprotectedDocsMethods;
+
+	bool isFensedCode() const
+	{
+		return m_fensed;
+	}
+
 private:
 	typename Trait::String m_text;
 	bool m_inlined;
+	bool m_fensed;
 	typename Trait::String m_syntax;
 
 	DISABLE_COPY( Code )

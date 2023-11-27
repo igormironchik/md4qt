@@ -767,7 +767,8 @@ public:
 		std::shared_ptr< Block< Trait > > parent,
 		bool collectRefLinks,
 		int indent, const typename Trait::String & syntax,
-		long long int emptyColumn, long long int startLine );
+		long long int emptyColumn, long long int startLine,
+		bool fensedCode );
 	static void parseListItem( MdBlock< Trait > & fr,
 		std::shared_ptr< Block< Trait > > parent,
 		std::shared_ptr< Document< Trait > > doc,
@@ -2035,7 +2036,7 @@ Parser< Trait >::parseFragment( MdBlock< Trait > & fr,
 				if( fr.data.front().first.asString().startsWith( "    " ) )
 					indent = 4;
 
-				parseCodeIndentedBySpaces( fr, parent, collectRefLinks, indent, {}, -1, -1 );
+				parseCodeIndentedBySpaces( fr, parent, collectRefLinks, indent, {}, -1, -1, false );
 			}
 				break;
 
@@ -2634,226 +2635,36 @@ Parser< Trait >::parseParagraph( MdBlock< Trait > & fr,
 	const typename Trait::String & fileName,
 	bool collectRefLinks, RawHtmlBlock< Trait > & html )
 {
-	bool heading = false;
-
-	// Check for alternative syntax of H1 and H2 headings.
-	if( fr.data.size() >= 2 )
-	{
-		long long int i = 1;
-		int lvl = 0;
-		long long int horLines = 0;
-
-		for( ; i < (long long int) fr.data.size(); ++i )
-		{
-			const auto first = skipSpaces< Trait >( 0, fr.data.at( i - 1 ).first.asString() );
-
-			auto s = fr.data.at( i - 1 ).first.asString().sliced( first );
-
-			const bool prevHorLine = ( first < 4 && isHorizontalLine< Trait >( s ) );
-
-			if( prevHorLine )
-				++horLines;
-
-			if( isH1< Trait >( fr.data.at( i ).first.asString() ) && !prevHorLine &&
-				!fr.data.at( i - 1 ).first.asString().simplified().isEmpty() )
-			{
-				lvl = 1;
-				heading = true;
-				break;
-			}
-			else if( isH2< Trait >( fr.data.at( i ).first.asString() ) && !prevHorLine &&
-				!fr.data.at( i - 1 ).first.asString().simplified().isEmpty() )
-			{
-				lvl = 2;
-				heading = true;
-				break;
-			}
-		}
-
-		if( heading )
-		{
-			if( !collectRefLinks )
-				for( long long int j = 0; j < horLines; ++j )
-					parent->appendItem( std::shared_ptr< Item< Trait > > ( new HorizontalLine< Trait > ) );
-
-			fr.data.erase( fr.data.cbegin(), fr.data.cbegin() + horLines );
-
-			std::shared_ptr< Heading< Trait > > h( new Heading< Trait > );
-			h->setStartColumn( fr.data.front().first.virginPos( 0 ) );
-			h->setStartLine( fr.data.front().second.lineNumber );
-			auto lastHLineIt = fr.data.cbegin() + ( i - horLines );
-			h->setEndColumn( lastHLineIt->first.virginPos( lastHLineIt->first.length() - 1 ) );
-			h->setEndLine( lastHLineIt->second.lineNumber );
-			std::shared_ptr< Paragraph< Trait > > p( new Paragraph< Trait > );
-
-			h->setLevel( lvl );
-
-			typename MdBlock< Trait >::Data tmp;
-			std::copy( fr.data.cbegin(), lastHLineIt, std::back_inserter( tmp ) );
-
-			const auto ns1 = skipSpaces< Trait >( 0, tmp.front().first.asString() );
-
-			if( ns1 > 0 && ns1 < tmp.front().first.length() )
-				tmp.front().first = tmp.front().first.sliced( ns1 );
-
-			long long int ns2 = tmp.back().first.length();
-
-			for( long long int i = tmp.back().first.length() - 1; i >= 0; --i )
-			{
-				if( tmp.back().first[ i ].isSpace() )
-					ns2 = i;
-				else
-					break;
-			}
-
-			if( ns2 < tmp.back().first.length() )
-				tmp.back().first = tmp.back().first.sliced( 0, ns2 );
-
-			MdBlock< Trait > block = { tmp, 0 };
-
-			parseFormattedTextLinksImages( block, p, doc, linksToParse,
-				workingPath, fileName, collectRefLinks, true, html );
-
-			const bool skipHeading = p->isEmpty() ? true :
-				p->items().back()->type() == ItemType::Table;
-
-			heading = !skipHeading;
-
-			if( heading )
-				fr.data.erase( fr.data.cbegin(), fr.data.cbegin() + ( i - horLines + 1 ) );
-
-			if( !collectRefLinks && !skipHeading )
-			{
-				if( p->items().at( 0 )->type() == ItemType::Paragraph )
-					h->setText( std::static_pointer_cast< Paragraph< Trait > >(
-						p->items().at( 0 ) ) );
-
-				typename Trait::String label = "#" + paragraphToLabel( h->text().get() );
-
-				label += "/" + ( !workingPath.isEmpty() ? typename Trait::String( workingPath + "/" ) :
-					typename Trait::String() ) + fileName;
-
-				h->setLabel( label );
-
-				doc->insertLabeledHeading( label, h );
-
-				parent->appendItem( h );
-			}
-		}
-	}
-
-	if( !fr.data.empty() )
-	{
-		if( heading )
-		{
-			StringListStream< Trait > stream( fr.data );
-			parse( stream, parent, doc, linksToParse, workingPath, fileName,
-				collectRefLinks );
-		}
-		else
-		{
-			std::shared_ptr< Paragraph< Trait > > p( new Paragraph< Trait > );
-
-			parseFormattedTextLinksImages( fr, p, doc, linksToParse, workingPath, fileName,
-				collectRefLinks, false, html );
-
-			if( !p->isEmpty() && !collectRefLinks )
-			{
-				for( auto it = p->items().cbegin(), last = p->items().cend(); it != last; ++it )
-				{
-					if( (*it)->type() == MD::ItemType::Paragraph )
-					{
-						auto p = static_cast< Paragraph< Trait >* > ( (*it).get() );
-
-						std::shared_ptr< Paragraph< Trait > > pp( new Paragraph< Trait > );
-						pp->setDirty( p->isDirty() );
-						pp->setStartColumn( p->startColumn() );
-						pp->setStartLine( p->startLine() );
-						pp->setEndColumn( p->endColumn() );
-						pp->setEndLine( p->endLine() );
-
-						for( auto it = p->items().cbegin(), last = p->items().cend(); it != last; ++it )
-						{
-							if( (*it)->type() == MD::ItemType::RawHtml &&
-								std::static_pointer_cast< RawHtml< Trait > >( *it )->isFreeTag() )
-							{
-								if( !pp->isEmpty() )
-								{
-									const auto end = prevPosition( fr, (*it)->startColumn(),
-										(*it)->startLine() );
-									pp->setEndColumn( end.first );
-									pp->setEndLine( end.second );
-
-									parent->appendItem( pp );
-
-									pp.reset( new Paragraph< Trait > );
-									const auto start = nextPosition( fr, (*it)->endColumn(),
-										(*it)->endLine() );
-									pp->setDirty( p->isDirty() );
-									pp->setStartColumn( start.first );
-									pp->setStartLine( start.second );
-								}
-								else
-								{
-									const auto start = nextPosition( fr, (*it)->endColumn(),
-										(*it)->endLine() );
-									pp->setStartColumn( start.first );
-									pp->setStartLine( start.second );
-								}
-
-								parent->appendItem( (*it) );
-							}
-							else
-								pp->appendItem( (*it) );
-						}
-
-						pp->setEndColumn( p->endColumn() );
-						pp->setEndLine( p->endLine() );
-
-						if( !pp->isEmpty() )
-						{
-							Paragraph< Trait > * prevP = nullptr;
-
-							if( pp->items().at( 0 )->type() == MD::ItemType::RawHtml &&
-								parent->items().size() &&
-								parent->items().back()->type() == MD::ItemType::Paragraph )
-									prevP = static_cast< Paragraph< Trait >* >
-										( parent->items().back().get() );
-
-							if( prevP && prevP->isDirty() )
-							{
-								for( auto it = pp->items().cbegin(), last = pp->items().cend();
-									it != last; ++it )
-										prevP->appendItem( (*it) );
-
-								prevP->setEndColumn( pp->endColumn() );
-								prevP->setEndLine( pp->endLine() );
-
-								prevP->setDirty( false );
-							}
-							else
-								parent->appendItem( pp );
-						}
-					}
-					else
-						parent->appendItem( (*it) );
-				}
-			}
-		}
-	}
+	parseFormattedTextLinksImages( fr, parent, doc, linksToParse, workingPath, fileName,
+		collectRefLinks, false, html );
 }
 
 template< class Trait >
 struct UnprotectedDocsMethods {
+	static bool isFreeTag( std::shared_ptr< RawHtml< Trait > > html )
+	{
+		return html->isFreeTag();
+	}
+
 	static void setFreeTag( std::shared_ptr< RawHtml< Trait > > html,
 		bool on )
 	{
 		html->setFreeTag( on );
 	}
 
-	static void setDirty( std::shared_ptr< Paragraph< Trait > > p )
+	static bool isDirty( std::shared_ptr< Paragraph< Trait > > p )
 	{
-		p->setDirty( true );
+		return p->isDirty();
+	}
+
+	static void setDirty( std::shared_ptr< Paragraph< Trait > > p, bool on )
+	{
+		p->setDirty( on );
+	}
+
+	static bool isFensedCode( std::shared_ptr< Code< Trait > > code )
+	{
+		return code->isFensedCode();
 	}
 };
 
@@ -2884,6 +2695,8 @@ struct Delimiter {
 		// $
 		Math,
 		HorizontalLine,
+		H1,
+		H2,
 		Unknown
 	}; // enum DelimiterType
 
@@ -2934,6 +2747,10 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 
 		if( isHorizontalLine< Trait >( withoutSpaces ) && p < 4 )
 			d.push_back( { Delimiter::HorizontalLine, line, 0, str.length(), false, false, false } );
+		else if( isH1< Trait >( withoutSpaces ) && p < 4 )
+			d.push_back( { Delimiter::H1, line, 0, str.length(), false, false, false } );
+		else if( isH2< Trait >( withoutSpaces ) && p < 4 )
+			d.push_back( { Delimiter::H2, line, 0, str.length(), false, false, false } );
 		else
 		{
 			bool backslash = false;
@@ -3234,6 +3051,9 @@ struct TextParsingOpts {
 	bool wasRefLink = false;
 	bool tableDetected = false;
 	bool htmlDetected = false;
+	bool listDetected = false;
+	bool codeDetected = false;
+	bool checkLineOnNewType = false;
 	long long int line = 0;
 	long long int pos = 0;
 	long long int startTableLine = -1;
@@ -3440,7 +3260,10 @@ makeTextObjectWithLineBreak( const typename Trait::String & text, bool spaceBefo
 	makeTextObject( text, spaceBefore, true, po, doNotEscape,
 		startPos, startLine, endPos, endLine );
 
-	std::shared_ptr< Item< Trait > > hr( new LineBreak< Trait > );
+	std::shared_ptr< LineBreak< Trait > > hr( new LineBreak< Trait > );
+	hr->setText( po.fr.data.at( endLine ).first.asString().sliced( endPos + 1 ) );
+	hr->setSpaceAfter( true );
+	hr->setSpaceBefore( po.fr.data.at( endLine ).first.asString()[ endPos ].isSpace() );
 	hr->setStartColumn( po.fr.data.at( endLine ).first.virginPos( endPos + 1 ) );
 	hr->setStartLine( po.fr.data.at( endLine ).second.lineNumber );
 	hr->setEndColumn( po.fr.data.at( endLine ).first.virginPos(
@@ -3861,6 +3684,23 @@ isOnlyHtmlTagsAfterOrClosedRule1( long long int line, long long int pos,
 }
 
 template< class Trait >
+inline bool
+isSetextHeadingBetween( const TextParsingOpts< Trait > & po,
+	long long int startLine, long long int endLine )
+{
+	for( ; startLine <= endLine; ++startLine )
+	{
+		const auto pos = skipSpaces< Trait > ( 0, po.fr.data.at( startLine ).first.asString() );
+		const auto line = po.fr.data.at( startLine ).first.asString().sliced( pos );
+
+		if( ( isH1< Trait > ( line ) || isH2< Trait > ( line ) ) && pos < 4 )
+			return true;
+	}
+
+	return false;
+}
+
+template< class Trait >
 inline std::tuple< bool, long long int, long long int, bool, typename Trait::String >
 isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po, int rule )
 {
@@ -3918,7 +3758,10 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 			bool onLine = ( first && ( rule == 7 ? tmp == po.fr.data[ l ].first.length() :
 				isOnlyHtmlTagsAfterOrClosedRule1( l, p + 2, po, rule == 1 ) ) );
 
-			return { true, l, p + 1, onLine, tag };
+			if( !isSetextHeadingBetween( po, line, l ) )
+				return { true, l, p + 1, onLine, tag };
+			else
+				return { false, line, pos, first, tag };
 		}
 		else
 			return { false, line, pos, first, tag };
@@ -3935,7 +3778,10 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 		bool onLine = ( first && ( rule == 7 ? tmp == po.fr.data[ l ].first.length() :
 			isOnlyHtmlTagsAfterOrClosedRule1( l, p + 1, po, rule == 1 ) ) );
 
-		return { true, l, p, onLine, tag };
+		if( !isSetextHeadingBetween( po, line, l ) )
+			return { true, l, p, onLine, tag };
+		else
+			return { false, line, pos, first, tag };
 	}
 
 	skipSpacesInHtml< Trait >( l, p, po.fr.data );
@@ -3953,7 +3799,10 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 		bool onLine = ( first && ( rule == 7 ? tmp == po.fr.data[ l ].first.length() :
 			isOnlyHtmlTagsAfterOrClosedRule1( l, p + 1, po, rule == 1 ) ) );
 
-		return { true, l, p, onLine, tag };
+		if( !isSetextHeadingBetween( po, line, l ) )
+			return { true, l, p, onLine, tag };
+		else
+			return { false, line, pos, first, tag };
 	}
 
 	bool attr = true;
@@ -3994,7 +3843,10 @@ isHtmlTag( long long int line, long long int pos, TextParsingOpts< Trait > & po,
 		bool onLine = ( first && ( rule == 7 ? tmp == po.fr.data[ l ].first.length() :
 			isOnlyHtmlTagsAfterOrClosedRule1( l, p + 1, po, rule == 1 ) ) );
 
-		return { true, l, p, onLine, tag };
+		if( !isSetextHeadingBetween( po, line, l ) )
+			return { true, l, p, onLine, tag };
+		else
+			return { false, line, pos, first, tag };
 	}
 
 	return { false, line, pos, first, {} };
@@ -4851,7 +4703,7 @@ makeInlineCode( long long int startLine, long long int startPos,
 
 	if( !c.isEmpty() )
 	{
-		auto code = std::make_shared< Code< Trait > >( c, true );
+		auto code = std::make_shared< Code< Trait > >( c, false, true );
 
 		code->setStartColumn( po.fr.data.at( startLine ).first.virginPos( startPos ) );
 		code->setStartLine( po.fr.data.at( startLine ).second.lineNumber );
@@ -4877,7 +4729,14 @@ checkForInlineCode( typename Delims< Trait >::const_iterator it,
 
 	for( ; it != last; ++it )
 	{
-		if( it->m_type == Delimiter::InlineCode &&
+		const auto p = skipSpaces< Trait >( 0, po.fr.data.at( it->m_line ).first.asString() );
+		const auto withoutSpaces = po.fr.data.at( it->m_line ).first.asString().sliced( p );
+
+		if( ( it->m_type == Delimiter::HorizontalLine &&
+				withoutSpaces[ 0 ] == typename Trait::Char( '-' ) ) ||
+			it->m_type == Delimiter::H1 || it->m_type == Delimiter::H2 )
+				break;
+		else if( it->m_type == Delimiter::InlineCode &&
 			( it->m_len - ( it->m_backslashed ? 1 : 0 ) ) == len )
 		{
 			if( !po.collectRefLinks )
@@ -6690,8 +6549,11 @@ template< class Trait >
 inline bool
 isListOrQuoteAfterHtml( TextParsingOpts< Trait > & po )
 {
-	if( po.htmlDetected )
+	if( po.htmlDetected && !po.parent->items().empty() &&
+		po.parent->items().back()->type() == ItemType::RawHtml )
 	{
+		auto html = std::static_pointer_cast< RawHtml< Trait > > ( po.parent->items().back() );
+
 		bool dontClearDetection = false;
 
 		long long int line = po.line;
@@ -6707,24 +6569,39 @@ isListOrQuoteAfterHtml( TextParsingOpts< Trait > & po )
 				const auto type = Parser< Trait >::whatIsTheLine(
 					po.fr.data[ line ].first );
 
-				if( type == Parser< Trait >::BlockType::List )
+				switch( type )
 				{
-					int num = 0;
-
-					if( isOrderedList< Trait >( po.fr.data[ line ].first.asString(),
-						&num ) )
+					case Parser< Trait >::BlockType::List :
 					{
-						if( num == 1 )
+						int num = 0;
+
+						if( isOrderedList< Trait >( po.fr.data[ line ].first.asString(),
+							&num ) )
+						{
+							if( num == 1 )
+								return true;
+						}
+						else
 							return true;
 					}
-					else
+						break;
+
+					case Parser< Trait >::BlockType::Blockquote :
 						return true;
-				}
-				else if( type == Parser< Trait >::BlockType::Blockquote )
-					return true;
-				else if( type == Parser< Trait >::BlockType::ListWithFirstEmptyLine ||
-					type == Parser< Trait >::BlockType::EmptyLine )
+
+					case Parser< Trait >::BlockType::ListWithFirstEmptyLine :
+					{
+						if( UnprotectedDocsMethods< Trait >::isFreeTag( html ) )
+							return true;
+					}
+
+					case Parser< Trait >::BlockType::EmptyLine :
 						dontClearDetection = true;
+						break;
+
+					default :
+						break;
+				}
 			}
 		}
 
@@ -6733,6 +6610,162 @@ isListOrQuoteAfterHtml( TextParsingOpts< Trait > & po )
 	}
 
 	return false;
+}
+
+template< class Trait >
+inline std::shared_ptr< Paragraph< Trait > >
+makeParagraph( typename Block< Trait >::Items::const_iterator first,
+	typename Block< Trait >::Items::const_iterator last )
+{
+	auto p = std::make_shared< Paragraph< Trait > > ();
+
+	p->setStartColumn( (*first)->startColumn() );
+	p->setStartLine( (*first)->startLine() );
+
+	for( ; first != last; ++first )
+	{
+		p->appendItem( *first );
+		p->setEndColumn( (*first)->endColumn() );
+		p->setEndLine( (*first)->endLine() );
+	}
+
+	return p;
+}
+
+template< class Trait >
+inline void
+concatenateParagraphsIfNeededOrAppend( std::shared_ptr< Block< Trait > > parent,
+	std::shared_ptr< Paragraph< Trait > > p )
+{
+	if( !parent->items().empty() && parent->items().back()->type() == ItemType::Paragraph &&
+		!p->items().empty() && p->items().front()->type() == ItemType::RawHtml )
+	{
+		auto pp = std::static_pointer_cast< Paragraph< Trait > > ( parent->items().back() );
+		auto h = std::static_pointer_cast< RawHtml< Trait > > ( p->items().front() );
+
+		if( UnprotectedDocsMethods< Trait >::isDirty( pp ) &&
+			!UnprotectedDocsMethods< Trait >::isFreeTag( h ) )
+		{
+			for( auto it = p->items().cbegin(), last = p->items().cend(); it != last; ++it )
+				pp->appendItem( *it );
+
+			UnprotectedDocsMethods< Trait >::setDirty( pp,
+				UnprotectedDocsMethods< Trait >::isDirty( p ) );
+
+			pp->setEndColumn( p->endColumn() );
+			pp->setEndLine( p->endLine() );
+
+			return;
+		}
+	}
+
+	parent->appendItem( p );
+}
+
+template< class Trait >
+inline std::shared_ptr< Paragraph< Trait > >
+splitParagraphsAndFreeHtml( std::shared_ptr< Block< Trait > > parent,
+	std::shared_ptr< Paragraph< Trait > > p,
+	bool collectRefLinks )
+{
+	auto first = p->items().cbegin();
+	auto it = first;
+	auto last = p->items().cend();
+
+	for( ; it != last; ++it )
+	{
+		if( first == last )
+			first = it;
+
+		if( (*it)->type() == ItemType::RawHtml &&
+			UnprotectedDocsMethods< Trait >::isFreeTag(
+				std::static_pointer_cast< RawHtml< Trait > >( *it ) ) )
+		{
+			auto p = makeParagraph< Trait >( first, it );
+
+			if( !collectRefLinks )
+			{
+				if( !p->isEmpty() )
+					concatenateParagraphsIfNeededOrAppend( parent, p );
+
+				parent->appendItem( *it );
+			}
+
+			first = last;
+		}
+	}
+
+	if( first != last )
+	{
+		if( first != p->items().cbegin() )
+			return makeParagraph< Trait >( first, last );
+		else
+			return p;
+	}
+	else
+		return std::make_shared< Paragraph< Trait > > ();
+}
+
+template< class Trait >
+inline void
+makeHeading( std::shared_ptr< Block< Trait > > parent,
+	std::shared_ptr< Document< Trait > > doc,
+	std::shared_ptr< Paragraph< Trait > > p,
+	long long int lastColumn,
+	long long int lastLine,
+	int level,
+	const typename Trait::String & workingPath,
+	const typename Trait::String & fileName,
+	bool collectRefLinks )
+{
+	if( p->items().back()->type() == ItemType::LineBreak )
+	{
+		auto lb = std::static_pointer_cast< LineBreak< Trait > >( p->items().back() );
+
+		p = makeParagraph< Trait >( p->items().cbegin(),
+			std::prev( p->items().cend() ) );
+
+		if( p->items().back()->type() == ItemType::Text )
+		{
+			auto lt = std::static_pointer_cast< Text< Trait > > ( p->items().back() );
+			lt->setText( typename Trait::String( lt->text() + ( lb->isSpaceBefore() ? " " : "" ) +
+				lb->text() ).simplified() );
+			lt->setEndColumn( lt->endColumn() + lb->text().length() );
+		}
+		else
+		{
+			auto t = std::make_shared< Text< Trait > > ();
+			t->setText( lb->text() );
+			t->setSpaceBefore( lb->isSpaceBefore() );
+			t->setSpaceAfter( lb->isSpaceAfter() );
+			t->setStartColumn( lb->startColumn() );
+			t->setStartLine( lb->startLine() );
+			t->setEndColumn( lb->endColumn() );
+			t->setEndLine( lb->endLine() );
+
+			p->appendItem( t );
+		}
+	}
+
+	std::shared_ptr< Heading< Trait > > h( new Heading< Trait > );
+	h->setStartColumn( p->startColumn() );
+	h->setStartLine( p->startLine() );
+	h->setEndColumn( lastColumn );
+	h->setEndLine( lastLine );
+	h->setLevel( level );
+	h->setText( p );
+
+	typename Trait::String label = "#" + paragraphToLabel( p.get() );
+
+	label += "/" + ( !workingPath.isEmpty() ? typename Trait::String( workingPath + "/" ) :
+		typename Trait::String() ) + fileName;
+
+	h->setLabel( label );
+
+	doc->insertLabeledHeading( label, h );
+
+	if( !collectRefLinks )
+		parent->appendItem( h );
 }
 
 template< class Trait >
@@ -6747,6 +6780,9 @@ parseFormattedText( MdBlock< Trait > & fr,
 {
 	if( fr.data.empty() )
 		return;
+
+	const auto actualCollectRefLinks = collectRefLinks;
+	collectRefLinks = false;
 
 	std::shared_ptr< Paragraph< Trait > > p( new Paragraph< Trait > );
 	p->setStartColumn( fr.data.at( 0 ).first.virginPos( 0 ) );
@@ -6779,7 +6815,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 
 				if( it->m_line > po.line || it->m_pos > po.pos )
 				{
-					if( po.tableDetected )
+					if( po.tableDetected || po.listDetected )
 						break;
 					else if( !collectRefLinks )
 						makeText( it->m_line, it->m_pos, po );
@@ -6856,25 +6892,139 @@ parseFormattedText( MdBlock< Trait > & fr,
 
 					case Delimiter::HorizontalLine :
 					{
-						if( !collectRefLinks )
 						{
-							if( !p->isEmpty() )
+							long long int lastLine = it->m_line, lastPos = 0;
+
+							checkForTableInParagraph( po, lastLine, lastPos );
+
+							if( po.tableDetected )
+								break;
+						}
+
+						const auto pos = skipSpaces< Trait >( 0,
+							po.fr.data[ it->m_line ].first.asString() );
+						const auto withoutSpaces = po.fr.data[ it->m_line ]
+							.first.asString().sliced( pos );
+
+						auto h2 = isH2< Trait >( withoutSpaces );
+
+						if( !p->isEmpty() )
+						{
+							optimizeParagraph< Trait >( p );
+
+							if( it->m_line - 1 >= 0 )
 							{
-								optimizeParagraph< Trait >( p );
 								p->setEndColumn( fr.data.at( it->m_line - 1 ).first.virginPos(
 									fr.data.at( it->m_line - 1 ).first.length() - 1 ) );
 								p->setEndLine( fr.data.at( it->m_line - 1 ).second.lineNumber );
-								parent->appendItem( p );
 							}
 
-							std::shared_ptr< Item< Trait > > hr( new HorizontalLine< Trait > );
-							hr->setStartColumn( fr.data.at( it->m_line ).first.virginPos(
-								it->m_pos ) );
-							hr->setStartLine( fr.data.at( it->m_line ).second.lineNumber );
-							hr->setEndColumn( fr.data.at( it->m_line ).first.virginPos(
-								it->m_pos + it->m_len - 1 ) );
-							hr->setEndLine( fr.data.at( it->m_line ).second.lineNumber );
-							parent->appendItem( hr );
+							p = splitParagraphsAndFreeHtml( parent, p, actualCollectRefLinks );
+
+							if( !p->isEmpty() )
+							{
+								if( !collectRefLinks )
+								{
+									if( !h2 || ( p->items().size() == 1 &&
+										p->items().front()->type() == ItemType::LineBreak ) )
+									{
+										if( !actualCollectRefLinks )
+											concatenateParagraphsIfNeededOrAppend( parent, p );
+
+										h2 = false;
+									}
+									else
+									{
+										makeHeading( parent, doc, p,
+											fr.data[ it->m_line ].first.virginPos(
+												it->m_pos + it->m_len - 1 ),
+											fr.data[ it->m_line ].second.lineNumber,
+											2, workingPath, fileName,
+											actualCollectRefLinks );
+
+										po.checkLineOnNewType = true;
+									}
+								}
+							}
+							else
+								h2 = false;
+						}
+						else
+							h2 = false;
+
+						p.reset( new Paragraph< Trait > );
+
+						if( it->m_line + 1 < fr.data.size() )
+						{
+							p->setStartColumn( fr.data.at( it->m_line + 1 ).first
+								.virginPos( 0 ) );
+							p->setStartLine( fr.data.at( it->m_line + 1 ).second
+								.lineNumber );
+						}
+
+						po.parent = p;
+						po.line = it->m_line;
+						po.pos = it->m_pos + it->m_len;
+
+						if( !h2 )
+						{
+							if( !actualCollectRefLinks )
+							{
+								std::shared_ptr< Item< Trait > > hr( new HorizontalLine< Trait > );
+								hr->setStartColumn( fr.data.at( it->m_line ).first.virginPos(
+									it->m_pos ) );
+								hr->setStartLine( fr.data.at( it->m_line ).second.lineNumber );
+								hr->setEndColumn( fr.data.at( it->m_line ).first.virginPos(
+									it->m_pos + it->m_len - 1 ) );
+								hr->setEndLine( fr.data.at( it->m_line ).second.lineNumber );
+								parent->appendItem( hr );
+							}
+						}
+						// Looks like a list.
+						else if( withoutSpaces.simplified().length() == 1 &&
+							withoutSpaces.simplified()[ 0 ] == typename Trait::Char( '-' ) )
+						{
+							po.listDetected = true;
+							po.pos = 0;
+						}
+					}
+						break;
+
+					case Delimiter::H1 :
+					case Delimiter::H2 :
+					{
+						{
+							long long int lastLine = it->m_line, lastPos = 0;
+
+							checkForTableInParagraph( po, lastLine, lastPos );
+
+							if( po.tableDetected )
+								break;
+						}
+
+						optimizeParagraph< Trait >( p );
+
+						if( it->m_line - 1 >= 0 )
+						{
+							p->setEndColumn( fr.data.at( it->m_line - 1 ).first.virginPos(
+								fr.data.at( it->m_line - 1 ).first.length() - 1 ) );
+							p->setEndLine( fr.data.at( it->m_line - 1 ).second.lineNumber );
+						}
+
+						p = splitParagraphsAndFreeHtml( parent, p, actualCollectRefLinks );
+
+						if( !p->isEmpty() && !( ( p->items().size() == 1 &&
+							p->items().front()->type() == ItemType::LineBreak ) ) )
+						{
+							makeHeading( parent, doc, p,
+								fr.data[ it->m_line ].first.virginPos(
+									it->m_pos + it->m_len - 1 ),
+								fr.data[ it->m_line ].second.lineNumber,
+								it->m_type == Delimiter::H1 ? 1 : 2,
+								workingPath, fileName,
+								actualCollectRefLinks );
+
+							po.checkLineOnNewType = true;
 
 							p.reset( new Paragraph< Trait > );
 
@@ -6886,16 +7036,17 @@ parseFormattedText( MdBlock< Trait > & fr,
 									.lineNumber );
 							}
 
-							po.parent = p;
 							po.line = it->m_line;
 							po.pos = it->m_pos + it->m_len;
 						}
+
+						po.parent = p;
 					}
 						break;
 
 					default :
 					{
-						if( !po.tableDetected && !collectRefLinks )
+						if( !po.tableDetected && !po.listDetected && !collectRefLinks )
 							makeText( it->m_line, it->m_pos + it->m_len, po );
 						else
 						{
@@ -6906,8 +7057,26 @@ parseFormattedText( MdBlock< Trait > & fr,
 						break;
 				}
 
-				if( po.tableDetected )
+				if( po.tableDetected || po.listDetected )
 					break;
+
+				if( po.checkLineOnNewType )
+				{
+					if( po.line + 1 < po.fr.data.size() )
+					{
+						const auto type = Parser< Trait >::whatIsTheLine(
+							po.fr.data[ po.line + 1 ].first );
+
+						if( type == Parser< Trait >::BlockType::CodeIndentedBySpaces )
+						{
+							po.codeDetected = true;
+
+							break;
+						}
+					}
+
+					po.checkLineOnNewType = false;
+				}
 			}
 		}
 	}
@@ -6929,7 +7098,6 @@ parseFormattedText( MdBlock< Trait > & fr,
 		resetHtmlTag( html );
 	}
 
-	if( !po.tableDetected )
 	{
 		long long int lastLine = po.fr.data.size() - 1;
 		long long int lastPos = po.fr.data.back().first.length();
@@ -6946,7 +7114,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 		}
 	}
 
-	while( po.htmlDetected && !po.tableDetected && po.line < po.fr.data.size() )
+	while( po.htmlDetected && !po.listDetected && !po.tableDetected && po.line < po.fr.data.size() )
 	{
 		if( !isListOrQuoteAfterHtml( po ) )
 		{
@@ -6960,7 +7128,8 @@ parseFormattedText( MdBlock< Trait > & fr,
 			break;
 	}
 
-	if( !po.htmlDetected && po.line <= po.fr.data.size() - 1 )
+	if( !po.htmlDetected && !po.listDetected && !po.codeDetected &&
+		po.line <= po.fr.data.size() - 1 )
 	{
 		if( !collectRefLinks )
 			makeText( po.fr.data.size() - 1, po.fr.data.back().first.length(), po );
@@ -6970,20 +7139,24 @@ parseFormattedText( MdBlock< Trait > & fr,
 	{
 		optimizeParagraph< Trait >( p );
 
-		if( html.html.get() && !html.onLine )
-			UnprotectedDocsMethods< Trait >::setDirty( p );
+		p = splitParagraphsAndFreeHtml( parent, p, actualCollectRefLinks );
 
-		parent->appendItem( p );
+		if( html.html.get() && !html.onLine )
+			UnprotectedDocsMethods< Trait >::setDirty( p, true );
+
+		if( !p->isEmpty() && !actualCollectRefLinks )
+			concatenateParagraphsIfNeededOrAppend( parent, p );
 	}
 
-	if( !pt->isEmpty() && !collectRefLinks )
+	if( !pt->isEmpty() && !actualCollectRefLinks )
 		parent->appendItem( pt->items().front() );
 
 	normalizePos( po.pos, po.line, po.line < po.fr.data.size() ?
 		po.fr.data[ po.line ].first.length() : 0,
 		po.fr.data.size() );
 
-	if( po.htmlDetected && po.line < po.fr.data.size() )
+	if( ( po.htmlDetected || po.listDetected || po.codeDetected ) &&
+		po.line < po.fr.data.size() )
 	{
 		typename MdBlock< Trait >::Data tmp;
 		std::copy( fr.data.cbegin() + po.line, fr.data.cend(),
@@ -6992,7 +7165,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 		StringListStream< Trait > stream( tmp );
 
 		Parser< Trait >::parse( stream, parent, doc, linksToParse,
-			workingPath, fileName, collectRefLinks );
+			workingPath, fileName, actualCollectRefLinks );
 	}
 }
 
@@ -7667,7 +7840,7 @@ Parser< Trait >::parseCode( MdBlock< Trait > & fr,
 		}
 		else
 			parseCodeIndentedBySpaces( fr, parent, collectRefLinks, indent, syntax,
-				emptyColumn, startLine );
+				emptyColumn, startLine, true );
 	}
 }
 
@@ -7677,7 +7850,8 @@ Parser< Trait >::parseCodeIndentedBySpaces( MdBlock< Trait > & fr,
 	std::shared_ptr< Block< Trait > > parent,
 	bool collectRefLinks, int indent,
 	const typename Trait::String & syntax,
-	long long int emptyColumn, long long int startLine )
+	long long int emptyColumn, long long int startLine,
+	bool fensedCode )
 {
 	if( !collectRefLinks )
 	{
@@ -7699,7 +7873,7 @@ Parser< Trait >::parseCodeIndentedBySpaces( MdBlock< Trait > & fr,
 		if( !code.isEmpty() )
 			code.remove( code.length() - 1, 1 );
 
-		std::shared_ptr< Code< Trait > > codeItem( new Code< Trait >( code ) );
+		std::shared_ptr< Code< Trait > > codeItem( new Code< Trait >( code, fensedCode, false ) );
 		codeItem->setSyntax( syntax );
 
 		if( !fr.data.empty() )
@@ -7718,7 +7892,30 @@ Parser< Trait >::parseCodeIndentedBySpaces( MdBlock< Trait > & fr,
 			codeItem->setEndLine( startLine );
 		}
 
-		parent->appendItem( codeItem );
+		if( fensedCode )
+			parent->appendItem( codeItem );
+		else if( !parent->items().empty() && parent->items().back()->type() == ItemType::Code )
+		{
+			auto c = std::static_pointer_cast< Code< Trait > > ( parent->items().back() );
+
+			if( !UnprotectedDocsMethods< Trait >::isFensedCode( c ) )
+			{
+				auto line = c->endLine();
+				auto text = c->text();
+
+				for( ; line < codeItem->startLine(); ++line )
+					text.push_back( "\n" );
+
+				text.push_back( codeItem->text() );
+				c->setText( text );
+				c->setEndColumn( codeItem->endColumn() );
+				c->setEndLine( codeItem->endLine() );
+			}
+			else
+				parent->appendItem( codeItem );
+		}
+		else
+			parent->appendItem( codeItem );
 	}
 }
 

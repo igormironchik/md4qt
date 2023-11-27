@@ -71,7 +71,7 @@ int enter_block( MD_BLOCKTYPE type, void * data, void * doc )
 
 		case MD_BLOCK_CODE :
 		{
-			item.reset( new MD::Code< MD::QStringTrait >( QStringLiteral( "" ), false ) );
+			item.reset( new MD::Code< MD::QStringTrait >( QStringLiteral( "" ), false, false ) );
 		}
 			break;
 
@@ -208,7 +208,7 @@ int enter_span( MD_SPANTYPE type, void * data, void * doc )
 		case MD_SPAN_CODE :
 		{
 			std::shared_ptr< MD::Item< MD::QStringTrait > > item(
-				new MD::Code< MD::QStringTrait >( QStringLiteral( "" ), true ) );
+				new MD::Code< MD::QStringTrait >( QStringLiteral( "" ), false, true ) );
 
 			if( d->elems.empty() )
 				(*d->doc)->appendItem( item );

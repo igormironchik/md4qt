@@ -379,7 +379,7 @@ TEST_CASE( "paragraph_to_label" )
 {
 	{
 		MD::Paragraph< TRAIT > p;
-		auto c = std::make_shared< MD::Code< TRAIT > > ( u8"ICU", true );
+		auto c = std::make_shared< MD::Code< TRAIT > > ( u8"ICU", false, true );
 		c->setStartColumn( 0 );
 		c->setStartLine( 0 );
 		c->setEndColumn( 3 );
@@ -400,7 +400,7 @@ TEST_CASE( "paragraph_to_label" )
 
 	{
 		MD::Paragraph< TRAIT > p;
-		auto c = std::make_shared< MD::Code< TRAIT > > ( u8"ICU", true );
+		auto c = std::make_shared< MD::Code< TRAIT > > ( u8"ICU", false, true );
 		c->setStartColumn( 0 );
 		c->setStartLine( 0 );
 		c->setEndColumn( 3 );
@@ -434,7 +434,7 @@ TEST_CASE( "paragraph_to_label" )
 
 	{
 		MD::Paragraph< TRAIT > p;
-		auto c = std::make_shared< MD::Code< TRAIT > > ( u8"text", true );
+		auto c = std::make_shared< MD::Code< TRAIT > > ( u8"text", false, true );
 		c->setStartColumn( 0 );
 		c->setStartLine( 0 );
 		c->setEndColumn( 3 );
