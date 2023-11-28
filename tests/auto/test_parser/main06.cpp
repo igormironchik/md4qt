@@ -901,3 +901,127 @@ TEST_CASE( "166" )
 	REQUIRE( c->text() == u8"code\n\n\ncode" );
 	REQUIRE( !c->isInlined() );
 }
+
+/*
+<!-- c -->
+-
+
+<?php
+?>
+-
+
+<pre>
+</pre>
+-
+
+<?php
+?>
+text
+-
+
+text
+<?php
+?>
+-
+
+*/
+TEST_CASE( "167" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/167.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 8 );
+
+	{
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 0 );
+		REQUIRE( h->endColumn() == 9 );
+		REQUIRE( h->endLine() == 0 );
+		REQUIRE( h->text() == u8"<!-- c -->" );
+	}
+
+	{
+		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 2 ).get() );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 3 );
+		REQUIRE( h->endColumn() == 1 );
+		REQUIRE( h->endLine() == 4 );
+		REQUIRE( h->text() == u8"<?php\n?>" );
+	}
+
+	{
+		REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 3 ).get() );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 7 );
+		REQUIRE( h->endColumn() == 5 );
+		REQUIRE( h->endLine() == 8 );
+		REQUIRE( h->text() == u8"<pre>\n</pre>" );
+	}
+
+	{
+		REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 4 ).get() );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 11 );
+		REQUIRE( h->endColumn() == 1 );
+		REQUIRE( h->endLine() == 12 );
+		REQUIRE( h->text() == u8"<?php\n?>" );
+	}
+
+	{
+		REQUIRE( doc->items().at( 5 )->type() == MD::ItemType::Heading );
+		auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 5 ).get() );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 13 );
+		REQUIRE( h->endColumn() == 0 );
+		REQUIRE( h->endLine() == 14 );
+		REQUIRE( h->level() == 2 );
+		REQUIRE( h->text().get() );
+		auto p = h->text().get();
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 13 );
+		REQUIRE( p->endColumn() == 3 );
+		REQUIRE( p->endLine() == 13 );
+		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->text() == u8"text" );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 13 );
+		REQUIRE( t->endColumn() == 3 );
+		REQUIRE( t->endLine() == 13 );
+	}
+
+	{
+		REQUIRE( doc->items().at( 6 )->type() == MD::ItemType::Paragraph );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 6 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 16 );
+		REQUIRE( p->endColumn() == 3 );
+		REQUIRE( p->endLine() == 16 );
+		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->text() == u8"text" );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 16 );
+		REQUIRE( t->endColumn() == 3 );
+		REQUIRE( t->endLine() == 16 );
+	}
+
+	{
+		REQUIRE( doc->items().at( 7 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 7 ).get() );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 17 );
+		REQUIRE( h->endColumn() == 1 );
+		REQUIRE( h->endLine() == 18 );
+		REQUIRE( h->text() == u8"<?php\n?>" );
+	}
+}
