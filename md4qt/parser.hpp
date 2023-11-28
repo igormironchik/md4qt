@@ -3049,11 +3049,32 @@ struct TextParsingOpts {
 	std::shared_ptr< Text< Trait > > lastText = {};
 	bool isSpaceBefore = false;
 	bool wasRefLink = false;
-	bool tableDetected = false;
-	bool htmlDetected = false;
-	bool listDetected = false;
-	bool codeDetected = false;
 	bool checkLineOnNewType = false;
+
+	enum class Detected {
+		Nothing = 0,
+		Table = 1,
+		HTML = 2,
+		List = 3,
+		Code = 4
+	}; // enum class Detected
+
+	Detected detected = Detected::Nothing;
+
+	inline bool shouldStopParsing() const
+	{
+		switch( detected )
+		{
+			case Detected::Table :
+			case Detected::List :
+			case Detected::Code :
+				return true;
+
+			default :
+				return false;
+		}
+	}
+
 	long long int line = 0;
 	long long int pos = 0;
 	long long int startTableLine = -1;
@@ -3292,7 +3313,7 @@ checkForTableInParagraph( TextParsingOpts< Trait > & po,
 
 			if( h && c && c == h )
 			{
-				po.tableDetected = true;
+				po.detected = TextParsingOpts< Trait >::Detected::Table;
 				po.startTableLine = i;
 				po.columnsCount = c;
 				lastLine = i - 1;
@@ -4252,7 +4273,7 @@ finishRawHtmlTag( typename Delims< Trait >::const_iterator it,
 	typename Delims< Trait >::const_iterator last,
 	TextParsingOpts< Trait > & po, bool skipFirst )
 {
-	po.htmlDetected = true;
+	po.detected = TextParsingOpts< Trait >::Detected::HTML;
 
 	switch( po.html.htmlBlockType )
 	{
@@ -4284,7 +4305,7 @@ finishRawHtmlTag( typename Delims< Trait >::const_iterator it,
 			return finishRule7HtmlTag( it, last, po );
 
 		default :
-			po.htmlDetected = false;
+			po.detected = TextParsingOpts< Trait >::Detected::Nothing;
 			break;
 	}
 
@@ -6551,7 +6572,7 @@ template< class Trait >
 inline bool
 isListOrQuoteAfterHtml( TextParsingOpts< Trait > & po )
 {
-	if( po.htmlDetected && !po.parent->items().empty() &&
+	if( po.detected == TextParsingOpts< Trait >::Detected::HTML && !po.parent->items().empty() &&
 		po.parent->items().back()->type() == ItemType::RawHtml )
 	{
 		auto html = std::static_pointer_cast< RawHtml< Trait > > ( po.parent->items().back() );
@@ -6608,7 +6629,7 @@ isListOrQuoteAfterHtml( TextParsingOpts< Trait > & po )
 		}
 
 		if( !dontClearDetection )
-			po.htmlDetected = false;
+			po.detected = TextParsingOpts< Trait >::Detected::Nothing;
 	}
 
 	return false;
@@ -6817,7 +6838,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 
 				if( it->m_line > po.line || it->m_pos > po.pos )
 				{
-					if( po.tableDetected || po.listDetected )
+					if( po.shouldStopParsing() )
 						break;
 					else if( !collectRefLinks )
 						makeText( it->m_line, it->m_pos, po );
@@ -6899,7 +6920,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 
 							checkForTableInParagraph( po, lastLine, lastPos );
 
-							if( po.tableDetected )
+							if( po.shouldStopParsing() )
 								break;
 						}
 
@@ -6986,7 +7007,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 						else if( withoutSpaces.simplified().length() == 1 &&
 							withoutSpaces.simplified()[ 0 ] == typename Trait::Char( '-' ) )
 						{
-							po.listDetected = true;
+							po.detected = TextParsingOpts< Trait >::Detected::List;
 							po.pos = 0;
 						}
 					}
@@ -7000,7 +7021,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 
 							checkForTableInParagraph( po, lastLine, lastPos );
 
-							if( po.tableDetected )
+							if( po.shouldStopParsing() )
 								break;
 						}
 
@@ -7048,7 +7069,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 
 					default :
 					{
-						if( !po.tableDetected && !po.listDetected && !collectRefLinks )
+						if( !po.shouldStopParsing() && !collectRefLinks )
 							makeText( it->m_line, it->m_pos + it->m_len, po );
 						else
 						{
@@ -7059,7 +7080,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 						break;
 				}
 
-				if( po.tableDetected || po.listDetected )
+				if( po.shouldStopParsing() )
 					break;
 
 				if( po.checkLineOnNewType )
@@ -7071,7 +7092,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 
 						if( type == Parser< Trait >::BlockType::CodeIndentedBySpaces )
 						{
-							po.codeDetected = true;
+							po.detected = TextParsingOpts< Trait >::Detected::Code;
 
 							break;
 						}
@@ -7106,7 +7127,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 
 		checkForTableInParagraph( po, lastLine, lastPos );
 
-		if( po.tableDetected )
+		if( po.detected == TextParsingOpts< Trait >::Detected::Table )
 		{
 			if( !collectRefLinks )
 				makeText( lastLine, lastPos, po );
@@ -7116,7 +7137,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 		}
 	}
 
-	while( po.htmlDetected && !po.listDetected && !po.tableDetected && po.line < po.fr.data.size() )
+	while( po.detected == TextParsingOpts< Trait >::Detected::HTML && po.line < po.fr.data.size() )
 	{
 		if( !isListOrQuoteAfterHtml( po ) )
 		{
@@ -7130,7 +7151,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 			break;
 	}
 
-	if( !po.htmlDetected && !po.listDetected && !po.codeDetected &&
+	if( po.detected == TextParsingOpts< Trait >::Detected::Nothing &&
 		po.line <= po.fr.data.size() - 1 )
 	{
 		if( !collectRefLinks )
@@ -7157,8 +7178,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 		po.fr.data[ po.line ].first.length() : 0,
 		po.fr.data.size() );
 
-	if( ( po.htmlDetected || po.listDetected || po.codeDetected ) &&
-		po.line < po.fr.data.size() )
+	if( po.detected != TextParsingOpts< Trait >::Detected::Nothing && po.line < po.fr.data.size() )
 	{
 		typename MdBlock< Trait >::Data tmp;
 		std::copy( fr.data.cbegin() + po.line, fr.data.cend(),
