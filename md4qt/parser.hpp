@@ -2486,17 +2486,24 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 					parseFormattedTextLinksImages( block, p, doc,
 						linksToParse, workingPath, fileName, collectRefLinks, false, html );
 
-					if( !p->isEmpty() && p->items().at( 0 )->type() == ItemType::Paragraph )
+					if( !p->isEmpty() )
 					{
-						const auto pp = std::static_pointer_cast< Paragraph< Trait > >(
-							p->items().at( 0 ) );
-
-						for( auto it = pp->items().cbegin(), last = pp->items().cend();
-							it != last; ++it )
+						if( p->items().at( 0 )->type() == ItemType::Paragraph )
 						{
-							c->appendItem( (*it) );
+							const auto pp = std::static_pointer_cast< Paragraph< Trait > >(
+								p->items().at( 0 ) );
+
+							for( auto it = pp->items().cbegin(), last = pp->items().cend();
+								it != last; ++it )
+							{
+								c->appendItem( (*it) );
+							}
 						}
+						else if( p->items().at( 0 )->type() == ItemType::RawHtml )
+							c->appendItem( p->items().at( 0 ) );
 					}
+					else if( html.html.get() )
+						c->appendItem( html.html );
 				}
 
 				tr->appendCell( c );

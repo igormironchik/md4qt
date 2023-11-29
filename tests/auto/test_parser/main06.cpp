@@ -1025,3 +1025,167 @@ TEST_CASE( "167" )
 		REQUIRE( h->text() == u8"<?php\n?>" );
 	}
 }
+
+/*
+| table |
+| ----- |
+| <img src="img/img.png"> |
+
+*/
+TEST_CASE( "168" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/168.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Table );
+	auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( t->startColumn() == 0 );
+	REQUIRE( t->startLine() == 0 );
+	REQUIRE( t->endColumn() == 26 );
+	REQUIRE( t->endLine() == 2 );
+
+	REQUIRE( t->columnsCount() == 1 );
+	REQUIRE( t->rows().size() == 2 );
+
+	auto r0 = t->rows().at( 0 );
+	REQUIRE( r0->startColumn() == 0 );
+	REQUIRE( r0->startLine() == 0 );
+	REQUIRE( r0->endColumn() == 8 ) ;
+	REQUIRE( r0->endLine() == r0->startLine() );
+
+	REQUIRE( r0->type() == MD::ItemType::TableRow );
+
+	REQUIRE( r0->cells().size() == 1 );
+
+	REQUIRE( r0->cells().at( 0 )->type() == MD::ItemType::TableCell );
+	auto c0 = static_cast< MD::TableCell< TRAIT >* > ( r0->cells().at( 0 ).get() );
+	REQUIRE( c0->startColumn() == 0 );
+	REQUIRE( c0->startLine() == r0->startLine() );
+	REQUIRE( c0->endColumn() == r0->endColumn() ) ;
+	REQUIRE( c0->endLine() == c0->startLine() );
+
+	REQUIRE( c0->items().size() == 1 );
+	REQUIRE( c0->items().at( 0 )->type() == MD::ItemType::Text );
+
+	auto t0 = static_cast< MD::Text< TRAIT >* > ( c0->items().at( 0 ).get() );
+	REQUIRE( t0->startColumn() == 2 );
+	REQUIRE( t0->startLine() == c0->startLine() );
+	REQUIRE( t0->endColumn() == 6 );
+	REQUIRE( t0->endLine() == t0->startLine() );
+
+	REQUIRE( t0->text() == u8"table" );
+
+	auto r1 = t->rows().at( 1 );
+	REQUIRE( r1->startColumn() == 0 );
+	REQUIRE( r1->startLine() == 2 );
+	REQUIRE( r1->endColumn() == 26 ) ;
+	REQUIRE( r1->endLine() == r1->startLine() );
+
+	REQUIRE( r1->type() == MD::ItemType::TableRow );
+
+	REQUIRE( r1->cells().size() == 1 );
+
+	REQUIRE( r1->cells().at( 0 )->type() == MD::ItemType::TableCell );
+	auto c1 = static_cast< MD::TableCell< TRAIT >* > ( r1->cells().at( 0 ).get() );
+	REQUIRE( c1->startColumn() == 0 );
+	REQUIRE( c1->startLine() == r1->startLine() );
+	REQUIRE( c1->endColumn() == r1->endColumn() ) ;
+	REQUIRE( c1->endLine() == c1->startLine() );
+
+	REQUIRE( c1->items().size() == 1 );
+	REQUIRE( c1->items().at( 0 )->type() == MD::ItemType::RawHtml );
+
+	auto h1 = static_cast< MD::RawHtml< TRAIT >* > ( c1->items().at( 0 ).get() );
+	REQUIRE( h1->startColumn() == 2 );
+	REQUIRE( h1->startLine() == c1->startLine() );
+	REQUIRE( h1->endColumn() == 24 );
+	REQUIRE( h1->endLine() == c1->startLine() );
+
+	REQUIRE( h1->text() == u8"<img src=\"img/img.png\">" );
+}
+
+/*
+| table |
+| ----- |
+| <pre>code</pre> |
+
+*/
+TEST_CASE( "169" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/169.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Table );
+	auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( t->startColumn() == 0 );
+	REQUIRE( t->startLine() == 0 );
+	REQUIRE( t->endColumn() == 18 );
+	REQUIRE( t->endLine() == 2 );
+
+	REQUIRE( t->columnsCount() == 1 );
+	REQUIRE( t->rows().size() == 2 );
+
+	auto r0 = t->rows().at( 0 );
+	REQUIRE( r0->startColumn() == 0 );
+	REQUIRE( r0->startLine() == 0 );
+	REQUIRE( r0->endColumn() == 8 ) ;
+	REQUIRE( r0->endLine() == r0->startLine() );
+
+	REQUIRE( r0->type() == MD::ItemType::TableRow );
+
+	REQUIRE( r0->cells().size() == 1 );
+
+	REQUIRE( r0->cells().at( 0 )->type() == MD::ItemType::TableCell );
+	auto c0 = static_cast< MD::TableCell< TRAIT >* > ( r0->cells().at( 0 ).get() );
+	REQUIRE( c0->startColumn() == 0 );
+	REQUIRE( c0->startLine() == r0->startLine() );
+	REQUIRE( c0->endColumn() == r0->endColumn() ) ;
+	REQUIRE( c0->endLine() == c0->startLine() );
+
+	REQUIRE( c0->items().size() == 1 );
+	REQUIRE( c0->items().at( 0 )->type() == MD::ItemType::Text );
+
+	auto t0 = static_cast< MD::Text< TRAIT >* > ( c0->items().at( 0 ).get() );
+	REQUIRE( t0->startColumn() == 2 );
+	REQUIRE( t0->startLine() == c0->startLine() );
+	REQUIRE( t0->endColumn() == 6 );
+	REQUIRE( t0->endLine() == t0->startLine() );
+
+	REQUIRE( t0->text() == u8"table" );
+
+	auto r1 = t->rows().at( 1 );
+	REQUIRE( r1->startColumn() == 0 );
+	REQUIRE( r1->startLine() == 2 );
+	REQUIRE( r1->endColumn() == 18 ) ;
+	REQUIRE( r1->endLine() == r1->startLine() );
+
+	REQUIRE( r1->type() == MD::ItemType::TableRow );
+
+	REQUIRE( r1->cells().size() == 1 );
+
+	REQUIRE( r1->cells().at( 0 )->type() == MD::ItemType::TableCell );
+	auto c1 = static_cast< MD::TableCell< TRAIT >* > ( r1->cells().at( 0 ).get() );
+	REQUIRE( c1->startColumn() == 0 );
+	REQUIRE( c1->startLine() == r1->startLine() );
+	REQUIRE( c1->endColumn() == r1->endColumn() ) ;
+	REQUIRE( c1->endLine() == c1->startLine() );
+
+	REQUIRE( c1->items().size() == 1 );
+	REQUIRE( c1->items().at( 0 )->type() == MD::ItemType::RawHtml );
+
+	auto h1 = static_cast< MD::RawHtml< TRAIT >* > ( c1->items().at( 0 ).get() );
+	REQUIRE( h1->startColumn() == 2 );
+	REQUIRE( h1->startLine() == c1->startLine() );
+	REQUIRE( h1->endColumn() == 16 );
+	REQUIRE( h1->endLine() == c1->startLine() );
+
+	REQUIRE( h1->text() == u8"<pre>code</pre>" );
+}
