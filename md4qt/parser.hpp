@@ -3085,6 +3085,8 @@ struct TextParsingOpts {
 	long long int line = 0;
 	long long int pos = 0;
 	long long int startTableLine = -1;
+	long long int lastTextLine = -1;
+	long long int lastTextPos = -1;
 	int columnsCount = -1;
 	int opts = TextWithoutFormat;
 	std::vector< std::pair< Style, long long int > > styles = {};
@@ -3305,8 +3307,7 @@ makeTextObjectWithLineBreak( const typename Trait::String & text, bool spaceBefo
 
 template< class Trait >
 inline void
-checkForTableInParagraph( TextParsingOpts< Trait > & po,
-	long long int & lastLine, long long int & lastPos )
+checkForTableInParagraph( TextParsingOpts< Trait > & po, long long int lastLine )
 {
 	if( !po.opts )
 	{
@@ -3323,13 +3324,16 @@ checkForTableInParagraph( TextParsingOpts< Trait > & po,
 				po.detected = TextParsingOpts< Trait >::Detected::Table;
 				po.startTableLine = i;
 				po.columnsCount = c;
-				lastLine = i - 1;
-				lastPos = po.fr.data[ lastLine ].first.length();
+				po.lastTextLine = i - 1;
+				po.lastTextPos = po.fr.data[ po.lastTextLine ].first.length();
 
 				return;
 			}
 		}
 	}
+
+	po.lastTextLine = po.fr.data.size() - 1;
+	po.lastTextPos = po.fr.data.back().first.length();
 }
 
 template< class Trait >
@@ -3351,8 +3355,6 @@ makeText(
 		return;
 
 	typename Trait::String text;
-
-	checkForTableInParagraph( po, lastLine, lastPos );
 
 	const auto isLastChar = po.pos >= po.fr.data.at( po.line ).first.length();
 	long long int startPos = ( isLastChar ? 0 : po.pos );
@@ -4522,7 +4524,7 @@ checkForMath( typename Delims< Trait >::const_iterator it,
 					 d.m_len == it->m_len );
 		} );
 
-	if( end != last )
+	if( end != last && end->m_line <= po.lastTextLine )
 	{
 		typename Trait::String math;
 
@@ -4759,33 +4761,38 @@ checkForInlineCode( typename Delims< Trait >::const_iterator it,
 
 	for( ; it != last; ++it )
 	{
-		const auto p = skipSpaces< Trait >( 0, po.fr.data.at( it->m_line ).first.asString() );
-		const auto withoutSpaces = po.fr.data.at( it->m_line ).first.asString().sliced( p );
-
-		if( ( it->m_type == Delimiter::HorizontalLine &&
-				withoutSpaces[ 0 ] == typename Trait::Char( '-' ) ) ||
-			it->m_type == Delimiter::H1 || it->m_type == Delimiter::H2 )
-				break;
-		else if( it->m_type == Delimiter::InlineCode &&
-			( it->m_len - ( it->m_backslashed ? 1 : 0 ) ) == len )
+		if( it->m_line <= po.lastTextLine )
 		{
-			if( !po.collectRefLinks )
+			const auto p = skipSpaces< Trait >( 0, po.fr.data.at( it->m_line ).first.asString() );
+			const auto withoutSpaces = po.fr.data.at( it->m_line ).first.asString().sliced( p );
+
+			if( ( it->m_type == Delimiter::HorizontalLine &&
+					withoutSpaces[ 0 ] == typename Trait::Char( '-' ) ) ||
+				it->m_type == Delimiter::H1 || it->m_type == Delimiter::H2 )
+					break;
+			else if( it->m_type == Delimiter::InlineCode &&
+				( it->m_len - ( it->m_backslashed ? 1 : 0 ) ) == len )
 			{
-				makeText( start->m_line, start->m_pos, po );
+				if( !po.collectRefLinks )
+				{
+					makeText( start->m_line, start->m_pos, po );
 
-				po.pos = start->m_pos + start->m_len;
+					po.pos = start->m_pos + start->m_len;
 
-				makeInlineCode( start->m_line, start->m_pos + start->m_len,
-					it->m_line, it->m_pos + ( it->m_backslashed ? 1 : 0 ), po );
+					makeInlineCode( start->m_line, start->m_pos + start->m_len,
+						it->m_line, it->m_pos + ( it->m_backslashed ? 1 : 0 ), po );
 
-				po.line = it->m_line;
-				po.pos = it->m_pos + it->m_len;
+					po.line = it->m_line;
+					po.pos = it->m_pos + it->m_len;
+				}
+
+				po.wasRefLink = false;
+
+				return it;
 			}
-
-			po.wasRefLink = false;
-
-			return it;
 		}
+		else
+			break;
 	}
 
 	if( !po.collectRefLinks )
@@ -4803,7 +4810,7 @@ readTextBetweenSquareBrackets( typename Delims< Trait >::const_iterator start,
 	TextParsingOpts< Trait > & po,
 	bool doNotCreateTextOnFail )
 {
-	if( it != last )
+	if( it != last && it->m_line <= po.lastTextLine )
 	{
 		if( start->m_line == it->m_line )
 		{
@@ -5212,15 +5219,16 @@ skipSpacesUpTo1Line( long long int & line, long long int & pos, const typename M
 
 template< class Trait >
 inline std::tuple< long long int, long long int, bool, typename Trait::String, long long int >
-readLinkDestination( long long int line, long long int pos, const typename MdBlock< Trait >::Data & fr )
+readLinkDestination( long long int line, long long int pos,
+	const TextParsingOpts< Trait > & po )
 {
-	skipSpacesUpTo1Line< Trait >( line, pos, fr );
+	skipSpacesUpTo1Line< Trait >( line, pos, po.fr.data );
 
 	const auto destLine = line;
-	const auto & s = fr.at( line ).first.asString();
+	const auto & s = po.fr.data.at( line ).first.asString();
 	bool backslash = false;
 
-	if( pos < s.length() )
+	if( pos < s.length() && line <= po.lastTextLine )
 	{
 		if( s[ pos ] == typename Trait::Char( '<' ) )
 		{
@@ -5301,28 +5309,29 @@ readLinkDestination( long long int line, long long int pos, const typename MdBlo
 
 template< class Trait >
 inline std::tuple< long long int, long long int, bool, typename Trait::String, long long int >
-readLinkTitle( long long int line, long long int pos, const typename MdBlock< Trait >::Data & fr )
+readLinkTitle( long long int line, long long int pos,
+	const TextParsingOpts< Trait > & po )
 {
-	const auto space = ( pos < fr.at( line ).first.length() ?
-		fr.at( line ).first[ pos ].isSpace() : true );
+	const auto space = ( pos < po.fr.data.at( line ).first.length() ?
+		po.fr.data.at( line ).first[ pos ].isSpace() : true );
 
 	const auto firstLine = line;
 
-	skipSpacesUpTo1Line< Trait >( line, pos, fr );
+	skipSpacesUpTo1Line< Trait >( line, pos, po.fr.data );
 
-	if( pos >= fr.at( line ).first.length() )
+	if( pos >= po.fr.data.at( line ).first.length() )
 		return { line, pos, true, {}, firstLine };
 
-	const auto sc = fr.at( line ).first[ pos ];
+	const auto sc = po.fr.data.at( line ).first[ pos ];
 
 	if( sc != typename Trait::Char( '"' ) && sc != typename Trait::Char( '\'' ) &&
 		sc != typename Trait::Char( '(' ) && sc != typename Trait::Char( ')' ) )
-			return { line, pos, ( firstLine != line ), {}, firstLine };
+			return { line, pos, ( firstLine != line && line <= po.lastTextLine ), {}, firstLine };
 	else if( !space && sc != typename Trait::Char( ')' ) )
 		return { line, pos, false, {}, firstLine };
 
 	if( sc == typename Trait::Char( ')' ) )
-		return { line, pos, true, {}, firstLine };
+		return { line, pos, line <= po.lastTextLine, {}, firstLine };
 
 	const auto startLine = line;
 
@@ -5330,37 +5339,37 @@ readLinkTitle( long long int line, long long int pos, const typename MdBlock< Tr
 
 	++pos;
 
-	skipSpacesUpTo1Line< Trait >( line, pos, fr );
+	skipSpacesUpTo1Line< Trait >( line, pos, po.fr.data );
 
 	typename Trait::String title;
 
-	while( line < (long long int) fr.size() && pos < fr.at( line ).first.length() )
+	while( line < (long long int) po.fr.data.size() && pos < po.fr.data.at( line ).first.length() )
 	{
 		bool now = false;
 
-		if( fr.at( line ).first[ pos ] == typename Trait::Char( '\\' ) && !backslash )
+		if( po.fr.data.at( line ).first[ pos ] == typename Trait::Char( '\\' ) && !backslash )
 		{
 			backslash = true;
 			now = true;
 		}
 		else if( sc == typename Trait::Char( '(' ) &&
-			fr.at( line ).first[ pos ] == typename Trait::Char( ')' ) && !backslash )
-				return { line, ++pos, true, title, startLine };
+			po.fr.data.at( line ).first[ pos ] == typename Trait::Char( ')' ) && !backslash )
+				return { line, ++pos, line <= po.lastTextLine, title, startLine };
 		else if( sc == typename Trait::Char( '(' ) &&
-			fr.at( line ).first[ pos ] == typename Trait::Char( '(' ) && !backslash )
+			po.fr.data.at( line ).first[ pos ] == typename Trait::Char( '(' ) && !backslash )
 				return { line, pos, false, {}, startLine };
-		else if( sc != typename Trait::Char( '(' ) && fr.at( line ).first[ pos ] == sc && !backslash )
-			return { line, ++pos, true, title, startLine };
+		else if( sc != typename Trait::Char( '(' ) && po.fr.data.at( line ).first[ pos ] == sc && !backslash )
+			return { line, ++pos, line <= po.lastTextLine, title, startLine };
 		else
-			title.push_back( fr.at( line ).first[ pos ] );
+			title.push_back( po.fr.data.at( line ).first[ pos ] );
 
 		if( !now )
 			backslash = false;
 
 		++pos;
 
-		if( pos == fr.at( line ).first.length() )
-			skipSpacesUpTo1Line< Trait >( line, pos, fr );
+		if( pos == po.fr.data.at( line ).first.length() )
+			skipSpacesUpTo1Line< Trait >( line, pos, po.fr.data );
 	}
 
 	return { line, pos, false, {}, startLine };
@@ -5379,14 +5388,14 @@ checkForInlineLink( typename Delims< Trait >::const_iterator it,
 	typename Trait::String dest, title;
 	long long int destStartLine = 0;
 
-	std::tie( l, p, ok, dest, destStartLine ) = readLinkDestination< Trait >( l, p, po.fr.data );
+	std::tie( l, p, ok, dest, destStartLine ) = readLinkDestination< Trait >( l, p, po );
 
 	if( !ok )
 		return { {}, {}, it, false };
 
 	long long int s = 0;
 
-	std::tie( l, p, ok, title, s ) = readLinkTitle< Trait >( l, p, po.fr.data );
+	std::tie( l, p, ok, title, s ) = readLinkTitle< Trait >( l, p, po );
 
 	skipSpacesUpTo1Line< Trait >( l, p, po.fr.data );
 
@@ -5416,14 +5425,14 @@ checkForRefLink( typename Delims< Trait >::const_iterator it,
 	typename Trait::String dest, title;
 	long long int destStartLine = 0;
 
-	std::tie( l, p, ok, dest, destStartLine ) = readLinkDestination< Trait >( l, p, po.fr.data );
+	std::tie( l, p, ok, dest, destStartLine ) = readLinkDestination< Trait >( l, p, po );
 
 	if( !ok )
 		return { {}, {}, it, false };
 
 	long long int titleStartLine = 0;
 
-	std::tie( l, p, ok, title, titleStartLine ) = readLinkTitle< Trait >( l, p, po.fr.data );
+	std::tie( l, p, ok, title, titleStartLine ) = readLinkTitle< Trait >( l, p, po );
 
 	if( !ok )
 		return { {}, {}, it, false };
@@ -6162,47 +6171,52 @@ isStyleClosed( typename Delims< Trait >::const_iterator it,
 
 	for( ; it != last; ++it )
 	{
-		switch( it->m_type )
+		if( it->m_line <= po.lastTextLine )
 		{
-			case Delimiter::SquareBracketsOpen :
-				it = checkForLink( it, last, po );
-				break;
-
-			case Delimiter::ImageOpen :
-				it = checkForImage( it, last, po );
-				break;
-
-			case Delimiter::Less :
-				it = checkForAutolinkHtml( it, last, po, false );
-				break;
-
-			case Delimiter::Strikethrough :
-			case Delimiter::Emphasis1 :
-			case Delimiter::Emphasis2 :
+			switch( it->m_type )
 			{
-				it = readSequence< Trait >( it, last, itLine, itPos, itLength, current );
+				case Delimiter::SquareBracketsOpen :
+					it = checkForLink( it, last, po );
+					break;
 
-				if( first )
+				case Delimiter::ImageOpen :
+					it = checkForImage( it, last, po );
+					break;
+
+				case Delimiter::Less :
+					it = checkForAutolinkHtml( it, last, po, false );
+					break;
+
+				case Delimiter::Strikethrough :
+				case Delimiter::Emphasis1 :
+				case Delimiter::Emphasis2 :
 				{
-					vars.front().push_back( { { itLength, it->m_leftFlanking && it->m_rightFlanking },
-						emphasisToInt( open->m_type ) } );
-					first = false;
+					it = readSequence< Trait >( it, last, itLine, itPos, itLength, current );
+
+					if( first )
+					{
+						vars.front().push_back( { { itLength, it->m_leftFlanking && it->m_rightFlanking },
+							emphasisToInt( open->m_type ) } );
+						first = false;
+					}
+					else
+					{
+						collectDelimiterVariants( vars, itLength, emphasisToInt( it->m_type ),
+							it->m_leftFlanking, it->m_rightFlanking );
+					}
 				}
-				else
-				{
-					collectDelimiterVariants( vars, itLength, emphasisToInt( it->m_type ),
-						it->m_leftFlanking, it->m_rightFlanking );
-				}
+					break;
+
+				case Delimiter::InlineCode :
+					it = checkForInlineCode( it, last, po );
+					break;
+
+				default :
+					break;
 			}
-				break;
-
-			case Delimiter::InlineCode :
-				it = checkForInlineCode( it, last, po );
-				break;
-
-			default :
-				break;
 		}
+		else
+			break;
 	}
 
 	po.line = line;
@@ -6842,16 +6856,20 @@ parseFormattedText( MdBlock< Trait > & fr,
 				if( isListOrQuoteAfterHtml( po ) )
 					break;
 
+				if( po.line > po.lastTextLine )
+					checkForTableInParagraph( po, fr.data.size() - 1 );
+
 				if( it->m_line > po.line || it->m_pos > po.pos )
 				{
-					if( po.shouldStopParsing() )
+					if( po.shouldStopParsing() && po.lastTextLine < it->m_line )
 						break;
 					else if( !collectRefLinks )
-						makeText( it->m_line, it->m_pos, po );
+						makeText( po.lastTextLine < it->m_line ? po.lastTextLine : it->m_line,
+							po.lastTextLine < it->m_line ? po.lastTextPos : it->m_pos, po );
 					else
 					{
-						po.line = it->m_line;
-						po.pos = it->m_pos;
+						po.line = ( po.lastTextLine < it->m_line ? po.lastTextLine : it->m_line );
+						po.pos = ( po.lastTextLine < it->m_line ? po.lastTextPos : it->m_pos );
 					}
 				}
 
@@ -6921,14 +6939,8 @@ parseFormattedText( MdBlock< Trait > & fr,
 
 					case Delimiter::HorizontalLine :
 					{
-						{
-							long long int lastLine = it->m_line, lastPos = 0;
-
-							checkForTableInParagraph( po, lastLine, lastPos );
-
-							if( po.shouldStopParsing() )
-								break;
-						}
+						if( po.shouldStopParsing() && po.lastTextLine < it->m_line )
+							break;
 
 						const auto pos = skipSpaces< Trait >( 0,
 							po.fr.data[ it->m_line ].first.asString() );
@@ -7011,14 +7023,8 @@ parseFormattedText( MdBlock< Trait > & fr,
 					case Delimiter::H1 :
 					case Delimiter::H2 :
 					{
-						{
-							long long int lastLine = it->m_line, lastPos = 0;
-
-							checkForTableInParagraph( po, lastLine, lastPos );
-
-							if( po.shouldStopParsing() )
-								break;
-						}
+						if( po.shouldStopParsing() && po.lastTextLine < it->m_line )
+							break;
 
 						optimizeParagraph< Trait >( p );
 
@@ -7064,12 +7070,15 @@ parseFormattedText( MdBlock< Trait > & fr,
 
 					default :
 					{
-						if( !po.shouldStopParsing() && !collectRefLinks )
-							makeText( it->m_line, it->m_pos + it->m_len, po );
-						else
+						if( !po.shouldStopParsing() )
 						{
-							po.line = it->m_line;
-							po.pos = it->m_pos + it->m_len;
+							if( !collectRefLinks )
+								makeText( it->m_line, it->m_pos + it->m_len, po );
+							else
+							{
+								po.line = it->m_line;
+								po.pos = it->m_pos + it->m_len;
+							}
 						}
 					}
 						break;
@@ -7116,20 +7125,16 @@ parseFormattedText( MdBlock< Trait > & fr,
 		resetHtmlTag( html );
 	}
 
+	if( po.lastTextLine == -1 )
+		checkForTableInParagraph( po, po.fr.data.size() - 1 );
+
+	if( po.detected == TextParsingOpts< Trait >::Detected::Table )
 	{
-		long long int lastLine = po.fr.data.size() - 1;
-		long long int lastPos = po.fr.data.back().first.length();
+		if( !collectRefLinks )
+			makeText( po.lastTextLine, po.lastTextPos, po );
 
-		checkForTableInParagraph( po, lastLine, lastPos );
-
-		if( po.detected == TextParsingOpts< Trait >::Detected::Table )
-		{
-			if( !collectRefLinks )
-				makeText( lastLine, lastPos, po );
-
-			parseTableInParagraph( po, pt, doc,
-				linksToParse, workingPath, fileName, collectRefLinks );
-		}
+		parseTableInParagraph( po, pt, doc,
+			linksToParse, workingPath, fileName, collectRefLinks );
 	}
 
 	while( po.detected == TextParsingOpts< Trait >::Detected::HTML && po.line < po.fr.data.size() )
@@ -7234,6 +7239,8 @@ Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
 
 		TextParsingOpts< Trait > po = { fr, f, doc, linksToParse, workingPath,
 			fileName, collectRefLinks, false, html };
+		po.lastTextLine = fr.data.size();
+		po.lastTextPos = fr.data.back().first.length();
 
 		if( !delims.empty() && delims.cbegin()->m_type == Delimiter::SquareBracketsOpen &&
 			!delims.cbegin()->m_isWordBefore )
