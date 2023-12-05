@@ -1515,3 +1515,67 @@ TEST_CASE( "177" )
 		REQUIRE( t->rows().size() == 2 );
 	}
 }
+
+/*
+<?php
+
+
+data
+
+
+?>
+
+*/
+TEST_CASE( "178" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/178.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( h->startColumn() == 0 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 1 );
+	REQUIRE( h->endLine() == 6 );
+	REQUIRE( h->text() == u8"<?php\n\n\ndata\n\n\n?>" );
+}
+
+/*
+<form>
+
+<form>
+
+*/
+TEST_CASE( "179" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/179.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 3 );
+
+	{
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 0 );
+		REQUIRE( h->endColumn() == 5 );
+		REQUIRE( h->endLine() == 0 );
+		REQUIRE( h->text() == u8"<form>" );
+	}
+
+	{
+		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 2 ).get() );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 2 );
+		REQUIRE( h->endColumn() == 5 );
+		REQUIRE( h->endLine() == 2 );
+		REQUIRE( h->text() == u8"<form>" );
+	}
+}

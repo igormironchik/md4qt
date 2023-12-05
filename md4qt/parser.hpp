@@ -7113,18 +7113,6 @@ parseFormattedText( MdBlock< Trait > & fr,
 			finishRawHtmlTag( delims.cend(), delims.cend(), po, false );
 	}
 
-	if( html.html.get() && !html.continueHtml && html.onLine )
-	{
-		if( !collectRefLinks )
-		{
-			p->appendItem( html.html );
-			p->setEndColumn( html.html->endColumn() );
-			p->setEndLine( html.html->endLine() );
-		}
-
-		resetHtmlTag( html );
-	}
-
 	if( po.lastTextLine == -1 )
 		checkForTableInParagraph( po, po.fr.data.size() - 1 );
 
