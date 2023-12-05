@@ -6576,16 +6576,10 @@ inline void
 normalizePos( long long int & pos, long long int & line,
 	long long int length, long long int linesCount )
 {
-	if( pos != 0 )
+	if( pos != 0 && line < linesCount && pos == length )
 	{
-		if( line < linesCount )
-		{
-			if( pos == length )
-			{
-				pos = 0;
-				++line;
-			}
-		}
+		pos = 0;
+		++line;
 	}
 }
 
@@ -6845,32 +6839,21 @@ parseFormattedText( MdBlock< Trait > & fr,
 				it = finishRawHtmlTag( it, last, po, false );
 			else
 			{
-				if( html.html.get() )
-				{
-					if( !collectRefLinks )
-						p->appendItem( html.html );
-
-					resetHtmlTag( po.html );
-				}
-
 				if( isListOrQuoteAfterHtml( po ) )
 					break;
 
 				if( po.line > po.lastTextLine )
 					checkForTableInParagraph( po, fr.data.size() - 1 );
 
-				if( it->m_line > po.line || it->m_pos > po.pos )
+				if( po.shouldStopParsing() && po.lastTextLine < it->m_line )
+					break;
+				else if( !collectRefLinks )
+					makeText( po.lastTextLine < it->m_line ? po.lastTextLine : it->m_line,
+						po.lastTextLine < it->m_line ? po.lastTextPos : it->m_pos, po );
+				else
 				{
-					if( po.shouldStopParsing() && po.lastTextLine < it->m_line )
-						break;
-					else if( !collectRefLinks )
-						makeText( po.lastTextLine < it->m_line ? po.lastTextLine : it->m_line,
-							po.lastTextLine < it->m_line ? po.lastTextPos : it->m_pos, po );
-					else
-					{
-						po.line = ( po.lastTextLine < it->m_line ? po.lastTextLine : it->m_line );
-						po.pos = ( po.lastTextLine < it->m_line ? po.lastTextPos : it->m_pos );
-					}
+					po.line = ( po.lastTextLine < it->m_line ? po.lastTextLine : it->m_line );
+					po.pos = ( po.lastTextLine < it->m_line ? po.lastTextPos : it->m_pos );
 				}
 
 				switch( it->m_type )
@@ -6939,9 +6922,6 @@ parseFormattedText( MdBlock< Trait > & fr,
 
 					case Delimiter::HorizontalLine :
 					{
-						if( po.shouldStopParsing() && po.lastTextLine < it->m_line )
-							break;
-
 						const auto pos = skipSpaces< Trait >( 0,
 							po.fr.data[ it->m_line ].first.asString() );
 						const auto withoutSpaces = po.fr.data[ it->m_line ]
@@ -7023,9 +7003,6 @@ parseFormattedText( MdBlock< Trait > & fr,
 					case Delimiter::H1 :
 					case Delimiter::H2 :
 					{
-						if( po.shouldStopParsing() && po.lastTextLine < it->m_line )
-							break;
-
 						optimizeParagraph< Trait >( p );
 
 						if( it->m_line - 1 >= 0 )
