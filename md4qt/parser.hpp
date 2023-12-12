@@ -1876,7 +1876,7 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 		const bool indentIn = indentInList( indents, first, false );
 		bool isHeading = false;
 
-		if( s.asString().startsWith( '#' ) )
+		if( s.asString().startsWith( '#' ) && ( indent ? first - (*indent) < 4 : first < 4 ) )
 		{
 			long long int c = 0;
 

@@ -1579,3 +1579,62 @@ TEST_CASE( "179" )
 		REQUIRE( h->text() == u8"<form>" );
 	}
 }
+
+/*
+* The
+
+      ```
+      # This
+      ```
+
+    The
+*/
+TEST_CASE( "180" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/180.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->items().size() == 1 );
+	REQUIRE( l->startColumn() == 0 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 6 );
+	REQUIRE( l->endLine() == 6 );
+
+	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+	auto i = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( i->items().size() == 3 );
+	REQUIRE( i->startColumn() == 0 );
+	REQUIRE( i->startLine() == 0 );
+	REQUIRE( i->endColumn() == 6 );
+	REQUIRE( i->endLine() == 6 );
+
+	REQUIRE( i->items().at( 0 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( i->items().at( 0 ).get() );
+	REQUIRE( p->startColumn() == 2 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 4 );
+	REQUIRE( p->endLine() == 0 );
+
+	REQUIRE( i->items().at( 1 )->type() == MD::ItemType::Code );
+	auto c = static_cast< MD::Code< TRAIT >* > ( i->items().at( 1 ).get() );
+	REQUIRE( c->startColumn() == 6 );
+	REQUIRE( c->startLine() == 2 );
+	REQUIRE( c->endColumn() == 8 );
+	REQUIRE( c->endLine() == 4 );
+	REQUIRE( c->text() == u8"```\n# This\n```" );
+
+	{
+		REQUIRE( i->items().at( 2 )->type() == MD::ItemType::Paragraph );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( i->items().at( 2 ).get() );
+		REQUIRE( p->startColumn() == 2 );
+		REQUIRE( p->startLine() == 6 );
+		REQUIRE( p->endColumn() == 6 );
+		REQUIRE( p->endLine() == 6 );
+	}
+}
