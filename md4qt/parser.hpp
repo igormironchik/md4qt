@@ -4267,7 +4267,18 @@ finishRule6HtmlTag( typename Delims< Trait >::const_iterator it,
 	po.html.onLine = ( it != last ? it->m_pos == skipSpaces< Trait >(
 		0, po.fr.data[ it->m_line ].first.asString() ) : true );
 
-	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 6, po.html.onLine );
+	if( po.html.onLine )
+		eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 6, po.html.onLine );
+	else
+	{
+		const auto nit = std::find_if( std::next( it ), last,
+			[] ( const auto & d ) { return ( d.m_type == Delimiter::Greater ); } );
+
+		if( nit != last )
+			eatRawHtml( po.line, po.pos, nit->m_line, nit->m_pos + nit->m_len , po, true, 6, false );
+		else
+			eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 6, po.html.onLine );
+	}
 }
 
 template< class Trait >

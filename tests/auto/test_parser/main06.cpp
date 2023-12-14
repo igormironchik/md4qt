@@ -1638,3 +1638,42 @@ TEST_CASE( "180" )
 		REQUIRE( p->endLine() == 6 );
 	}
 }
+
+/*
+[<picture><source media="(prefers-color-scheme: dark)" srcset="https://steampipe.io/images/steampipe-color-logo-and-wordmark-with-white-bubble.svg"><source media="(prefers-color-scheme: light)" srcset="https://steampipe.io/images/steampipe-color-logo-and-wordmark-with-white-bubble.svg"><img width="67%" alt="Steampipe Logo" src="https://steampipe.io/images/steampipe-color-logo-and-wordmark-with-white-bubble.svg"></picture>](https://steampipe.io?utm_id=gspreadme&utm_source=github&utm_medium=repo&utm_campaign=github&utm_content=readme)
+
+*/
+TEST_CASE( "181" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/181.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->startColumn() == 0 );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endColumn() == 537 );
+	REQUIRE( p->endLine() == 0 );
+	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().front()->type() == MD::ItemType::Link );
+	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().front().get() );
+	REQUIRE( l->startColumn() == 0 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 537 );
+	REQUIRE( l->endLine() == 0 );
+	REQUIRE( l->url() == u8"https://steampipe.io?utm_id=gspreadme&utm_source=github&"
+		"utm_medium=repo&utm_campaign=github&utm_content=readme" );
+	REQUIRE( l->p().get() );
+	auto pp = l->p().get();
+	REQUIRE( pp->startColumn() == 1 );
+	REQUIRE( pp->startLine() == 0 );
+	REQUIRE( pp->endColumn() == 424 );
+	REQUIRE( pp->endLine() == 0 );
+	REQUIRE( pp->items().size() == 5 );
+	for( int i = 0; i < pp->items().size(); ++i )
+		REQUIRE( pp->items().at( i )->type() == MD::ItemType::RawHtml );
+}
