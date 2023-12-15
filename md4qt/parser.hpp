@@ -861,6 +861,18 @@ public:
 		long long int ns,
 		long long int currentLineNumber );
 
+	static void parseFragmentAndMakeNextLineMain( ParserContext & ctx,
+		std::shared_ptr< Block< Trait > > parent,
+		std::shared_ptr< Document< Trait > > doc,
+		typename Trait::StringList & linksToParse,
+		const typename Trait::String & workingPath,
+		const typename Trait::String & fileName,
+		bool collectRefLinks,
+		const typename Trait::InternalString & line,
+		long long int currentIndent,
+		long long int ns,
+		long long int currentLineNumber );
+
 	static bool isListType( BlockType t );
 
 	static typename Trait::InternalString readLine( ParserContext & ctx,
@@ -1308,6 +1320,28 @@ Parser< Trait >::makeLineMain( ParserContext & ctx,
 }
 
 template< class Trait >
+inline void
+Parser< Trait >::parseFragmentAndMakeNextLineMain( ParserContext & ctx,
+	std::shared_ptr< Block< Trait > > parent,
+	std::shared_ptr< Document< Trait > > doc,
+	typename Trait::StringList & linksToParse,
+	const typename Trait::String & workingPath,
+	const typename Trait::String & fileName,
+	bool collectRefLinks,
+	const typename Trait::InternalString & line,
+	long long int currentIndent,
+	long long int ns,
+	long long int currentLineNumber )
+{
+	const auto empty = ctx.emptyLinesCount;
+
+	parseFragment( ctx, parent, doc, linksToParse,
+		workingPath, fileName, collectRefLinks );
+
+	makeLineMain( ctx, line, empty, currentIndent, ns, currentLineNumber );
+}
+
+template< class Trait >
 inline bool
 Parser< Trait >::isListType( BlockType t )
 {
@@ -1397,10 +1431,9 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 		{
 			if( ctx.emptyLinesCount > 0 )
 			{
-				parseFragment( ctx, parent, doc, linksToParse,
-					workingPath, fileName, collectRefLinks );
-
-				makeLineMain( ctx, line, 0, currentIndent, ns, currentLineNumber );
+				parseFragmentAndMakeNextLineMain( ctx, parent, doc, linksToParse,
+					workingPath, fileName, collectRefLinks,
+					line, currentIndent, ns, currentLineNumber );
 
 				continue;
 			}
@@ -1417,11 +1450,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 		// First line of the fragment.
 		if( ns != line.length() && ctx.type == BlockType::EmptyLine )
 		{
-			makeLineMain( ctx, line, 0, currentIndent, ns, currentLineNumber );
-
-			if( ctx.type == BlockType::Heading )
-				parseFragment( ctx, parent, doc, linksToParse,
-					workingPath, fileName, collectRefLinks );
+			makeLineMain( ctx, line, ctx.emptyLinesCount, currentIndent, ns, currentLineNumber );
 
 			continue;
 		}
@@ -1502,13 +1531,15 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			}
 			else
 			{
+				const auto empty = ctx.emptyLinesCount;
+
 				parseFragment( ctx, parent, doc, linksToParse,
 					workingPath, fileName, collectRefLinks );
 
 				ctx.lineType = whatIsTheLine( line, false, false, false, nullptr,
 					nullptr, true, false, &ctx.indents );
 
-				makeLineMain( ctx, line, 0, currentIndent, ns, currentLineNumber );
+				makeLineMain( ctx, line, empty, currentIndent, ns, currentLineNumber );
 
 				continue;
 			}
@@ -1529,12 +1560,9 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 			}
 			else
 			{
-				const auto empty = ctx.emptyLinesCount;
-
-				parseFragment( ctx, parent, doc, linksToParse,
-					workingPath, fileName, collectRefLinks );
-
-				makeLineMain( ctx, line, empty, currentIndent, ns, currentLineNumber );
+				parseFragmentAndMakeNextLineMain( ctx, parent, doc, linksToParse,
+					workingPath, fileName, collectRefLinks,
+					line, currentIndent, ns, currentLineNumber );
 			}
 
 			continue;
@@ -1572,12 +1600,9 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 					}
 				}
 
-				const auto empty = ctx.emptyLinesCount;
-
-				parseFragment( ctx, parent, doc, linksToParse,
-					workingPath, fileName, collectRefLinks );
-
-				makeLineMain( ctx, line, empty, currentIndent, ns, currentLineNumber );
+				parseFragmentAndMakeNextLineMain( ctx, parent, doc, linksToParse,
+					workingPath, fileName, collectRefLinks,
+					line, currentIndent, ns, currentLineNumber );
 			}
 		}
 		// End of code block.
@@ -1589,14 +1614,21 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 			parseFragment( ctx, parent, doc, linksToParse, workingPath, fileName, collectRefLinks );
 		}
+		// Not a continue of list.
 		else if( ctx.type != ctx.lineType && isListType( ctx.type ) &&
 			ctx.lineType != BlockType::SomethingInList &&
 			ctx.lineType != BlockType::FensedCodeInList &&
 			!isListType( ctx.lineType ) )
-		{		
-			parseFragment( ctx, parent, doc, linksToParse, workingPath, fileName, collectRefLinks );
-
-			makeLineMain( ctx, line, 0, currentIndent, ns, currentLineNumber );
+		{
+			parseFragmentAndMakeNextLineMain( ctx, parent, doc, linksToParse,
+				workingPath, fileName, collectRefLinks,
+				line, currentIndent, ns, currentLineNumber );
+		}
+		else if( ctx.type == BlockType::Heading )
+		{
+			parseFragmentAndMakeNextLineMain( ctx, parent, doc, linksToParse,
+				workingPath, fileName, collectRefLinks,
+				line, currentIndent, ns, currentLineNumber );
 		}
 		else
 			ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
