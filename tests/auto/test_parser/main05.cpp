@@ -2108,8 +2108,8 @@ TEST_CASE( "148" )
 		auto l = static_cast< MD::List< TRAIT >* > ( li->items().at( 1 ).get() );
 		REQUIRE( l->startColumn() == 4 );
 		REQUIRE( l->startLine() == 2 );
-		REQUIRE( l->endColumn() == 0 );
-		REQUIRE( l->endLine() == 4 );
+		REQUIRE( l->endColumn() == 13 );
+		REQUIRE( l->endLine() == 3 );
 	}
 
 	REQUIRE( li->items().at( 2 )->type() == MD::ItemType::RawHtml );

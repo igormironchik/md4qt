@@ -1956,11 +1956,22 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 			else if( ( ( ( s.asString().startsWith( '-' ) ||
 					s.asString().startsWith( '+' ) || s.asString().startsWith( '*' ) ) &&
 				( ( s.length() > 1 && s[ 1 ] == typename Trait::Char( ' ' ) ) || s.length() == 1 ) ) ||
-				orderedList ) &&
-				( first < 4  || ( emptyLinePreceded ? false : indentIn ) ) )
+				orderedList ) && ( first < 4 || indentIn ) )
 			{
-				if( calcIndent && indent )
-					*indent = posOfListItem< Trait >( str.asString(), orderedList );
+				if( indent )
+				{
+					if( indent )
+					{
+						if( emptyLinePreceded && first == 4 &&
+							first < *indent &&
+							( indents ? std::find( indents->cbegin(), indents->cend(), 4 ) ==
+								indents->cend() : true ) )
+									return BlockType::CodeIndentedBySpaces;
+
+						if( calcIndent )
+							*indent = posOfListItem< Trait >( str.asString(), orderedList );
+					}
+				}
 
 				if( s.simplified().length() == 1 || isFirstLineEmpty )
 					return BlockType::ListWithFirstEmptyLine;
@@ -1995,10 +2006,19 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 					s.asString().startsWith( '+' ) || s.asString().startsWith( '*' ) ) &&
 				( ( s.length() > 1 && s[ 1 ] == typename Trait::Char( ' ' ) ) || s.length() == 1 ) ) ||
 				orderedList ) &&
-				( first < 4  || ( emptyLinePreceded ? false : indentIn ) ) )
+				( first < 4 || indentIn ) )
 			{
-				if( calcIndent && indent )
-					*indent = posOfListItem< Trait >( str.asString(), orderedList );
+				if( indent )
+				{
+					if( emptyLinePreceded && first == 4 &&
+						first < *indent &&
+						( indents ? std::find( indents->cbegin(), indents->cend(), 4 ) ==
+							indents->cend() : true ) )
+								return BlockType::CodeIndentedBySpaces;
+
+					if( calcIndent )
+						*indent = posOfListItem< Trait >( str.asString(), orderedList );
+				}
 
 				if( s.simplified().length() == 1 || isFirstLineEmpty )
 					return BlockType::ListWithFirstEmptyLine;
@@ -7750,6 +7770,10 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 					if( it->first.asString().startsWith( typename Trait::String( indent, ' ' ) ) )
 						it->first = it->first.sliced( indent );
 				}
+
+				while( !nestedList.empty() &&
+					nestedList.back().first.asString().simplified().isEmpty() )
+						nestedList.pop_back();
 
 				MdBlock< Trait > block = { nestedList, 0 };
 
