@@ -2005,20 +2005,10 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 			if( !isHLine && ( ( ( s.asString().startsWith( '-' ) ||
 					s.asString().startsWith( '+' ) || s.asString().startsWith( '*' ) ) &&
 				( ( s.length() > 1 && s[ 1 ] == typename Trait::Char( ' ' ) ) || s.length() == 1 ) ) ||
-				orderedList ) &&
-				( first < 4 || indentIn ) )
+				orderedList ) && first < 4 )
 			{
-				if( indent )
-				{
-					if( emptyLinePreceded && first == 4 &&
-						first < *indent &&
-						( indents ? std::find( indents->cbegin(), indents->cend(), 4 ) ==
-							indents->cend() : true ) )
-								return BlockType::CodeIndentedBySpaces;
-
-					if( calcIndent )
-						*indent = posOfListItem< Trait >( str.asString(), orderedList );
-				}
+				if( calcIndent && indent )
+					*indent = posOfListItem< Trait >( str.asString(), orderedList );
 
 				if( s.simplified().length() == 1 || isFirstLineEmpty )
 					return BlockType::ListWithFirstEmptyLine;

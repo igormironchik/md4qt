@@ -155,3 +155,25 @@ TEST_CASE( "184" )
 		}
 	}
 }
+
+/*
+	- code
+
+*/
+TEST_CASE( "185" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/185.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Code );
+	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( c->startColumn() == 4 );
+	REQUIRE( c->startLine() == 0 );
+	REQUIRE( c->endColumn() == 9 );
+	REQUIRE( c->endLine() == 0 );
+	REQUIRE( c->text() == u8"- code" );
+}
