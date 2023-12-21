@@ -1299,7 +1299,9 @@ Parser< Trait >::makeLineMain( ParserContext & ctx,
 		case BlockType::List :
 		case BlockType::ListWithFirstEmptyLine :
 		{
-			ctx.indents.push_back( currentIndent );
+			if( ctx.indents.empty() )
+				ctx.indents.push_back( currentIndent );
+
 			ctx.indent = currentIndent;
 		}
 			break;
