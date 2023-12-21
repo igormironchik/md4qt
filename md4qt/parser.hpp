@@ -1927,6 +1927,9 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 			const auto orderedList = isOrderedList< Trait >( str.asString(),
 				nullptr, nullptr, nullptr, &isFirstLineEmpty );
 			const bool fensedCode = isCodeFences< Trait >( s.asString() );
+			const auto codeIndentedBySpaces = indent && emptyLinePreceded && first == 4 &&
+				first < *indent && ( indents ? std::find( indents->cbegin(), indents->cend(), 4 ) ==
+					indents->cend() : true );
 
 			if( fensedCodeInList )
 			{
@@ -1954,17 +1957,11 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 				( ( s.length() > 1 && s[ 1 ] == typename Trait::Char( ' ' ) ) || s.length() == 1 ) ) ||
 				orderedList ) && ( first < 4 || indentIn ) )
 			{
-				if( indent )
-				{
-					if( emptyLinePreceded && first == 4 &&
-						first < *indent &&
-						( indents ? std::find( indents->cbegin(), indents->cend(), 4 ) ==
-							indents->cend() : true ) )
-								return BlockType::CodeIndentedBySpaces;
+				if( codeIndentedBySpaces )
+					return BlockType::CodeIndentedBySpaces;
 
-					if( calcIndent )
-						*indent = posOfListItem< Trait >( str.asString(), orderedList );
-				}
+				if( indent && calcIndent )
+					*indent = posOfListItem< Trait >( str.asString(), orderedList );
 
 				if( s.simplified().length() == 1 || isFirstLineEmpty )
 					return BlockType::ListWithFirstEmptyLine;
@@ -1972,7 +1969,12 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 					return BlockType::List;
 			}
 			else if( indentInList( indents, first, true ) )
-				return BlockType::SomethingInList;
+			{
+				if( codeIndentedBySpaces )
+					return BlockType::CodeIndentedBySpaces;
+				else
+					return BlockType::SomethingInList;
+			}
 			else
 			{
 				if( !isHeading && !isBlockquote && !fensedCode &&
