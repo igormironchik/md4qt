@@ -1927,12 +1927,6 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 			const auto orderedList = isOrderedList< Trait >( str.asString(),
 				nullptr, nullptr, nullptr, &isFirstLineEmpty );
 			const bool fensedCode = isCodeFences< Trait >( s.asString() );
-			const bool code = ( ( emptyLinePreceded && first >= 4 &&
-					( indents && !indents->empty() ? indents->front() < first : true ) ) ||
-				fensedCode );
-			const bool indentInLastIndent = ( indent ? first >= *indent : false );
-			const bool isHLine = isHorizontalLine< Trait >( s.asString() ) &&
-				!( s[ 0 ] == typename Trait::Char( '-' ) && indentIn );
 
 			if( fensedCodeInList )
 			{
@@ -1962,17 +1956,14 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 			{
 				if( indent )
 				{
-					if( indent )
-					{
-						if( emptyLinePreceded && first == 4 &&
-							first < *indent &&
-							( indents ? std::find( indents->cbegin(), indents->cend(), 4 ) ==
-								indents->cend() : true ) )
-									return BlockType::CodeIndentedBySpaces;
+					if( emptyLinePreceded && first == 4 &&
+						first < *indent &&
+						( indents ? std::find( indents->cbegin(), indents->cend(), 4 ) ==
+							indents->cend() : true ) )
+								return BlockType::CodeIndentedBySpaces;
 
-						if( calcIndent )
-							*indent = posOfListItem< Trait >( str.asString(), orderedList );
-					}
+					if( calcIndent )
+						*indent = posOfListItem< Trait >( str.asString(), orderedList );
 				}
 
 				if( s.simplified().length() == 1 || isFirstLineEmpty )
@@ -1980,20 +1971,13 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 				else
 					return BlockType::List;
 			}
-			else if( emptyLinePreceded )
+			else if( indentInList( indents, first, true ) )
+				return BlockType::SomethingInList;
+			else
 			{
-				if( indentInList( indents, first, true ) && ( !code || indentInLastIndent ) )
-					return BlockType::SomethingInList;
-			}
-			else if( !emptyLinePreceded )
-			{
-				if( ( !code || indentInLastIndent ) && !isHLine && !inListWithFirstEmptyLine &&
-					!isBlockquote && !isHeading )
+				if( !isHeading && !isBlockquote && !fensedCode &&
+					!emptyLinePreceded && !inListWithFirstEmptyLine )
 						return BlockType::SomethingInList;
-				else if( inListWithFirstEmptyLine && indentInList( indents, first, true ) )
-					return BlockType::SomethingInList;
-				else if( ( isBlockquote || isHeading ) && indentIn )
-					return BlockType::SomethingInList;
 			}
 		}
 		else
