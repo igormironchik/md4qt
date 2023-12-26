@@ -430,6 +430,7 @@ tableToHtml( Table< Trait > * t, std::shared_ptr< Document< Trait > > doc,
 template< class Trait >
 typename Trait::String
 listItemToHtml( ListItem< Trait > * i, std::shared_ptr< Document< Trait > > doc,
+	bool first,
 	typename Trait::template Vector< typename Trait::String > & fns,
 	const typename Trait::template Vector< typename Trait::String > & anchors )
 {
@@ -443,6 +444,13 @@ listItemToHtml( ListItem< Trait > * i, std::shared_ptr< Document< Trait > > doc,
 
 		if( i->isChecked() )
 			html.push_back( " checked=\"\"" );
+	}
+
+	if( i->listType() == ListItem< Trait >::Ordered && first )
+	{
+		html.push_back( " value=\"" );
+		html.push_back( std::to_string( i->startNumber() ).c_str() );
+		html.push_back( "\"" );
 	}
 
 	html.push_back( ">\n" );
@@ -518,7 +526,6 @@ listToHtml( List< Trait > * l, std::shared_ptr< Document< Trait > > doc,
 			if( first )
 			{
 				type = item->listType();
-				first = false;
 
 				if( type == ListItem< Trait >::Ordered )
 				{
@@ -552,7 +559,9 @@ listToHtml( List< Trait > * l, std::shared_ptr< Document< Trait > > doc,
 				}
 			}
 
-			html.push_back( listItemToHtml( item, doc, fns, anchors ) );
+			html.push_back( listItemToHtml( item, doc, first, fns, anchors ) );
+
+			first = false;
 		}
 	}
 
