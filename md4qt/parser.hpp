@@ -485,15 +485,20 @@ template< class Trait >
 inline bool
 isStartOfCode( const typename Trait::String & str, typename Trait::String * syntax = nullptr )
 {
-	if( str.size() < 3 )
+	long long int p = skipSpaces< Trait >( p, str );
+
+	if( p > 3 )
 		return false;
 
-	const bool c96 = str[ 0 ] == typename Trait::Char( '`' );
-	const bool c126 = str[ 0 ] == typename Trait::Char( '~' );
+	if( str.size() - p < 3 )
+		return false;
+
+	const bool c96 = str[ p ] == typename Trait::Char( '`' );
+	const bool c126 = str[ p ] == typename Trait::Char( '~' );
 
 	if( c96 || c126 )
 	{
-		long long int p = 1;
+		++p;
 		long long int c = 1;
 
 		while( p < str.length() )
@@ -762,7 +767,7 @@ public:
 		RawHtmlBlock< Trait > & html );
 	static void parseCode( MdBlock< Trait > & fr,
 		std::shared_ptr< Block< Trait > > parent,
-		bool collectRefLinks, int indent = 0 );
+		bool collectRefLinks );
 	static void parseCodeIndentedBySpaces( MdBlock< Trait > & fr,
 		std::shared_ptr< Block< Trait > > parent,
 		bool collectRefLinks,
@@ -7800,81 +7805,81 @@ template< class Trait >
 inline void
 Parser< Trait >::parseCode( MdBlock< Trait > & fr,
 	std::shared_ptr< Block< Trait > > parent,
-	bool collectRefLinks, int indent )
+	bool collectRefLinks )
 {
 	if( !collectRefLinks )
 	{
-		const auto i = skipSpaces< Trait >( 0, fr.data.front().first.asString() );
+		const auto indent = skipSpaces< Trait >( 0, fr.data.front().first.asString() );
 
-		if( i != fr.data.front().first.length() )
-			indent += i;
-
-		typename Trait::String syntax;
-		isStartOfCode< Trait >( fr.data.front().first.asString(), &syntax );
-		syntax = replaceEntity< Trait >( syntax );
-
-		const long long int startPos = fr.data.front().first.virginPos( i );
-		const long long int emptyColumn = fr.data.front().first.virginPos(
-			fr.data.front().first.length() );
-		const long long int startLine = fr.data.front().second.lineNumber;
-		const long long int endPos = fr.data.back().first.virginPos(
-			fr.data.back().first.length() - 1 );
-		const long long int endLine = fr.data.back().second.lineNumber;
-
-		fr.data.erase( fr.data.cbegin() );
-		fr.data.erase( std::prev( fr.data.cend() ) );
-
-		if( syntax.toLower() == "math" )
+		if( indent != fr.data.front().first.length() )
 		{
-			typename Trait::String math;
-			bool first = true;
+			typename Trait::String syntax;
+			isStartOfCode< Trait >( fr.data.front().first.asString(), &syntax );
+			syntax = replaceEntity< Trait >( syntax );
 
-			for( const auto & l : std::as_const( fr.data ) )
+			const long long int startPos = fr.data.front().first.virginPos( indent );
+			const long long int emptyColumn = fr.data.front().first.virginPos(
+				fr.data.front().first.length() );
+			const long long int startLine = fr.data.front().second.lineNumber;
+			const long long int endPos = fr.data.back().first.virginPos(
+				fr.data.back().first.length() - 1 );
+			const long long int endLine = fr.data.back().second.lineNumber;
+
+			fr.data.erase( fr.data.cbegin() );
+			fr.data.erase( std::prev( fr.data.cend() ) );
+
+			if( syntax.toLower() == "math" )
 			{
-				if( !first )
-					math.push_back( typename Trait::Char( '\n' ) );
+				typename Trait::String math;
+				bool first = true;
 
-				math.push_back( l.first.asString() );
-
-				first = false;
-			}
-
-			if( !collectRefLinks )
-			{
-				std::shared_ptr< Paragraph< Trait > > p( new Paragraph< Trait > );
-				p->setStartColumn( startPos );
-				p->setStartLine( startLine );
-				p->setEndColumn( endPos );
-				p->setEndLine( endLine );
-
-				std::shared_ptr< Math< Trait > > m( new Math< Trait > );
-
-				if( !fr.data.empty() )
+				for( const auto & l : std::as_const( fr.data ) )
 				{
-					m->setStartColumn( fr.data.front().first.virginPos( 0 ) );
-					m->setStartLine( fr.data.front().second.lineNumber );
-					m->setEndColumn( fr.data.back().first.virginPos(
-						fr.data.back().first.length() - 1 ) );
-					m->setEndLine( fr.data.back().second.lineNumber );
-				}
-				else
-				{
-					m->setStartColumn( emptyColumn );
-					m->setStartLine( startLine );
-					m->setEndColumn( emptyColumn );
-					m->setEndLine( startLine );
+					if( !first )
+						math.push_back( typename Trait::Char( '\n' ) );
+
+					math.push_back( l.first.asString() );
+
+					first = false;
 				}
 
-				m->setInline( false );
-				m->setExpr( math );
-				p->appendItem( m );
+				if( !collectRefLinks )
+				{
+					std::shared_ptr< Paragraph< Trait > > p( new Paragraph< Trait > );
+					p->setStartColumn( startPos );
+					p->setStartLine( startLine );
+					p->setEndColumn( endPos );
+					p->setEndLine( endLine );
 
-				parent->appendItem( p );
+					std::shared_ptr< Math< Trait > > m( new Math< Trait > );
+
+					if( !fr.data.empty() )
+					{
+						m->setStartColumn( fr.data.front().first.virginPos( 0 ) );
+						m->setStartLine( fr.data.front().second.lineNumber );
+						m->setEndColumn( fr.data.back().first.virginPos(
+							fr.data.back().first.length() - 1 ) );
+						m->setEndLine( fr.data.back().second.lineNumber );
+					}
+					else
+					{
+						m->setStartColumn( emptyColumn );
+						m->setStartLine( startLine );
+						m->setEndColumn( emptyColumn );
+						m->setEndLine( startLine );
+					}
+
+					m->setInline( false );
+					m->setExpr( math );
+					p->appendItem( m );
+
+					parent->appendItem( p );
+				}
 			}
+			else
+				parseCodeIndentedBySpaces( fr, parent, collectRefLinks, indent, syntax,
+					emptyColumn, startLine, true );
 		}
-		else
-			parseCodeIndentedBySpaces( fr, parent, collectRefLinks, indent, syntax,
-				emptyColumn, startLine, true );
 	}
 }
 
