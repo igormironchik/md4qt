@@ -485,7 +485,7 @@ template< class Trait >
 inline bool
 isStartOfCode( const typename Trait::String & str, typename Trait::String * syntax = nullptr )
 {
-	long long int p = skipSpaces< Trait >( p, str );
+	long long int p = skipSpaces< Trait >( 0, str );
 
 	if( p > 3 )
 		return false;
