@@ -36,6 +36,7 @@
 
 // C++ include.
 #include <string>
+#include <utility>
 
 
 namespace MD {
@@ -172,13 +173,13 @@ template< class Trait >
 typename Trait::String
 paragraphToHtml( Paragraph< Trait > * p, bool wrap,
 	std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns,
+	typename Trait::template Vector< std::pair< typename Trait::String, long long int > > & fns,
 	const typename Trait::template Vector< typename Trait::String > & anchors );
 
 template< class Trait >
 typename Trait::String
 linkToHtml( Link< Trait > * l, std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns,
+	typename Trait::template Vector< std::pair< typename Trait::String, long long int > > & fns,
 	const typename Trait::template Vector< typename Trait::String > & anchors )
 {
 	typename Trait::String html;
@@ -225,7 +226,7 @@ template< class Trait >
 typename Trait::String
 footnoteRefToHtml( FootnoteRef< Trait > * ref,
 	std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns )
+	typename Trait::template Vector< std::pair< typename Trait::String, long long int > > & fns )
 {
 	typename Trait::String html;
 
@@ -233,23 +234,31 @@ footnoteRefToHtml( FootnoteRef< Trait > * ref,
 
 	if( fit != doc->footnotesMap().cend() )
 	{
-		const auto r = std::find( fns.cbegin(), fns.cend(), ref->id() );
+		const auto r = std::find_if( fns.begin(), fns.end(),
+			[&ref] ( const auto & p ) { return ref->id() == p.first; } );
 
 		html.push_back( "<sup>" );
 		html.push_back( "<a href=\"#" );
 		html.push_back( ref->id() );
 		html.push_back( "\" id=\"ref-" );
 		html.push_back( ref->id() );
+		html.push_back( "-" );
+
+		if( r == fns.end() )
+			html.push_back( "1" );
+		else
+			html.push_back( std::to_string( ++( r->second ) ).c_str() );
+
 		html.push_back( "\">" );
 
-		if( r == fns.cend() )
+		if( r == fns.end() )
 		{
 			html.push_back( std::to_string( fns.size() + 1 ).c_str() );
 
-			fns.push_back( ref->id() );
+			fns.push_back( { ref->id(), 1 } );
 		}
 		else
-			html.push_back( std::to_string( std::distance( fns.cbegin(), r ) + 1 ).c_str() );
+			html.push_back( std::to_string( std::distance( fns.begin(), r ) + 1 ).c_str() );
 
 		html.push_back( "</a></sup>" );
 	}
@@ -261,7 +270,7 @@ template< class Trait >
 typename Trait::String
 paragraphToHtml( Paragraph< Trait > * p, bool wrap,
 	std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns,
+	typename Trait::template Vector< std::pair< typename Trait::String, long long int > > & fns,
 	const typename Trait::template Vector< typename Trait::String > & anchors )
 {
 	typename Trait::String html;
@@ -338,7 +347,7 @@ template< class Trait >
 typename Trait::String
 headingToHtml( Heading< Trait > * h, const typename Trait::String & ht,
 	std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns,
+	typename Trait::template Vector< std::pair< typename Trait::String, long long int > > & fns,
 	const typename Trait::template Vector< typename Trait::String > & anchors )
 {
 	typename Trait::String html;
@@ -361,7 +370,7 @@ headingToHtml( Heading< Trait > * h, const typename Trait::String & ht,
 template< class Trait >
 typename Trait::String
 headingToHtml( Heading< Trait > * h, std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns,
+	typename Trait::template Vector< std::pair< typename Trait::String, long long int > > & fns,
 	const typename Trait::template Vector< typename Trait::String > & anchors )
 {
 	typename Trait::String html;
@@ -421,26 +430,26 @@ codeToHtml( Code< Trait > * c )
 template< class Trait >
 typename Trait::String
 blockquoteToHtml( Blockquote< Trait > * b, std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns,
+	typename Trait::template Vector< std::pair< typename Trait::String, long long int > > & fns,
 	const typename Trait::template Vector< typename Trait::String > & anchors );
 
 template< class Trait >
 typename Trait::String
 listToHtml( List< Trait > * l, std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns,
+	typename Trait::template Vector< std::pair< typename Trait::String, long long int > > & fns,
 	const typename Trait::template Vector< typename Trait::String > & anchors );
 
 template< class Trait >
 typename Trait::String
 tableToHtml( Table< Trait > * t, std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns,
+	typename Trait::template Vector< std::pair< typename Trait::String, long long int > > & fns,
 	const typename Trait::template Vector< typename Trait::String > & anchors );
 
 template< class Trait >
 typename Trait::String
 listItemToHtml( ListItem< Trait > * i, std::shared_ptr< Document< Trait > > doc,
 	bool first,
-	typename Trait::template Vector< typename Trait::String > & fns,
+	typename Trait::template Vector< std::pair< typename Trait::String, long long int > > & fns,
 	const typename Trait::template Vector< typename Trait::String > & anchors )
 {
 	typename Trait::String html;
@@ -516,7 +525,7 @@ listItemToHtml( ListItem< Trait > * i, std::shared_ptr< Document< Trait > > doc,
 template< class Trait >
 typename Trait::String
 listToHtml( List< Trait > * l, std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns,
+	typename Trait::template Vector< std::pair< typename Trait::String, long long int > > & fns,
 	const typename Trait::template Vector< typename Trait::String > & anchors )
 {
 	typename Trait::String html;
@@ -588,7 +597,7 @@ listToHtml( List< Trait > * l, std::shared_ptr< Document< Trait > > doc,
 template< class Trait >
 typename Trait::String
 cellToHtml( TableCell< Trait > * l, std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns,
+	typename Trait::template Vector< std::pair< typename Trait::String, long long int > > & fns,
 	const typename Trait::template Vector< typename Trait::String > & anchors )
 {
 	typename Trait::String html;
@@ -665,7 +674,7 @@ tableAlignmentToHtml( typename Table< Trait >::Alignment a )
 template< class Trait >
 typename Trait::String
 tableToHtml( Table< Trait > * t, std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns,
+	typename Trait::template Vector< std::pair< typename Trait::String, long long int > > & fns,
 	const typename Trait::template Vector< typename Trait::String > & anchors )
 {
 	typename Trait::String html;
@@ -723,7 +732,7 @@ tableToHtml( Table< Trait > * t, std::shared_ptr< Document< Trait > > doc,
 template< class Trait >
 typename Trait::String
 blockquoteToHtml( Blockquote< Trait > * b, std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns,
+	typename Trait::template Vector< std::pair< typename Trait::String, long long int > > & fns,
 	const typename Trait::template Vector< typename Trait::String > & anchors )
 {
 	typename Trait::String html;
@@ -802,7 +811,7 @@ anchorToHtml( Anchor< Trait > * a )
 template< class Trait >
 typename Trait::String
 footnotesToHtml( std::shared_ptr< Document< Trait > > doc,
-	typename Trait::template Vector< typename Trait::String > & fns,
+	typename Trait::template Vector< std::pair< typename Trait::String, long long int > > & fns,
 	const typename Trait::template Vector< typename Trait::String > & anchors,
 	const typename Trait::String & hrefForRefBackImage = {} )
 {
@@ -813,16 +822,16 @@ footnotesToHtml( std::shared_ptr< Document< Trait > > doc,
 
 	int i = 1;
 
-	typename Trait::template Vector< typename Trait::String > tmp;
+	typename Trait::template Vector< std::pair< typename Trait::String, long long int > > tmp;
 
 	for( const auto & id : fns )
 	{
 		html.push_back( "<li id=\"" );
-		html.push_back( id );
+		html.push_back( id.first );
 		html.push_back( "\">" );
 		++i;
 
-		const auto fit = doc->footnotesMap().find( id );
+		const auto fit = doc->footnotesMap().find( id.first );
 
 		if( fit != doc->footnotesMap().cend() )
 		{
@@ -906,11 +915,16 @@ footnotesToHtml( std::shared_ptr< Document< Trait > > doc,
 			{
 				typename Trait::String backRef;
 
-				backRef.push_back( "<a href=\"#ref-" );
-				backRef.push_back( id );
-				backRef.push_back( "\"><img src=\"" );
-				backRef.push_back( hrefForRefBackImage );
-				backRef.push_back( "\" /></a>" );
+				for( long long int i = 1; i <= id.second; ++i )
+				{
+					backRef.push_back( "<a href=\"#ref-" );
+					backRef.push_back( id.first );
+					backRef.push_back( "-" );
+					backRef.push_back( std::to_string( i ).c_str() );
+					backRef.push_back( "\"><img src=\"" );
+					backRef.push_back( hrefForRefBackImage );
+					backRef.push_back( "\" /></a>" );
+				}
 
 				html.insert( html.length() - backRefPos, backRef );
 			}
@@ -934,7 +948,7 @@ toHtml( std::shared_ptr< Document< Trait > > doc, bool wrapInBodyTag = true,
 {
 	typename Trait::String html;
 
-	typename Trait::template Vector< typename Trait::String > fns;
+	typename Trait::template Vector< std::pair< typename Trait::String, long long int > > fns;
 
 	if( wrapInBodyTag )
 		html.push_back( "<!DOCTYPE html>\n<html><head></head><body>\n" );
