@@ -2122,7 +2122,7 @@ isTableHeader( const typename Trait::String & s )
 
 		const auto tmp = s.simplified();
 		const auto p = tmp.startsWith( '|' ) ? 1 : 0;
-		const auto n = tmp.size() - p - ( tmp.endsWith( '|' ) ? 1 : 0 );
+		const auto n = tmp.size() - p - ( tmp.endsWith( '|' ) && tmp.size() > 1 ? 1 : 0 );
 		const auto v = tmp.sliced( p, n );
 
 		bool backslash = false;
