@@ -1207,23 +1207,36 @@ Parser< Trait >::eatFootnote( typename Parser< Trait >::ParserContext & ctx,
 	const typename Trait::String & fileName,
 	bool collectRefLinks )
 {
+	long long int emptyLinesCount = 0;
+
 	while( !stream.atEnd() )
 	{
 		const auto currentLineNumber = stream.currentLineNumber();
 
 		auto line = readLine( ctx, stream );
 
-		if( line.isEmpty() || line.asString().startsWith( "    " ) ||
+		const auto ns = skipSpaces< Trait >( 0, line.asString() );
+
+		if( ns == line.length() || line.asString().startsWith( "    " ) ||
 			line.asString().startsWith( '\t' ) )
 		{
+			if( ns == line.length() )
+				++emptyLinesCount;
+			else
+				emptyLinesCount = 0;
+
 			ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
 		}
 		else
 		{
 			parseFragment( ctx, parent, doc, linksToParse, workingPath, fileName, collectRefLinks );
 
-			ctx.type = whatIsTheLine( line );
-			ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
+			ctx.lineType = whatIsTheLine( line,
+				false, false, false,
+				&ctx.startOfCodeInList, &ctx.indent, ctx.lineType == BlockType::EmptyLine,
+				true, &ctx.indents );
+
+			makeLineMain( ctx, line, emptyLinesCount, ctx.indent, ns, currentLineNumber );
 
 			break;
 		}

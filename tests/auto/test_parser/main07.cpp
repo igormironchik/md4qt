@@ -522,3 +522,56 @@ TEST_CASE( "190" )
 	REQUIRE( c->syntax() == u8"c++" );
 	REQUIRE( c->text() == u8"    code" );
 }
+
+/*
+Text[^1]:
+
+[^1]: Footnote.
+
+```
+code
+```
+
+Text.
+
+*/
+TEST_CASE( "191" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/191.md" );
+
+	REQUIRE( doc->items().size() == 4 );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Code );
+	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 2 ).get() );
+	REQUIRE( c->text() == u8"code" );
+	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Paragraph );
+
+	REQUIRE( doc->footnotesMap().size() == 1 );
+}
+
+/*
+Text[^1]:
+
+[^1]: Footnote.
+
+- List.
+
+Text.
+
+
+*/
+TEST_CASE( "192" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/192.md" );
+
+	REQUIRE( doc->items().size() == 4 );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::List );
+	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Paragraph );
+
+	REQUIRE( doc->footnotesMap().size() == 1 );
+}
