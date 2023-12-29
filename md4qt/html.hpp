@@ -233,16 +233,25 @@ footnoteRefToHtml( FootnoteRef< Trait > * ref,
 
 	if( fit != doc->footnotesMap().cend() )
 	{
+		const auto r = std::find( fns.cbegin(), fns.cend(), ref->id() );
+
 		html.push_back( "<sup>" );
 		html.push_back( "<a href=\"#" );
 		html.push_back( ref->id() );
 		html.push_back( "\" id=\"ref-" );
 		html.push_back( ref->id() );
 		html.push_back( "\">" );
-		html.push_back( std::to_string( fns.size() + 1 ).c_str() );
-		html.push_back( "</a></sup>" );
 
-		fns.push_back( ref->id() );
+		if( r == fns.cend() )
+		{
+			html.push_back( std::to_string( fns.size() + 1 ).c_str() );
+
+			fns.push_back( ref->id() );
+		}
+		else
+			html.push_back( std::to_string( std::distance( fns.cbegin(), r ) + 1 ).c_str() );
+
+		html.push_back( "</a></sup>" );
 	}
 
 	return html;
