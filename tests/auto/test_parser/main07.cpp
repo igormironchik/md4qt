@@ -575,3 +575,65 @@ TEST_CASE( "192" )
 
 	REQUIRE( doc->footnotesMap().size() == 1 );
 }
+
+/*
+| Table |
+| --- |
+| Data |
+    code
+
+*/
+
+TEST_CASE( "193" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/193.md" );
+
+	REQUIRE( doc->items().size() == 3 );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Table );
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Code );
+}
+
+/*
+Text
+| Table |
+| --- |
+| Data |
+    code
+
+*/
+
+TEST_CASE( "194" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/194.md" );
+
+	REQUIRE( doc->items().size() == 4 );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Table );
+	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Code );
+}
+
+/*
+Text
+| Table |
+| --- |
+| Data |
+    code
+Text
+
+*/
+TEST_CASE( "195" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/195.md" );
+
+	REQUIRE( doc->items().size() == 5 );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Table );
+	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Code );
+	REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::Paragraph );
+}

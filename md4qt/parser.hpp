@@ -2169,7 +2169,17 @@ Parser< Trait >::parseText( MdBlock< Trait > & fr,
 		parseFootnote( fr, parent, doc, linksToParse, workingPath, fileName,
 			collectRefLinks );
 	else if( c && h && c == h )
+	{
 		parseTable( fr, parent, doc, linksToParse, workingPath, fileName, collectRefLinks, c );
+
+		if( !fr.data.empty() )
+		{
+			StringListStream< Trait > stream( fr.data );
+
+			Parser< Trait >::parse( stream, parent, doc, linksToParse,
+				workingPath, fileName, collectRefLinks );
+		}
+	}
 	else
 		parseParagraph( fr, parent, doc, linksToParse,
 			workingPath, fileName, collectRefLinks, html );
@@ -2484,8 +2494,11 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 		table->setEndLine( fr.data.back().second.lineNumber );
 
 		auto parseTableRow = [&] ( const typename Trait::InternalString & row,
-			long long int lineNumber )
+			long long int lineNumber ) -> bool
 		{
+			if( row.asString().startsWith( "    " ) )
+				return false;
+
 			auto line = row.simplified();
 
 			if( line.asString().startsWith( sep ) )
@@ -2559,6 +2572,8 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 
 			if( !tr->isEmpty() )
 				table->appendRow( tr );
+
+			return true;
 		};
 
 		{
@@ -2586,8 +2601,17 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 
 		fr.data.erase( fr.data.cbegin() + 1 );
 
+		long long int r = 0;
+
 		for( const auto & line : std::as_const( fr.data ) )
-			parseTableRow( line.first, line.second.lineNumber );
+		{
+			if( !parseTableRow( line.first, line.second.lineNumber ) )
+				break;
+
+			++r;
+		}
+
+		fr.data.erase( fr.data.cbegin(), fr.data.cbegin() + r );
 
 		if( !table->isEmpty() && !collectRefLinks )
 			parent->appendItem( table );
@@ -6628,7 +6652,11 @@ parseTableInParagraph( TextParsingOpts< Trait > & po,
 	Parser< Trait >::parseTable( fr, parent, doc,
 		linksToParse, workingPath, fileName, collectRefLinks, po.columnsCount );
 
-	po.line = po.fr.data.size();
+	po.line = po.fr.data.size() - fr.data.size();
+	po.pos = 0;
+
+	if( !fr.data.empty() )
+		po.detected = TextParsingOpts< Trait >::Detected::Code;
 }
 
 inline void
