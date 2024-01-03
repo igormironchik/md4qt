@@ -512,6 +512,10 @@ listItemToHtml( ListItem< Trait > * i, std::shared_ptr< Document< Trait > > doc,
 				html.push_back( static_cast< RawHtml< Trait>* > ( it->get() )->text() );
 				break;
 
+			case ItemType::HorizontalLine :
+				html.push_back( "<hr />" );
+				break;
+
 			default :
 				break;
 		}
