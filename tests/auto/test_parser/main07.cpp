@@ -637,3 +637,57 @@ TEST_CASE( "195" )
 	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Code );
 	REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::Paragraph );
 }
+
+/*
+- list
+    - list
+
+    --------------------------------
+
+    text
+
+*/
+TEST_CASE( "196" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/196.md" );
+
+	REQUIRE( doc->items().size() == 2 );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT > * > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->items().size() == 1 );
+	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+	auto i = static_cast< MD::ListItem< TRAIT > * > ( l->items().at( 0 ).get() );
+	REQUIRE( i->items().size() == 4 );
+	REQUIRE( i->items().at( 0 )->type() == MD::ItemType::Paragraph );
+	REQUIRE( i->items().at( 1 )->type() == MD::ItemType::List );
+	REQUIRE( i->items().at( 2 )->type() == MD::ItemType::HorizontalLine );
+	REQUIRE( i->items().at( 3 )->type() == MD::ItemType::Paragraph );
+}
+
+/*
+- list
+
+    --------------------------------
+
+    text
+
+*/
+TEST_CASE( "197" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/197.md" );
+
+	REQUIRE( doc->items().size() == 2 );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT > * > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->items().size() == 1 );
+	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+	auto i = static_cast< MD::ListItem< TRAIT > * > ( l->items().at( 0 ).get() );
+	REQUIRE( i->items().size() == 3 );
+	REQUIRE( i->items().at( 0 )->type() == MD::ItemType::Paragraph );
+	REQUIRE( i->items().at( 1 )->type() == MD::ItemType::HorizontalLine );
+	REQUIRE( i->items().at( 2 )->type() == MD::ItemType::Paragraph );
+}

@@ -738,10 +738,15 @@ public:
 		FensedCodeInList
 	}; // enum BlockType
 
+	struct ListIndent {
+		long long int level = -1;
+		long long int indent = -1;
+	}; // struct ListIndent
+
 	static BlockType whatIsTheLine( typename Trait::InternalString & str, bool inList = false,
 		bool inListWithFirstEmptyLine = false, bool fensedCodeInList = false,
 		typename Trait::String * startOfCode = nullptr,
-		long long int * indent = nullptr, bool emptyLinePreceded = false,
+		ListIndent * indent = nullptr, bool emptyLinePreceded = false,
 		bool calcIndent = false, const std::vector< long long int > * indents = nullptr );
 	static void parseFragment( MdBlock< Trait > & fr, std::shared_ptr< Block< Trait > > parent,
 		std::shared_ptr< Document< Trait > > doc,
@@ -826,7 +831,7 @@ public:
 		long long int emptyLinesCount = 0;
 		long long int lineCounter = 0;
 		std::vector< long long int > indents;
-		long long int indent = 0;
+		ListIndent indent;
 		RawHtmlBlock< Trait > html;
 		long long int emptyLinesBefore = 0;
 		std::vector< std::pair< bool, bool > > htmlCommentData;
@@ -862,7 +867,7 @@ public:
 	static void makeLineMain( ParserContext & ctx,
 		const typename Trait::InternalString & line,
 		long long int emptyLinesCount,
-		long long int currentIndent,
+		const ListIndent & currentIndent,
 		long long int ns,
 		long long int currentLineNumber );
 
@@ -874,7 +879,7 @@ public:
 		const typename Trait::String & fileName,
 		bool collectRefLinks,
 		const typename Trait::InternalString & line,
-		long long int currentIndent,
+		const ListIndent & currentIndent,
 		long long int ns,
 		long long int currentLineNumber );
 
@@ -1191,7 +1196,7 @@ Parser< Trait >::parseFragment( typename Parser< Trait >::ParserContext & ctx,
 	ctx.emptyLinesCount = 0;
 	ctx.lineCounter = 0;
 	ctx.indents.clear();
-	ctx.indent = 0;
+	ctx.indent = { -1, -1 };
 	ctx.startOfCode.clear();
 	ctx.startOfCodeInList.clear();
 }
@@ -1303,7 +1308,7 @@ inline void
 Parser< Trait >::makeLineMain( ParserContext & ctx,
 	const typename Trait::InternalString & line,
 	long long int emptyLinesCount,
-	long long int currentIndent,
+	const ListIndent & currentIndent,
 	long long int ns,
 	long long int currentLineNumber )
 {
@@ -1318,7 +1323,7 @@ Parser< Trait >::makeLineMain( ParserContext & ctx,
 		case BlockType::ListWithFirstEmptyLine :
 		{
 			if( ctx.indents.empty() )
-				ctx.indents.push_back( currentIndent );
+				ctx.indents.push_back( currentIndent.indent );
 
 			ctx.indent = currentIndent;
 		}
@@ -1349,7 +1354,7 @@ Parser< Trait >::parseFragmentAndMakeNextLineMain( ParserContext & ctx,
 	const typename Trait::String & fileName,
 	bool collectRefLinks,
 	const typename Trait::InternalString & line,
-	long long int currentIndent,
+	const ListIndent & currentIndent,
 	long long int ns,
 	long long int currentLineNumber )
 {
@@ -1412,8 +1417,6 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 		auto line = readLine( ctx, stream );
 
-		const long long int prevIndent = ctx.indent;
-
 		if( ctx.lineType != BlockType::Unknown )
 			ctx.prevLineType = ctx.lineType;
 
@@ -1426,21 +1429,19 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 		if( isListType( ctx.type ) && ctx.lineType == BlockType::FensedCodeInList )
 			ctx.fensedCodeInList = !ctx.fensedCodeInList;
 
-		const long long int currentIndent = ctx.indent;
+		const auto currentIndent = ctx.indent;
 
 		const auto ns = skipSpaces< Trait >( 0, line.asString() );
 
-		const auto indentInListValue = indentInList( &ctx.indents,
-			ns - ( ctx.lineType == BlockType::CodeIndentedBySpaces ? 4 : 0 ),
-			ctx.lineType == BlockType::CodeIndentedBySpaces );
+		const auto indentInListValue = indentInList( &ctx.indents, ns, true );
 
-		if( ctx.indent != prevIndent && isListType( ctx.lineType )  &&
-			!ctx.fensedCodeInList )
+		if( isListType( ctx.lineType ) && !ctx.fensedCodeInList && ctx.indent.level > -1 )
 		{
-			if( ctx.indents.empty() )
-				ctx.indents.push_back( ctx.indent );
-			else if( indentInListValue )
-				ctx.indents.push_back( ctx.indent );
+			if( ctx.indent.level < ctx.indents.size() )
+				ctx.indents.erase( ctx.indents.cbegin() + ctx.indent.level,
+					ctx.indents.cend() );
+
+			ctx.indents.push_back( ctx.indent.indent );
 		}
 
 		if( ctx.type == BlockType::CodeIndentedBySpaces && ns > 3 )
@@ -1908,12 +1909,29 @@ posOfListItem( const typename Trait::String & s, bool ordered )
 	return p;
 }
 
+inline
+long long int
+listLevel( const std::vector< long long int > & indents, long long int pos )
+{
+	long long int level = indents.size();
+
+	for( auto it = indents.crbegin(), last = indents.crend(); it != last; ++it )
+	{
+		if( pos >= *it )
+			break;
+		else
+			--level;
+	}
+
+	return level;
+}
+
 template< class Trait >
 inline typename Parser< Trait >::BlockType
 Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 	bool inList, bool inListWithFirstEmptyLine, bool fensedCodeInList,
 	typename Trait::String * startOfCode,
-	long long int * indent, bool emptyLinePreceded, bool calcIndent,
+	ListIndent * indent, bool emptyLinePreceded, bool calcIndent,
 	const std::vector< long long int > * indents )
 {
 	str.replace( typename Trait::Char( '\t' ), typename Trait::String( 4, ' ' ) );
@@ -1928,7 +1946,7 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 		const bool indentIn = indentInList( indents, first, false );
 		bool isHeading = false;
 
-		if( s.asString().startsWith( '#' ) && ( indent ? first - (*indent) < 4 : first < 4 ) )
+		if( s.asString().startsWith( '#' ) && ( indent ? first - indent->indent < 4 : first < 4 ) )
 		{
 			long long int c = 0;
 
@@ -1945,9 +1963,8 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 			const auto orderedList = isOrderedList< Trait >( str.asString(),
 				nullptr, nullptr, nullptr, &isFirstLineEmpty );
 			const bool fensedCode = isCodeFences< Trait >( s.asString() );
-			const auto codeIndentedBySpaces = indent && emptyLinePreceded && first == 4 &&
-				first < *indent && ( indents ? std::find( indents->cbegin(), indents->cend(), 4 ) ==
-					indents->cend() : true );
+			const auto codeIndentedBySpaces = emptyLinePreceded && first >= 4 &&
+				!indentInList( indents, first, true );
 
 			if( fensedCodeInList )
 			{
@@ -1979,7 +1996,10 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 					return BlockType::CodeIndentedBySpaces;
 
 				if( indent && calcIndent )
-					*indent = posOfListItem< Trait >( str.asString(), orderedList );
+				{
+					indent->indent = posOfListItem< Trait >( str.asString(), orderedList );
+					indent->level = ( indents ? listLevel( *indents, first ) : -1 );
+				}
 
 				if( s.simplified().length() == 1 || isFirstLineEmpty )
 					return BlockType::ListWithFirstEmptyLine;
@@ -1987,12 +2007,7 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 					return BlockType::List;
 			}
 			else if( indentInList( indents, first, true ) )
-			{
-				if( codeIndentedBySpaces )
-					return BlockType::CodeIndentedBySpaces;
-				else
-					return BlockType::SomethingInList;
-			}
+				return BlockType::SomethingInList;
 			else
 			{
 				if( !isHeading && !isBlockquote && !fensedCode &&
@@ -2013,8 +2028,11 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 				( ( s.length() > 1 && s[ 1 ] == typename Trait::Char( ' ' ) ) || s.length() == 1 ) ) ||
 				orderedList ) && first < 4 )
 			{
-				if( calcIndent && indent )
-					*indent = posOfListItem< Trait >( str.asString(), orderedList );
+				if( indent && calcIndent )
+				{
+					indent->indent = posOfListItem< Trait >( str.asString(), orderedList );
+					indent->level = ( indents ? listLevel( *indents, first ) : -1 );
+				}
 
 				if( s.simplified().length() == 1 || isFirstLineEmpty )
 					return BlockType::ListWithFirstEmptyLine;
@@ -7573,8 +7591,8 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 
 			const auto ns = skipSpaces< Trait >( 0, it->first.asString() );
 
-			if( isHorizontalLine< Trait >( it->first.asString().sliced( ns ) ) && !listItem.empty() &&
-				( ns == indent ? !isH2< Trait >( it->first.asString().sliced( ns ) ) : true ) )
+			if( isHorizontalLine< Trait >( it->first.asString().sliced( ns ) ) &&
+				ns < indent && !listItem.empty() )
 			{
 				updateIndent = true;
 
@@ -7590,7 +7608,7 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 				list.reset( new List< Trait > );
 
 				if( !collectRefLinks )
-					doc->appendItem( std::shared_ptr< Item< Trait > > ( new HorizontalLine< Trait > ) );
+					parent->appendItem( std::shared_ptr< Item< Trait > > ( new HorizontalLine< Trait > ) );
 
 				continue;
 			}
@@ -7760,7 +7778,9 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 
 		if( !fensedCode )
 		{
-			std::tie( ok, std::ignore, std::ignore ) = listItemData< Trait >(
+			long long int newIndent = 0;
+
+			std::tie( ok, newIndent, std::ignore ) = listItemData< Trait >(
 				it->first.asString().startsWith( typename Trait::String( indent, ' ' ) ) ?
 					it->first.asString().sliced( indent ) : it->first.asString() );
 
@@ -7783,7 +7803,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 					std::tie( ok, std::ignore, std::ignore ) = listItemData< Trait >(
 						( ns >= indent ? it->first.asString().sliced( indent ) : it->first.asString() ) );
 
-					if( ok || ns > indent || ns == it->first.length() )
+					if( ok || ns >= indent + newIndent || ns == it->first.length() )
 						nestedList.push_back( *it );
 					else
 						break;
