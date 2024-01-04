@@ -3250,7 +3250,7 @@ replaceEntity( const typename Trait::String & s )
 					{
 						bool ok = false;
 
-						const auto c = hex.toInt( &ok, 16 );
+						const char32_t c = hex.toInt( &ok, 16 );
 
 						if( ok )
 						{
@@ -3258,7 +3258,7 @@ replaceEntity( const typename Trait::String & s )
 							i = p2 + 1;
 
 							if( c )
-								res.push_back( typename Trait::Char( c ) );
+								Trait::appendUcs4( res, c );
 							else
 								res.push_back( typename Trait::Char( 0xFFFD ) );
 						}
@@ -3272,7 +3272,7 @@ replaceEntity( const typename Trait::String & s )
 					{
 						bool ok = false;
 
-						const auto c = dec.toInt( &ok, 10 );
+						const char32_t c = dec.toInt( &ok, 10 );
 
 						if( ok )
 						{
@@ -3280,7 +3280,7 @@ replaceEntity( const typename Trait::String & s )
 							i = p2 + 1;
 
 							if( c )
-								res.push_back( typename Trait::Char( c ) );
+								Trait::appendUcs4( res, c );
 							else
 								res.push_back( typename Trait::Char( 0xFFFD ) );
 						}

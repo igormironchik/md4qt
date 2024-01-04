@@ -813,6 +813,12 @@ struct UnicodeStringTrait {
 
 		return ( er ? "" : UnicodeString::fromUTF8( p ) );
 	}
+
+	//! Add UCS4 to string.
+	static void appendUcs4( String & str, char32_t ch )
+	{
+		str.push_back( Char( ch ) );
+	}
 }; // struct UnicodeStringTrait
 
 #endif // MD4QT_ICU_STL_SUPPORT
@@ -868,6 +874,12 @@ struct QStringTrait {
 	static String absoluteFilePath( const String & path )
 	{
 		return QFileInfo( path ).absoluteFilePath();
+	}
+
+	//! Add UCS4 to string.
+	static void appendUcs4( String & str, char32_t ch )
+	{
+		str += QChar::fromUcs4( ch );
 	}
 }; // struct QStringTrait
 
