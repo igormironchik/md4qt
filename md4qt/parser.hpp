@@ -4686,6 +4686,9 @@ checkForMath( typename Delims< Trait >::const_iterator it,
 template< class Trait >
 inline bool isEmail( const typename Trait::String & url );
 
+template< class Trait >
+inline bool isValidUrl( const typename Trait::String & url );
+
 #ifdef MD4QT_QT_SUPPORT
 
 template<>
@@ -4703,6 +4706,14 @@ inline bool isEmail< QStringTrait >( const QString & url )
 		erm = er.match( url );
 
 	return erm.hasMatch();
+}
+
+template<>
+inline bool isValidUrl< QStringTrait >( const QString & url )
+{
+	const QUrl u( url, QUrl::StrictMode );
+
+	return ( u.isValid() && !u.isRelative() );
 }
 
 #endif
@@ -4728,6 +4739,14 @@ inline bool isEmail< UnicodeStringTrait >( const UnicodeString & url )
 		return (bool) icu::RegexPattern::matches( pattern, url.right( url.length() - 7 ), er, status );
 	else
 		return (bool) icu::RegexPattern::matches( pattern, url, er, status );
+}
+
+template<>
+inline bool isValidUrl< UnicodeStringTrait >( const UnicodeString & url )
+{
+	const UrlUri u( url );
+
+	return ( u.isValid() && !u.isRelative() );
 }
 
 #endif
@@ -4762,9 +4781,7 @@ checkForAutolinkHtml( typename Delims< Trait >::const_iterator it,
 
 			if( isUrl )
 			{
-				const typename Trait::Url u( url );
-
-				if( ( !u.isValid() || u.isRelative() ) && !isEmail< Trait >( url ) )
+				if( !isValidUrl< Trait >( url ) && !isEmail< Trait >( url ) )
 					isUrl = false;
 			}
 

@@ -191,14 +191,12 @@ TEST_CASE( "019" )
 	REQUIRE( c->text() == u8"\\[\\]" );
 }
 
-template< class Trait >
-void checkTest020( std::shared_ptr< MD::Document< Trait > > doc );
-
-#ifdef MD4QT_QT_SUPPORT
-
-template<>
-void checkTest020< MD::QStringTrait >( std::shared_ptr< MD::Document< MD::QStringTrait > > doc )
+TEST_CASE( "020" )
 {
+	MESSAGE( "This test is not strict to CommonMark 0.30." );
+
+	const auto doc = load_test( 20 );
+
 	REQUIRE( doc->isEmpty() == false );
 	REQUIRE( doc->items().size() == 2 );
 
@@ -206,30 +204,9 @@ void checkTest020< MD::QStringTrait >( std::shared_ptr< MD::Document< MD::QStrin
 
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
-	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( l->opts() == MD::TextWithoutFormat );
-	REQUIRE( l->img()->isEmpty() );
-	REQUIRE( l->text().size() == 0 );
-	REQUIRE( l->url() == u8"http://example.com?find=\\*" );
-}
-
-#endif // MD4QT_QT_SUPPORT
-
-#ifdef MD4QT_ICU_STL_SUPPORT
-
-template<>
-void checkTest020< MD::UnicodeStringTrait >( std::shared_ptr< MD::Document< MD::UnicodeStringTrait > > doc )
-{
-	MESSAGE( "This test is not strict to CommonMark 0.30 as uriparse library can't parse the URL." );
-	MESSAGE( "Skip for now." );
-}
-
-#endif // MD4QT_ICU_STL_SUPPORT
-
-TEST_CASE( "020" )
-{
-	checkTest020< TRAIT >( load_test( 20 ) );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->text() == u8"<http://example.com?find=*>" );
 }
 
 TEST_CASE( "021" )

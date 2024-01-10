@@ -691,3 +691,41 @@ TEST_CASE( "197" )
 	REQUIRE( i->items().at( 1 )->type() == MD::ItemType::HorizontalLine );
 	REQUIRE( i->items().at( 2 )->type() == MD::ItemType::Paragraph );
 }
+
+/*
+<std::vector<T>> <std::vector<T>>
+
+*/
+TEST_CASE( "198" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/198.md" );
+
+	REQUIRE( doc->items().size() == 2 );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT > * > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 5 );
+
+	{
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT > * > ( p->items().at( 0 ).get() );
+		REQUIRE( t->text() == u8"<std::vector" );
+	}
+
+	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
+
+	{
+		REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT > * > ( p->items().at( 2 ).get() );
+		REQUIRE( t->text() == u8"> <std::vector" );
+	}
+
+	REQUIRE( p->items().at( 3 )->type() == MD::ItemType::RawHtml );
+
+	{
+		REQUIRE( p->items().at( 4 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT > * > ( p->items().at( 4 ).get() );
+		REQUIRE( t->text() == u8">" );
+	}
+}

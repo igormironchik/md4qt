@@ -100,6 +100,18 @@ closeTextStyleToHtml( int s )
 
 template< class Trait >
 typename Trait::String
+prepareTextForHtml( const typename Trait::String & t )
+{
+	auto tmp = t;
+	tmp.replace( typename Trait::Char( '&' ), "&amp;" );
+	tmp.replace( typename Trait::Char( '<' ), "&lt;" );
+	tmp.replace( typename Trait::Char( '>' ), "&gt;" );
+
+	return tmp;
+}
+
+template< class Trait >
+typename Trait::String
 textToHtml( Text< Trait > * t )
 {
 	typename Trait::String html;
@@ -109,7 +121,7 @@ textToHtml( Text< Trait > * t )
 	if( t->isSpaceBefore() )
 		html.push_back( " " );
 
-	html.push_back( t->text() );
+	html.push_back( prepareTextForHtml< Trait >( t->text() ) );
 
 	if( t->isSpaceAfter() )
 		html.push_back( " " );
@@ -127,7 +139,7 @@ linkTextToHtml( const typename Trait::String & text, int style )
 
 	html.push_back( openTextStyleToHtml< Trait >( style ) );
 
-	html.push_back( text );
+	html.push_back( prepareTextForHtml< Trait >( text ) );
 
 	html.push_back( closeTextStyleToHtml< Trait >( style ) );
 
@@ -142,12 +154,7 @@ inlineCodeToHtml( Code< Trait > * c )
 
 	html.push_back( "<code>" );
 
-	auto code = c->text();
-	code.replace( typename Trait::Char( '&' ), "&amp;" );
-	code.replace( typename Trait::Char( '<' ), "&lt;" );
-	code.replace( typename Trait::Char( '>' ), "&gt;" );
-
-	html.push_back( code );
+	html.push_back( prepareTextForHtml< Trait >( c->text() ) );
 
 	html.push_back( "</code>" );
 
@@ -163,7 +170,7 @@ imgToHtml( Image< Trait > * i )
 	html.push_back( "<img src=\"" );
 	html.push_back( i->url() );
 	html.push_back( "\" alt=\"" );
-	html.push_back( i->text() );
+	html.push_back( prepareTextForHtml< Trait >( i->text() ) );
 	html.push_back( "\" style=\"max-width:100%;\" />" );
 
 	return html;
@@ -416,11 +423,7 @@ codeToHtml( Code< Trait > * c )
 	}
 
 	html.push_back( ">" );
-	auto code = c->text();
-	code.replace( typename Trait::Char( '&' ), "&amp;" );
-	code.replace( typename Trait::Char( '<' ), "&lt;" );
-	code.replace( typename Trait::Char( '>' ), "&gt;" );
-	html.push_back( code );
+	html.push_back( prepareTextForHtml< Trait >( c->text() ) );
 	html.push_back( "</code></pre>" );
 	html.push_back( "\n" );
 
