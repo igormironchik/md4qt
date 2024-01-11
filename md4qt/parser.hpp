@@ -2010,7 +2010,7 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 				return BlockType::SomethingInList;
 			else
 			{
-				if( !isHeading && !isBlockquote && !fensedCode &&
+				if( !isHeading && !isBlockquote && !( fensedCode && first < 4 ) &&
 					!emptyLinePreceded && !inListWithFirstEmptyLine )
 						return BlockType::SomethingInList;
 			}
