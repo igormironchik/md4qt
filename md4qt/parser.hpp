@@ -2941,7 +2941,7 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 							++i;
 						}
 
-						if( style.length() == 2 )
+						if( style.length() <= 2 )
 						{
 							const bool spaceAfter =
 								( i < str.length() ? str[ i ].isSpace() : true );
@@ -6104,8 +6104,8 @@ createStyles( std::vector< std::pair< Style, long long int > > & s, long long in
 	}
 	else
 	{
-		s.push_back( { Style::Strikethrough, l / 2 } );
-		count += l / 2;
+		s.push_back( { Style::Strikethrough, 1 } );
+		++count;
 	}
 }
 
@@ -6148,7 +6148,7 @@ isSequence( typename Delims< Trait >::const_iterator it, long long int itLine, l
 	Delimiter::DelimiterType t )
 {
 	return ( itLine == it->m_line &&
-		itPos + ( it->m_type != Delimiter::Strikethrough ? 1 : 2 ) == it->m_pos &&
+		itPos + it->m_len == it->m_pos &&
 		it->m_type == t );
 }
 
@@ -6161,7 +6161,7 @@ readSequence( typename Delims< Trait >::const_iterator it,
 {
 	line = it->m_line;
 	pos = it->m_pos;
-	len = ( it->m_type != Delimiter::Strikethrough ? 1 : 2 );
+	len = it->m_len;
 	current = it;
 	const auto t = it->m_type;
 
@@ -6171,16 +6171,8 @@ readSequence( typename Delims< Trait >::const_iterator it,
 	{
 		current = it;
 
-		if( it->m_type != Delimiter::Strikethrough )
-		{
-			++pos;
-			++len;
-		}
-		else
-		{
-			pos += 2;
-			len += 2;
-		}
+		pos += it->m_len;
+		len += it->m_len;
 
 		++it;
 	}
@@ -6238,7 +6230,7 @@ isStyleClosed( typename Delims< Trait >::const_iterator it,
 	vars.push_back( {} );
 
 	long long int itLine = open->m_line, itPos = open->m_pos,
-		itLength = ( open->m_type != Delimiter::Strikethrough ? 1 : 2 );
+		itLength = open->m_len;
 
 	const long long int line = po.line, pos = po.pos;
 	const bool collectRefLinks = po.collectRefLinks;
@@ -6353,8 +6345,7 @@ isStyleClosed( typename Delims< Trait >::const_iterator it,
 	}
 	else
 		return { false, { { Style::Unknown, 0 } }, isSkipAllEmphasis< Trait >( vars.front(), idx ) ?
-			vars.front().at( idx ).first.first :
-			( open->m_type != Delimiter::Strikethrough ? 1 : 2 ), 1 };
+			vars.front().at( idx ).first.first : open->m_len, 1 };
 }
 
 template< class Trait >

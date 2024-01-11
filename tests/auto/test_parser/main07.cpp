@@ -759,3 +759,79 @@ TEST_CASE( "199" )
 	REQUIRE( c->isInlined() );
 	REQUIRE( c->text() == u8"    text    " );
 }
+
+/*
+~text~
+
+*/
+TEST_CASE( "200" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/200.md" );
+
+	REQUIRE( doc->items().size() == 2 );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT > * > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text< TRAIT > * > ( p->items().at( 0 ).get() );
+	REQUIRE( t->opts() == MD::StrikethroughText );
+	REQUIRE( t->text() == u8"text" );
+}
+
+/*
+~~text~text~~
+
+*/
+TEST_CASE( "201" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/201.md" );
+
+	REQUIRE( doc->items().size() == 2 );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT > * > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text< TRAIT > * > ( p->items().at( 0 ).get() );
+	REQUIRE( t->opts() == MD::StrikethroughText );
+	REQUIRE( t->text() == u8"text~text" );
+}
+
+/*
+~~~text~~
+
+*/
+TEST_CASE( "202" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/202.md" );
+
+	REQUIRE( doc->items().size() == 2 );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Code );
+	auto c = static_cast< MD::Code< TRAIT > * > ( doc->items().at( 1 ).get() );
+	REQUIRE( c->text().isEmpty() );
+}
+
+/*
+~~text~
+
+*/
+TEST_CASE( "203" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/203.md" );
+
+	REQUIRE( doc->items().size() == 2 );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT > * > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text< TRAIT > * > ( p->items().at( 0 ).get() );
+	REQUIRE( t->opts() == MD::TextWithoutFormat );
+	REQUIRE( t->text() == u8"~~text~" );
+}
