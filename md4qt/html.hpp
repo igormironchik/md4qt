@@ -210,6 +210,8 @@ linkToHtml( Link< Trait > * l, std::shared_ptr< Document< Trait > > doc,
 		url.remove( p, url.length() - p );
 	}
 
+	html.push_back( openTextStyleToHtml< Trait >( l->opts() ) );
+
 	html.push_back( "<a href=\"" );
 	html.push_back( url );
 	html.push_back( "\">" );
@@ -225,6 +227,8 @@ linkToHtml( Link< Trait > * l, std::shared_ptr< Document< Trait > > doc,
 
 
 	html.push_back( "</a>" );
+
+	html.push_back( closeTextStyleToHtml< Trait >( l->opts() ) );
 
 	return html;
 }
