@@ -936,3 +936,54 @@ TEST_CASE( "207" )
 	REQUIRE( p->items().at( 3 )->type() == MD::ItemType::Link );
 	REQUIRE( p->items().at( 4 )->type() == MD::ItemType::Text );
 }
+
+/*
+1. Text
+   - Text
+    text
+
+*/
+TEST_CASE( "208" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/208.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	{
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+		auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( l->items().size() == 1 );
+
+		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+		auto i = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+
+		REQUIRE( i->items().at( 0 )->type() == MD::ItemType::Paragraph );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( i->items().at( 0 ).get() );
+		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT > * > ( p->items().at( 0 ).get() );
+		REQUIRE( t->text() == u8"Text" );
+
+		{
+			REQUIRE( i->items().at( 1 )->type() == MD::ItemType::List );
+			auto l = static_cast< MD::List< TRAIT >* > ( i->items().at( 1 ).get() );
+
+			REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+			auto i = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+			REQUIRE( i->items().size() == 1 );
+
+			REQUIRE( i->items().at( 0 )->type() == MD::ItemType::Paragraph );
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( i->items().at( 0 ).get() );
+			REQUIRE( p->items().size() == 2 );
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+			auto t1 = static_cast< MD::Text< TRAIT > * > ( p->items().at( 0 ).get() );
+			REQUIRE( t1->text() == u8"Text" );
+			REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+			auto t2 = static_cast< MD::Text< TRAIT > * > ( p->items().at( 1 ).get() );
+			REQUIRE( t2->text() == u8"text" );
+		}
+	}
+}

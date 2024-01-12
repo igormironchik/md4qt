@@ -7836,23 +7836,27 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 				nestedList.push_back( *it );
 				++it;
 
+				bool wasEmptyLine = false;
+
 				for( ; it != last; ++it )
 				{
 					const auto ns = skipSpaces< Trait >( 0, it->first.asString() );
 					std::tie( ok, std::ignore, std::ignore ) = listItemData< Trait >(
 						( ns >= indent ? it->first.asString().sliced( indent ) : it->first.asString() ) );
 
-					if( ok || ns >= indent + newIndent || ns == it->first.length() )
+					if( ok ) wasEmptyLine = false;
+
+					if( ok || ns >= indent + newIndent || ns == it->first.length() || !wasEmptyLine )
 						nestedList.push_back( *it );
 					else
 						break;
+
+					wasEmptyLine = ns == it->first.length();
 				}
 
-				for( auto it = nestedList.begin(), last = nestedList.end(); it != last; ++it )
-				{
-					if( it->first.asString().startsWith( typename Trait::String( indent, ' ' ) ) )
-						it->first = it->first.sliced( indent );
-				}
+				for( auto it = nestedList.begin(), last = nestedList.end(); it != last; ++it )		
+					it->first = it->first.sliced( std::min(
+						skipSpaces< Trait >( 0, it->first.asString() ), indent ) );
 
 				while( !nestedList.empty() &&
 					nestedList.back().first.asString().simplified().isEmpty() )
