@@ -835,3 +835,76 @@ TEST_CASE( "203" )
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
 	REQUIRE( t->text() == u8"~~text~" );
 }
+
+/*
+<!-- -->
+[link]: https://www.google.com
+
+Text [link].
+
+*/
+TEST_CASE( "204" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/204.md" );
+
+	REQUIRE( doc->items().size() == 3 );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT > * > ( doc->items().at( 2 ).get() );
+	REQUIRE( p->items().size() == 3 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Link );
+	REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+}
+
+/*
+<!-- -->
+<!-- -->
+[link]: https://www.google.com
+
+Text [link].
+
+*/
+TEST_CASE( "205" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/205.md" );
+
+	REQUIRE( doc->items().size() == 4 );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::RawHtml );
+	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT > * > ( doc->items().at( 3 ).get() );
+	REQUIRE( p->items().size() == 3 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Link );
+	REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+}
+
+/*
+<!-- --><!-- -->
+<!-- -->
+[link]: https://www.google.com
+
+Text [link].
+
+*/
+TEST_CASE( "206" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/206.md" );
+
+	REQUIRE( doc->items().size() == 4 );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::RawHtml );
+	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT > * > ( doc->items().at( 3 ).get() );
+	REQUIRE( p->items().size() == 3 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Link );
+	REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+}

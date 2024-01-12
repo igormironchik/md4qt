@@ -3147,6 +3147,7 @@ struct TextParsingOpts {
 	bool isSpaceBefore = false;
 	bool wasRefLink = false;
 	bool checkLineOnNewType = false;
+	bool firstInParagraph = true;
 
 	enum class Detected {
 		Nothing = 0,
@@ -3364,6 +3365,7 @@ makeTextObject( const typename Trait::String & text, bool spaceBefore, bool spac
 		po.parent->setEndLine( po.fr.data.at( endLine ).second.lineNumber );
 
 		po.wasRefLink = false;
+		po.firstInParagraph = false;
 		po.parent->appendItem( t );
 
 		po.lastText = t;
@@ -3392,6 +3394,7 @@ makeTextObjectWithLineBreak( const typename Trait::String & text, bool spaceBefo
 	po.parent->setEndColumn( hr->endColumn() );
 	po.parent->setEndLine( hr->endLine() );
 	po.wasRefLink = false;
+	po.firstInParagraph = false;
 	po.parent->appendItem( hr );
 }
 
@@ -4538,6 +4541,8 @@ checkForRawHtml( typename Delims< Trait >::const_iterator it,
 	{
 		resetHtmlTag( po.html );
 
+		po.firstInParagraph = false;
+
 		return it;
 	}
 
@@ -4618,6 +4623,9 @@ checkForMath( typename Delims< Trait >::const_iterator it,
 	typename Delims< Trait >::const_iterator last,
 	TextParsingOpts< Trait > & po )
 {
+	po.wasRefLink = false;
+	po.firstInParagraph = false;
+
 	const auto end = std::find_if( std::next( it ), last,
 		[&] ( const auto & d )
 		{
@@ -4801,6 +4809,7 @@ checkForAutolinkHtml( typename Delims< Trait >::const_iterator it,
 				}
 
 				po.wasRefLink = false;
+				po.firstInParagraph = false;
 
 				if( updatePos )
 				{
@@ -4864,6 +4873,7 @@ makeInlineCode( long long int startLine, long long int startPos,
 	}
 
 	po.wasRefLink = false;
+	po.firstInParagraph = false;
 }
 
 template< class Trait >
@@ -4874,6 +4884,9 @@ checkForInlineCode( typename Delims< Trait >::const_iterator it,
 {
 	const auto len = it->m_len;
 	const auto start = it;
+
+	po.wasRefLink = false;
+	po.firstInParagraph = false;
 
 	++it;
 
@@ -4904,8 +4917,6 @@ checkForInlineCode( typename Delims< Trait >::const_iterator it,
 					po.pos = it->m_pos + it->m_len;
 				}
 
-				po.wasRefLink = false;
-
 				return it;
 			}
 		}
@@ -4915,8 +4926,6 @@ checkForInlineCode( typename Delims< Trait >::const_iterator it,
 
 	if( !po.collectRefLinks )
 		makeText( start->m_line, start->m_pos + start->m_len, po );
-
-	po.wasRefLink = false;
 
 	return start;
 }
@@ -5200,6 +5209,7 @@ createShortcutLink( const typename MdBlock< Trait >::Data & text,
 		typename Trait::String( po.workingPath + "/" ) ) + po.fileName;
 
 	po.wasRefLink = false;
+	po.firstInParagraph = false;
 
 	if( po.doc->labeledLinks().find( url ) != po.doc->labeledLinks().cend() )
 	{
@@ -5296,6 +5306,7 @@ createShortcutImage( const typename MdBlock< Trait >::Data & text,
 			typename Trait::String( po.workingPath + "/" ) ) + po.fileName;
 
 	po.wasRefLink = false;
+	po.firstInParagraph = false;
 
 	const auto iit = po.doc->labeledLinks().find( url );
 
@@ -5592,6 +5603,7 @@ checkForImage( typename Delims< Trait >::const_iterator it,
 	typename MdBlock< Trait >::Data text;
 
 	po.wasRefLink = false;
+	po.firstInParagraph = false;
 
 	std::tie( text, it ) = checkForLinkText( it, last, po );
 
@@ -5717,7 +5729,9 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 	typename MdBlock< Trait >::Data text;
 
 	const auto wasRefLink = po.wasRefLink;
+	const auto firstInParagraph = po.firstInParagraph;
 	po.wasRefLink = false;
+	po.firstInParagraph = false;
 
 	const auto ns = skipSpaces< Trait >( 0, po.fr.data.at( po.line ).first.asString() );
 
@@ -5756,7 +5770,8 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 				typename Trait::Char( ':' ) )
 			{
 				// Reference definitions allowed only at start of paragraph.
-				if( ( po.line == 0 || wasRefLink ) && ns < 4 && start->m_pos == ns )
+				if( ( po.line == 0 || wasRefLink || firstInParagraph )
+					&& ns < 4 && start->m_pos == ns )
 				{
 					typename Trait::String url, title;
 					typename Delims< Trait >::const_iterator iit;
@@ -6370,6 +6385,7 @@ checkForStyle( typename Delims< Trait >::const_iterator first,
 	long long int count = 1;
 
 	po.wasRefLink = false;
+	po.firstInParagraph = false;
 
 	if( it->m_rightFlanking )
 	{
@@ -6965,8 +6981,15 @@ parseFormattedText( MdBlock< Trait > & fr,
 						po.lastTextLine < it->m_line ? po.lastTextPos : it->m_pos, po );
 				else
 				{
+					const auto prevLine = po.line;
+
 					po.line = ( po.lastTextLine < it->m_line ? po.lastTextLine : it->m_line );
 					po.pos = ( po.lastTextLine < it->m_line ? po.lastTextPos : it->m_pos );
+
+					if( po.line > prevLine )
+						po.firstInParagraph = false;
+					else if( po.pos > skipSpaces< Trait >( 0, po.fr.data[ po.line ].first.asString() ) )
+						po.firstInParagraph = false;
 				}
 
 				switch( it->m_type )
@@ -7035,6 +7058,9 @@ parseFormattedText( MdBlock< Trait > & fr,
 
 					case Delimiter::HorizontalLine :
 					{
+						po.wasRefLink = false;
+						po.firstInParagraph = false;
+
 						const auto pos = skipSpaces< Trait >( 0,
 							po.fr.data[ it->m_line ].first.asString() );
 						const auto withoutSpaces = po.fr.data[ it->m_line ]
@@ -7116,6 +7142,9 @@ parseFormattedText( MdBlock< Trait > & fr,
 					case Delimiter::H1 :
 					case Delimiter::H2 :
 					{
+						po.wasRefLink = false;
+						po.firstInParagraph = false;
+
 						optimizeParagraph< Trait >( p );
 
 						if( it->m_line - 1 >= 0 )
@@ -7162,6 +7191,9 @@ parseFormattedText( MdBlock< Trait > & fr,
 					{
 						if( !po.shouldStopParsing() )
 						{
+							po.wasRefLink = false;
+							po.firstInParagraph = false;
+
 							if( !collectRefLinks )
 								makeText( it->m_line, it->m_pos + it->m_len, po );
 							else
