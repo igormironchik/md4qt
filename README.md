@@ -208,11 +208,9 @@ How can I convert `MD::Document` into `HTML`?
        return 0;
    }
    ```
-   
-   But this functionality is not fully tested yet.
 
 I need to know positions in the `Markdown` file of blocks/elements. How
 can I achieve this?
 ---
 
- * Done in version `2.0.5`. But this functionality is not fully tested yet.
+ * Done in version `2.0.5`.
