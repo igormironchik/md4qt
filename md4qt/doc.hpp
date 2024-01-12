@@ -128,6 +128,37 @@ private:
 
 
 //
+// ItemWithOpts
+//
+
+template< class Trait >
+class ItemWithOpts
+	:	public Item< Trait >
+{
+protected:
+	ItemWithOpts() = default;
+
+public:
+	~ItemWithOpts() override = default;
+
+	int opts() const
+	{
+		return m_opts;
+	}
+
+	void setOpts( int o )
+	{
+		m_opts = o;
+	}
+
+private:
+	int m_opts = 0;
+
+	DISABLE_COPY( ItemWithOpts )
+}; // class ItemWithOpts
+
+
+//
 // PageBreak
 //
 
@@ -267,7 +298,7 @@ protected:
 
 private:
 	typename Trait::String m_text;
-	bool m_isFreeTag;
+	bool m_isFreeTag = true;
 
 	DISABLE_COPY( RawHtml )
 }; // class RawHtml
@@ -280,16 +311,10 @@ private:
 //! Text.
 template< typename Trait >
 class Text
-	:	public Item< Trait >
+	:	public ItemWithOpts< Trait >
 {
 public:
-	Text()
-		:	m_opts( 0 )
-		,	m_isSpaceBefore( false )
-		,	m_isSpaceAfter( false )
-	{
-	}
-
+	Text() = default;
 	~Text() override = default;
 
 	ItemType type() const override
@@ -305,16 +330,6 @@ public:
 	void setText( const typename Trait::String & t )
 	{
 		m_text = t;
-	}
-
-	int opts() const
-	{
-		return m_opts;
-	}
-
-	void setOpts( int o )
-	{
-		m_opts = o;
 	}
 
 	bool isSpaceBefore() const
@@ -339,9 +354,8 @@ public:
 
 private:
 	typename Trait::String m_text;
-	int m_opts;
-	bool m_isSpaceBefore;
-	bool m_isSpaceAfter;
+	bool m_isSpaceBefore = false;
+	bool m_isSpaceAfter = false;
 
 	DISABLE_COPY( Text )
 }; // class Text
@@ -511,7 +525,6 @@ class Heading final
 public:
 	Heading()
 		:	m_text( new Paragraph< Trait> )
-		,	m_level( 0 )
 	{
 	}
 
@@ -561,7 +574,7 @@ public:
 
 private:
 	ParagraphSharedPointer m_text;
-	int m_level;
+	int m_level = 0;
 	typename Trait::String m_label;
 
 	DISABLE_COPY( Heading )
@@ -780,12 +793,11 @@ private:
 //! Link.
 template< class Trait >
 class Link
-	:	public Item< Trait >
+	:	public ItemWithOpts< Trait >
 {
 public:
 	Link()
-		:	m_opts( 0 )
-		,	m_img( new Image< Trait > )
+		:	m_img( new Image< Trait > )
 		,	m_p( new Paragraph< Trait > )
 	{
 	}
@@ -817,16 +829,6 @@ public:
 		m_text = t;
 	}
 
-	int opts() const
-	{
-		return m_opts;
-	}
-
-	void setOpts( int o )
-	{
-		m_opts = o;
-	}
-
 	using ImageSharedPointer = std::shared_ptr< Image< Trait > >;
 	using ParagraphSharedPointer = std::shared_ptr< Paragraph< Trait > >;
 
@@ -853,7 +855,6 @@ public:
 private:
 	typename Trait::String m_url;
 	typename Trait::String m_text;
-	int m_opts;
 	ImageSharedPointer m_img;
 	ParagraphSharedPointer m_p;
 
@@ -868,7 +869,7 @@ private:
 //! Code.
 template< class Trait >
 class Code final
-	:	public Item< Trait >
+	:	public ItemWithOpts< Trait >
 {
 public:
 	explicit Code( const typename Trait::String & t, bool fensedCode, bool inl )

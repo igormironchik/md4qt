@@ -274,7 +274,7 @@ TEST_CASE( "642" )
 	REQUIRE( p->items().size() == 1 );
 
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::RawHtml );
-	auto h = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( h->text() == u8"<a href=\"foo  \nbar\">" );
 }
 

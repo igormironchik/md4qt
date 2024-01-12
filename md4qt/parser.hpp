@@ -4866,6 +4866,7 @@ makeInlineCode( long long int startLine, long long int startPos,
 		code->setStartLine( po.fr.data.at( startLine ).second.lineNumber );
 		code->setEndColumn( po.fr.data.at( lastLine ).first.virginPos( lastPos - 1 ) );
 		code->setEndLine( po.fr.data.at( lastLine ).second.lineNumber );
+		code->setOpts( po.opts );
 
 		po.parent->appendItem( code );
 	}

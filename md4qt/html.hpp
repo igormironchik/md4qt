@@ -152,11 +152,15 @@ inlineCodeToHtml( Code< Trait > * c )
 {
 	typename Trait::String html;
 
+	html.push_back( openTextStyleToHtml< Trait >( c->opts() ) );
+
 	html.push_back( "<code>" );
 
 	html.push_back( prepareTextForHtml< Trait >( c->text() ) );
 
 	html.push_back( "</code>" );
+
+	html.push_back( closeTextStyleToHtml< Trait >( c->opts() ) );
 
 	return html;
 }
