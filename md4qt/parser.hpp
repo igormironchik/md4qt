@@ -4535,8 +4535,6 @@ checkForRawHtml( typename Delims< Trait >::const_iterator it,
 {
 	const auto rule = htmlTagRule( it, last, po );
 
-	po.wasRefLink = false;
-
 	if( rule == -1 )
 	{
 		resetHtmlTag( po.html );
