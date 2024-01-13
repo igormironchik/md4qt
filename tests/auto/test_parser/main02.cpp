@@ -820,7 +820,7 @@ TEST_CASE( "037" )
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 11 ).get() );
 		REQUIRE( p->startColumn() == 0 );
 		REQUIRE( p->startLine() == 20 );
-		REQUIRE( p->endColumn() == 0 );
+		REQUIRE( p->endColumn() == 1 );
 		REQUIRE( p->endLine() == 20 );
 
 		REQUIRE( p->items().size() == 1 );
@@ -830,7 +830,7 @@ TEST_CASE( "037" )
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->startColumn() == 0 );
 		REQUIRE( t->startLine() == 20 );
-		REQUIRE( t->endColumn() == 0 );
+		REQUIRE( t->endColumn() == 1 );
 		REQUIRE( t->endLine() == 20 );
 
 		REQUIRE( t->text() == u8"[" );

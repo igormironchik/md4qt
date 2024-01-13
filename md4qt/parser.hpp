@@ -5719,6 +5719,32 @@ checkForImage( typename Delims< Trait >::const_iterator it,
 
 template< class Trait >
 inline typename Delims< Trait >::const_iterator
+checkShortcutLink( typename Delims< Trait >::const_iterator it,
+	typename Delims< Trait >::const_iterator last,
+	TextParsingOpts< Trait > & po )
+{
+	const auto start = it;
+
+	typename MdBlock< Trait >::Data text;
+
+	std::tie( text, it ) = checkForLinkLabel( start, last, po );
+
+	if( it != start && !toSingleLine< Trait >( text ).simplified().isEmpty() )
+	{
+		if( createShortcutLink( text,
+				po, start->m_line, start->m_pos,
+				start->m_line, start->m_pos + start->m_len,
+				it, {}, false ) )
+		{
+			return it;
+		}
+	}
+
+	return start;
+}
+
+template< class Trait >
+inline typename Delims< Trait >::const_iterator
 checkForLink( typename Delims< Trait >::const_iterator it,
 	typename Delims< Trait >::const_iterator last,
 	TextParsingOpts< Trait > & po )
@@ -5820,27 +5846,13 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 							return iit;
 						}
 						else
-						{
-							if( !po.collectRefLinks )
-								makeText( start->m_line, start->m_pos + start->m_len, po );
-
-							return start;
-						}
+							return checkShortcutLink( start, last, po );
 					}
 					else
-					{
-						if( !po.collectRefLinks )
-							makeText( start->m_line, start->m_pos + start->m_len, po );
-
 						return start;
-					}
 				}
-				else if( !po.collectRefLinks )
-				{
-					makeText( start->m_line, start->m_pos + start->m_len, po );
-
-					return start;
-				}
+				else
+					return checkShortcutLink( start, last, po );
 			}
 			// Inline -> (
 			else if( po.fr.data.at( it->m_line ).first[ it->m_pos + it->m_len ] ==
@@ -5917,42 +5929,12 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 					return it;
 				}
 			}
-			// Shortcut
 			else
-			{
-				std::tie( text, it ) = checkForLinkLabel( start, last, po );
-
-				if( it != start && !toSingleLine< Trait >( text ).simplified().isEmpty() )
-				{
-					if( createShortcutLink( text,
-							po, start->m_line, start->m_pos,
-							start->m_line, start->m_pos + start->m_len,
-							it, {}, false ) )
-					{
-						return it;
-					}
-				}
-			}
+				return checkShortcutLink( start, last, po );
 		}
-		// Shortcut
 		else
-		{
-			std::tie( text, it ) = checkForLinkLabel( start, last, po );
-
-			if( it != start && !toSingleLine< Trait >( text ).simplified().isEmpty() )
-			{
-				if( createShortcutLink( text,
-						po, start->m_line, start->m_pos,
-						start->m_line, start->m_pos + start->m_len,
-						it, {}, false ) )
-				{
-					return it;
-				}
-			}
-		}
+			return checkShortcutLink( start, last, po );
 	}
-	else if( !po.collectRefLinks )
-		makeText( start->m_line, start->m_pos + start->m_len, po );
 
 	return start;
 }

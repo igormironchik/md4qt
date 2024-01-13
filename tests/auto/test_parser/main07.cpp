@@ -1012,3 +1012,32 @@ TEST_CASE( "209" )
 	auto t2 = static_cast< MD::Text< TRAIT > * > ( p->items().at( 1 ).get() );
 	REQUIRE( t2->text() == u8"0. text" );
 }
+
+/*
+- [#6899]: Text
+
+[#6899]: https://www.google.com
+
+*/
+TEST_CASE( "210" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/210.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->items().size() == 1 );
+
+	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+	auto i = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+
+	REQUIRE( i->items().at( 0 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( i->items().at( 0 ).get() );
+	REQUIRE( p->items().size() == 2 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
+	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+}
