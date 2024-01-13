@@ -354,12 +354,16 @@ TEST_CASE( "is_table_alignmnet" )
 
 TEST_CASE( "is_html_comment" )
 {
-	REQUIRE( MD::isHtmlComment< TRAIT >( u8"<!-- -->" ) );
-	REQUIRE( !MD::isHtmlComment< TRAIT >( u8"<-- -->" ) );
-	REQUIRE( !MD::isHtmlComment< TRAIT >( u8"<!-->" ) );
-	REQUIRE( !MD::isHtmlComment< TRAIT >( u8"<!--->" ) );
-	REQUIRE( !MD::isHtmlComment< TRAIT >( u8"<!-- --" ) );
-	REQUIRE( !MD::isHtmlComment< TRAIT >( u8"<!-- -" ) );
+	REQUIRE( MD::isHtmlComment< TRAIT >( u8"<!-- -->", false ) );
+	REQUIRE( MD::isHtmlComment< TRAIT >( u8"<!-- -- -->", true ) );
+	REQUIRE( MD::isHtmlComment< TRAIT >( u8"<!--My favorite operators are > and <!-->", false ) );
+	REQUIRE( MD::isHtmlComment< TRAIT >( u8"<!--My favorite operators are > and <!-->", true ) );
+	REQUIRE( !MD::isHtmlComment< TRAIT >( u8"<!-- -- -->", false ) );
+	REQUIRE( !MD::isHtmlComment< TRAIT >( u8"<-- -->", false ) );
+	REQUIRE( !MD::isHtmlComment< TRAIT >( u8"<!-->", false ) );
+	REQUIRE( !MD::isHtmlComment< TRAIT >( u8"<!--->", false ) );
+	REQUIRE( !MD::isHtmlComment< TRAIT >( u8"<!-- --", false ) );
+	REQUIRE( !MD::isHtmlComment< TRAIT >( u8"<!-- -", false ) );
 }
 
 TEST_CASE( "test_column_alignment" )

@@ -1041,3 +1041,40 @@ TEST_CASE( "210" )
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
 	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
 }
+
+/*
+<!--
+--comment
+-->
+
+*/
+TEST_CASE( "211" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/211.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+}
+
+/*
+foo <!--
+--
+-->
+
+*/
+TEST_CASE( "212" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/212.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 3 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Heading );
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
+}

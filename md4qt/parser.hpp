@@ -652,7 +652,7 @@ isTableAlignment( const typename Trait::String & s )
 //! \return Is given string a HTML comment.
 template< class Trait >
 inline bool
-isHtmlComment( const typename Trait::String & s )
+isHtmlComment( const typename Trait::String & s, bool online )
 {
 	auto c = s;
 
@@ -667,17 +667,35 @@ isHtmlComment( const typename Trait::String & s )
 	if( c.startsWith( "->" ) )
 		return false;
 
-	const auto p = c.indexOf( "--" );
+	long long int p = -1;
+	bool endFound = false;
 
-	if( p > -1 )
+	while( ( p = c.indexOf( "--", p + 1 ) ) > -1 )
 	{
-		if( c.size() > p + 2 )
-			return c[ p + 2 ] == typename Trait::Char( '>' );
+		if( online )
+		{
+			if( c.size() > p + 2 && c[ p + 2 ] == typename Trait::Char( '>' ) )
+			{
+				if( !endFound )
+					endFound = true;
+				else
+					return false;
+			}
+			else if( p - 2 >= 0 && c.sliced( p - 2, 4 ) == "<!--" )
+				return false;
+			else if( c.size() > p + 3 && c.sliced( p, 4 ) == "--!>" )
+				return false;
+		}
 		else
-			return false;
+		{
+			if( c.size() > p + 2 )
+				return c[ p + 2 ] == typename Trait::Char( '>' );
+			else
+				return false;
+		}
 	}
-	else
-		return false;
+
+	return endFound;
 }
 
 
@@ -1114,13 +1132,13 @@ private:
 template< class Trait >
 inline bool
 checkForEndHtmlComments( const typename Trait::String & line, long long int pos,
-	std::vector< std::pair< bool, bool > > & res )
+	std::vector< std::pair< bool, bool > > & res, bool online )
 {
-	long long int e = line.indexOf( "-->", pos );
+	const long long int e = line.indexOf( "-->", pos );
 
 	if( e != -1 )
-	{
-		res.push_back( { true, isHtmlComment< Trait >( line.sliced( 0, e + 3 ) ) } );
+	{	
+		res.push_back( { true, isHtmlComment< Trait >( line.sliced( 0, e + 3 ), online ) } );
 
 		return true;
 	}
@@ -1134,6 +1152,7 @@ checkForHtmlComments( const typename Trait::String & line, StringListStream< Tra
 	std::vector< std::pair< bool, bool > > & res )
 {
 	long long int p = 0, l = stream.currentLineNumber();
+	const auto ns = skipSpaces< Trait > ( 0, line );
 
 	bool add = false;
 
@@ -1141,7 +1160,7 @@ checkForHtmlComments( const typename Trait::String & line, StringListStream< Tra
 	{
 		auto c = line.sliced( p );
 
-		if( !checkForEndHtmlComments< Trait >( c, 4, res ) )
+		if( !checkForEndHtmlComments< Trait >( c, 4, res, ns == p ) )
 		{
 			add = true;
 
@@ -1150,7 +1169,7 @@ checkForHtmlComments( const typename Trait::String & line, StringListStream< Tra
 				c.push_back( typename Trait::Char( ' ' ) );
 				c.push_back( stream.lineAt( l ).asString() );
 
-				if( checkForEndHtmlComments< Trait >( c, 4, res ) )
+				if( checkForEndHtmlComments< Trait >( c, 4, res, ns == p ) )
 				{
 					add = false;
 
