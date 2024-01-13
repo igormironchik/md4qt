@@ -1605,7 +1605,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 						if( isOrderedList< Trait >( line.asString(), &num ) )
 						{
-							if( num > 1 )
+							if( num != 1 )
 							{
 								ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
 
