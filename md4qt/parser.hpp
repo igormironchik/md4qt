@@ -5591,6 +5591,33 @@ checkForRefLink( typename Delims< Trait >::const_iterator it,
 	return { dest, title, std::prev( it ), true };
 }
 
+template< class Trait, class Func >
+inline typename Delims< Trait >::const_iterator
+checkShortcut( typename Delims< Trait >::const_iterator it,
+	typename Delims< Trait >::const_iterator last,
+	TextParsingOpts< Trait > & po,
+	Func functor )
+{
+	const auto start = it;
+
+	typename MdBlock< Trait >::Data text;
+
+	std::tie( text, it ) = checkForLinkLabel( start, last, po );
+
+	if( it != start && !toSingleLine< Trait >( text ).simplified().isEmpty() )
+	{
+		if( functor( text,
+				po, start->m_line, start->m_pos,
+				start->m_line, start->m_pos + start->m_len,
+				it, {}, false ) )
+		{
+			return it;
+		}
+	}
+
+	return start;
+}
+
 template< class Trait >
 inline typename Delims< Trait >::const_iterator
 checkForImage( typename Delims< Trait >::const_iterator it,
@@ -5679,65 +5706,10 @@ checkForImage( typename Delims< Trait >::const_iterator it,
 				}
 			}
 			else
-			{
-				std::tie( text, it ) = checkForLinkLabel( start, last, po );
-
-				if( it != start && !toSingleLine< Trait >( text ).simplified().isEmpty() )
-				{
-					if( createShortcutImage( text,
-						po, start->m_line, start->m_pos,
-						start->m_line, start->m_pos + start->m_len,
-						it, {}, false ) )
-					{
-						return it;
-					}
-				}
-			}
+				return checkShortcut( start, last, po, createShortcutImage< Trait > );
 		}
-		// Shortcut
 		else
-		{
-			std::tie( text, it ) = checkForLinkLabel( start, last, po );
-
-			if( it != start && !toSingleLine< Trait >( text ).simplified().isEmpty() )
-			{
-				if( createShortcutImage( text,
-					po, start->m_line, start->m_pos,
-					start->m_line, start->m_pos + start->m_len,
-					it, {}, false ) )
-				{
-					return it;
-				}
-			}
-		}
-	}
-	else if( !po.collectRefLinks )
-		makeText( start->m_line, start->m_pos + start->m_len, po );
-
-	return start;
-}
-
-template< class Trait >
-inline typename Delims< Trait >::const_iterator
-checkShortcutLink( typename Delims< Trait >::const_iterator it,
-	typename Delims< Trait >::const_iterator last,
-	TextParsingOpts< Trait > & po )
-{
-	const auto start = it;
-
-	typename MdBlock< Trait >::Data text;
-
-	std::tie( text, it ) = checkForLinkLabel( start, last, po );
-
-	if( it != start && !toSingleLine< Trait >( text ).simplified().isEmpty() )
-	{
-		if( createShortcutLink( text,
-				po, start->m_line, start->m_pos,
-				start->m_line, start->m_pos + start->m_len,
-				it, {}, false ) )
-		{
-			return it;
-		}
+			return checkShortcut( start, last, po, createShortcutImage< Trait > );
 	}
 
 	return start;
@@ -5846,13 +5818,13 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 							return iit;
 						}
 						else
-							return checkShortcutLink( start, last, po );
+							return checkShortcut( start, last, po, createShortcutLink< Trait > );
 					}
 					else
 						return start;
 				}
 				else
-					return checkShortcutLink( start, last, po );
+					return checkShortcut( start, last, po, createShortcutLink< Trait > );
 			}
 			// Inline -> (
 			else if( po.fr.data.at( it->m_line ).first[ it->m_pos + it->m_len ] ==
@@ -5930,10 +5902,10 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 				}
 			}
 			else
-				return checkShortcutLink( start, last, po );
+				return checkShortcut( start, last, po, createShortcutLink< Trait > );
 		}
 		else
-			return checkShortcutLink( start, last, po );
+			return checkShortcut( start, last, po, createShortcutLink< Trait > );
 	}
 
 	return start;
