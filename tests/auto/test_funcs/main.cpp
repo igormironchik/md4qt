@@ -460,3 +460,37 @@ TEST_CASE( "paragraph_to_label" )
 		REQUIRE( MD::paragraphToLabel( &p ) == u8"text-text" );
 	}
 }
+
+TEST_CASE( "replace_tabs" )
+{
+	typename TRAIT::InternalString s1( typename TRAIT::String( u8"-\ttext" ) );
+	typename TRAIT::InternalString s2( typename TRAIT::String( u8" >\ttext" ) );
+	typename TRAIT::InternalString s3( typename TRAIT::String( u8"> >\ttext" ) );
+	typename TRAIT::InternalString s4( typename TRAIT::String( u8"\ttext" ) );
+
+	MD::replaceTabs< TRAIT > ( s1 );
+	MD::replaceTabs< TRAIT > ( s2 );
+	MD::replaceTabs< TRAIT > ( s3 );
+	MD::replaceTabs< TRAIT > ( s4 );
+
+	REQUIRE( s1.asString() == u8"-   text" );
+	REQUIRE( s2.asString() == u8" >  text" );
+	REQUIRE( s3.asString() == u8"> > text" );
+	REQUIRE( s4.asString() == u8"    text" );
+
+	typename TRAIT::InternalString s5( typename TRAIT::String( u8"\t-\ttext" ) );
+	typename TRAIT::InternalString s6( typename TRAIT::String( u8"\t >\ttext" ) );
+	typename TRAIT::InternalString s7( typename TRAIT::String( u8"\t> >\ttext" ) );
+	typename TRAIT::InternalString s8( typename TRAIT::String( u8"\t\ttext" ) );
+
+	MD::replaceTabs< TRAIT > ( s5 );
+	MD::replaceTabs< TRAIT > ( s6 );
+	MD::replaceTabs< TRAIT > ( s7 );
+	MD::replaceTabs< TRAIT > ( s8 );
+
+	REQUIRE( s5.asString() == u8"    -   text" );
+	REQUIRE( s6.asString() == u8"     >  text" );
+	REQUIRE( s7.asString() == u8"    > > text" );
+	REQUIRE( s8.asString() == u8"        text" );
+
+}

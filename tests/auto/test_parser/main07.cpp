@@ -1078,3 +1078,51 @@ TEST_CASE( "212" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Heading );
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
 }
+
+/*
+- 	text
+1.	text
+    - text $text
+    - text $text
+
+*/
+TEST_CASE( "213" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/213.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 3 );
+
+	{
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+		auto l = static_cast< MD::List< TRAIT > * > ( doc->items().at( 1 ).get() );
+		REQUIRE( l->items().size() == 1 );
+
+		{
+			REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+			auto li = static_cast< MD::ListItem< TRAIT > * > ( l->items().at( 0 ).get() );
+			REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
+			REQUIRE( li->items().size() == 1 );
+			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
+		}
+	}
+
+	{
+		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::List );
+		auto l = static_cast< MD::List< TRAIT > * > ( doc->items().at( 2 ).get() );
+		REQUIRE( l->items().size() == 1 );
+
+		{
+			REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+			auto li = static_cast< MD::ListItem< TRAIT > * > ( l->items().at( 0 ).get() );
+			REQUIRE( li->listType() == MD::ListItem< TRAIT >::Ordered );
+			REQUIRE( li->items().size() == 2 );
+			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
+			REQUIRE( li->items().at( 1 )->type() == MD::ItemType::List );
+			auto ll = static_cast< MD::List< TRAIT > * > ( li->items().at( 1 ).get() );
+			REQUIRE( ll->items().size() == 2 );
+		}
+	}
+}

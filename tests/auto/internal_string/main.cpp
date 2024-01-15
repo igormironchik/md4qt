@@ -394,7 +394,7 @@ TEST_CASE( "insert" )
 {
 	TRAIT::InternalString s( "a" );
 
-	s = s.insert( 0, 'b' );
+	s = s.insert( 0, TRAIT::Char( 'b' ) );
 
 	REQUIRE( s.asString() == "ba" );
 	REQUIRE( s.virginPos( 0 ) == 0 );

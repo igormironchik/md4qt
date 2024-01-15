@@ -99,6 +99,22 @@ public:
 		return str[ position ];
 	}
 
+	InternalStringT & replaceOne( long long int pos, long long int size, const String & with )
+	{
+		const auto len = str.length();
+
+		str.remove( pos, size );
+		str.insert( pos, with );
+
+		if( with.length() != size )
+		{
+			changedPos.push_back( { { 0, len }, {} } );
+			changedPos.back().second.push_back( { pos, size, with.size() } );
+		}
+
+		return *this;
+	}
+
 	InternalStringT & replace( const String & what, const String & with )
 	{
 		String tmp;
@@ -289,12 +305,18 @@ public:
 
 	InternalStringT & insert( long long int pos, Char ch )
 	{
-		const auto len = str.length();
+		return insert( pos, String( 1, ch ) );
+	}
 
-		str.insert( pos, ch );
+	InternalStringT & insert( long long int pos, const String & s )
+	{
+		const auto len = str.length();
+		const auto ilen = s.length();
+
+		str.insert( pos, s );
 
 		changedPos.push_back( { { 0, len }, {} } );
-		changedPos.back().second.push_back( { pos, 1, 2 } );
+		changedPos.back().second.push_back( { pos, 1, ilen + 1 } );
 
 		return *this;
 	}

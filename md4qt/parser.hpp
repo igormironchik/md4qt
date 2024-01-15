@@ -1222,6 +1222,29 @@ Parser< Trait >::parseFragment( typename Parser< Trait >::ParserContext & ctx,
 
 template< class Trait >
 inline void
+replaceTabs( typename Trait::InternalString & s )
+{
+	unsigned char size = 4;
+	long long int len = s.length();
+
+	for( long long int i = 0; i < len; ++i, --size )
+	{
+		if( s[ i ] == typename Trait::Char( '\t' ) )
+		{
+			s.replaceOne( i, 1, typename Trait::String( size, ' ' ) );
+
+			len += size - 1;
+			i += size - 1;
+			size = 5;
+		}
+
+		if( size == 1 )
+			size = 5;
+	}
+}
+
+template< class Trait >
+inline void
 Parser< Trait >::eatFootnote( typename Parser< Trait >::ParserContext & ctx,
 	StringListStream< Trait > & stream,
 	std::shared_ptr< Block< Trait > > parent,
@@ -1239,10 +1262,11 @@ Parser< Trait >::eatFootnote( typename Parser< Trait >::ParserContext & ctx,
 
 		auto line = readLine( ctx, stream );
 
+		replaceTabs< Trait > ( line );
+
 		const auto ns = skipSpaces< Trait >( 0, line.asString() );
 
-		if( ns == line.length() || line.asString().startsWith( "    " ) ||
-			line.asString().startsWith( '\t' ) )
+		if( ns == line.length() || line.asString().startsWith( "    " ) )
 		{
 			if( ns == line.length() )
 				++emptyLinesCount;
@@ -1953,7 +1977,7 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 	ListIndent * indent, bool emptyLinePreceded, bool calcIndent,
 	const std::vector< long long int > * indents )
 {
-	str.replace( typename Trait::Char( '\t' ), typename Trait::String( 4, ' ' ) );
+	replaceTabs< Trait >( str );
 
 	const auto first = skipSpaces< Trait >( 0, str.asString() );
 
@@ -5423,8 +5447,7 @@ readLinkDestination( long long int line, long long int pos,
 					backslash = true;
 					now = true;
 				}
-				else if( !backslash && ( s[ pos ] == typename Trait::Char( ' ' ) ||
-					s[ pos ] == typename Trait::Char( '\t' ) ) )
+				else if( !backslash && s[ pos ] == typename Trait::Char( ' ' ) )
 				{
 					if( !pc )
 						return { line, pos, true, s.sliced( start, pos - start ), destLine };
@@ -7355,8 +7378,6 @@ Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
 				{
 					if( it->first.asString().startsWith( "    " ) )
 						it->first = it->first.sliced( 4 );
-					else if( it->first.asString().startsWith( '\t' ) )
-						it->first = it->first.sliced( 1 );
 				}
 
 				StringListStream< Trait > stream( fr.data );
@@ -7422,7 +7443,7 @@ Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
 					{
 						const auto p = it->first.asString().indexOf( '=' );
 
-						it->first.insert( p, '\\' );
+						it->first.insert( p, typename Trait::Char( '\\' ) );
 
 						continue;
 					}
@@ -7430,7 +7451,7 @@ Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
 					{
 						const auto p = it->first.asString().indexOf( '-' );
 
-						it->first.insert( p, '\\' );
+						it->first.insert( p, typename Trait::Char( '\\' ) );
 
 						continue;
 					}
@@ -7566,9 +7587,6 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 	const typename Trait::String & fileName,
 	bool collectRefLinks, RawHtmlBlock< Trait > & html )
 {
-	for( auto it = fr.data.begin(), last = fr.data.end(); it != last; ++it )
-		it->first.replace( typename Trait::Char( '\t' ), typename Trait::String( "    " ) );
-
 	const auto p = skipSpaces< Trait >( 0, fr.data.front().first.asString() );
 
 	if( p != fr.data.front().first.length() )
