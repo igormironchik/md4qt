@@ -2283,8 +2283,9 @@ stringToLabel( const typename Trait::String & s )
 	{
 		const auto c = s[ i ];
 
-		if( c.isLetter() || c.isDigit() || c == typename Trait::Char( '-' ) )
-			res.push_back( c.toLower() );
+		if( c.isLetter() || c.isDigit() || c == typename Trait::Char( '-' ) ||
+			c == typename Trait::Char( '_' ) )
+				res.push_back( c.toLower() );
 		else if( c.isSpace() && !res.isEmpty() )
 			res.push_back( "-" );
 	}
