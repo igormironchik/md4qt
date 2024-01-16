@@ -1290,7 +1290,7 @@ Parser< Trait >::eatFootnote( typename Parser< Trait >::ParserContext & ctx,
 
 				makeLineMain( ctx, line, emptyLinesCount, ctx.indent, ns, currentLineNumber );
 
-				break;
+				continue;
 			}
 			else
 				ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
@@ -1306,7 +1306,14 @@ Parser< Trait >::eatFootnote( typename Parser< Trait >::ParserContext & ctx,
 
 			makeLineMain( ctx, line, emptyLinesCount, ctx.indent, ns, currentLineNumber );
 
-			break;
+			if( ctx.type == BlockType::Footnote )
+			{
+				wasEmptyLine = false;
+
+				continue;
+			}
+			else
+				break;
 		}
 	}
 

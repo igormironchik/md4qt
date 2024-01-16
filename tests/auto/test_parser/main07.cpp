@@ -1197,3 +1197,34 @@ TEST_CASE( "216" )
 	REQUIRE( pp->items().size() == 3 );
 	REQUIRE( pp->items().at( 2 )->type() == MD::ItemType::FootnoteRef );
 }
+
+/*
+Text[^1] text[^2].
+
+[^1]: E.g., James H. Breasted, "Editor's Forward," in Ancient
+Records of Assyria and Babylonia, vol. 1, Historical Records of
+Assyria from the Earliest Times to Sargon, by Daniel D.
+Luckenbill (Chicago: The University of Chicago Press, 1926),
+viii.
+
+[^2]: James H. Breasted, The Oriental Institute of the University
+of Chicago: A Beginning and A Program. Oriental Institute
+Communications 1 (Chicago: University of Chicago Press, 1922),
+22-23.
+
+*/
+TEST_CASE( "217" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/217.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT > * > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 5 );
+
+	REQUIRE( doc->footnotesMap().size() == 2 );
+}
