@@ -700,18 +700,18 @@ tableToHtml( Table< Trait > * t, std::shared_ptr< Document< Trait > > doc,
 	{
 		html.push_back( "<table><thead><tr>\n" );
 
-		int i = 0;
+		int columns = 0;
 
 		for( auto th = (*t->rows().cbegin())->cells().cbegin(),
 			last = (*t->rows().cbegin())->cells().cend(); th != last; ++th )
 		{
 			html.push_back( "<th" );
-			html.push_back( tableAlignmentToHtml< Trait >( t->columnAlignment( i ) ) );
+			html.push_back( tableAlignmentToHtml< Trait >( t->columnAlignment( columns ) ) );
 			html.push_back( ">\n" );
 			html.push_back( cellToHtml( th->get(), doc, fns, anchors ) );
 			html.push_back( "\n</th>\n" );
 
-			++i;
+			++columns;
 		}
 
 		html.push_back( "</thead><tbody>\n" );
@@ -720,7 +720,7 @@ tableToHtml( Table< Trait > * t, std::shared_ptr< Document< Trait > > doc,
 		{
 			html.push_back( "<tr>\n" );
 
-			i = 0;
+			int i = 0;
 
 			for( auto c = (*r)->cells().cbegin(), clast = (*r)->cells().cend(); c != clast; ++c )
 			{
@@ -731,7 +731,13 @@ tableToHtml( Table< Trait > * t, std::shared_ptr< Document< Trait > > doc,
 				html.push_back( "\n</td>\n" );
 
 				++i;
+
+				if( i == columns )
+					break;
 			}
+
+			for( ; i < columns; ++i )
+				html.push_back( "<td></td>" );
 
 			html.push_back( "\n</tr>\n" );
 		}
