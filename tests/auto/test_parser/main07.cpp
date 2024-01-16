@@ -1126,3 +1126,74 @@ TEST_CASE( "213" )
 		}
 	}
 }
+
+/*
+text[^1] text[^2]
+
+[^1]: footnote1
+[^2]: footnote2
+
+*/
+TEST_CASE( "214" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/214.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT > * > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 4 );
+
+	REQUIRE( doc->footnotesMap().size() == 2 );
+}
+
+/*
+Text[^1]
+[^1]: Footnote1
+
+*/
+TEST_CASE( "215" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/215.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT > * > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 2 );
+
+	REQUIRE( doc->footnotesMap().size() == 1 );
+}
+
+/*
+Text[^1]
+[^1]: Footnote1
+Text[^1]
+
+*/
+TEST_CASE( "216" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/216.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT > * > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 2 );
+
+	REQUIRE( doc->footnotesMap().size() == 1 );
+	auto f = static_cast< MD::Footnote< TRAIT > * > ( doc->footnotesMap().cbegin()->second.get() );
+	REQUIRE( f->items().size() == 1 );
+	auto pp = static_cast< MD::Paragraph< TRAIT > * > ( f->items().at( 0 ).get() );
+	REQUIRE( pp->items().size() == 3 );
+	REQUIRE( pp->items().at( 2 )->type() == MD::ItemType::FootnoteRef );
+}

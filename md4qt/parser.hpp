@@ -753,7 +753,8 @@ public:
 		Blockquote,
 		Heading,
 		SomethingInList,
-		FensedCodeInList
+		FensedCodeInList,
+		Footnote
 	}; // enum BlockType
 
 	struct ListIndent {
@@ -1255,6 +1256,7 @@ Parser< Trait >::eatFootnote( typename Parser< Trait >::ParserContext & ctx,
 	bool collectRefLinks )
 {
 	long long int emptyLinesCount = 0;
+	bool wasEmptyLine = false;
 
 	while( !stream.atEnd() )
 	{
@@ -1269,11 +1271,29 @@ Parser< Trait >::eatFootnote( typename Parser< Trait >::ParserContext & ctx,
 		if( ns == line.length() || line.asString().startsWith( "    " ) )
 		{
 			if( ns == line.length() )
+			{
 				++emptyLinesCount;
+				wasEmptyLine = true;
+			}
 			else
 				emptyLinesCount = 0;
 
 			ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
+		}
+		else if( !wasEmptyLine )
+		{
+			if( isFootnote< Trait > ( line.sliced( ns ).asString() ) )
+			{
+				parseFragment( ctx, parent, doc, linksToParse, workingPath, fileName, collectRefLinks );
+
+				ctx.lineType = BlockType::Footnote;
+
+				makeLineMain( ctx, line, emptyLinesCount, ctx.indent, ns, currentLineNumber );
+
+				break;
+			}
+			else
+				ctx.fragment.push_back( { line, { currentLineNumber, ctx.htmlCommentData } } );
 		}
 		else
 		{
@@ -1511,6 +1531,19 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 		if( ctx.type == BlockType::ListWithFirstEmptyLine && ctx.lineCounter == 2 )
 			ctx.type = BlockType::List;
 
+		// Footnote.
+		if( ctx.lineType == BlockType::Footnote )
+		{
+			parseFragmentAndMakeNextLineMain( ctx, parent, doc, linksToParse,
+				workingPath, fileName, collectRefLinks,
+				line, currentIndent, ns, currentLineNumber );
+
+			eatFootnote( ctx, stream, parent, doc, linksToParse,
+				workingPath, fileName, collectRefLinks );
+
+			continue;
+		}
+
 		// First line of the fragment.
 		if( ns != line.length() && ctx.type == BlockType::EmptyLine )
 		{
@@ -1530,20 +1563,6 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 
 			switch( ctx.type )
 			{
-				case BlockType::Text :
-				{
-					if( isFootnote< Trait >( ctx.fragment.front().first.asString() ) )
-					{
-						ctx.fragment.push_back( { typename Trait::String(),
-							{ currentLineNumber, ctx.htmlCommentData } } );
-
-						eatFootnote( ctx, stream, parent, doc, linksToParse,
-							workingPath, fileName, collectRefLinks );
-					}
-
-					continue;
-				}
-
 				case BlockType::Blockquote :
 				{
 					parseFragment( ctx, parent, doc, linksToParse,
@@ -1552,6 +1571,7 @@ Parser< Trait >::parse( StringListStream< Trait > & stream,
 					continue;
 				}
 
+				case BlockType::Text :
 				case BlockType::CodeIndentedBySpaces :
 					continue;
 					break;
@@ -1989,6 +2009,9 @@ Parser< Trait >::whatIsTheLine( typename Trait::InternalString & str,
 		const bool indentIn = indentInList( indents, first, false );
 		bool isHeading = false;
 
+		if( first < 4 && isFootnote< Trait >( s.asString() ) )
+			return BlockType::Footnote;
+
 		if( s.asString().startsWith( '#' ) && ( indent ? first - indent->indent < 4 : first < 4 ) )
 		{
 			long long int c = 0;
@@ -2124,6 +2147,11 @@ Parser< Trait >::parseFragment( MdBlock< Trait > & fr,
 
 		switch( whatIsTheLine( fr.data.front().first ) )
 		{
+			case BlockType::Footnote :
+				parseFootnote( fr, parent, doc, linksToParse, workingPath, fileName,
+					collectRefLinks );
+				break;
+
 			case BlockType::Text :
 				parseText( fr, parent, doc, linksToParse,
 					workingPath, fileName, collectRefLinks, html );
@@ -2226,10 +2254,7 @@ Parser< Trait >::parseText( MdBlock< Trait > & fr,
 	const auto c = fr.data.size() > 1 ?
 		isTableAlignment< Trait >( fr.data[ 1 ].first.asString() ) : 0;
 
-	if( isFootnote< Trait >( fr.data.front().first.asString() ) )
-		parseFootnote( fr, parent, doc, linksToParse, workingPath, fileName,
-			collectRefLinks );
-	else if( c && h && c == h )
+	if( c && h && c == h && !html.continueHtml )
 	{
 		parseTable( fr, parent, doc, linksToParse, workingPath, fileName, collectRefLinks, c );
 
