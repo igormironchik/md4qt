@@ -4751,6 +4751,10 @@ checkForMath( typename Delims< Trait >::const_iterator it,
 			m->setEndColumn( endColumn );
 			m->setEndLine( endLine );
 			m->setInline( it->m_len == 1 );
+
+			if( math.startsWith( "`" ) && math.endsWith( "`" ) && !math.endsWith( "\\`" ) )
+				math = math.sliced( 1, math.length() - 2 );
+
 			m->setExpr( math );
 
 			po.parent->appendItem( m );
@@ -7071,6 +7075,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 							it->m_pos + it->m_len - 1 ) );
 						p->setEndLine( fr.data.at( it->m_line ).second.lineNumber );
 					}
+						break;
 
 					case Delimiter::InlineCode :
 					{
