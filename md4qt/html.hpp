@@ -171,6 +171,7 @@ public:
 		const typename Trait::String & hrefForRefBackImage )
 	{
 		html.clear();
+		fns.clear();
 
 		this->process( doc );
 
