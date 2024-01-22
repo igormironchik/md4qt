@@ -64,3 +64,48 @@ TEST_CASE( "218" )
 		REQUIRE( m->expr() == u8"\\sqrt{3x-1}+(1+x)^2" );
 	}
 }
+
+/*
+[^]
+
+[^1]
+
+[^1
+]
+
+*/
+TEST_CASE( "219" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/219.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 4 );
+
+	{
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	}
+
+	{
+		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
+		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::FootnoteRef );
+		auto fr = static_cast< MD::FootnoteRef< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( fr->text() == u8"[^1]" );
+		REQUIRE( fr->isSpaceBefore() );
+		REQUIRE( fr->isSpaceAfter() );
+	}
+
+	{
+		REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Paragraph );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 3 ).get() );
+		REQUIRE( p->items().size() == 2 );
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+	}
+}

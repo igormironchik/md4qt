@@ -1074,7 +1074,7 @@ private:
 //! Footnote ref.
 template< class Trait >
 class FootnoteRef final
-	:	public Item< Trait >
+	:	public Text< Trait >
 {
 public:
 	explicit FootnoteRef( const typename Trait::String & i )

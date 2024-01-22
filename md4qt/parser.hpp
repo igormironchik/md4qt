@@ -5816,7 +5816,9 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 	if( it != start )
 	{
 		// Footnote reference.
-		if( text.front().first.asString().startsWith( '^' ) )
+		if( text.front().first.asString().startsWith( '^' ) &&
+			text.front().first.asString().simplified().length() > 1 &&
+			text.size() == 1 && start->m_line == it->m_line )
 		{
 			if( !po.collectRefLinks )
 			{
@@ -5830,6 +5832,27 @@ checkForLink( typename Delims< Trait >::const_iterator it,
 				fnr->setEndColumn( po.fr.data.at( it->m_line ).first.virginPos(
 					it->m_pos + it->m_len - 1 ) );
 				fnr->setEndLine( po.fr.data.at( it->m_line ).second.lineNumber );
+
+				typename Trait::String fnrText = "[";
+				bool firstFnrText = true;
+
+				for( const auto & t : text )
+				{
+					if( !firstFnrText )
+						fnrText.push_back( "\n" );
+
+					firstFnrText = false;
+
+					fnrText.push_back( t.first.asString() );
+				}
+
+				fnrText.push_back( "]" );
+
+				fnr->setText( fnrText );
+				fnr->setSpaceBefore( start->m_pos > 0 ?
+					po.fr.data.at( start->m_line ).first[ start->m_pos - 1 ].isSpace() : true );
+				fnr->setSpaceAfter( it->m_pos + it->m_len < po.fr.data.at( it->m_line ).first.length() ?
+					po.fr.data.at( it->m_line ).first[ it->m_pos + it->m_len ].isSpace() : true );
 
 				po.parent->appendItem( fnr );
 			}

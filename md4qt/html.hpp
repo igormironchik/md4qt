@@ -632,6 +632,8 @@ protected:
 			if( !justCollectFootnoteRefs )
 				html.push_back( "</a></sup>" );
 		}
+		else
+			onText( static_cast< Text< Trait>* > ( ref ) );
 	}
 
 	void onListItem(
