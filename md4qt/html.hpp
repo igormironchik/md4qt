@@ -612,10 +612,12 @@ protected:
 				if( !justCollectFootnoteRefs )
 					html.push_back( std::to_string( ++( r->current ) ).c_str() );
 
-				++( r->count );
+				if( !dontIncrementFootnoteCount )
+					++( r->count );
 			}
 
-			html.push_back( "\">" );
+			if( !justCollectFootnoteRefs )
+				html.push_back( "\">" );
 
 			if( r == fns.end() )
 			{
@@ -711,6 +713,7 @@ private:
 		}
 
 		justCollectFootnoteRefs = false;
+		dontIncrementFootnoteCount = true;
 
 		for( const auto & id : fns )
 		{
@@ -756,6 +759,8 @@ private:
 	typename Trait::String html;
 	//! Just collect footnote references?
 	bool justCollectFootnoteRefs = false;
+	//! Just process footnote references and don't increment count number.
+	bool dontIncrementFootnoteCount = false;
 
 	struct FootnoteRefStuff {
 		typename Trait::String id;
