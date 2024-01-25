@@ -24,6 +24,8 @@ This library parses Markdown into tree structure.
   * [Why is parsing wrong on Windows with `std::ifstream`?](#why-is-parsing-wrong-on-windows-with-stdifstream)
   * [How can I convert `MD::Document` into `HTML`?](#how-can-i-convert-mddocument-into-html)
   * [I need to know positions in the `Markdown` file of blocks/elements. How can I achieve this?](#i-need-to-know-positions-in-the-markdown-file-of-blockselements-howcan-i-achieve-this)
+  * [How can I easily traverse through the `MD::Document`?](#how-can-i-easily-traverse-through-the-mddocument)
+
 
 # Example
 
@@ -214,3 +216,15 @@ can I achieve this?
 ---
 
  * Done in version `2.0.5`.
+
+## How can I easily traverse through the `MD::Document`?
+
+Since version `2.6.0` in `md4qt/visitor.hpp` header implemented `MD::Visitor` interface
+with which you can easily walk through the document, all you need is implement/override
+virtual methods to handle that or another element in the document, like:
+
+```cpp
+virtual void onHeading(
+   //! Heading.
+   Heading< Trait > * h ) = 0;
+```
