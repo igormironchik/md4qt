@@ -219,12 +219,12 @@ can I achieve this?
 
 ## How can I easily traverse through the `MD::Document`?
 
-Since version `2.6.0` in `md4qt/visitor.hpp` header implemented `MD::Visitor` interface
+* Since version `2.6.0` in `md4qt/visitor.hpp` header implemented `MD::Visitor` interface
 with which you can easily walk through the document, all you need is implement/override
 virtual methods to handle that or another element in the document, like:
 
-```cpp
-virtual void onHeading(
-   //! Heading.
-   Heading< Trait > * h ) = 0;
-```
+  ```cpp
+  virtual void onHeading(
+     //! Heading.
+     Heading< Trait > * h ) = 0;
+  ```
