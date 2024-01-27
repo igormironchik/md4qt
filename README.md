@@ -228,3 +228,10 @@ virtual methods to handle that or another element in the document, like:
      //! Heading.
      Heading< Trait > * h ) = 0;
   ```
+
+## Why don't you have an implementation for pure `STL` with `std::string`?
+
+* Because of performance, I did an pure `STL` implementation where string class
+was an `std::string` with some small third-party library to handle `UTF8`, and
+benchmark said that the performance was like with `Qt6` `QString`, so I decided
+to not support third trait. Maybe because I so lazy?
