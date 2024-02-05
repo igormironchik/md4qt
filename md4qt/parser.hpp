@@ -2899,15 +2899,6 @@ template< class Trait >
 using Delims = typename Trait::template Vector< Delimiter >;
 
 template< class Trait >
-inline bool
-isAsciiPunct( typename Trait::Char ch )
-{
-	static const typename Trait::String ascii = u8"!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
-
-	return ascii.contains( ch );
-}
-
-template< class Trait >
 inline Delims< Trait >
 collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 {
@@ -2954,9 +2945,11 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 						typename Trait::String style;
 
 						const bool punctBefore = ( i > 0 ? str[ i - 1 ].isPunct() ||
-							isAsciiPunct< Trait >( str[ i - 1 ] ) : false );
-						const bool alNumBefore =
-							( i > 0 ? str[ i - 1 ].isLetterOrNumber() : false );
+							str[ i - 1 ].isSymbol() : true );
+						const bool uWhitespaceBefore = ( i > 0 ?
+							Trait::isUnicodeWhitespace( str[ i - 1 ] ) : true );
+						const bool uWhitespaceOrPunctBefore = uWhitespaceBefore || punctBefore;
+						const bool alNumBefore = ( i > 0 ? str[ i - 1 ].isLetterOrNumber() : false );
 
 						const auto ch = str[ i ];
 
@@ -2973,23 +2966,24 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 						else
 							dt = Delimiter::Emphasis2;
 
-						const bool spaceAfter =
-							( i < str.length() ? str[ i ].isSpace() : true );
 						const bool punctAfter =
 							( i < str.length() ? str[ i ].isPunct() ||
-								isAsciiPunct< Trait >( str[ i ] ) : false );
-						const bool leftFlanking =
-							( ( space || punctBefore ) && punctAfter ) ||
-							( !spaceAfter && !punctAfter );
-						const bool rightFlanking =
-							( punctBefore && ( spaceAfter || punctAfter ) ) ||
-							( !space && !punctBefore );
-						const bool disabledEmphasis =
-							( ( i < str.length() ? str[ i ].isLetterOrNumber() : false ) &&
-							alNumBefore && ch == typename Trait::Char( '_' ) );
+								str[ i ].isSymbol() : true );
+						const bool uWhitespaceAfter = ( i < str.length() ?
+							Trait::isUnicodeWhitespace( str[ i ] ) : true );
+						const bool alNumAfter = ( i < str.length() ?
+							str[ i ].isLetterOrNumber() : false );
+						const bool leftFlanking = !uWhitespaceAfter &&
+							( !punctAfter || ( punctAfter && uWhitespaceOrPunctBefore ) ) &&
+							!( ch == typename Trait::Char( '_' ) && alNumBefore && alNumAfter );
+						const bool rightFlanking = !uWhitespaceBefore &&
+							( !punctBefore || ( punctBefore && ( uWhitespaceAfter || punctAfter ) ) ) &&
+							!( ch == typename Trait::Char( '_' ) && alNumBefore && alNumAfter );
 
-						if( ( leftFlanking || rightFlanking ) && !disabledEmphasis )
+						if( leftFlanking || rightFlanking )
 						{
+							const bool spaceAfter = ( i < str.length() ? str[ i ].isSpace() : true );
+
 							for( auto j = 0; j < style.length(); ++j )
 							{
 								d.push_back( { dt, line, i - style.length() + j,
@@ -3010,7 +3004,10 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 						typename Trait::String style;
 
 						const bool punctBefore = ( i > 0 ? str[ i - 1 ].isPunct() ||
-							isAsciiPunct< Trait >( str[ i - 1 ] ) : false );
+							str[ i - 1 ].isSymbol() : true );
+						const bool uWhitespaceBefore = ( i > 0 ?
+							Trait::isUnicodeWhitespace( str[ i - 1 ] ) : true );
+						const bool uWhitespaceOrPunctBefore = uWhitespaceBefore || punctBefore;
 
 						while( i < str.length() && str[ i ] == typename Trait::Char( '~' ) )
 						{
@@ -3020,20 +3017,20 @@ collectDelimiters( const typename MdBlock< Trait >::Data & fr )
 
 						if( style.length() <= 2 )
 						{
-							const bool spaceAfter =
-								( i < str.length() ? str[ i ].isSpace() : true );
 							const bool punctAfter =
 								( i < str.length() ? str[ i ].isPunct() ||
-									isAsciiPunct< Trait >( str[ i ] ) : false );
-							const bool leftFlanking =
-								( ( space || punctBefore ) && punctAfter ) ||
-								( !spaceAfter && !punctAfter );
-							const bool rightFlanking =
-								( punctBefore && ( spaceAfter || punctAfter ) ) ||
-								( !space && !punctBefore );
+									str[ i ].isSymbol() : true );
+							const bool uWhitespaceAfter = ( i < str.length() ?
+								Trait::isUnicodeWhitespace( str[ i ] ) : true );
+							const bool leftFlanking = !uWhitespaceAfter &&
+								( !punctAfter || ( punctAfter && uWhitespaceOrPunctBefore ) );
+							const bool rightFlanking = !uWhitespaceBefore &&
+								( !punctBefore || ( punctBefore && ( uWhitespaceAfter || punctAfter ) ) );
 
 							if( leftFlanking || rightFlanking )
 							{
+								const bool spaceAfter = ( i < str.length() ? str[ i ].isSpace() : true );
+
 								d.push_back( { Delimiter::Strikethrough, line, i - style.length(),
 									style.length(), space, spaceAfter, word, false,
 									leftFlanking, rightFlanking } );
