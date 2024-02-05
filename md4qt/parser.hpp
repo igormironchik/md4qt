@@ -202,8 +202,10 @@ resetHtmlTag( RawHtmlBlock< Trait > & html )
 //! Internal structure.
 struct MdLineData {
 	long long int lineNumber = -1;
+	using CommentData = std::pair< char, bool >;
+	using CommentDataVec = std::vector< CommentData >;
 	// std::pair< closed, valid >
-	std::vector< std::pair< bool, bool > > htmlCommentData = {};
+	CommentDataVec htmlCommentData = {};
 }; // struct MdLineData
 
 
@@ -652,7 +654,7 @@ isTableAlignment( const typename Trait::String & s )
 //! \return Is given string a HTML comment.
 template< class Trait >
 inline bool
-isHtmlComment( const typename Trait::String & s, bool online )
+isHtmlComment( const typename Trait::String & s )
 {
 	auto c = s;
 
@@ -661,38 +663,22 @@ isHtmlComment( const typename Trait::String & s, bool online )
 	else
 		return false;
 
-	if( c.startsWith( '>' ) )
-		return false;
-
-	if( c.startsWith( "->" ) )
-		return false;
-
 	long long int p = -1;
 	bool endFound = false;
 
 	while( ( p = c.indexOf( "--", p + 1 ) ) > -1 )
 	{
-		if( online )
+		if( c.size() > p + 2 && c[ p + 2 ] == typename Trait::Char( '>' ) )
 		{
-			if( c.size() > p + 2 && c[ p + 2 ] == typename Trait::Char( '>' ) )
-			{
-				if( !endFound )
-					endFound = true;
-				else
-					return false;
-			}
-			else if( p - 2 >= 0 && c.sliced( p - 2, 4 ) == "<!--" )
-				return false;
-			else if( c.size() > p + 3 && c.sliced( p, 4 ) == "--!>" )
-				return false;
-		}
-		else
-		{
-			if( c.size() > p + 2 )
-				return c[ p + 2 ] == typename Trait::Char( '>' );
+			if( !endFound )
+				endFound = true;
 			else
 				return false;
 		}
+		else if( p - 2 >= 0 && c.sliced( p - 2, 4 ) == "<!--" )
+			return false;
+		else if( c.size() > p + 3 && c.sliced( p, 4 ) == "--!>" )
+			return false;
 	}
 
 	return endFound;
@@ -853,7 +839,7 @@ public:
 		ListIndent indent;
 		RawHtmlBlock< Trait > html;
 		long long int emptyLinesBefore = 0;
-		std::vector< std::pair< bool, bool > > htmlCommentData;
+		MdLineData::CommentDataVec htmlCommentData;
 		typename Trait::String startOfCode;
 		typename Trait::String startOfCodeInList;
 		BlockType type = BlockType::EmptyLine;
@@ -1133,13 +1119,13 @@ private:
 template< class Trait >
 inline bool
 checkForEndHtmlComments( const typename Trait::String & line, long long int pos,
-	std::vector< std::pair< bool, bool > > & res, bool online )
+	MdLineData::CommentDataVec & res )
 {
 	const long long int e = line.indexOf( "-->", pos );
 
 	if( e != -1 )
 	{	
-		res.push_back( { true, isHtmlComment< Trait >( line.sliced( 0, e + 3 ), online ) } );
+		res.push_back( { 2, isHtmlComment< Trait >( line.sliced( 0, e + 3 ) ) } );
 
 		return true;
 	}
@@ -1150,10 +1136,9 @@ checkForEndHtmlComments( const typename Trait::String & line, long long int pos,
 template< class Trait >
 inline void
 checkForHtmlComments( const typename Trait::String & line, StringListStream< Trait > & stream,
-	std::vector< std::pair< bool, bool > > & res )
+	MdLineData::CommentDataVec & res )
 {
 	long long int p = 0, l = stream.currentLineNumber();
-	const auto ns = skipSpaces< Trait > ( 0, line );
 
 	bool add = false;
 
@@ -1161,7 +1146,23 @@ checkForHtmlComments( const typename Trait::String & line, StringListStream< Tra
 	{
 		auto c = line.sliced( p );
 
-		if( !checkForEndHtmlComments< Trait >( c, 4, res, ns == p ) )
+		if( c.startsWith( '>' ) )
+		{
+			res.push_back( { 0, true } );
+
+			p += 5;
+
+			continue;
+		}
+		else if( c.startsWith( "->" ) )
+		{
+			res.push_back( { 1, true } );
+
+			p += 6;
+
+			continue;
+		}
+		else if( !checkForEndHtmlComments< Trait >( c, 4, res ) )
 		{
 			add = true;
 
@@ -1170,7 +1171,7 @@ checkForHtmlComments( const typename Trait::String & line, StringListStream< Tra
 				c.push_back( typename Trait::Char( ' ' ) );
 				c.push_back( stream.lineAt( l ).asString() );
 
-				if( checkForEndHtmlComments< Trait >( c, 4, res, ns == p ) )
+				if( checkForEndHtmlComments< Trait >( c, 4, res ) )
 				{
 					add = false;
 
@@ -1180,7 +1181,7 @@ checkForHtmlComments( const typename Trait::String & line, StringListStream< Tra
 		}
 
 		if( add )
-			res.push_back( { false, false } );
+			res.push_back( { -1, false } );
 
 		++p;
 	}
@@ -4249,7 +4250,7 @@ finishRule2HtmlTag( typename Delims< Trait >::const_iterator it,
 {
 	if( it != last )
 	{
-		std::pair< bool, bool > commentData = { true, true };
+		MdLineData::CommentData commentData = { 2, true };
 		bool onLine = po.html.onLine;
 
 		if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less )
@@ -4272,21 +4273,36 @@ finishRule2HtmlTag( typename Delims< Trait >::const_iterator it,
 			po.html.onLine = onLine;
 		}
 
-		if( commentData.first && commentData.second )
+		if( commentData.first != -1 && commentData.second )
 		{
 			for( ; it != last; ++it )
 			{
 				if( it->m_type == Delimiter::Greater )
 				{
-					if( it->m_pos > 1 && po.fr.data[ it->m_line ].first[ it->m_pos - 1 ] ==
-							typename Trait::Char( '-' ) &&
-						po.fr.data[ it->m_line ].first[ it->m_pos - 2 ] == typename Trait::Char( '-' ) )
-					{
-						eatRawHtml( po.line, po.pos, it->m_line, po.fr.data[ it->m_line ].first.length(),
-							po, true, 2, onLine );
+					auto p = it->m_pos;
 
-						return;
+					bool doContinue = false;
+
+					for( char i = 0; i < commentData.first; ++i )
+					{
+						if( !( p > 0 && po.fr.data[ it->m_line ].first[ p - 1 ] ==
+							typename Trait::Char( '-' ) ) )
+						{
+							doContinue = true;
+
+							break;
+						}
+
+						--p;
 					}
+
+					if( doContinue )
+						continue;
+
+					eatRawHtml( po.line, po.pos, it->m_line, po.fr.data[ it->m_line ].first.length(),
+						po, true, 2, onLine );
+
+					return;
 				}
 			}
 
@@ -4295,7 +4311,7 @@ finishRule2HtmlTag( typename Delims< Trait >::const_iterator it,
 			return;
 		}
 
-		if( !commentData.first )
+		if( commentData.first == -1 )
 			eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 2, onLine );
 		else
 			resetHtmlTag( po.html );
