@@ -109,3 +109,25 @@ TEST_CASE( "219" )
 		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
 	}
 }
+
+/*
+foo <!--
+* not list
+-->
+
+*/
+TEST_CASE( "220" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/220.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 2 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
+}

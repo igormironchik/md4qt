@@ -1146,7 +1146,7 @@ checkForHtmlComments( const typename Trait::String & line, StringListStream< Tra
 	{
 		auto c = line.sliced( p );
 
-		if( c.startsWith( '>' ) )
+		if( c.startsWith( "<!-->" ) )
 		{
 			res.push_back( { 0, true } );
 
@@ -1154,7 +1154,7 @@ checkForHtmlComments( const typename Trait::String & line, StringListStream< Tra
 
 			continue;
 		}
-		else if( c.startsWith( "->" ) )
+		else if( c.startsWith( "<!--->" ) )
 		{
 			res.push_back( { 1, true } );
 
@@ -4299,7 +4299,8 @@ finishRule2HtmlTag( typename Delims< Trait >::const_iterator it,
 					if( doContinue )
 						continue;
 
-					eatRawHtml( po.line, po.pos, it->m_line, po.fr.data[ it->m_line ].first.length(),
+					eatRawHtml( po.line, po.pos, it->m_line,
+						onLine ? po.fr.data[ it->m_line ].first.length() : it->m_pos + 1,
 						po, true, 2, onLine );
 
 					return;
