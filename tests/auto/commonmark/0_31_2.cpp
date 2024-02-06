@@ -164,7 +164,7 @@ TEST_CASE( "354" )
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == u8"*£*bravo." );
+		REQUIRE( t->text() == TRAIT::String( u8"*£*bravo." ) );
 	}
 
 	{
@@ -175,6 +175,6 @@ TEST_CASE( "354" )
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == u8"*€*charlie." );
+		REQUIRE( t->text() == TRAIT::String( u8"*€*charlie." ) );
 	}
 }
