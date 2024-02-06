@@ -13,6 +13,8 @@ endif()
 
 file( GLOB MD_FILES 0.30/*.md )
 file( COPY ${MD_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/tests/commonmark/0.30 )
+file( GLOB MD_FILES_31 0.31.2/*.md )
+file( COPY ${MD_FILES_31} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/tests/commonmark/0.31.2 )
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/../../..

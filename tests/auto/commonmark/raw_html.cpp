@@ -330,49 +330,12 @@ TEST_CASE( "624" )
 
 TEST_CASE( "625" )
 {
-	const auto doc = load_test( 625 );
-
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
-
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
-
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"foo <!-- not a comment -- two hyphens -->" );
+	MESSAGE( "Outdated. Changed in CommonMark 0.31.2" );
 }
 
 TEST_CASE( "626" )
 {
-	const auto doc = load_test( 626 );
-
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 3 );
-
-	{
-		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-		REQUIRE( p->items().size() == 1 );
-
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == u8"foo <!--> foo -->" );
-	}
-
-	{
-		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
-		REQUIRE( p->items().size() == 1 );
-
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == u8"foo <!-- foo--->" );
-	}
+	MESSAGE( "Outdated. Changed in CommonMark 0.31.2" );
 }
 
 TEST_CASE( "627" )

@@ -41,23 +41,26 @@
 
 
 inline std::shared_ptr< MD::Document< TRAIT > >
-load_test( int n )
+load_test( int n, const std::string & folder = "0.30" )
 {
 	auto fileName = std::to_string( n );
 
 	if( fileName.size() < 3 )
 		fileName.insert( 0, 3 - fileName.size(), '0' );
 
-	fileName.insert( 0, "tests/commonmark/0.30/" );
-	fileName.append( ".md" );
+	std::string path = "tests/commonmark/";
+	path.append( folder );
+	path.append( "/" );
+	path.append( fileName );
+	path.append( ".md" );
 
 	MD::Parser< TRAIT > p;
 
 	return p.parse(
 #ifdef MD4QT_QT_SUPPORT
-		QString::fromStdString( fileName ),
+		QString::fromStdString( path ),
 #else
-		fileName,
+		path,
 #endif
 		false );
 }

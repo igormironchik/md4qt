@@ -472,6 +472,23 @@ public:
 		}
 	}
 
+	inline bool isSymbol() const
+	{
+		const auto type = u_charType( m_ch );
+
+		switch( type )
+		{
+			case U_MATH_SYMBOL :
+			case U_CURRENCY_SYMBOL :
+			case U_MODIFIER_SYMBOL :
+			case U_OTHER_SYMBOL :
+				return true;
+
+			default :
+				return false;
+		}
+	}
+
 	UnicodeChar toLower() const
 	{
 		return icu::UnicodeString( 1, m_ch, 1 ).toLower().char32At( 0 );
@@ -790,6 +807,19 @@ struct UnicodeStringTrait {
 
 	using Url = UrlUri;
 
+	//! \return Is Unicode whitespace?
+	static bool isUnicodeWhitespace( const UnicodeChar & ch )
+	{
+		const auto c = ch.unicode();
+
+		if( u_charType( c ) == U_SPACE_SEPARATOR )
+			return true;
+		else if( c == 0x09 || c == 0x0A || c == 0x0C || c == 0x0D )
+			return true;
+		else
+			return false;
+	}
+
 	//! Convert UTF-16 into trait's string.
 	static String utf16ToString( const char16_t * u16 )
 	{
@@ -872,6 +902,19 @@ struct QStringTrait {
 	using StringList = QStringList;
 
 	using Url = QUrl;
+
+	//! \return Is Unicode whitespace?
+	static bool isUnicodeWhitespace( const QChar & ch )
+	{
+		const auto c = ch.unicode();
+
+		if( ch.category() == QChar::Separator_Space )
+			return true;
+		else if( c == 0x09 || c == 0x0A || c == 0x0C || c == 0x0D )
+			return true;
+		else
+			return false;
+	}
 
 	//! Convert UTF-16 into trait's string.
 	static String utf16ToString( const char16_t * u16 )
