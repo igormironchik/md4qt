@@ -203,9 +203,9 @@ resetHtmlTag( RawHtmlBlock< Trait > & html )
 struct MdLineData {
 	long long int lineNumber = -1;
 	using CommentData = std::pair< char, bool >;
-	using CommentDataVec = std::vector< CommentData >;
+	using CommentDataMap = std::map< long long int, CommentData >;
 	// std::pair< closed, valid >
-	CommentDataVec htmlCommentData = {};
+	CommentDataMap htmlCommentData = {};
 }; // struct MdLineData
 
 
@@ -216,8 +216,8 @@ struct MdLineData {
 //! Internal structure.
 template< class Trait >
 struct MdBlock {
-	using Data = typename Trait::template Vector<
-		std::pair< typename Trait::InternalString, MdLineData > >;
+	using Line = std::pair< typename Trait::InternalString, MdLineData >;
+	using Data = typename Trait::template Vector< Line >;
 
 	Data data;
 	long long int emptyLinesBefore = 0;
@@ -839,7 +839,7 @@ public:
 		ListIndent indent;
 		RawHtmlBlock< Trait > html;
 		long long int emptyLinesBefore = 0;
-		MdLineData::CommentDataVec htmlCommentData;
+		MdLineData::CommentDataMap htmlCommentData;
 		typename Trait::String startOfCode;
 		typename Trait::String startOfCodeInList;
 		BlockType type = BlockType::EmptyLine;
@@ -1119,36 +1119,34 @@ private:
 template< class Trait >
 inline bool
 checkForEndHtmlComments( const typename Trait::String & line, long long int pos,
-	MdLineData::CommentDataVec & res )
+	MdLineData::CommentDataMap & res )
 {
 	const long long int e = line.indexOf( "-->", pos );
 
 	if( e != -1 )
-	{	
-		res.push_back( { 2, isHtmlComment< Trait >( line.sliced( 0, e + 3 ) ) } );
-
-		return true;
-	}
+		return isHtmlComment< Trait >( line.sliced( 0, e + 3 ) );
 
 	return false;
 }
 
 template< class Trait >
 inline void
-checkForHtmlComments( const typename Trait::String & line, StringListStream< Trait > & stream,
-	MdLineData::CommentDataVec & res )
+checkForHtmlComments( const typename Trait::InternalString & line, StringListStream< Trait > & stream,
+	MdLineData::CommentDataMap & res )
 {
 	long long int p = 0, l = stream.currentLineNumber();
 
-	bool add = false;
+	const auto & str = line.asString();
 
-	while( ( p = line.indexOf( c_startComment, p ) ) != -1 )
+	while( ( p = str.indexOf( c_startComment, p ) ) != -1 )
 	{
-		auto c = line.sliced( p );
+		bool addNegative = false;
+
+		auto c = str.sliced( p );
 
 		if( c.startsWith( "<!-->" ) )
 		{
-			res.push_back( { 0, true } );
+			res.insert( { line.virginPos( p ), { 0, true } } );
 
 			p += 5;
 
@@ -1156,15 +1154,18 @@ checkForHtmlComments( const typename Trait::String & line, StringListStream< Tra
 		}
 		else if( c.startsWith( "<!--->" ) )
 		{
-			res.push_back( { 1, true } );
+			res.insert( { line.virginPos( p ), { 1, true } } );
 
 			p += 6;
 
 			continue;
 		}
-		else if( !checkForEndHtmlComments< Trait >( c, 4, res ) )
+
+		if( checkForEndHtmlComments< Trait >( c, 4, res ) )
+			res.insert( { line.virginPos( p ), { 2, true } } );
+		else
 		{
-			add = true;
+			addNegative = true;
 
 			for( ; l < stream.size(); ++l )
 			{
@@ -1173,15 +1174,17 @@ checkForHtmlComments( const typename Trait::String & line, StringListStream< Tra
 
 				if( checkForEndHtmlComments< Trait >( c, 4, res ) )
 				{
-					add = false;
+					res.insert( { line.virginPos( p ), { 2, true } } );
+
+					addNegative = false;
 
 					break;
 				}
 			}
 		}
 
-		if( add )
-			res.push_back( { -1, false } );
+		if( addNegative )
+			res.insert( { line.virginPos( p ), { -1, false } } );
 
 		++p;
 	}
@@ -1465,7 +1468,7 @@ Parser< Trait >::readLine( typename Parser< Trait >::ParserContext & ctx,
 
 	line.replace( typename Trait::Char( 0 ), Trait::utf16ToString( &c_zeroReplaceWith[ 0 ] ) );
 
-	checkForHtmlComments( line.asString(), stream, ctx.htmlCommentData );
+	checkForHtmlComments( line, stream, ctx.htmlCommentData );
 
 	return line;
 }
@@ -2588,9 +2591,10 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 			fr.data.back().first.length() - 1 ) );
 		table->setEndLine( fr.data.back().second.lineNumber );
 
-		auto parseTableRow = [&] ( const typename Trait::InternalString & row,
-			long long int lineNumber ) -> bool
+		auto parseTableRow = [&] ( const typename MdBlock< Trait >::Line & lineData ) -> bool
 		{
+			const auto & row = lineData.first;
+
 			if( row.asString().startsWith( "    " ) )
 				return false;
 
@@ -2608,9 +2612,9 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 
 			std::shared_ptr< TableRow< Trait > > tr( new TableRow< Trait > );
 			tr->setStartColumn( row.virginPos( 0 ) );
-			tr->setStartLine( lineNumber );
+			tr->setStartLine( lineData.second.lineNumber );
 			tr->setEndColumn( row.virginPos( row.length() - 1 ) );
-			tr->setEndLine( lineNumber );
+			tr->setEndLine( lineData.second.lineNumber );
 
 			int col = 0;
 
@@ -2623,16 +2627,16 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 				std::shared_ptr< TableCell< Trait > > c(
 					new TableCell< Trait > );
 				c->setStartColumn( columns.second.at( col ) );
-				c->setStartLine( lineNumber );
+				c->setStartLine( lineData.second.lineNumber );
 				c->setEndColumn( columns.second.at( col + 1 ) );
-				c->setEndLine( lineNumber );
+				c->setEndLine( lineData.second.lineNumber );
 
 				if( !it->isEmpty() )
 				{
 					it->replace( "&#124;", typename Trait::Char( sep ) );
 
 					typename MdBlock< Trait >::Data fragment;
-					fragment.push_back( { *it, { lineNumber } } );
+					fragment.push_back( { *it, lineData.second } );
 					MdBlock< Trait > block = { fragment, 0 };
 
 					std::shared_ptr< Paragraph< Trait > > p( new Paragraph< Trait > );
@@ -2700,7 +2704,7 @@ Parser< Trait >::parseTable( MdBlock< Trait > & fr,
 
 		for( const auto & line : std::as_const( fr.data ) )
 		{
-			if( !parseTableRow( line.first, line.second.lineNumber ) )
+			if( !parseTableRow( line ) )
 				break;
 
 			++r;
@@ -4252,17 +4256,7 @@ finishRule2HtmlTag( typename Delims< Trait >::const_iterator it,
 
 		if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less )
 		{
-			size_t i = 0;
-
-			const auto & s = po.fr.data[ it->m_line ].first.asString();
-
-			long long int p = 0;
-
-			while( ( p = s.indexOf( c_startComment, p ) ) != it->m_pos )
-			{
-				++i;
-				++p;
-			}
+			long long int i = po.fr.data[ it->m_line ].first.virginPos( it->m_pos );
 
 			commentData = po.fr.data[ it->m_line ].second.htmlCommentData[ i ];
 
@@ -5048,7 +5042,7 @@ readTextBetweenSquareBrackets( typename Delims< Trait >::const_iterator start,
 				res.push_back(
 					{ po.fr.data.at( start->m_line ).first
 						.sliced( start->m_pos + start->m_len ).simplified(),
-							{ po.fr.data.at( start->m_line ).second.lineNumber } } );
+							po.fr.data.at( start->m_line ).second } );
 
 				long long int i = start->m_line + 1;
 
@@ -5056,10 +5050,10 @@ readTextBetweenSquareBrackets( typename Delims< Trait >::const_iterator start,
 				{
 					if( i == it->m_line )
 						res.push_back( { po.fr.data.at( i ).first.sliced( 0, it->m_pos ).simplified(),
-							{ po.fr.data.at( i ).second.lineNumber } } );
+							po.fr.data.at( i ).second } );
 					else
 						res.push_back( { po.fr.data.at( i ).first.simplified(),
-							{ po.fr.data.at( i ).second.lineNumber } } );
+							po.fr.data.at( i ).second } );
 				}
 
 				return { res, it };
