@@ -214,7 +214,7 @@ protected:
 		if( !justCollectFootnoteRefs )
 		{
 			html.push_back( m->isInline() ? "$ " : "$$ " );
-			html.push_back( m->expr() );
+			html.push_back( prepareTextForHtml< Trait >( m->expr() ) );
 			html.push_back( m->isInline() ? " $" : " $$" );
 		}
 	}
