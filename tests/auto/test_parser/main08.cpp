@@ -131,3 +131,30 @@ TEST_CASE( "220" )
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
 }
+
+/*
+|||||
+|:---------------------|:---------------------|:---------------------|:-----
+|$\text{\'{a}}$ `\'{a}`|$\text{\~{a}}$ `\~{a}`|$\text{\.{a}}$ `\.{a}`|$\text{\H{a}}$ `\H{a}`
+|$\text{\`{a}}$ <code>\\`{a}</code>|$\text{\={a}}$ `\={a}`|$\text{\"{a}}$ `\"{a}`|$\text{\v{a}}$ `\v{a}`
+|$\text{\^{a}}$ `\^{a}`|$\text{\u{a}}$ `\u{a}`|$\text{\r{a}}$ `\r{a}`|
+
+*/
+TEST_CASE( "221" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/221.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Table );
+	auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( t->columnsCount() == 4 );
+	REQUIRE( t->rows().size() == 4 );
+	auto c = static_cast< MD::TableCell< TRAIT > * > ( t->rows()[ 1 ]->cells()[ 0 ].get() );
+	REQUIRE( c->items().size() == 2 );
+	REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Math );
+	REQUIRE( c->items().at( 1 )->type() == MD::ItemType::Code );
+}

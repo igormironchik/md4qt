@@ -360,6 +360,9 @@ protected:
 					onRawHtml( static_cast< RawHtml< Trait >* > ( it->get() ) );
 					break;
 
+				case ItemType::Math :
+					onMath( static_cast< Math< Trait >* > ( it->get() ) );
+
 				default :
 					break;
 			}

@@ -2563,9 +2563,8 @@ splitTableRow( const typename Trait::InternalString & s )
 			backslash = false;
 	}
 
-	if( start < s.length() )
-		res.push_back( prepareTableData< Trait >(
-			s.sliced( start, s.length() - start ).simplified() ) );
+	res.push_back( prepareTableData< Trait >(
+		s.sliced( start, s.length() - start ).simplified() ) );
 
 	return { res, columns };
 }
@@ -4760,8 +4759,9 @@ checkForMath( typename Delims< Trait >::const_iterator it,
 			m->setEndLine( endLine );
 			m->setInline( it->m_len == 1 );
 
-			if( math.startsWith( "`" ) && math.endsWith( "`" ) && !math.endsWith( "\\`" ) )
-				math = math.sliced( 1, math.length() - 2 );
+			if( math.startsWith( "`" ) && math.endsWith( "`" ) && !math.endsWith( "\\`" ) &&
+				math.length() > 1 )
+					math = math.sliced( 1, math.length() - 2 );
 
 			m->setExpr( math );
 
