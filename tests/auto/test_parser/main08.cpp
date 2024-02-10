@@ -158,3 +158,32 @@ TEST_CASE( "221" )
 	REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Math );
 	REQUIRE( c->items().at( 1 )->type() == MD::ItemType::Code );
 }
+
+/*
+||||
+|:--------------|:----------------------------------------|:-----
+|$x_n$ `x_n` |$\stackrel{!}{=}$ `\stackrel{!}{=}`| $a \atop b$ `a \atop b`
+|$e^x$ `e^x` |$\overset{!}{=}$ `\overset{!}{=}`  | $a\raisebox{0.25em}{$b$}c$ `a\raisebox{0.25em}{$b$}c`
+|$_u^o $ `_u^o `| $\underset{!}{=}$ `\underset{!}{=}` | $a+\left(\vcenter{\frac{\frac a b}c}\right)$ `a+\left(\vcenter{\hbox{$\frac{\frac a b}c$}}\right)`
+||| $$\sum_{\substack{0<i<m\\0<j<n}}$$ `\sum_{\substack{0<i<m\\0<j<n}}`
+
+*/
+TEST_CASE( "222" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/222.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Table );
+	auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( t->columnsCount() == 3 );
+	REQUIRE( t->rows().size() == 5 );
+	REQUIRE( t->rows()[ 4 ]->cells().size() == 3 );
+	auto c = static_cast< MD::TableCell< TRAIT > * > ( t->rows()[ 4 ]->cells()[ 2 ].get() );
+	REQUIRE( c->items().size() == 2 );
+	REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Math );
+	REQUIRE( c->items().at( 1 )->type() == MD::ItemType::Code );
+}
