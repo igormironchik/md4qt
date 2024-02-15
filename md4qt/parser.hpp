@@ -4344,19 +4344,7 @@ finishRule2HtmlTag( typename Delims< Trait >::const_iterator it,
 					return;
 				}
 			}
-
-			if( onLine )
-				eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 2, onLine );
-			else
-				resetHtmlTag( po.html );
-
-			return;
 		}
-
-		if( commentData.first == -1 && onLine )
-			eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 2, onLine );
-		else
-			resetHtmlTag( po.html );
 	}
 
 	if( po.html.onLine )
