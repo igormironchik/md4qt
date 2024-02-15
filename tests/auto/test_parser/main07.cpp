@@ -1073,13 +1073,23 @@ TEST_CASE( "212" )
 	auto doc = parser.parse( "tests/parser/data/212.md" );
 
 	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+	REQUIRE( doc->items().size() == 3 );
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 2 );
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Heading );
+	auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( h->text()->items().size() == 1 );
+	REQUIRE( h->text()->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text< TRAIT >* > ( h->text()->items().at( 0 ).get() );
+	REQUIRE( t->text() == u8"foo <!--" );
+
+	{
+		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
+		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->text() == u8"-->" );
+	}
 }
 
 /*

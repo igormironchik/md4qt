@@ -4181,6 +4181,46 @@ eatRawHtml( long long int line, long long int pos, long long int toLine, long lo
 }
 
 template< class Trait >
+inline bool
+isNewBlockIn( MdBlock< Trait > & fr,
+	long long int startLine, long long int endLine )
+{
+	for( auto i = startLine + 1; i <= endLine; ++i )
+	{
+		const auto type = Parser< Trait >::whatIsTheLine( fr.data[ i ].first );
+
+		switch( type )
+		{
+			case Parser< Trait >::BlockType::Footnote :
+			case Parser< Trait >::BlockType::FensedCodeInList :
+			case Parser< Trait >::BlockType::SomethingInList :
+			case Parser< Trait >::BlockType::List :
+			case Parser< Trait >::BlockType::ListWithFirstEmptyLine :
+			case Parser< Trait >::BlockType::Code :
+			case Parser< Trait >::BlockType::Blockquote :
+			case Parser< Trait >::BlockType::Heading :
+			case Parser< Trait >::BlockType::EmptyLine :
+				return true;
+
+			default :
+				break;
+		}
+
+		const auto ns = skipSpaces< Trait >( 0, fr.data[ i ].first.asString() );
+
+		if( ns < 4 )
+		{
+			const auto s = fr.data[ i ].first.asString().sliced( ns );
+
+			if( isHorizontalLine< Trait >( s ) || isH1< Trait >( s ) || isH2< Trait >( s ) )
+				return true;
+		}
+	}
+
+	return false;
+}
+
+template< class Trait >
 inline void
 finishRule1HtmlTag( typename Delims< Trait >::const_iterator it,
 	typename Delims< Trait >::const_iterator last,
@@ -4225,7 +4265,7 @@ finishRule1HtmlTag( typename Delims< Trait >::const_iterator it,
 				}
 			}
 		}
-		else if( ok )
+		else if( ok && !isNewBlockIn< Trait >( po.fr, it->m_line, l ) )
 		{
 			eatRawHtml( po.line, po.pos, l, p + 1, po, true, 1, false );
 
@@ -4239,7 +4279,10 @@ finishRule1HtmlTag( typename Delims< Trait >::const_iterator it,
 		}
 	}
 
-	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 1, po.html.onLine );
+	if( po.html.onLine )
+		eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 1, po.html.onLine );
+	else
+		resetHtmlTag( po.html );
 }
 
 template< class Trait >
@@ -4250,6 +4293,8 @@ finishRule2HtmlTag( typename Delims< Trait >::const_iterator it,
 {
 	if( it != last )
 	{
+		const auto start = it;
+
 		MdLineData::CommentData commentData = { 2, true };
 		bool onLine = po.html.onLine;
 
@@ -4289,26 +4334,35 @@ finishRule2HtmlTag( typename Delims< Trait >::const_iterator it,
 					if( doContinue )
 						continue;
 
-					eatRawHtml( po.line, po.pos, it->m_line,
-						onLine ? po.fr.data[ it->m_line ].first.length() : it->m_pos + 1,
-						po, true, 2, onLine );
+					if( onLine || !isNewBlockIn< Trait >( po.fr, start->m_line, it->m_line  ) )
+						eatRawHtml( po.line, po.pos, it->m_line,
+							onLine ? po.fr.data[ it->m_line ].first.length() : it->m_pos + 1,
+							po, true, 2, onLine );
+					else
+						resetHtmlTag( po.html );
 
 					return;
 				}
 			}
 
-			eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 2, onLine );
+			if( onLine )
+				eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 2, onLine );
+			else
+				resetHtmlTag( po.html );
 
 			return;
 		}
 
-		if( commentData.first == -1 )
+		if( commentData.first == -1 && onLine )
 			eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 2, onLine );
 		else
 			resetHtmlTag( po.html );
 	}
-	else
+
+	if( po.html.onLine )
 		eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 2, po.html.onLine );
+	else
+		resetHtmlTag( po.html );
 }
 
 template< class Trait >
@@ -4321,6 +4375,8 @@ finishRule3HtmlTag( typename Delims< Trait >::const_iterator it,
 
 	if( it != last )
 	{
+		const auto start = it;
+
 		if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less )
 		{
 			onLine = ( it->m_pos == skipSpaces< Trait >( 0, po.fr.data[ it->m_line ].first.asString() ) );
@@ -4342,7 +4398,10 @@ finishRule3HtmlTag( typename Delims< Trait >::const_iterator it,
 							break;
 					}
 
-					eatRawHtml( po.line, po.pos, it->m_line, i , po, true, 3, onLine );
+					if( onLine || !isNewBlockIn< Trait >( po.fr, start->m_line, it->m_line ) )
+						eatRawHtml( po.line, po.pos, it->m_line, i , po, true, 3, onLine );
+					else
+						resetHtmlTag( po.html );
 
 					return;
 				}
@@ -4350,7 +4409,10 @@ finishRule3HtmlTag( typename Delims< Trait >::const_iterator it,
 		}
 	}
 
-	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 3, onLine );
+	if( po.html.onLine )
+		eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 3, onLine );
+	else
+		resetHtmlTag( po.html );
 }
 
 template< class Trait >
@@ -4361,6 +4423,8 @@ finishRule4HtmlTag( typename Delims< Trait >::const_iterator it,
 {
 	if( it != last )
 	{
+		const auto start = it;
+
 		bool onLine = po.html.onLine;
 
 		if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less )
@@ -4381,14 +4445,20 @@ finishRule4HtmlTag( typename Delims< Trait >::const_iterator it,
 						break;
 				}
 
-				eatRawHtml( po.line, po.pos, it->m_line, i , po, true, 4, onLine );
+				if( onLine || !isNewBlockIn< Trait >( po.fr, start->m_line, it->m_line ) )
+					eatRawHtml( po.line, po.pos, it->m_line, i , po, true, 4, onLine );
+				else
+					resetHtmlTag( po.html );
 
 				return;
 			}
 		}
 	}
 
-	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 4, true );
+	if( po.html.onLine )
+		eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 4, true );
+	else
+		resetHtmlTag( po.html );
 }
 
 template< class Trait >
@@ -4399,6 +4469,8 @@ finishRule5HtmlTag( typename Delims< Trait >::const_iterator it,
 {
 	if( it != last )
 	{
+		const auto start = it;
+
 		bool onLine = po.html.onLine;
 
 		if( po.html.html->text().isEmpty() && it->m_type == Delimiter::Less )
@@ -4423,7 +4495,10 @@ finishRule5HtmlTag( typename Delims< Trait >::const_iterator it,
 							break;
 					}
 
-					eatRawHtml( po.line, po.pos, it->m_line, i , po, true, 5, onLine );
+					if( onLine || !isNewBlockIn< Trait >( po.fr, start->m_line, it->m_line ) )
+						eatRawHtml( po.line, po.pos, it->m_line, i , po, true, 5, onLine );
+					else
+						resetHtmlTag( po.html );
 
 					return;
 				}
@@ -4431,7 +4506,10 @@ finishRule5HtmlTag( typename Delims< Trait >::const_iterator it,
 		}
 	}
 
-	eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 5, true );
+	if( po.html.onLine )
+		eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 5, true );
+	else
+		resetHtmlTag( po.html );
 }
 
 template< class Trait >
@@ -4450,10 +4528,8 @@ finishRule6HtmlTag( typename Delims< Trait >::const_iterator it,
 		const auto nit = std::find_if( std::next( it ), last,
 			[] ( const auto & d ) { return ( d.m_type == Delimiter::Greater ); } );
 
-		if( nit != last )
+		if( nit != last && !isNewBlockIn< Trait >( po.fr, it->m_line, nit->m_line ) )
 			eatRawHtml( po.line, po.pos, nit->m_line, nit->m_pos + nit->m_len , po, true, 6, false );
-		else
-			eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, false, 6, po.html.onLine );
 	}
 }
 
@@ -4692,10 +4768,17 @@ finishRule7HtmlTag( typename Delims< Trait >::const_iterator it,
 	}
 	else
 	{
-		eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, true, 7, true );
+		if( po.html.onLine )
+		{
+			eatRawHtml( po.line, po.pos, po.fr.data.size() - 1, -1, po, true, 7, true );
 
-		return last;
+			return last;
+		}
+		else
+			resetHtmlTag( po.html );
 	}
+
+	return it;
 }
 
 template< class Trait >
