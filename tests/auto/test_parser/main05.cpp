@@ -1511,14 +1511,18 @@ TEST_CASE( "139" )
 
 	REQUIRE( item->items().size() == 1 );
 
-	REQUIRE( item->items().at( 0 )->type() == MD::ItemType::Paragraph );
+	REQUIRE( item->items().at( 0 )->type() == MD::ItemType::Heading );
 
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( item->items().at( 0 ).get() );
-	REQUIRE( p->startColumn() == 2 );
-	REQUIRE( p->startLine() == 0 );
-	REQUIRE( p->endColumn() == 5 );
-	REQUIRE( p->endLine() == 0 );
+	auto h = static_cast< MD::Heading< TRAIT >* > ( item->items().at( 0 ).get() );
+	REQUIRE( h->startColumn() == 2 );
+	REQUIRE( h->startLine() == 0 );
+	REQUIRE( h->endColumn() == 4 );
+	REQUIRE( h->endLine() == 1 );
 
+	REQUIRE( h->level() == 2 );
+	REQUIRE( !h->text()->isEmpty() );
+
+	auto p = h->text().get();
 	REQUIRE( p->items().size() == 1 );
 
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
