@@ -2,7 +2,7 @@
 
 `md4qt` is a header-only C++ library for parsing Markdown.
 
-`md4qt` almost supports CommonMark 0.31.2 Spec, and some GitHub extensions, such as
+`md4qt` supports CommonMark 0.31.2 Spec, and some GitHub extensions, such as
 tables, footnotes, tasks lists, strikethroughs, LaTeX Math injections.
 
 `md4qt` can be built with Qt6 or with ICU.
