@@ -26,7 +26,6 @@ This library parses Markdown into tree structure.
   * [I need to know positions in the `Markdown` file of blocks/elements. How can I achieve this?](#i-need-to-know-positions-in-the-markdown-file-of-blockselements-howcan-i-achieve-this)
   * [How can I easily traverse through the `MD::Document`?](#how-can-i-easily-traverse-through-the-mddocument)
   * [Why don't you have an implementation for pure `STL` with `std::string`?](#why-dont-you-have-an-implementation-for-pure-stl-with-stdstring)
-  * [Why you support CommonMark 0.31.2 just almost?](#why-you-support-commonmark-0312-just-almost)
 
 # Example
 
@@ -236,51 +235,3 @@ virtual methods to handle that or another element in the document, like:
 was an `std::string` with some small third-party library to handle `UTF8`, and
 benchmark said that the performance was like with `Qt6` `QString`, so I decided
 to not support third trait. Maybe because I so lazy?
-
-## Why you support CommonMark 0.31.2 just almost?
-
-* I don't support removing from the CommonMark a following sentence:
-
-  > If a line containing a single `-` can be interpreted as an	
-    empty list items, it should be interpreted this way
-    and not as a setext heading underline.
-
-  Guys, CommonMark 0.30 implementation had a following issue:
-
-  ```markdown
-  * List
-    -
-  ```
-
-  Was parsed as:
-
-  ```html
-  <ul>
-  <li>
-  <h2>List</h2>
-  </li>
-  </ul>
-  ```
-
-  What is an issue with the above sentence. And, I guess, they decided to make a feature from the bug.
-  I don't wan't to be the same.
-
-  And in my opinion they introduced a lot of new issues with this removing, for example:
-
-  ```markdown
-  * Text
-    -
-      Text
-  ```
-
-  Parses as:
-
-  ```html
-  <ul>
-  <li>
-  <h2>Text</h2>
-  Text</li>
-  </ul>
-  ```
-
-  So, guys, at this moment I won't do anything till this question be clarified [here](https://talk.commonmark.org/t/clarify-following-empty-list-items-in-0-31-2/4599/1).
