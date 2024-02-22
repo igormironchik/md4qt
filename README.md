@@ -283,22 +283,4 @@ to not support third trait. Maybe because I so lazy?
   </ul>
   ```
 
-  And:
-
-  ```markdown
-  - List
-  text
-  -
-  ```
-
-  Parses as:
-
-  ```html
-  <ul>
-  <li>List
-  text</li>
-  <li></li>
-  </ul>
-  ```
-
-  So, guys, why should I support something indefinite?
+  So, guys, at this moment I won't do anything till this question be clarified [here](https://talk.commonmark.org/t/clarify-following-empty-list-items-in-0-31-2/4599/1).
