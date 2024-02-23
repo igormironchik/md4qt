@@ -26,6 +26,7 @@ This library parses Markdown into tree structure.
   * [I need to know positions in the `Markdown` file of blocks/elements. How can I achieve this?](#i-need-to-know-positions-in-the-markdown-file-of-blockselements-howcan-i-achieve-this)
   * [How can I easily traverse through the `MD::Document`?](#how-can-i-easily-traverse-through-the-mddocument)
   * [Why don't you have an implementation for pure `STL` with `std::string`?](#why-dont-you-have-an-implementation-for-pure-stl-with-stdstring)
+  * [Where are empty list items?](#where-are-empty-list-items)
 
 # Example
 
@@ -235,3 +236,9 @@ virtual methods to handle that or another element in the document, like:
 was an `std::string` with some small third-party library to handle `UTF8`, and
 benchmark said that the performance was like with `Qt6` `QString`, so I decided
 to not support third trait. Maybe because I so lazy?
+
+## Where are empty list items?
+
+* I don't add empty (withouth any data in it) list items in the list. Parser do everything right,
+I just decided to not add empty list items into `MD::Document`. For this reason you can even
+not find whole list if it will contain only empty list items.
