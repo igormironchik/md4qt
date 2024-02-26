@@ -465,3 +465,22 @@ TEST_CASE( "230" )
 		REQUIRE( h->text()->items().at( 0 )->type() == MD::ItemType::Text );
 	}
 }
+
+/*
+www.google.com
+
+*/
+TEST_CASE( "231" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/231.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
+}

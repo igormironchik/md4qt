@@ -3402,6 +3402,131 @@ removeBackslashes( const typename MdBlock< Trait >::Data & d )
 }
 
 template< class Trait >
+inline std::shared_ptr< Text< Trait > >
+appendTextObject( const typename Trait::String & text, bool spaceBefore, bool spaceAfter,
+	TextParsingOpts< Trait > & po, bool doNotEscape,
+	long long int startPos, long long int startLine,
+	long long int endPos, long long int endLine )
+{
+	auto s = replaceEntity< Trait >( text );
+
+	if( !doNotEscape )
+		s = removeBackslashes< Trait >( s ).asString();
+
+	s = s.simplified();
+
+	if( !s.isEmpty() )
+	{
+		std::shared_ptr< Text< Trait > > t( new Text< Trait > );
+		t->setText( s );
+		t->setOpts( po.opts );
+		t->setSpaceBefore( spaceBefore );
+		t->setSpaceAfter( spaceAfter );
+		t->setStartColumn( po.fr.data.at( startLine ).first.virginPos( startPos ) );
+		t->setStartLine( po.fr.data.at( startLine ).second.lineNumber );
+		t->setEndColumn( po.fr.data.at( endLine ).first.virginPos( endPos ) );
+		t->setEndLine( po.fr.data.at( endLine ).second.lineNumber );
+
+		po.parent->appendItem( t );
+
+		return t;
+	}
+
+	return nullptr;
+}
+
+template< class Trait >
+inline bool isEmail( const typename Trait::String & url );
+
+template< class Trait >
+inline bool isValidUrl( const typename Trait::String & url );
+
+template< class Trait >
+inline bool isGitHubAutolink( const typename Trait::String & url );
+
+#ifdef MD4QT_QT_SUPPORT
+
+template<>
+inline bool isEmail< QStringTrait >( const QString & url )
+{
+	static const QRegularExpression er(
+		"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
+		"(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$" );
+
+	QRegularExpressionMatch erm;
+
+	if( url.startsWith( "mailto:", Qt::CaseInsensitive ) )
+		erm = er.match( url.right( url.length() - 7 ) );
+	else
+		erm = er.match( url );
+
+	return erm.hasMatch();
+}
+
+template<>
+inline bool isValidUrl< QStringTrait >( const QString & url )
+{
+	const QUrl u( url, QUrl::StrictMode );
+
+	return ( u.isValid() && !u.isRelative() );
+}
+
+template<>
+inline bool isGitHubAutolink< QStringTrait >( const QString & url )
+{
+	const QUrl u( url, QUrl::StrictMode );
+
+	return ( u.isValid() && ( ( !u.scheme().isEmpty() && !u.host().isEmpty() ) ||
+		( url.startsWith( QStringLiteral( "www." ) ) && url.length() >= 7 &&
+			url.indexOf( QLatin1Char( '.' ), 4 ) != -1 ) ) );
+}
+
+#endif
+
+#ifdef MD4QT_ICU_STL_SUPPORT
+
+template<>
+inline bool isEmail< UnicodeStringTrait >( const UnicodeString & url )
+{
+	UParseError er;
+	er.line = 0;
+	er.offset = 0;
+	er.preContext[ 0 ] = 0;
+	er.postContext[ 0 ] = 0;
+
+	UErrorCode status = U_ZERO_ERROR;
+
+	static const icu::UnicodeString pattern = icu::UnicodeString::fromUTF8(
+		"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
+		"(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$" );
+
+	if( url.toLower().startsWith( "mailto:" ) )
+		return (bool) icu::RegexPattern::matches( pattern, url.right( url.length() - 7 ), er, status );
+	else
+		return (bool) icu::RegexPattern::matches( pattern, url, er, status );
+}
+
+template<>
+inline bool isValidUrl< UnicodeStringTrait >( const UnicodeString & url )
+{
+	const UrlUri u( url );
+
+	return ( u.isValid() && !u.isRelative() );
+}
+
+template<>
+inline bool isGitHubAutolink< UnicodeStringTrait >( const UnicodeString & url )
+{
+	const UrlUri u( url );
+
+	return ( u.isValid() && ( ( !u.scheme().isEmpty() && !u.host().isEmpty() ) ||
+		( url.startsWith( QStringLiteral( "www." ) ) && url.length() >= 7 &&
+			url.indexOf( QLatin1Char( '.' ), 4 ) != -1 ) ) );
+}
+
+#endif
+
+template< class Trait >
 inline void
 makeTextObject( const typename Trait::String & text, bool spaceBefore, bool spaceAfter,
 	TextParsingOpts< Trait > & po, bool doNotEscape,
@@ -3429,24 +3554,67 @@ makeTextObject( const typename Trait::String & text, bool spaceBefore, bool spac
 			--endLine;
 		}
 
-		std::shared_ptr< Text< Trait > > t( new Text< Trait > );
-		t->setText( s );
-		t->setOpts( po.opts );
-		t->setSpaceBefore( spaceBefore );
-		t->setSpaceAfter( spaceAfter );
-		t->setStartColumn( po.fr.data.at( startLine ).first.virginPos( startPos ) );
-		t->setStartLine( po.fr.data.at( startLine ).second.lineNumber );
-		t->setEndColumn( po.fr.data.at( endLine ).first.virginPos( endPos ) );
-		t->setEndLine( po.fr.data.at( endLine ).second.lineNumber );
+		typename Trait::String tmp, textToAdd;
+		long long int pos = 0, sp = startPos;
+		bool sb = spaceBefore;
+
+		auto checkUrl = [&] () -> bool
+		{
+			if( isGitHubAutolink< Trait >( tmp ) || isEmail< Trait >( tmp ) )
+			{
+				appendTextObject< Trait >( textToAdd, sb, true, po, doNotEscape,
+					startPos + pos - tmp.length() - textToAdd.length(), startLine,
+					startPos + pos - tmp.length(), startLine );
+
+				sb = true;
+				textToAdd.clear();
+
+				std::shared_ptr< Link< Trait > > lnk( new Link< Trait > );
+				lnk->setStartColumn( po.fr.data.at( startLine ).first.virginPos(
+					startPos + pos - tmp.length() ) );
+				lnk->setStartLine( po.fr.data.at( startLine ).second.lineNumber );
+				lnk->setEndColumn( po.fr.data.at( startLine ).first.virginPos(
+					startPos + pos - 1 ) );
+				lnk->setEndLine( po.fr.data.at( startLine ).second.lineNumber );
+				lnk->setUrl( tmp.simplified() );
+				lnk->setOpts( po.opts );
+				po.parent->appendItem( lnk );
+
+				sp = startPos + pos;
+
+				return true;
+			}
+
+			return false;
+		};
+
+		for( ; pos < text.length(); ++pos )
+		{
+			if( text[ pos ].isSpace() )
+			{
+				if( !checkUrl() )
+				{
+					textToAdd.push_back( tmp );
+					textToAdd.push_back( typename Trait::Char( ' ' ) );
+				}
+
+				tmp.clear();
+			}
+			else
+				tmp.push_back( text[ pos ] );
+		}
+
+		tmp = textToAdd + tmp;
+
+		if( !checkUrl() )
+			po.lastText = appendTextObject< Trait >( tmp, sb, spaceAfter, po, doNotEscape,
+				sp, startLine, endPos, endLine );
 
 		po.parent->setEndColumn( po.fr.data.at( endLine ).first.virginPos( endPos ) );
 		po.parent->setEndLine( po.fr.data.at( endLine ).second.lineNumber );
 
 		po.wasRefLink = false;
 		po.firstInParagraph = false;
-		po.parent->appendItem( t );
-
-		po.lastText = t;
 	}
 }
 
@@ -4850,74 +5018,6 @@ checkForMath( typename Delims< Trait >::const_iterator it,
 
 	return it;
 }
-
-template< class Trait >
-inline bool isEmail( const typename Trait::String & url );
-
-template< class Trait >
-inline bool isValidUrl( const typename Trait::String & url );
-
-#ifdef MD4QT_QT_SUPPORT
-
-template<>
-inline bool isEmail< QStringTrait >( const QString & url )
-{
-	static const QRegularExpression er(
-		"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
-		"(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$" );
-
-	QRegularExpressionMatch erm;
-
-	if( url.startsWith( "mailto:", Qt::CaseInsensitive ) )
-		erm = er.match( url.right( url.length() - 7 ) );
-	else
-		erm = er.match( url );
-
-	return erm.hasMatch();
-}
-
-template<>
-inline bool isValidUrl< QStringTrait >( const QString & url )
-{
-	const QUrl u( url, QUrl::StrictMode );
-
-	return ( u.isValid() && !u.isRelative() );
-}
-
-#endif
-
-#ifdef MD4QT_ICU_STL_SUPPORT
-
-template<>
-inline bool isEmail< UnicodeStringTrait >( const UnicodeString & url )
-{
-	UParseError er;
-	er.line = 0;
-	er.offset = 0;
-	er.preContext[ 0 ] = 0;
-	er.postContext[ 0 ] = 0;
-
-	UErrorCode status = U_ZERO_ERROR;
-
-	static const icu::UnicodeString pattern = icu::UnicodeString::fromUTF8(
-		"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
-		"(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$" );
-
-	if( url.toLower().startsWith( "mailto:" ) )
-		return (bool) icu::RegexPattern::matches( pattern, url.right( url.length() - 7 ), er, status );
-	else
-		return (bool) icu::RegexPattern::matches( pattern, url, er, status );
-}
-
-template<>
-inline bool isValidUrl< UnicodeStringTrait >( const UnicodeString & url )
-{
-	const UrlUri u( url );
-
-	return ( u.isValid() && !u.isRelative() );
-}
-
-#endif
 
 template< class Trait >
 inline typename Delims< Trait >::const_iterator
