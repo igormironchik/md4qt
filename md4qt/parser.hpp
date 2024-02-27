@@ -3241,7 +3241,7 @@ struct TextParsingOpts {
 		{
 			TextData d = rawTextData[ start ];
 
-			for( auto i = start; i < end; ++i )
+			for( auto i = start + 1; i < end; ++i )
 				d.str += rawTextData[ i ].str;
 
 			rawTextData.erase( rawTextData.cbegin() + start, rawTextData.cbegin() + end );
@@ -7210,7 +7210,8 @@ makeHeading( std::shared_ptr< Block< Trait > > parent,
 
 template< class Trait >
 inline void
-checkForTextPlugins()
+checkForTextPlugins( std::shared_ptr< Paragraph< Trait > > p,
+	TextParsingOpts< Trait > & po )
 {
 }
 
@@ -7350,7 +7351,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 						{
 							optimizeParagraph< Trait >( p, po );
 
-							checkForTextPlugins< Trait >();
+							checkForTextPlugins< Trait >( p, po );
 
 							if( it->m_line - 1 >= 0 )
 							{
@@ -7428,7 +7429,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 
 						optimizeParagraph< Trait >( p, po );
 
-						checkForTextPlugins< Trait >();
+						checkForTextPlugins< Trait >( p, po );
 
 						if( it->m_line - 1 >= 0 )
 						{
@@ -7556,7 +7557,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 	{
 		optimizeParagraph< Trait >( p, po );
 
-		checkForTextPlugins< Trait >();
+		checkForTextPlugins< Trait >( p, po );
 
 		p = splitParagraphsAndFreeHtml( parent, p, po, collectRefLinks );
 
