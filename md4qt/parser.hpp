@@ -3227,6 +3227,28 @@ struct TextParsingOpts {
 	bool checkLineOnNewType = false;
 	bool firstInParagraph = true;
 
+	struct TextData {
+		typename Trait::String str;
+		long long int pos = -1;
+		long long int line = -1;
+	};
+
+	std::vector< TextData > rawTextData;
+
+	inline void concatenateAuxText( long long int start, long long int end )
+	{
+		if( start < end && ( end - start > 1 ) )
+		{
+			TextData d = rawTextData[ start ];
+
+			for( auto i = start; i < end; ++i )
+				d.str += rawTextData[ i ].str;
+
+			rawTextData.erase( rawTextData.cbegin() + start, rawTextData.cbegin() + end );
+			rawTextData.insert( rawTextData.cbegin() + start, d );
+		}
+	}
+
 	enum class Detected {
 		Nothing = 0,
 		Table = 1,
@@ -3402,40 +3424,6 @@ removeBackslashes( const typename MdBlock< Trait >::Data & d )
 }
 
 template< class Trait >
-inline std::shared_ptr< Text< Trait > >
-appendTextObject( const typename Trait::String & text, bool spaceBefore, bool spaceAfter,
-	TextParsingOpts< Trait > & po, bool doNotEscape,
-	long long int startPos, long long int startLine,
-	long long int endPos, long long int endLine )
-{
-	auto s = replaceEntity< Trait >( text );
-
-	if( !doNotEscape )
-		s = removeBackslashes< Trait >( s ).asString();
-
-	s = s.simplified();
-
-	if( !s.isEmpty() )
-	{
-		std::shared_ptr< Text< Trait > > t( new Text< Trait > );
-		t->setText( s );
-		t->setOpts( po.opts );
-		t->setSpaceBefore( spaceBefore );
-		t->setSpaceAfter( spaceAfter );
-		t->setStartColumn( po.fr.data.at( startLine ).first.virginPos( startPos ) );
-		t->setStartLine( po.fr.data.at( startLine ).second.lineNumber );
-		t->setEndColumn( po.fr.data.at( endLine ).first.virginPos( endPos ) );
-		t->setEndLine( po.fr.data.at( endLine ).second.lineNumber );
-
-		po.parent->appendItem( t );
-
-		return t;
-	}
-
-	return nullptr;
-}
-
-template< class Trait >
 inline bool isEmail( const typename Trait::String & url );
 
 template< class Trait >
@@ -3548,73 +3536,32 @@ makeTextObject( const typename Trait::String & text, bool spaceBefore, bool spac
 
 	if( !s.isEmpty() )
 	{
+		po.rawTextData.push_back( { text, startPos, startLine } );
+
 		if( endPos < 0 && endLine - 1 >= 0 )
 		{
 			endPos = po.fr.data.at( endLine - 1 ).first.length() - 1;
 			--endLine;
 		}
 
-		typename Trait::String tmp, textToAdd;
-		long long int pos = 0, sp = startPos;
-		bool sb = spaceBefore;
-
-		auto checkUrl = [&] () -> bool
-		{
-			if( isGitHubAutolink< Trait >( tmp ) || isEmail< Trait >( tmp ) )
-			{
-				appendTextObject< Trait >( textToAdd, sb, true, po, doNotEscape,
-					startPos + pos - tmp.length() - textToAdd.length(), startLine,
-					startPos + pos - tmp.length(), startLine );
-
-				sb = true;
-				textToAdd.clear();
-
-				std::shared_ptr< Link< Trait > > lnk( new Link< Trait > );
-				lnk->setStartColumn( po.fr.data.at( startLine ).first.virginPos(
-					startPos + pos - tmp.length() ) );
-				lnk->setStartLine( po.fr.data.at( startLine ).second.lineNumber );
-				lnk->setEndColumn( po.fr.data.at( startLine ).first.virginPos(
-					startPos + pos - 1 ) );
-				lnk->setEndLine( po.fr.data.at( startLine ).second.lineNumber );
-				lnk->setUrl( tmp.simplified() );
-				lnk->setOpts( po.opts );
-				po.parent->appendItem( lnk );
-
-				sp = startPos + pos;
-
-				return true;
-			}
-
-			return false;
-		};
-
-		for( ; pos < text.length(); ++pos )
-		{
-			if( text[ pos ].isSpace() )
-			{
-				if( !checkUrl() )
-				{
-					textToAdd.push_back( tmp );
-					textToAdd.push_back( typename Trait::Char( ' ' ) );
-				}
-
-				tmp.clear();
-			}
-			else
-				tmp.push_back( text[ pos ] );
-		}
-
-		tmp = textToAdd + tmp;
-
-		if( !checkUrl() )
-			po.lastText = appendTextObject< Trait >( tmp, sb, spaceAfter, po, doNotEscape,
-				sp, startLine, endPos, endLine );
+		std::shared_ptr< Text< Trait > > t( new Text< Trait > );
+		t->setText( s );
+		t->setOpts( po.opts );
+		t->setSpaceBefore( spaceBefore );
+		t->setSpaceAfter( spaceAfter );
+		t->setStartColumn( po.fr.data.at( startLine ).first.virginPos( startPos ) );
+		t->setStartLine( po.fr.data.at( startLine ).second.lineNumber );
+		t->setEndColumn( po.fr.data.at( endLine ).first.virginPos( endPos ) );
+		t->setEndLine( po.fr.data.at( endLine ).second.lineNumber );
 
 		po.parent->setEndColumn( po.fr.data.at( endLine ).first.virginPos( endPos ) );
 		po.parent->setEndLine( po.fr.data.at( endLine ).second.lineNumber );
 
 		po.wasRefLink = false;
 		po.firstInParagraph = false;
+		po.parent->appendItem( t );
+
+		po.lastText = t;
 	}
 }
 
@@ -6860,7 +6807,8 @@ concatenateText( typename Block< Trait >::Items::const_iterator it,
 
 template< class Trait >
 inline void
-optimizeParagraph( std::shared_ptr< Paragraph< Trait > > & p )
+optimizeParagraph( std::shared_ptr< Paragraph< Trait > > & p,
+	TextParsingOpts< Trait > & po )
 {
 	std::shared_ptr< Paragraph< Trait > > np( new Paragraph< Trait > );
 	np->setStartColumn( p->startColumn() );
@@ -6871,6 +6819,7 @@ optimizeParagraph( std::shared_ptr< Paragraph< Trait > > & p )
 	int opts = TextWithoutFormat;
 
 	auto start = p->items().cend();
+	long long int auxStart = 0, auxIt = -1;
 
 	long long int line = -1;
 
@@ -6878,6 +6827,8 @@ optimizeParagraph( std::shared_ptr< Paragraph< Trait > > & p )
 	{
 		if( (*it)->type() == ItemType::Text )
 		{
+			++auxIt;
+
 			const auto t = std::static_pointer_cast< Text< Trait > >( *it );
 
 			if( start == last )
@@ -6888,6 +6839,9 @@ optimizeParagraph( std::shared_ptr< Paragraph< Trait > > & p )
 			}
 			else if( opts != t->opts() || t->startLine() != line )
 			{
+				po.concatenateAuxText( auxStart, auxIt );
+				auxIt = auxIt - ( auxIt - auxStart ) + 1;
+				auxStart = auxIt;
 				np->appendItem( concatenateText< Trait >( start, it ) );
 				start = it;
 				opts = t->opts();
@@ -6898,6 +6852,9 @@ optimizeParagraph( std::shared_ptr< Paragraph< Trait > > & p )
 		{
 			if( start != last )
 			{
+				po.concatenateAuxText( auxStart, auxIt );
+				auxIt = auxIt - ( auxIt - auxStart ) + 1;
+				auxStart = auxIt;
 				np->appendItem( concatenateText< Trait >( start, it ) );
 				start = last;
 				opts = TextWithoutFormat;
@@ -6909,7 +6866,10 @@ optimizeParagraph( std::shared_ptr< Paragraph< Trait > > & p )
 	}
 
 	if( start != p->items().cend() )
+	{
 		np->appendItem( concatenateText< Trait >( start, p->items().cend() ) );
+		po.concatenateAuxText( auxStart, po.rawTextData.size() );
+	}
 
 	p = np;
 }
@@ -7073,6 +7033,7 @@ template< class Trait >
 inline std::shared_ptr< Paragraph< Trait > >
 splitParagraphsAndFreeHtml( std::shared_ptr< Block< Trait > > parent,
 	std::shared_ptr< Paragraph< Trait > > p,
+	TextParsingOpts< Trait > & po,
 	bool collectRefLinks )
 {
 	auto first = p->items().cbegin();
@@ -7105,12 +7066,23 @@ splitParagraphsAndFreeHtml( std::shared_ptr< Block< Trait > > parent,
 	if( first != last )
 	{
 		if( first != p->items().cbegin() )
+		{
+			const auto c = std::count_if( first, last,
+				[]( const auto & i ) { return ( i->type() == MD::ItemType::Text ); } );
+			po.rawTextData.erase( po.rawTextData.cbegin(), po.rawTextData.cbegin() +
+				( po.rawTextData.size() - c ) );
+
 			return makeParagraph< Trait >( first, last );
+		}
 		else
 			return p;
 	}
 	else
+	{
+		po.rawTextData.clear();
+
 		return std::make_shared< Paragraph< Trait > > ();
+	}
 }
 
 template< class Trait >
@@ -7175,6 +7147,71 @@ makeHeading( std::shared_ptr< Block< Trait > > parent,
 
 		parent->appendItem( h );
 	}
+}
+
+// void doit()
+// {
+// typename Trait::String tmp, textToAdd;
+// long long int pos = 0, sp = startPos;
+// bool sb = spaceBefore;
+
+// auto checkUrl = [&] () -> bool
+// {
+// 	if( isGitHubAutolink< Trait >( tmp ) || isEmail< Trait >( tmp ) )
+// 	{
+// 		appendTextObject< Trait >( textToAdd, sb, true, po, doNotEscape,
+// 			startPos + pos - tmp.length() - textToAdd.length(), startLine,
+// 			startPos + pos - tmp.length(), startLine );
+
+// 		sb = true;
+// 		textToAdd.clear();
+
+// 		std::shared_ptr< Link< Trait > > lnk( new Link< Trait > );
+// 		lnk->setStartColumn( po.fr.data.at( startLine ).first.virginPos(
+// 			startPos + pos - tmp.length() ) );
+// 		lnk->setStartLine( po.fr.data.at( startLine ).second.lineNumber );
+// 		lnk->setEndColumn( po.fr.data.at( startLine ).first.virginPos(
+// 			startPos + pos - 1 ) );
+// 		lnk->setEndLine( po.fr.data.at( startLine ).second.lineNumber );
+// 		lnk->setUrl( tmp.simplified() );
+// 		lnk->setOpts( po.opts );
+// 		po.parent->appendItem( lnk );
+
+// 		sp = startPos + pos;
+
+// 		return true;
+// 	}
+
+// 	return false;
+// };
+
+// for( ; pos < text.length(); ++pos )
+// {
+// 	if( text[ pos ].isSpace() )
+// 	{
+// 		if( !checkUrl() )
+// 		{
+// 			textToAdd.push_back( tmp );
+// 			textToAdd.push_back( typename Trait::Char( ' ' ) );
+// 		}
+
+// 		tmp.clear();
+// 	}
+// 	else
+// 		tmp.push_back( text[ pos ] );
+// }
+
+// tmp = textToAdd + tmp;
+
+// if( !checkUrl() )
+// 	po.lastText = appendTextObject< Trait >( tmp, sb, spaceAfter, po, doNotEscape,
+// 		sp, startLine, endPos, endLine );
+// }
+
+template< class Trait >
+inline void
+checkForTextPlugins()
+{
 }
 
 template< class Trait >
@@ -7311,7 +7348,9 @@ parseFormattedText( MdBlock< Trait > & fr,
 
 						if( !p->isEmpty() )
 						{
-							optimizeParagraph< Trait >( p );
+							optimizeParagraph< Trait >( p, po );
+
+							checkForTextPlugins< Trait >();
 
 							if( it->m_line - 1 >= 0 )
 							{
@@ -7320,7 +7359,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 								p->setEndLine( fr.data.at( it->m_line - 1 ).second.lineNumber );
 							}
 
-							p = splitParagraphsAndFreeHtml( parent, p, collectRefLinks );
+							p = splitParagraphsAndFreeHtml( parent, p, po, collectRefLinks );
 
 							if( !p->isEmpty() )
 							{
@@ -7353,6 +7392,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 							h2 = false;
 
 						p.reset( new Paragraph< Trait > );
+						po.rawTextData.clear();
 
 						if( it->m_line + 1 < fr.data.size() )
 						{
@@ -7386,7 +7426,9 @@ parseFormattedText( MdBlock< Trait > & fr,
 						po.wasRefLink = false;
 						po.firstInParagraph = false;
 
-						optimizeParagraph< Trait >( p );
+						optimizeParagraph< Trait >( p, po );
+
+						checkForTextPlugins< Trait >();
 
 						if( it->m_line - 1 >= 0 )
 						{
@@ -7395,7 +7437,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 							p->setEndLine( fr.data.at( it->m_line - 1 ).second.lineNumber );
 						}
 
-						p = splitParagraphsAndFreeHtml( parent, p, collectRefLinks );
+						p = splitParagraphsAndFreeHtml( parent, p, po, collectRefLinks );
 
 						if( !p->isEmpty() && !( ( p->items().size() == 1 &&
 							p->items().front()->type() == ItemType::LineBreak ) ) )
@@ -7411,6 +7453,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 							po.checkLineOnNewType = true;
 
 							p.reset( new Paragraph< Trait > );
+							po.rawTextData.clear();
 
 							if( it->m_line + 1 < fr.data.size() )
 							{
@@ -7511,15 +7554,19 @@ parseFormattedText( MdBlock< Trait > & fr,
 
 	if( !p->isEmpty() )
 	{
-		optimizeParagraph< Trait >( p );
+		optimizeParagraph< Trait >( p, po );
 
-		p = splitParagraphsAndFreeHtml( parent, p, collectRefLinks );
+		checkForTextPlugins< Trait >();
+
+		p = splitParagraphsAndFreeHtml( parent, p, po, collectRefLinks );
 
 		if( html.html.get() && !html.onLine )
 			UnprotectedDocsMethods< Trait >::setDirty( p, true );
 
 		if( !p->isEmpty() && !collectRefLinks )
 			concatenateParagraphsIfNeededOrAppend( parent, p );
+
+		po.rawTextData.clear();
 	}
 
 	if( !pt->isEmpty() && !collectRefLinks )
