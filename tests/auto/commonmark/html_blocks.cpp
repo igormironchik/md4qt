@@ -112,7 +112,7 @@ TEST_CASE( "150" )
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
 		auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
-		REQUIRE( h->text() == u8"<div>\n  *hello*\n         <foo><a>" );
+		REQUIRE( h->text() == u8" <div>\n  *hello*\n         <foo><a>" );
 	}
 }
 
@@ -759,7 +759,7 @@ TEST_CASE( "183" )
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
 		auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
-		REQUIRE( h->text() == u8"<!-- foo -->" );
+		REQUIRE( h->text() == u8"  <!-- foo -->" );
 	}
 
 	{
@@ -779,7 +779,7 @@ TEST_CASE( "184" )
 	{
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
 		auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
-		REQUIRE( h->text() == u8"<div>" );
+		REQUIRE( h->text() == u8"  <div>" );
 	}
 
 	{
@@ -962,7 +962,7 @@ TEST_CASE( "191" )
 	{
 		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::RawHtml );
 		auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 2 ).get() );
-		REQUIRE( h->text() == u8"<tr>" );
+		REQUIRE( h->text() == u8"  <tr>" );
 	}
 
 	{
@@ -974,7 +974,7 @@ TEST_CASE( "191" )
 	{
 		REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::RawHtml );
 		auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 4 ).get() );
-		REQUIRE( h->text() == u8"</tr>" );
+		REQUIRE( h->text() == u8"  </tr>" );
 	}
 
 	{

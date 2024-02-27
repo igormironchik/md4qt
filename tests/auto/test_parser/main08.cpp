@@ -483,4 +483,10 @@ TEST_CASE( "231" )
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
+	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( l->startColumn() == 0 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 13 );
+	REQUIRE( l->endLine() == 0 );
+	REQUIRE( l->url() == u8"www.google.com" );
 }

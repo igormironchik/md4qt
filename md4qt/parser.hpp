@@ -3231,6 +3231,8 @@ struct TextParsingOpts {
 		typename Trait::String str;
 		long long int pos = -1;
 		long long int line = -1;
+		bool spaceBefore = false;
+		bool spaceAfter = false;
 	};
 
 	std::vector< TextData > rawTextData;
@@ -3508,8 +3510,8 @@ inline bool isGitHubAutolink< UnicodeStringTrait >( const UnicodeString & url )
 	const UrlUri u( url );
 
 	return ( u.isValid() && ( ( !u.scheme().isEmpty() && !u.host().isEmpty() ) ||
-		( url.startsWith( QStringLiteral( "www." ) ) && url.length() >= 7 &&
-			url.indexOf( QLatin1Char( '.' ), 4 ) != -1 ) ) );
+		( url.startsWith( UnicodeString( "www." ) ) && url.length() >= 7 &&
+			url.indexOf( UnicodeChar( '.' ), 4 ) != -1 ) ) );
 }
 
 #endif
@@ -3517,14 +3519,12 @@ inline bool isGitHubAutolink< UnicodeStringTrait >( const UnicodeString & url )
 template< class Trait >
 inline void
 makeTextObject( const typename Trait::String & text, bool spaceBefore, bool spaceAfter,
-	TextParsingOpts< Trait > & po, bool doNotEscape,
+	TextParsingOpts< Trait > & po,
 	long long int startPos, long long int startLine,
 	long long int endPos, long long int endLine )
 {
 	auto s = replaceEntity< Trait >( text );
-
-	if( !doNotEscape )
-		s = removeBackslashes< Trait >( s ).asString();
+	s = removeBackslashes< Trait >( s ).asString();
 
 	if( !s.isEmpty() )
 	{
@@ -3536,7 +3536,7 @@ makeTextObject( const typename Trait::String & text, bool spaceBefore, bool spac
 
 	if( !s.isEmpty() )
 	{
-		po.rawTextData.push_back( { text, startPos, startLine } );
+		po.rawTextData.push_back( { text, startPos, startLine, spaceBefore, spaceAfter } );
 
 		if( endPos < 0 && endLine - 1 >= 0 )
 		{
@@ -3563,16 +3563,18 @@ makeTextObject( const typename Trait::String & text, bool spaceBefore, bool spac
 
 		po.lastText = t;
 	}
+	else
+		po.pos = startPos;
 }
 
 template< class Trait >
 inline void
 makeTextObjectWithLineBreak( const typename Trait::String & text, bool spaceBefore, bool spaceAfter,
-	TextParsingOpts< Trait > & po, bool doNotEscape,
+	TextParsingOpts< Trait > & po,
 	long long int startPos, long long int startLine,
 	long long int endPos, long long int endLine )
 {
-	makeTextObject( text, spaceBefore, true, po, doNotEscape,
+	makeTextObject( text, spaceBefore, true, po,
 		startPos, startLine, endPos, endLine );
 
 	std::shared_ptr< LineBreak< Trait > > hr( new LineBreak< Trait > );
@@ -3632,8 +3634,7 @@ makeText(
 	long long int lastLine,
 	// Not inclusive
 	long long int lastPos,
-	TextParsingOpts< Trait > & po,
-	bool doNotEscape = false )
+	TextParsingOpts< Trait > & po )
 {
 	if( po.line > lastLine )
 		return;
@@ -3665,7 +3666,7 @@ makeText(
 		{
 			const auto & line = po.fr.data.at( po.line ).first.asString();
 
-			makeTextObjectWithLineBreak( text, spaceBefore, true, po, doNotEscape,
+			makeTextObjectWithLineBreak( text, spaceBefore, true, po,
 				startPos, startLine, line.length() - lineBreakLength< Trait >( line ) - 1, po.line );
 
 			startPos = 0;
@@ -3699,7 +3700,7 @@ makeText(
 			po.fr.data.at( po.line ).first[ po.pos ].isSpace() : isSpaceAfter;
 
 		makeTextObject( text, spaceBefore, isSpaceAfter, po,
-			doNotEscape, startPos, startLine,
+			startPos, startLine,
 			po.line == lastLine ? lastPos - 1 : po.fr.data.at( po.line ).first.length() - 1,
 			po.line );
 
@@ -3725,8 +3726,7 @@ makeText(
 			if( lineBreak )
 				makeTOWLB();
 			else
-				makeTextObject( text, true, true, po,
-					doNotEscape, 0, po.line,
+				makeTextObject( text, true, true, po, 0, po.line,
 					po.fr.data.at( po.line ).first.length() - 1,
 					po.line );
 
@@ -3739,8 +3739,20 @@ makeText(
 
 		auto s = po.fr.data.at( po.line ).first.asString().sliced( 0, lastPos );
 
+		po.pos = lastPos;
+
+		bool isSpaceAfter = po.pos > 0 ? po.fr.data.at( po.line ).first[ po.pos - 1 ].isSpace() ||
+			po.pos == po.fr.data.at( po.line ).first.length() : true;
+		isSpaceAfter = !isSpaceAfter && po.pos < po.fr.data.at( po.line ).first.length() ?
+			po.fr.data.at( po.line ).first[ po.pos ].isSpace() : isSpaceAfter;
+
 		if( !lineBreak )
+		{
 			text.push_back( s );
+
+			makeTextObject( text, true, isSpaceAfter, po,
+				0, lastLine, lastPos - 1, lastLine );
+		}
 		else
 		{
 			s = removeLineBreak< Trait >( s );
@@ -3749,16 +3761,6 @@ makeText(
 			makeTOWLB();
 		}
 	}
-
-	po.pos = lastPos;
-
-	bool isSpaceAfter = po.pos > 0 ? po.fr.data.at( po.line ).first[ po.pos - 1 ].isSpace() ||
-		po.pos == po.fr.data.at( po.line ).first.length() : true;
-	isSpaceAfter = !isSpaceAfter && po.pos < po.fr.data.at( po.line ).first.length() ?
-		po.fr.data.at( po.line ).first[ po.pos ].isSpace() : isSpaceAfter;
-
-	makeTextObject( text, true, isSpaceAfter, po,
-		doNotEscape, 0, lastLine, lastPos - 1, lastLine );
 }
 
 template< class Trait >
@@ -7209,10 +7211,165 @@ makeHeading( std::shared_ptr< Block< Trait > > parent,
 // }
 
 template< class Trait >
+inline long long int
+textAtIdx( std::shared_ptr< Paragraph< Trait > > p,
+	size_t idx )
+{
+	size_t i = 0;
+
+	for( auto it = p->items().cbegin(), last = p->items().cend(); it != last; ++it )
+	{
+		if( (*it)->type() == ItemType::Text )
+		{
+			if( i == idx )
+				return std::distance( p->items().cbegin(), it );
+
+			++i;
+		}
+	}
+
+	return -1;
+}
+
+template< class Trait >
+inline void
+processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
+	TextParsingOpts< Trait > & po, size_t idx )
+{
+	static const auto delims = typename Trait::String( "*_~()<>" );
+	auto s = po.rawTextData[ idx ];
+	bool first = true;
+	long long int j = 0;
+	bool doFirstRemove = true;
+
+	while( s.str.length() )
+	{
+		long long int i = 0;
+
+		for( ; i < s.str.length(); ++i )
+		{
+			if( first )
+			{
+				if( delims.indexOf( s.str[ i ] ) == -1 && !s.str[ i ].isSpace() )
+				{
+					first = false;
+					j = i;
+				}
+			}
+			else
+			{
+				if( s.str[ i ].isSpace() || i == s.str.length() - 1 )
+				{
+					const auto tmp = s.str.sliced( j, i - j + ( i == s.str.length() - 1 ? 1 : 0 ) );
+
+					if( isGitHubAutolink< Trait >( tmp ) || isEmail< Trait >( tmp ) )
+					{
+						auto ti = textAtIdx( p, idx );
+
+						if( ti >= 0 && ti < p->items().size() )
+						{
+							if( j == 0 || s.str.sliced( 0, j ).simplified().isEmpty() )
+							{
+								if( doFirstRemove )
+								{
+									p->removeItemAt( ti );
+									doFirstRemove = false;
+									po.rawTextData.erase( po.rawTextData.cbegin() + idx );
+								}
+							}
+							else
+							{
+								const auto tmp = s.str.sliced( 0, j );
+
+								if( !tmp.simplified().isEmpty() )
+								{
+									auto t = std::static_pointer_cast< Text< Trait > > ( p->items().at( ti ) );
+									t->setEndColumn( po.fr.data.at( s.line ).first.virginPos( s.pos + j - 1 ) );
+									po.rawTextData[ idx ].str = tmp;
+									++idx;
+									auto text = replaceEntity< Trait >( tmp.simplified() );
+									text = removeBackslashes< Trait >( text ).asString();
+									t->setText( text );
+									t->setSpaceAfter( true );
+									t->setSpaceBefore( s.pos > 0 ?
+										po.fr.data[ s.line ].first[ s.pos - 1 ].isSpace() : true );
+									++ti;
+								}
+								else
+								{
+									p->removeItemAt( ti );
+									po.rawTextData.erase( po.rawTextData.cbegin() + idx );
+								}
+							}
+
+							std::shared_ptr< Link< Trait > > lnk( new Link< Trait > );
+							lnk->setStartColumn( po.fr.data.at( s.line ).first.virginPos( s.pos + j ) );
+							lnk->setStartLine( po.fr.data.at( s.line ).second.lineNumber );
+							lnk->setEndColumn( po.fr.data.at( s.line ).first.virginPos(
+								s.pos + i - ( i == s.str.length() - 1 ? 0 : 1 ) ) );
+							lnk->setEndLine( po.fr.data.at( s.line ).second.lineNumber );
+							lnk->setUrl( tmp );
+							lnk->setOpts( po.opts );
+							p->insertItem( ti, lnk );
+
+							s.str.remove( 0, i + 1 );
+							s.spaceBefore = true;
+							s.pos += i + 1;
+							j = 0;
+							i = 0;
+
+							if( s.str.simplified().isEmpty() )
+								s.str.clear();
+
+							if( !s.str.isEmpty() )
+							{
+								po.rawTextData.insert( po.rawTextData.cbegin() + idx, s );
+
+								auto t = std::make_shared< Text< Trait > > ();
+								t->setStartColumn( po.fr.data[ s.line ].first.virginPos( s.pos ) );
+								t->setStartLine( po.fr.data.at( s.line ).second.lineNumber );
+								t->setEndLine( po.fr.data.at( s.line ).second.lineNumber );
+								t->setEndColumn( po.fr.data.at( s.line ).first.virginPos(
+									s.pos + s.str.length() - 1 ) );
+								auto text = replaceEntity< Trait >( s.str );
+								text = removeBackslashes< Trait >( text ).asString();
+								t->setText( text );
+								t->setSpaceAfter( s.spaceAfter );
+								t->setSpaceBefore( s.pos > 0 ?
+									po.fr.data[ s.line ].first[ s.pos - 1 ].isSpace() : true );
+								p->insertItem( ti + 1, t );
+							}
+
+							break;
+						}
+					}
+
+					j = i + 1;
+				}
+			}
+		}
+
+		first = true;
+
+		if( i == s.str.length() )
+			break;
+	}
+}
+
+template< class Trait >
 inline void
 checkForTextPlugins( std::shared_ptr< Paragraph< Trait > > p,
 	TextParsingOpts< Trait > & po )
 {
+	size_t i = 0;
+
+	for( auto it = po.rawTextData.cbegin(), last = po.rawTextData.cend();
+		it != last; ++it )
+	{
+		processGitHubAutolinkExtension( p, po, i );
+
+		++i;
+	}
 }
 
 template< class Trait >

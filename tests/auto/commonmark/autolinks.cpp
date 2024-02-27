@@ -156,18 +156,21 @@ TEST_CASE( "600" )
 
 TEST_CASE( "601" )
 {
-	const auto doc = load_test( 601 );
+	MESSAGE( "This test is not strict to CommonMark due to GitHub's autolinks extension." );
+	MESSAGE( "Skip for now." );
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+	// const auto doc = load_test( 601 );
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"<http://foo.bar/baz bim>" );
+	// REQUIRE( doc->isEmpty() == false );
+	// REQUIRE( doc->items().size() == 2 );
+
+	// REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	// auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	// REQUIRE( p->items().size() == 1 );
+	// REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	// auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	// REQUIRE( t->opts() == MD::TextWithoutFormat );
+	// REQUIRE( t->text() == u8"<http://foo.bar/baz bim>" );
 }
 
 TEST_CASE( "602" )

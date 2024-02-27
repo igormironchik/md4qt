@@ -758,11 +758,12 @@ public:
 			m_relative = !( uri.scheme.first && uri.scheme.afterLast );
 
 			if( !m_relative )
-				m_scheme = UnicodeString( uriString.substr( uri.scheme.first,
+				m_scheme = UnicodeString( std::string( uri.scheme.first,
 					uri.scheme.afterLast - uri.scheme.first ).c_str() );
 
-			m_host = UnicodeString( uriString.substr( uri.hostText.first,
-				uri.hostText.afterLast - uri.hostText.first ).c_str() );
+			if( uri.hostText.first && uri.hostText.afterLast )
+				m_host = UnicodeString( std::string( uri.hostText.first,
+					uri.hostText.afterLast - uri.hostText.first ).c_str() );
 
 			uriFreeUriMembersA( &uri );
 		}
