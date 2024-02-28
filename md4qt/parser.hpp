@@ -7181,16 +7181,21 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 	auto s = po.rawTextData[ idx ];
 	bool first = true;
 	long long int j = 0;
-	bool doFirstRemove = true;
+	auto end = typename Trait::Char( 0x00 );
+	bool skipSpace = true;
 
 	while( s.str.length() )
 	{
 		long long int i = 0;
+		end = typename Trait::Char( 0x00 );
 
 		for( ; i < s.str.length(); ++i )
 		{
 			if( first )
 			{
+				if( s.str[ i ] == typename Trait::Char( '(' ) )
+					end = typename Trait::Char( ')' );
+
 				if( delims.indexOf( s.str[ i ] ) == -1 && !s.str[ i ].isSpace() )
 				{
 					first = false;
@@ -7199,9 +7204,11 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 			}
 			else
 			{
-				if( s.str[ i ].isSpace() || i == s.str.length() - 1 )
+				if( s.str[ i ].isSpace() || i == s.str.length() - 1 || s.str[ i ] == end )
 				{
-					auto tmp = s.str.sliced( j, i - j + ( i == s.str.length() - 1 ? 1 : 0 ) );
+					auto tmp = s.str.sliced( j, i - j +
+						( i == s.str.length() - 1 && s.str[ i ] != end ? 1 : 0 ) );
+					skipSpace = s.str[ i ].isSpace();
 
 					if( isGitHubAutolink< Trait >( tmp ) || isEmail< Trait >( tmp ) )
 					{
@@ -7211,43 +7218,31 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 						{
 							if( j == 0 || s.str.sliced( 0, j ).simplified().isEmpty() )
 							{
-								if( doFirstRemove )
-								{
-									p->removeItemAt( ti );
-									doFirstRemove = false;
-									po.rawTextData.erase( po.rawTextData.cbegin() + idx );
-								}
+								p->removeItemAt( ti );
+								po.rawTextData.erase( po.rawTextData.cbegin() + idx );
 							}
 							else
 							{
 								const auto tmp = s.str.sliced( 0, j );
 
-								if( !tmp.simplified().isEmpty() )
-								{
-									auto t = std::static_pointer_cast< Text< Trait > > ( p->items().at( ti ) );
-									t->setEndColumn( po.fr.data.at( s.line ).first.virginPos( s.pos + j - 1 ) );
-									po.rawTextData[ idx ].str = tmp;
-									++idx;
-									auto text = replaceEntity< Trait >( tmp.simplified() );
-									text = removeBackslashes< Trait >( text ).asString();
-									t->setText( text );
-									t->setSpaceAfter( true );
-									t->setSpaceBefore( s.pos > 0 ?
-										po.fr.data[ s.line ].first[ s.pos - 1 ].isSpace() : true );
-									++ti;
-								}
-								else
-								{
-									p->removeItemAt( ti );
-									po.rawTextData.erase( po.rawTextData.cbegin() + idx );
-								}
+								auto t = std::static_pointer_cast< Text< Trait > > ( p->items().at( ti ) );
+								t->setEndColumn( po.fr.data.at( s.line ).first.virginPos( s.pos + j - 1 ) );
+								po.rawTextData[ idx ].str = tmp;
+								++idx;
+								auto text = replaceEntity< Trait >( tmp.simplified() );
+								text = removeBackslashes< Trait >( text ).asString();
+								t->setText( text );
+								t->setSpaceAfter( true );
+								t->setSpaceBefore( s.pos > 0 ?
+									po.fr.data[ s.line ].first[ s.pos - 1 ].isSpace() : true );
+								++ti;
 							}
 
 							std::shared_ptr< Link< Trait > > lnk( new Link< Trait > );
 							lnk->setStartColumn( po.fr.data.at( s.line ).first.virginPos( s.pos + j ) );
 							lnk->setStartLine( po.fr.data.at( s.line ).second.lineNumber );
 							lnk->setEndColumn( po.fr.data.at( s.line ).first.virginPos(
-								s.pos + i - ( i == s.str.length() - 1 ? 0 : 1 ) ) );
+								s.pos + i - ( i == s.str.length() - 1 && s.str[ i ] != end ? 0 : 1 ) ) );
 							lnk->setEndLine( po.fr.data.at( s.line ).second.lineNumber );
 
 							if( tmp.startsWith( typename Trait::String( "www." ) ) )
@@ -7257,9 +7252,9 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 							lnk->setOpts( po.opts );
 							p->insertItem( ti, lnk );
 
-							s.str.remove( 0, i + 1 );
+							s.pos += i + ( s.str[ i ] == end ? 0 : 1 );
+							s.str.remove( 0, i + ( s.str[ i ] == end ? 0 : 1 ) );
 							s.spaceBefore = true;
-							s.pos += i + 1;
 							j = 0;
 							i = 0;
 
@@ -7289,7 +7284,7 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 						}
 					}
 
-					j = i + 1;
+					j = i + ( skipSpace ? 1 : 0 );
 				}
 			}
 		}
