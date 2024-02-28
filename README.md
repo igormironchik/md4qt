@@ -3,7 +3,7 @@
 `md4qt` is a header-only C++ library for parsing Markdown.
 
 `md4qt` supports CommonMark 0.31.2 Spec, and some GitHub extensions, such as
-tables, footnotes, tasks lists, strikethroughs, LaTeX Math injections.
+tables, footnotes, tasks lists, strikethroughs, LaTeX Math injections, GitHub's autolinks.
 
 `md4qt` can be built with Qt6 or with ICU.
 
@@ -69,7 +69,7 @@ major extensions. Conclusion why it's slower you can read [here](tests/md_benchm
 
 | [cmark-gfm](https://github.com/github/cmark-gfm) | [md4c](https://github.com/mity/md4c) | [markdown-it (Rust)](https://github.com/markdown-it-rust/markdown-it) | `md4qt` with `Qt6` |
 | --- | --- | --- | --- |
-| ~284 microseconds | ~427 microseconds | ~3135 microseconds | ~2706 microseconds |
+| ~284 microseconds | ~427 microseconds | ~3135 microseconds | ~3394 microseconds |
 
 *This measurement done with test file in [markdown-it (Rust)](https://github.com/markdown-it-rust/markdown-it)*
 

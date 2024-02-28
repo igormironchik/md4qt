@@ -491,3 +491,33 @@ TEST_CASE( "replace_tabs" )
 	REQUIRE( s8.asString() == u8"        text" );
 
 }
+
+TEST_CASE( "is_email" )
+{
+	REQUIRE( MD::isEmail< TRAIT > ( typename TRAIT::String( "igor@gmail.com" ) ) );
+	REQUIRE( !MD::isEmail< TRAIT > ( typename TRAIT::String( "igor@gmail-.com" ) ) );
+	REQUIRE( !MD::isEmail< TRAIT > ( typename TRAIT::String( "igor@-gmail.com" ) ) );
+
+	static const auto i63 = typename TRAIT::String( 63, typename TRAIT::Char( 'i' ) );
+	static const auto i64 = typename TRAIT::String( 64, typename TRAIT::Char( 'i' ) );
+
+	static const auto okEmail = typename TRAIT::String( "igor@" ) + i63 +
+		typename TRAIT::String( 1, typename TRAIT::Char( '.' ) ) + i63;
+	REQUIRE( MD::isEmail< TRAIT > ( okEmail ) );
+
+	static const auto wrongEmail = typename TRAIT::String( "igor@" ) + i64 +
+		typename TRAIT::String( 1, typename TRAIT::Char( '.' ) ) + i63;
+	REQUIRE( !MD::isEmail< TRAIT > ( wrongEmail ) );
+
+	REQUIRE( !MD::isEmail< TRAIT > ( typename TRAIT::String( "i[]gor@gmail.com" ) ) );
+
+	REQUIRE( MD::isEmail< TRAIT > ( typename TRAIT::String( "igor@gmail-gmail.com" ) ) );
+
+	REQUIRE( !MD::isEmail< TRAIT > ( typename TRAIT::String( "igor@gmail-gmail." ) ) );
+	REQUIRE( !MD::isEmail< TRAIT > ( typename TRAIT::String( "igor@gmail-gmail" ) ) );
+	REQUIRE( !MD::isEmail< TRAIT > ( typename TRAIT::String( "igor@." ) ) );
+	REQUIRE( MD::isEmail< TRAIT > ( typename TRAIT::String( "a@a.a" ) ) );
+	REQUIRE( !MD::isEmail< TRAIT > ( typename TRAIT::String( "@a.a" ) ) );
+	REQUIRE( !MD::isEmail< TRAIT > ( typename TRAIT::String( "@.a" ) ) );
+	REQUIRE( !MD::isEmail< TRAIT > ( typename TRAIT::String( "@." ) ) );
+}

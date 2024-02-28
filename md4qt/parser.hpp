@@ -43,14 +43,10 @@
 #include <QTextStream>
 #include <QFile>
 #include <QDir>
-#include <QRegularExpression>
 
 #endif // MD4QT_QT_SUPPORT
 
 #ifdef MD4QT_ICU_STL_SUPPORT
-
-// ICU include.
-#include <unicode/regex.h>
 
 // C++ include.
 #include <exception>
@@ -3425,8 +3421,79 @@ removeBackslashes( const typename MdBlock< Trait >::Data & d )
 	return tmp;
 }
 
+/*
+	"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
+	"(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+*/
 template< class Trait >
-inline bool isEmail( const typename Trait::String & url );
+inline bool isEmail( const typename Trait::String & url )
+{
+	static const auto allowed = typename Trait::String( "abcdefghijklmnopqrstuvwxyz0123456789" );
+	static const auto additional = typename Trait::String( ".!#$%&'*+/=?^_`{|}~-" );
+	static const auto delim = typename Trait::Char( '-' );
+	static const auto dog = typename Trait::Char( '@' );
+	static const auto dot = typename Trait::Char( '.' );
+
+	const auto u = url.toLower();
+
+	long long int i = ( u.startsWith( typename Trait::String( "mailto:" ) ) ? 7 : 0 );
+	const auto dogPos = u.indexOf( dog, i );
+
+	if( dogPos != -1 )
+	{
+		if( i == dogPos )
+			return false;
+
+		for( ; i < dogPos; ++i )
+			if( allowed.indexOf( u[ i ] ) == -1 && additional.indexOf( u[ i ] ) == -1 )
+				return false;
+
+		auto checkToDot = [&] ( long long int start, long long int dotPos ) -> bool
+		{
+			static const long long int maxlen = 63;
+
+			if( dotPos - start > maxlen || start + 1 > dotPos ||
+				start >= u.length() || dotPos > u.length() )
+					return false;
+
+			if( u[ start ] == delim )
+				return false;
+
+			if( u[ dotPos - 1 ] == delim )
+				return false;
+
+			for( ; start < dotPos; ++start )
+				if( allowed.indexOf( u[ start ] ) == -1 &&
+					u[ start ] != delim )
+						return false;
+
+			return true;
+		};
+
+		long long int dotPos = u.indexOf( dot, dogPos + 1 );
+
+		if( dotPos != -1 )
+		{
+			i = dogPos + 1;
+
+			while( dotPos != -1 )
+			{
+				if( !checkToDot( i, dotPos ) )
+					return false;
+
+				i = dotPos + 1;
+				dotPos = u.indexOf( dot, i );
+			}
+
+			if( !checkToDot( i, u.length() ) )
+				return false;
+
+			return true;
+		}
+	}
+
+	return false;
+}
 
 template< class Trait >
 inline bool isValidUrl( const typename Trait::String & url );
@@ -3435,23 +3502,6 @@ template< class Trait >
 inline bool isGitHubAutolink( const typename Trait::String & url );
 
 #ifdef MD4QT_QT_SUPPORT
-
-template<>
-inline bool isEmail< QStringTrait >( const QString & url )
-{
-	static const QRegularExpression er(
-		"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
-		"(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$" );
-
-	QRegularExpressionMatch erm;
-
-	if( url.startsWith( "mailto:", Qt::CaseInsensitive ) )
-		erm = er.match( url.right( url.length() - 7 ) );
-	else
-		erm = er.match( url );
-
-	return erm.hasMatch();
-}
 
 template<>
 inline bool isValidUrl< QStringTrait >( const QString & url )
@@ -3474,27 +3524,6 @@ inline bool isGitHubAutolink< QStringTrait >( const QString & url )
 #endif
 
 #ifdef MD4QT_ICU_STL_SUPPORT
-
-template<>
-inline bool isEmail< UnicodeStringTrait >( const UnicodeString & url )
-{
-	UParseError er;
-	er.line = 0;
-	er.offset = 0;
-	er.preContext[ 0 ] = 0;
-	er.postContext[ 0 ] = 0;
-
-	UErrorCode status = U_ZERO_ERROR;
-
-	static const icu::UnicodeString pattern = icu::UnicodeString::fromUTF8(
-		"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
-		"(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$" );
-
-	if( url.toLower().startsWith( "mailto:" ) )
-		return (bool) icu::RegexPattern::matches( pattern, url.right( url.length() - 7 ), er, status );
-	else
-		return (bool) icu::RegexPattern::matches( pattern, url, er, status );
-}
 
 template<>
 inline bool isValidUrl< UnicodeStringTrait >( const UnicodeString & url )
