@@ -7173,16 +7173,20 @@ textAtIdx( std::shared_ptr< Paragraph< Trait > > p,
 }
 
 template< class Trait >
-inline void
+inline long long int
 processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
-	TextParsingOpts< Trait > & po, size_t idx )
+	TextParsingOpts< Trait > & po, long long int idx )
 {
+	if( idx < 0 || idx >= po.rawTextData.size() )
+		return idx;
+
 	static const auto delims = typename Trait::String( "*_~()<>" );
 	auto s = po.rawTextData[ idx ];
 	bool first = true;
 	long long int j = 0;
 	auto end = typename Trait::Char( 0x00 );
 	bool skipSpace = true;
+	long long int ret = idx;
 
 	while( s.str.length() )
 	{
@@ -7220,6 +7224,7 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 							{
 								p->removeItemAt( ti );
 								po.rawTextData.erase( po.rawTextData.cbegin() + idx );
+								--ret;
 							}
 							else
 							{
@@ -7264,6 +7269,7 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 							if( !s.str.isEmpty() )
 							{
 								po.rawTextData.insert( po.rawTextData.cbegin() + idx, s );
+								++ret;
 
 								auto t = std::make_shared< Text< Trait > > ();
 								t->setStartColumn( po.fr.data[ s.line ].first.virginPos( s.pos ) );
@@ -7294,6 +7300,8 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 		if( i == s.str.length() )
 			break;
 	}
+
+	return ret;
 }
 
 template< class Trait >
@@ -7301,13 +7309,11 @@ inline void
 checkForTextPlugins( std::shared_ptr< Paragraph< Trait > > p,
 	TextParsingOpts< Trait > & po )
 {
-	size_t i = 0;
+	long long int i = 0;
 
-	for( auto it = po.rawTextData.cbegin(), last = po.rawTextData.cend();
-		it != last; ++it )
+	while( i >= 0 && i < po.rawTextData.size() )
 	{
-		processGitHubAutolinkExtension( p, po, i );
-
+		i = processGitHubAutolinkExtension( p, po, i );
 		++i;
 	}
 }
