@@ -867,3 +867,42 @@ TEST_CASE( "238" )
 		REQUIRE( t->text() == u8"text" );
 	}
 }
+
+/*
+igor@gmail.com
+mailto:igor@gmail.com
+
+*/
+TEST_CASE( "239" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/239.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 2 );
+
+	{
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
+		auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( l->startColumn() == 0 );
+		REQUIRE( l->startLine() == 0 );
+		REQUIRE( l->endColumn() == 13 );
+		REQUIRE( l->endLine() == 0 );
+		REQUIRE( l->url() == u8"mailto:igor@gmail.com" );
+	}
+
+	{
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Link );
+		auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 1 ).get() );
+		REQUIRE( l->startColumn() == 0 );
+		REQUIRE( l->startLine() == 1 );
+		REQUIRE( l->endColumn() == 20 );
+		REQUIRE( l->endLine() == 1 );
+		REQUIRE( l->url() == u8"mailto:igor@gmail.com" );
+	}
+}

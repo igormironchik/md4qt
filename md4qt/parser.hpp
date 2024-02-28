@@ -7214,7 +7214,9 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 						( i == s.str.length() - 1 && s.str[ i ] != end ? 1 : 0 ) );
 					skipSpace = s.str[ i ].isSpace();
 
-					if( isGitHubAutolink< Trait >( tmp ) || isEmail< Trait >( tmp ) )
+					const auto email = isEmail< Trait >( tmp );
+
+					if( isGitHubAutolink< Trait >( tmp ) || email )
 					{
 						auto ti = textAtIdx( p, idx );
 
@@ -7250,7 +7252,10 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 								s.pos + i - ( i == s.str.length() - 1 && s.str[ i ] != end ? 0 : 1 ) ) );
 							lnk->setEndLine( po.fr.data.at( s.line ).second.lineNumber );
 
-							if( tmp.startsWith( typename Trait::String( "www." ) ) )
+							if( email && !tmp.toLower().startsWith( typename Trait::String( "mailto:" ) ) )
+								tmp = typename Trait::String( "mailto:" ) + tmp;
+
+							if( !email && tmp.toLower().startsWith( typename Trait::String( "www." ) ) )
 								tmp = typename Trait::String( "http://" ) + tmp;
 
 							lnk->setUrl( tmp );
