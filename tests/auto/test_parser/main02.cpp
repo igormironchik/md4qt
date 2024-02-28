@@ -599,7 +599,7 @@ TEST_CASE( "037" )
 		REQUIRE( l->startLine() == 0 );
 		REQUIRE( l->endColumn() == 24 );
 		REQUIRE( l->endLine() == 0 );
-		REQUIRE( l->url() == u8"www.google.com" );
+		REQUIRE( l->url() == u8"http://www.google.com" );
 
 		{
 			REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
@@ -751,7 +751,7 @@ TEST_CASE( "037" )
 		REQUIRE( l->startLine() == 12 );
 		REQUIRE( l->endColumn() == 24 );
 		REQUIRE( l->endLine() == 12 );
-		REQUIRE( l->url() == u8"www.google.com" );
+		REQUIRE( l->url() == u8"http://www.google.com" );
 
 		{
 			REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
@@ -994,7 +994,7 @@ TEST_CASE( "037" )
 		REQUIRE( l->startLine() == 30 );
 		REQUIRE( l->endColumn() == 14 );
 		REQUIRE( l->endLine() == 30 );
-		REQUIRE( l->url() == u8"www.google.com" );
+		REQUIRE( l->url() == u8"http://www.google.com" );
 	}
 }
 /*

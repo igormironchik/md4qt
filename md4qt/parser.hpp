@@ -7151,65 +7151,6 @@ makeHeading( std::shared_ptr< Block< Trait > > parent,
 	}
 }
 
-// void doit()
-// {
-// typename Trait::String tmp, textToAdd;
-// long long int pos = 0, sp = startPos;
-// bool sb = spaceBefore;
-
-// auto checkUrl = [&] () -> bool
-// {
-// 	if( isGitHubAutolink< Trait >( tmp ) || isEmail< Trait >( tmp ) )
-// 	{
-// 		appendTextObject< Trait >( textToAdd, sb, true, po, doNotEscape,
-// 			startPos + pos - tmp.length() - textToAdd.length(), startLine,
-// 			startPos + pos - tmp.length(), startLine );
-
-// 		sb = true;
-// 		textToAdd.clear();
-
-// 		std::shared_ptr< Link< Trait > > lnk( new Link< Trait > );
-// 		lnk->setStartColumn( po.fr.data.at( startLine ).first.virginPos(
-// 			startPos + pos - tmp.length() ) );
-// 		lnk->setStartLine( po.fr.data.at( startLine ).second.lineNumber );
-// 		lnk->setEndColumn( po.fr.data.at( startLine ).first.virginPos(
-// 			startPos + pos - 1 ) );
-// 		lnk->setEndLine( po.fr.data.at( startLine ).second.lineNumber );
-// 		lnk->setUrl( tmp.simplified() );
-// 		lnk->setOpts( po.opts );
-// 		po.parent->appendItem( lnk );
-
-// 		sp = startPos + pos;
-
-// 		return true;
-// 	}
-
-// 	return false;
-// };
-
-// for( ; pos < text.length(); ++pos )
-// {
-// 	if( text[ pos ].isSpace() )
-// 	{
-// 		if( !checkUrl() )
-// 		{
-// 			textToAdd.push_back( tmp );
-// 			textToAdd.push_back( typename Trait::Char( ' ' ) );
-// 		}
-
-// 		tmp.clear();
-// 	}
-// 	else
-// 		tmp.push_back( text[ pos ] );
-// }
-
-// tmp = textToAdd + tmp;
-
-// if( !checkUrl() )
-// 	po.lastText = appendTextObject< Trait >( tmp, sb, spaceAfter, po, doNotEscape,
-// 		sp, startLine, endPos, endLine );
-// }
-
 template< class Trait >
 inline long long int
 textAtIdx( std::shared_ptr< Paragraph< Trait > > p,
@@ -7260,7 +7201,7 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 			{
 				if( s.str[ i ].isSpace() || i == s.str.length() - 1 )
 				{
-					const auto tmp = s.str.sliced( j, i - j + ( i == s.str.length() - 1 ? 1 : 0 ) );
+					auto tmp = s.str.sliced( j, i - j + ( i == s.str.length() - 1 ? 1 : 0 ) );
 
 					if( isGitHubAutolink< Trait >( tmp ) || isEmail< Trait >( tmp ) )
 					{
@@ -7308,6 +7249,10 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 							lnk->setEndColumn( po.fr.data.at( s.line ).first.virginPos(
 								s.pos + i - ( i == s.str.length() - 1 ? 0 : 1 ) ) );
 							lnk->setEndLine( po.fr.data.at( s.line ).second.lineNumber );
+
+							if( tmp.startsWith( typename Trait::String( "www." ) ) )
+								tmp = typename Trait::String( "http://" ) + tmp;
+
 							lnk->setUrl( tmp );
 							lnk->setOpts( po.opts );
 							p->insertItem( ti, lnk );

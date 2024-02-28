@@ -488,5 +488,5 @@ TEST_CASE( "231" )
 	REQUIRE( l->startLine() == 0 );
 	REQUIRE( l->endColumn() == 13 );
 	REQUIRE( l->endLine() == 0 );
-	REQUIRE( l->url() == u8"www.google.com" );
+	REQUIRE( l->url() == u8"http://www.google.com" );
 }
