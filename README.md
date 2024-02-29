@@ -69,16 +69,18 @@ major extensions. Conclusion why it's slower you can read [here](tests/md_benchm
 
 | [cmark-gfm](https://github.com/github/cmark-gfm) | [md4c](https://github.com/mity/md4c) | [markdown-it (Rust)](https://github.com/markdown-it-rust/markdown-it) | `md4qt` with `Qt6` |
 | --- | --- | --- | --- |
-| ~284 microseconds | ~427 microseconds | ~3135 microseconds | ~3394 microseconds |
+| ~284 microseconds | ~427 microseconds | ~6700 microseconds | ~3394 microseconds |
 
 
 > [!NOTE]
 >
 > *This measurement done with test file in [markdown-it (Rust)](https://github.com/markdown-it-rust/markdown-it)*
 >
-> Keep in mind that `markdown-it (Rust)` doesn't support all GFM extensions, so it's not honest
+> *`markdown-it (Rust)` measurement done with `markdown_it::plugins::extra`*
+>
+> **Keep in mind that `markdown-it (Rust)` doesn't support all GFM extensions, so it's not honest
 > to compare. `md4qt` supports GitHub's autolinks extension, that `markdown-it (Rust)` doesn't, and
-> this requires ~500 microseconds, for example...
+> this requires ~500 microseconds, for example...**
 
 # Playground
 
