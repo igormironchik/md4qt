@@ -454,9 +454,20 @@ public:
 		return m_items;
 	}
 
+	void insertItem( long long int idx, ItemSharedPointer i )
+	{
+		m_items.insert( m_items.cbegin() + idx, i );
+	}
+
 	void appendItem( ItemSharedPointer i )
 	{
 		m_items.push_back( i );
+	}
+
+	void removeItemAt( long long int idx )
+	{
+		if( idx >= 0 && idx < m_items.size() )
+			m_items.erase( m_items.cbegin() + idx );
 	}
 
 	bool isEmpty() const

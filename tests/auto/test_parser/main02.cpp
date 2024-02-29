@@ -580,17 +580,37 @@ TEST_CASE( "037" )
 		REQUIRE( p->endColumn() == 43 );
 		REQUIRE( p->endLine() == 0 );
 
-		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().size() == 3 );
 
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		{
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( t->startColumn() == 0 );
+			REQUIRE( t->startLine() == 0 );
+			REQUIRE( t->endColumn() == 10 );
+			REQUIRE( t->endLine() == 0 );
 
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( t->startColumn() == 0 );
-		REQUIRE( t->startLine() == 0 );
-		REQUIRE( t->endColumn() == 43 );
-		REQUIRE( t->endLine() == 0 );
+			REQUIRE( t->text() == u8"[Google] (" );
+		}
 
-		REQUIRE( t->text() == u8"[Google] ( www.google.com Google Shmoogle..." );
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Link );
+		auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 1 ).get() );
+		REQUIRE( l->startColumn() == 11 );
+		REQUIRE( l->startLine() == 0 );
+		REQUIRE( l->endColumn() == 24 );
+		REQUIRE( l->endLine() == 0 );
+		REQUIRE( l->url() == u8"http://www.google.com" );
+
+		{
+			REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 2 ).get() );
+			REQUIRE( t->startColumn() == 26 );
+			REQUIRE( t->startLine() == 0 );
+			REQUIRE( t->endColumn() == 43 );
+			REQUIRE( t->endLine() == 0 );
+
+			REQUIRE( t->text() == u8"Google Shmoogle..." );
+		}
 	}
 
 	{
@@ -712,17 +732,37 @@ TEST_CASE( "037" )
 		REQUIRE( p->endColumn() == 45 );
 		REQUIRE( p->endLine() == 12 );
 
-		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().size() == 3 );
 
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		{
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( t->startColumn() == 0 );
+			REQUIRE( t->startLine() == 12 );
+			REQUIRE( t->endColumn() == 10 );
+			REQUIRE( t->endLine() == 12 );
 
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( t->startColumn() == 0 );
-		REQUIRE( t->startLine() == 12 );
-		REQUIRE( t->endColumn() == 45 );
-		REQUIRE( t->endLine() == 12 );
+			REQUIRE( t->text() == u8"[Google] (" );
+		}
 
-		REQUIRE( t->text() == u8"[Google] ( www.google.com \"Google Shmoogle...\"" );
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Link );
+		auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 1 ).get() );
+		REQUIRE( l->startColumn() == 11 );
+		REQUIRE( l->startLine() == 12 );
+		REQUIRE( l->endColumn() == 24 );
+		REQUIRE( l->endLine() == 12 );
+		REQUIRE( l->url() == u8"http://www.google.com" );
+
+		{
+			REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 2 ).get() );
+			REQUIRE( t->startColumn() == 26 );
+			REQUIRE( t->startLine() == 12 );
+			REQUIRE( t->endColumn() == 45 );
+			REQUIRE( t->endLine() == 12 );
+
+			REQUIRE( t->text() == u8"\"Google Shmoogle...\"" );
+		}
 	}
 
 	{
@@ -936,17 +976,25 @@ TEST_CASE( "037" )
 		REQUIRE( p->endColumn() == 14 );
 		REQUIRE( p->endLine() == 30 );
 
-		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().size() == 2 );
 
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->startColumn() == 0 );
 		REQUIRE( t->startLine() == 30 );
-		REQUIRE( t->endColumn() == 14 );
+		REQUIRE( t->endColumn() == 0 );
 		REQUIRE( t->endLine() == 30 );
 
-		REQUIRE( t->text() == u8"<www.google.com" );
+		REQUIRE( t->text() == u8"<" );
+
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Link );
+		auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 1 ).get() );
+		REQUIRE( l->startColumn() == 1 );
+		REQUIRE( l->startLine() == 30 );
+		REQUIRE( l->endColumn() == 14 );
+		REQUIRE( l->endLine() == 30 );
+		REQUIRE( l->url() == u8"http://www.google.com" );
 	}
 }
 /*

@@ -757,6 +757,14 @@ public:
 			m_valid = true;
 			m_relative = !( uri.scheme.first && uri.scheme.afterLast );
 
+			if( !m_relative )
+				m_scheme = UnicodeString( std::string( uri.scheme.first,
+					uri.scheme.afterLast - uri.scheme.first ).c_str() );
+
+			if( uri.hostText.first && uri.hostText.afterLast )
+				m_host = UnicodeString( std::string( uri.hostText.first,
+					uri.hostText.afterLast - uri.hostText.first ).c_str() );
+
 			uriFreeUriMembersA( &uri );
 		}
 	}
@@ -775,9 +783,21 @@ public:
 		return m_relative;
 	}
 
+	UnicodeString scheme() const
+	{
+		return m_scheme;
+	}
+
+	UnicodeString host() const
+	{
+		return m_host;
+	}
+
 private:
 	bool m_valid;
 	bool m_relative;
+	UnicodeString m_scheme;
+	UnicodeString m_host;
 }; // class UrlUri
 
 
