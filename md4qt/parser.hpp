@@ -1883,7 +1883,7 @@ Parser< Trait >::parseStream( typename Trait::TextStream & s,
 
 		while( !stream.atEnd() )
 		{
-			data.push_back( std::pair< typename Trait::String, MdLineData >(
+			data.push_back( std::pair< typename Trait::InternalString, MdLineData >(
 				stream.readLine(), { i } ) );
 			++i;
 		}
@@ -6850,7 +6850,7 @@ optimizeParagraph( std::shared_ptr< Paragraph< Trait > > & p,
 	int opts = TextWithoutFormat;
 
 	auto start = p->items().cend();
-	long long int auxStart = 0, auxIt = -1;
+	long long int auxStart = 0, auxIt = 0;
 
 	long long int line = -1;
 
@@ -6858,8 +6858,6 @@ optimizeParagraph( std::shared_ptr< Paragraph< Trait > > & p,
 	{
 		if( (*it)->type() == ItemType::Text )
 		{
-			++auxIt;
-
 			const auto t = std::static_pointer_cast< Text< Trait > >( *it );
 
 			if( start == last )
@@ -6878,6 +6876,8 @@ optimizeParagraph( std::shared_ptr< Paragraph< Trait > > & p,
 				opts = t->opts();
 				line = t->endLine();
 			}
+			
+			++auxIt;
 		}
 		else
 		{
@@ -7240,7 +7240,8 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 				if( s.str[ i ].isSpace() || i == s.str.length() - 1 || s.str[ i ] == end )
 				{
 					auto tmp = s.str.sliced( j, i - j +
-						( i == s.str.length() - 1 && s.str[ i ] != end ? 1 : 0 ) );
+						( i == s.str.length() - 1 && s.str[ i ] != end &&
+							!s.str[ i ].isSpace() ? 1 : 0 ) );
 					skipSpace = s.str[ i ].isSpace();
 
 					const auto email = isEmail< Trait >( tmp );
@@ -7278,7 +7279,9 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 							lnk->setStartColumn( po.fr.data.at( s.line ).first.virginPos( s.pos + j ) );
 							lnk->setStartLine( po.fr.data.at( s.line ).second.lineNumber );
 							lnk->setEndColumn( po.fr.data.at( s.line ).first.virginPos(
-								s.pos + i - ( i == s.str.length() - 1 && s.str[ i ] != end ? 0 : 1 ) ) );
+								s.pos + i -
+								( i == s.str.length() - 1 && s.str[ i ] != end &&
+									!s.str[ i ].isSpace() ? 0 : 1 ) ) );
 							lnk->setEndLine( po.fr.data.at( s.line ).second.lineNumber );
 
 							if( email && !tmp.toLower().startsWith( typename Trait::String( "mailto:" ) ) )

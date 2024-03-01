@@ -906,3 +906,62 @@ TEST_CASE( "239" )
 		REQUIRE( l->url() == u8"mailto:igor@gmail.com" );
 	}
 }
+
+/*
+www.google.com `code` www.google.com
+<!-- -->
+  www.google.com   `code`   www.google.com 
+
+
+*/
+TEST_CASE( "240" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/240.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 4 );
+
+	{
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( p->items().size() == 3 );
+		
+		{
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
+			auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( l->url() == u8"http://www.google.com" );
+		}
+	
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Code );
+		
+		{
+			REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Link );
+			auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 2 ).get() );
+			REQUIRE( l->url() == u8"http://www.google.com" );
+		}
+	}
+	
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::RawHtml );
+	
+	{
+		REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Paragraph );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 3 ).get() );
+		REQUIRE( p->items().size() == 3 );
+		
+		{
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
+			auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( l->url() == u8"http://www.google.com" );
+		}
+	
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Code );
+		
+		{
+			REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Link );
+			auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 2 ).get() );
+			REQUIRE( l->url() == u8"http://www.google.com" );
+		}
+	}
+}
