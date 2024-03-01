@@ -965,3 +965,30 @@ TEST_CASE( "240" )
 		}
 	}
 }
+
+/*
+[<img src="https://c5.patreon.com/external/logo/become_a_patron_button.png" align="right">](https://www.patreon.com/onqtam)
+
+*/
+TEST_CASE( "241" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/241.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+	
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 1 );
+	
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
+	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( l->url() == u8"https://www.patreon.com/onqtam" );
+	
+	REQUIRE( !l->p()->isEmpty() );
+	auto pp = l->p().get();
+	REQUIRE( pp->items().size() == 1 );
+	REQUIRE( pp->items().at( 0 )->type() == MD::ItemType::RawHtml );
+}

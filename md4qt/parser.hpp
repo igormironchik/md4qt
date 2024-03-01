@@ -5423,6 +5423,9 @@ makeLink( const typename Trait::String & url, const typename MdBlock< Trait >::D
 			link->setP( ip );
 		}
 	}
+	
+	if( html.html.get() )
+		link->p()->appendItem( html.html );
 
 	link->setText( toSingleLine< Trait >( text ).simplified() );
 	link->setStartColumn( po.fr.data.at( startLine ).first.virginPos( startPos ) );
