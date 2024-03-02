@@ -523,7 +523,7 @@ TEST_CASE( "is_email" )
 }
 
 #define INIT_VARS_FOR_OPTIMIZE_PARAGRAPH \
-	auto parent = std::make_shared< MD::Paragraph< TRAIT > > (); \
+	std::shared_ptr< MD::Block< TRAIT > > parent = std::make_shared< MD::Paragraph< TRAIT > > (); \
 	auto doc = std::make_shared< MD::Document< TRAIT > > (); \
 	MD::MdBlock< TRAIT > fr; \
 	typename TRAIT::StringList links; \
@@ -566,6 +566,19 @@ TEST_CASE( "optimize_paragraph" )
 		p->appendItem( c );
 	};
 	
+	auto makeHtml = [] ( MD::TextParsingOpts< TRAIT > & po, std::shared_ptr< MD::Paragraph< TRAIT > > p,
+		long long int line, bool isFree )
+	{
+		auto h = std::make_shared< MD::RawHtml< TRAIT > > ();
+		h->setStartColumn( 0 );
+		h->setStartLine( line );
+		h->setEndColumn( 0 );
+		h->setEndLine( line );
+		MD::UnprotectedDocsMethods< TRAIT >::setFreeTag( h, isFree );
+		
+		p->appendItem( h );
+	};
+	
 	auto checkP = [] ( const std::string & d, std::shared_ptr< MD::Paragraph< TRAIT > > p )
 	{
 		REQUIRE( d.length() == p->items().size() );
@@ -582,6 +595,10 @@ TEST_CASE( "optimize_paragraph" )
 					
 				case 't' :
 					REQUIRE( p->items().at( i )->type() == MD::ItemType::Text );
+					break;
+					
+				case 'h' :
+					REQUIRE( p->items().at( i )->type() == MD::ItemType::RawHtml );
 					break;
 					
 				default :
@@ -691,5 +708,101 @@ TEST_CASE( "optimize_paragraph" )
 		
 		checkP( "ttcttt", p );
 		checkT( { 1, 1, 1, 1, 1 }, po );
+	}
+	
+	{
+		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
+		
+		makeText( po, p, 0, MD::TextWithoutFormat );
+		makeText( po, p, 1, MD::TextWithoutFormat );
+		makeHtml( po, p, 2, true );
+		makeText( po, p, 3, MD::TextWithoutFormat );
+		makeText( po, p, 4, MD::TextWithoutFormat );
+		makeText( po, p, 5, MD::TextWithoutFormat );
+		
+		MD::optimizeParagraph( p, po );
+		
+		checkP( "tthttt", p );
+		checkT( { 1, 1, 1, 1, 1 }, po );
+		
+		p = MD::splitParagraphsAndFreeHtml( parent, p, po, false );
+		
+		REQUIRE( parent->items().size() == 2 );
+		REQUIRE( parent->items().at( 0 )->type() == MD::ItemType::Paragraph );
+		REQUIRE( parent->items().at( 1 )->type() == MD::ItemType::RawHtml );
+		
+		checkP( "ttt", p );
+		checkT( { 1, 1, 1 }, po );
+	}
+	
+	{
+		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
+		
+		makeText( po, p, 0, MD::TextWithoutFormat );
+		makeText( po, p, 1, MD::TextWithoutFormat );
+		makeHtml( po, p, 2, false );
+		makeText( po, p, 3, MD::TextWithoutFormat );
+		makeText( po, p, 4, MD::TextWithoutFormat );
+		makeText( po, p, 5, MD::TextWithoutFormat );
+		
+		MD::optimizeParagraph( p, po );
+		
+		checkP( "tthttt", p );
+		checkT( { 1, 1, 1, 1, 1 }, po );
+		
+		p = MD::splitParagraphsAndFreeHtml( parent, p, po, false );
+		
+		REQUIRE( parent->items().size() == 0 );
+		
+		checkP( "tthttt", p );
+		checkT( { 1, 1, 1, 1, 1 }, po );
+	}
+	
+	{
+		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
+		
+		makeText( po, p, 0, MD::TextWithoutFormat );
+		makeText( po, p, 0, MD::TextWithoutFormat );
+		makeHtml( po, p, 0, true );
+		makeText( po, p, 0, MD::TextWithoutFormat );
+		makeText( po, p, 0, MD::TextWithoutFormat );
+		makeText( po, p, 1, MD::TextWithoutFormat );
+		
+		MD::optimizeParagraph( p, po );
+		
+		checkP( "thtt", p );
+		checkT( { 2, 2, 1 }, po );
+		
+		p = MD::splitParagraphsAndFreeHtml( parent, p, po, false );
+		
+		REQUIRE( parent->items().size() == 2 );
+		REQUIRE( parent->items().at( 0 )->type() == MD::ItemType::Paragraph );
+		REQUIRE( parent->items().at( 1 )->type() == MD::ItemType::RawHtml );
+		
+		checkP( "tt", p );
+		checkT( { 2, 1 }, po );
+	}
+	
+	{
+		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
+		
+		makeText( po, p, 0, MD::TextWithoutFormat );
+		makeText( po, p, 0, MD::TextWithoutFormat );
+		makeHtml( po, p, 0, false );
+		makeText( po, p, 0, MD::TextWithoutFormat );
+		makeText( po, p, 0, MD::TextWithoutFormat );
+		makeText( po, p, 1, MD::TextWithoutFormat );
+		
+		MD::optimizeParagraph( p, po );
+		
+		checkP( "thtt", p );
+		checkT( { 2, 2, 1 }, po );
+		
+		p = MD::splitParagraphsAndFreeHtml( parent, p, po, false );
+		
+		REQUIRE( parent->items().size() == 0 );
+		
+		checkP( "thtt", p );
+		checkT( { 2, 2, 1 }, po );
 	}
 }
