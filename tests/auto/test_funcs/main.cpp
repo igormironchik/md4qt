@@ -521,3 +521,175 @@ TEST_CASE( "is_email" )
 	REQUIRE( !MD::isEmail< TRAIT > ( typename TRAIT::String( "@.a" ) ) );
 	REQUIRE( !MD::isEmail< TRAIT > ( typename TRAIT::String( "@." ) ) );
 }
+
+#define INIT_VARS_FOR_OPTIMIZE_PARAGRAPH \
+	auto parent = std::make_shared< MD::Paragraph< TRAIT > > (); \
+	auto doc = std::make_shared< MD::Document< TRAIT > > (); \
+	MD::MdBlock< TRAIT > fr; \
+	typename TRAIT::StringList links; \
+	MD::RawHtmlBlock< TRAIT > html; \
+	 \
+	MD::TextParsingOpts< TRAIT > po = { fr, parent, nullptr, doc, links, "", "", \
+		false, false, html }; \
+	 \
+	auto p = std::make_shared< MD::Paragraph< TRAIT > > ();
+
+TEST_CASE( "optimize_paragraph" )
+{
+	auto makeText = [] ( MD::TextParsingOpts< TRAIT > & po, std::shared_ptr< MD::Paragraph< TRAIT > > p,
+		long long int line, int opts )
+	{
+		auto t = std::make_shared< MD::Text< TRAIT > > ();
+		t->setText( "Text" );
+		t->setStartColumn( 0 );
+		t->setStartLine( line );
+		t->setEndColumn( 0 );
+		t->setEndLine( line );
+		t->setSpaceBefore( false );
+		t->setSpaceAfter( false );
+		t->setOpts( opts );
+		
+		po.rawTextData.push_back( { "Text", 0, line, false, false } );
+		
+		p->appendItem( t );
+	};
+	
+	auto makeCode = [] ( MD::TextParsingOpts< TRAIT > & po, std::shared_ptr< MD::Paragraph< TRAIT > > p,
+		long long int line )
+	{
+		auto c = std::make_shared< MD::Code< TRAIT > > ( "code", false, true );
+		c->setStartColumn( 0 );
+		c->setStartLine( line );
+		c->setEndColumn( 0 );
+		c->setEndLine( line );
+		
+		p->appendItem( c );
+	};
+	
+	auto checkP = [] ( const std::string & d, std::shared_ptr< MD::Paragraph< TRAIT > > p )
+	{
+		REQUIRE( d.length() == p->items().size() );
+		
+		long long int i = 0;
+		
+		for( const auto & c : d )
+		{
+			switch( c )
+			{
+				case 'c' :
+					REQUIRE( p->items().at( i )->type() == MD::ItemType::Code );
+					break;
+					
+				case 't' :
+					REQUIRE( p->items().at( i )->type() == MD::ItemType::Text );
+					break;
+					
+				default :
+				{
+					INFO( "Unknown type. This is an error in test..." );
+					REQUIRE( false );
+				}
+					break;
+			}
+			
+			++i;
+		}
+	};
+	
+	auto checkT = [] ( const std::vector< int > & d, const MD::TextParsingOpts< TRAIT > & po )
+	{
+		REQUIRE( d.size() == po.rawTextData.size() );
+		
+		long long int i = 0;
+		
+		for( const auto & l : d )
+		{
+			REQUIRE( po.rawTextData.at( i ).str.length() == 4 * l );
+			
+			++i;
+		}
+	};
+	
+	{
+		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
+		
+		makeText( po, p, 0, MD::TextWithoutFormat );
+		
+		MD::optimizeParagraph( p, po );
+		
+		checkP( "t", p  );
+		checkT( { 1 }, po );
+	}
+	
+	{
+		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
+		
+		makeCode( po, p, 0 );
+		
+		MD::optimizeParagraph( p, po );
+		
+		checkP( "c", p );
+		checkT( {}, po );
+	}
+	
+	{
+		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
+		
+		makeText( po, p, 0, MD::TextWithoutFormat );
+		makeCode( po, p, 0 );
+		makeText( po, p, 0, MD::TextWithoutFormat );
+		
+		MD::optimizeParagraph( p, po );
+		
+		checkP( "tct", p );
+		checkT( { 1, 1 }, po );
+	}
+	
+	{
+		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
+		
+		makeText( po, p, 0, MD::TextWithoutFormat );
+		makeText( po, p, 0, MD::TextWithoutFormat );
+		makeCode( po, p, 0 );
+		makeText( po, p, 0, MD::TextWithoutFormat );
+		makeText( po, p, 0, MD::TextWithoutFormat );
+		makeText( po, p, 1, MD::TextWithoutFormat );
+		
+		MD::optimizeParagraph( p, po );
+		
+		checkP( "tctt", p );
+		checkT( { 2, 2, 1 }, po );
+	}
+	
+	{
+		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
+		
+		makeText( po, p, 0, MD::TextWithoutFormat );
+		makeText( po, p, 0, MD::ItalicText );
+		makeCode( po, p, 0 );
+		makeText( po, p, 0, MD::TextWithoutFormat );
+		makeText( po, p, 0, MD::ItalicText );
+		makeText( po, p, 1, MD::TextWithoutFormat );
+		
+		MD::optimizeParagraph( p, po );
+		
+		checkP( "ttcttt", p );
+		checkT( { 1, 1, 1, 1, 1 }, po );
+	}
+	
+	{
+		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
+		
+		makeText( po, p, 0, MD::TextWithoutFormat );
+		makeText( po, p, 1, MD::TextWithoutFormat );
+		makeCode( po, p, 2 );
+		makeText( po, p, 3, MD::TextWithoutFormat );
+		makeText( po, p, 4, MD::TextWithoutFormat );
+		makeText( po, p, 5, MD::TextWithoutFormat );
+		
+		MD::optimizeParagraph( p, po );
+		
+		checkP( "ttcttt", p );
+		checkT( { 1, 1, 1, 1, 1 }, po );
+	}
+}
