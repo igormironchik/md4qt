@@ -11,7 +11,6 @@ This library parses Markdown into tree structure.
 
 * [Example](#example)
 * [Benchmark](#benchmark)
-* [Playground](#playground)
 * [Q/A](#qa)
   * [Why another AST Markdown parser?](#why-another-ast-markdown-parser)
   * [What should I know about links in the document?](#what-should-i-know-about-links-in-the-document)
@@ -26,7 +25,7 @@ This library parses Markdown into tree structure.
   * [I need to know positions in the `Markdown` file of blocks/elements. How can I achieve this?](#i-need-to-know-positions-in-the-markdown-file-of-blockselements-howcan-i-achieve-this)
   * [How can I easily traverse through the `MD::Document`?](#how-can-i-easily-traverse-through-the-mddocument)
   * [Why don't you have an implementation for pure `STL` with `std::string`?](#why-dont-you-have-an-implementation-for-pure-stl-with-stdstring)
-  * [Where are empty list items?](#where-are-empty-list-items)
+  * [Where are empty list items and blockquotes?](#where-are-empty-list-items-and-blockquotes)
 
 # Example
 
@@ -81,14 +80,6 @@ major extensions. Conclusion why it's slower you can read [here](tests/md_benchm
 > **Keep in mind that `markdown-it (Rust)` doesn't support all GFM extensions, so it's not honest
 > to compare. `md4qt` supports GitHub's autolinks extension, that `markdown-it (Rust)` doesn't, and
 > this requires ~500 microseconds, for example...**
-
-# Playground
-
-You can play with `md4qt` in action in
-[`Markdown` Editor/Viewer](https://github.com/igormironchik/md-editor),
-[`Markdown` to `PDF` converter](https://github.com/igormironchik/md-pdf),
-binaries of which for `Windows` and `Linux` you can get
-[here](https://github.com/igormironchik/markdown).
 
 # Q/A
 
@@ -246,8 +237,8 @@ was an `std::string` with some small third-party library to handle `UTF8`, and
 benchmark said that the performance was like with `Qt6` `QString`, so I decided
 to not support third trait. Maybe because I so lazy?
 
-## Where are empty list items?
+## Where are empty list items and blockquotes?
 
 * I don't add empty (withouth any data in it) list items in the list. Parser do everything right,
 I just decided to not add empty list items into `MD::Document`. For this reason you can even
-not find whole list if it will contain only empty list items.
+not find whole list if it will contain only empty list items. The same is and for blockquotes.
