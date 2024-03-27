@@ -7356,14 +7356,16 @@ checkForTextPlugins( std::shared_ptr< Paragraph< Trait > > p,
 	TextParsingOpts< Trait > & po,
 	const std::set< TextPlugin > & toSkip )
 {
-	long long int i = 0;
-
-	while( i >= 0 && i < po.rawTextData.size() )
+	if( toSkip.find( TextPlugin::GitHubAutoLink ) == toSkip.cend() )
 	{
-		if( toSkip.find( TextPlugin::GitHubAutoLink ) == toSkip.cend() )
+		long long int i = 0;
+	
+		while( i >= 0 && i < po.rawTextData.size() )
+		{
 			i = processGitHubAutolinkExtension( p, po, i );
-		
-		++i;
+			
+			++i;
+		}
 	}
 }
 
