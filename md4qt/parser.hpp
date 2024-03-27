@@ -3281,6 +3281,11 @@ struct TextParsingOpts {
 	std::vector< std::pair< Style, long long int > > styles = {};
 }; // struct TextParsingOpts
 
+enum class TextPlugin {
+	Unknown = 0,
+	GitHubAutoLink = 1
+}; // enum class TextPlugin
+
 template< class Trait >
 inline void
 parseFormattedText( MdBlock< Trait > & fr,
@@ -3289,7 +3294,8 @@ parseFormattedText( MdBlock< Trait > & fr,
 	typename Trait::StringList & linksToParse,
 	const typename Trait::String & workingPath,
 	const typename Trait::String & fileName, bool collectRefLinks, bool ignoreLineBreak,
-	RawHtmlBlock< Trait > & html );
+	RawHtmlBlock< Trait > & html,
+	const std::set< TextPlugin > & pluginsToSkip = {} );
 
 template< class Trait >
 inline bool
@@ -5389,7 +5395,7 @@ makeLink( const typename Trait::String & url, const typename MdBlock< Trait >::D
 
 	parseFormattedText( block, std::static_pointer_cast< Block< Trait > >( p ), po.doc,
 		po.linksToParse, po.workingPath,
-		po.fileName, po.collectRefLinks, true, html );
+		po.fileName, po.collectRefLinks, true, html, { TextPlugin::GitHubAutoLink } );
 
 	if( !p->isEmpty() )
 	{
@@ -5516,7 +5522,7 @@ makeImage( const typename Trait::String & url, const typename MdBlock< Trait >::
 
 	parseFormattedText( block, std::static_pointer_cast< Block< Trait > >( p ), po.doc,
 		po.linksToParse, po.workingPath,
-		po.fileName, po.collectRefLinks, true, html );
+		po.fileName, po.collectRefLinks, true, html, { TextPlugin::GitHubAutoLink } );
 
 	if( !p->isEmpty() )
 	{
@@ -7347,13 +7353,16 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 template< class Trait >
 inline void
 checkForTextPlugins( std::shared_ptr< Paragraph< Trait > > p,
-	TextParsingOpts< Trait > & po )
+	TextParsingOpts< Trait > & po,
+	const std::set< TextPlugin > & toSkip )
 {
 	long long int i = 0;
 
 	while( i >= 0 && i < po.rawTextData.size() )
 	{
-		i = processGitHubAutolinkExtension( p, po, i );
+		if( toSkip.find( TextPlugin::GitHubAutoLink ) == toSkip.cend() )
+			i = processGitHubAutolinkExtension( p, po, i );
+		
 		++i;
 	}
 }
@@ -7366,7 +7375,8 @@ parseFormattedText( MdBlock< Trait > & fr,
 	typename Trait::StringList & linksToParse,
 	const typename Trait::String & workingPath,
 	const typename Trait::String & fileName, bool collectRefLinks, bool ignoreLineBreak,
-	RawHtmlBlock< Trait > & html )
+	RawHtmlBlock< Trait > & html,
+	const std::set< TextPlugin > & pluginsToSkip )
 {
 	if( fr.data.empty() )
 		return;
@@ -7494,7 +7504,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 						{
 							optimizeParagraph< Trait >( p, po );
 
-							checkForTextPlugins< Trait >( p, po );
+							checkForTextPlugins< Trait >( p, po, pluginsToSkip );
 
 							if( it->m_line - 1 >= 0 )
 							{
@@ -7572,7 +7582,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 
 						optimizeParagraph< Trait >( p, po );
 
-						checkForTextPlugins< Trait >( p, po );
+						checkForTextPlugins< Trait >( p, po, pluginsToSkip );
 
 						if( it->m_line - 1 >= 0 )
 						{
@@ -7700,7 +7710,7 @@ parseFormattedText( MdBlock< Trait > & fr,
 	{
 		optimizeParagraph< Trait >( p, po );
 
-		checkForTextPlugins< Trait >( p, po );
+		checkForTextPlugins< Trait >( p, po, pluginsToSkip );
 
 		p = splitParagraphsAndFreeHtml( parent, p, po, collectRefLinks );
 

@@ -992,3 +992,26 @@ TEST_CASE( "241" )
 	REQUIRE( pp->items().size() == 1 );
 	REQUIRE( pp->items().at( 0 )->type() == MD::ItemType::RawHtml );
 }
+
+/*
+[https://github.com/igormironchik/md-pdf](https://github.com/igormironchik/md-pdf)
+
+*/
+TEST_CASE( "242" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/242.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+	
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 1 );
+	
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
+	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( l->url() == u8"https://github.com/igormironchik/md-pdf" );
+	REQUIRE( l->text() == u8"https://github.com/igormironchik/md-pdf" );
+}
