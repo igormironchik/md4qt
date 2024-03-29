@@ -1,0 +1,44 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: md4qt
+Upstream-Contact: Igor Mironchik <igor.mironchik@gmail.com>
+Source: https://github.com/igormironchik/md4qt
+
+Files: tests/auto/commonmark/0.30/spec.json tests/auto/commonmark/0.31.2/spec.json
+Copyright: John MacFarlane
+License: CC-BY-SA-4.0
+
+Files: tests/auto/commonmark/0.30/*.md tests/auto/commonmark/0.31.2/*.md
+Copyright: 2022-2024 Igor Mironchik <igor.mironchik@gmail.com>
+License: MIT
+
+Files: tests/md_benchmark/3rdparty/cmark-gfm/*
+Copyright: 2014 John MacFarlane
+License: BSD-2-Clause
+
+Files: tests/md_benchmark/3rdparty/md4c/*
+Copyright: 2016-2020 Martin Mitáš
+License: MIT
+
+Files: 3rdparty/doctest/*
+Copyright: 2016-2021 Viktor Kirilov
+License: MIT
+
+Files: tests/auto/test_parser/data/*
+Copyright: 2022-2024 Igor Mironchik <igor.mironchik@gmail.com>
+License: MIT
+
+Files: tests/auto/gfm/data/*
+Copyright: none
+License: CC-BY-SA-4.0
+
+Files: tests/manual/*
+Copyright: none
+License: MIT
+
+Files: .github/* .gitignore .gitmodules conanfile.txt codecov.yml
+Copyright: 2022-2024 Igor Mironchik <igor.mironchik@gmail.com>
+License: MIT
+
+Files: tests/utils/entity/entities.json
+Copyright: WHATWG (Apple, Google, Mozilla, Microsoft)
+License: CC-BY-4.0
