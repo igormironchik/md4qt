@@ -65,7 +65,7 @@ if( BUILD_MD4QT_QT_TESTS )
 endif()
 
 if( BUILD_MD4QT_STL_TESTS )
-	find_package( ICU REQUIRED )
+	find_package( ICU REQUIRED COMPONENTS data dt uc i18n io in tu )
 	find_package( uriparser REQUIRED )
 
 	set( COUNTER "0" )
