@@ -27,7 +27,7 @@ include_directories( 3rdparty/md4c/src
 	${CMAKE_CURRENT_BINARY_DIR}/3rdparty/cmark-gfm/extensions
 	${CMAKE_CURRENT_SOURCE_DIR}/../.. )
 
-find_package( ICU REQUIRED )
+find_package( ICU REQUIRED COMPONENTS data dt uc i18n io in tu )
 find_package( uriparser REQUIRED )
 find_package( Qt6Core REQUIRED )
 
@@ -37,4 +37,5 @@ file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/../manual/complex.md
 	DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../../bin/tests/manual )
 
 target_link_libraries( md_benchmark md4c libcmark-gfm-extensions_static
-	libcmark-gfm_static Qt::Core icu::icu uriparser::uriparser )
+	libcmark-gfm_static Qt::Core ICU::data ICU::dt ICU::uc ICU::i18n ICU::io ICU::in ICU::tu
+	uriparser::uriparser )
