@@ -97,7 +97,8 @@ if( BUILD_MD4QT_STL_TESTS )
 				REUSE_FROM ${PCH_TARGET} )
 		endif()
 
-		target_link_libraries( test.md_parser.commonmark.icu.${NUMSTRING} icu::icu uriparser::uriparser )
+		target_link_libraries( test.md_parser.commonmark.icu.${NUMSTRING}
+			ICU::data ICU::dt ICU::uc ICU::i18n ICU::io ICU::in ICU::tu uriparser::uriparser )
 
 		add_test( NAME test.md_parser.commonmark.icu.${NUMSTRING}
 			COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.commonmark.icu.${NUMSTRING}

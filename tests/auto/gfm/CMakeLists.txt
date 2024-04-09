@@ -39,7 +39,8 @@ if( BUILD_MD4QT_STL_TESTS )
 	target_compile_definitions( test.md_parser.gfm.stl PUBLIC TRAIT=MD::UnicodeStringTrait )
 	target_compile_definitions( test.md_parser.gfm.stl PUBLIC MD4QT_ICU_STL_SUPPORT )
 
-	target_link_libraries( test.md_parser.gfm.stl icu::icu uriparser::uriparser )
+	target_link_libraries( test.md_parser.gfm.stl
+		ICU::data ICU::dt ICU::uc ICU::i18n ICU::io ICU::in ICU::tu uriparser::uriparser )
 
 	add_test( NAME test.md_parser.gfm.stl
 		COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.gfm.stl

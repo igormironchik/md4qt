@@ -30,5 +30,6 @@ if( BUILD_MD4QT_STL_TESTS )
 	target_precompile_headers( test.multiple_definitions.icu PRIVATE
 		<md4qt/parser.hpp> )
 
-	target_link_libraries( test.multiple_definitions.icu icu::icu uriparser::uriparser )
+	target_link_libraries( test.multiple_definitions.icu
+		ICU::data ICU::dt ICU::uc ICU::i18n ICU::io ICU::in ICU::tu uriparser::uriparser )
 endif()

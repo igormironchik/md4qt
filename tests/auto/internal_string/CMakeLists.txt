@@ -36,7 +36,8 @@ if( BUILD_MD4QT_STL_TESTS )
 	target_compile_definitions( test.internal_string.stl PUBLIC TRAIT=MD::UnicodeStringTrait )
 	target_compile_definitions( test.internal_string.stl PUBLIC MD4QT_ICU_STL_SUPPORT )
 
-	target_link_libraries( test.internal_string.stl icu::icu uriparser::uriparser )
+	target_link_libraries( test.internal_string.stl
+		ICU::data ICU::dt ICU::uc ICU::i18n ICU::io ICU::in ICU::tu uriparser::uriparser )
 
 	add_test( NAME test.internal_string.stl
 		COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.internal_string.stl

@@ -36,7 +36,8 @@ if( BUILD_MD4QT_STL_TESTS )
 	target_compile_definitions( test.funcs.stl PUBLIC TRAIT=MD::UnicodeStringTrait )
 	target_compile_definitions( test.funcs.stl PUBLIC MD4QT_ICU_STL_SUPPORT )
 
-	target_link_libraries( test.funcs.stl icu::icu uriparser::uriparser )
+	target_link_libraries( test.funcs.stl
+		ICU::data ICU::dt ICU::uc ICU::i18n ICU::io ICU::in ICU::tu uriparser::uriparser )
 
 	add_test( NAME test.funcs.stl
 		COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.funcs.stl
