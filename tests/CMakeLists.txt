@@ -3,4 +3,6 @@
 
 project( tests )
 
+set( CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE )
+
 add_subdirectory( auto )
