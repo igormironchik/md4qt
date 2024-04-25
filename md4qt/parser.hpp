@@ -5340,17 +5340,45 @@ makeLink( const typename Trait::String & url, const typename MdBlock< Trait >::D
 	{
 		if( !u.startsWith( '#' ) )
 		{
-			if( Trait::fileExists( u ) )
+			const auto checkForFile = [&] ( typename Trait::String & url,
+				const typename Trait::String & ref = {} ) -> bool
 			{
-				u = Trait::absoluteFilePath( u );
-
-				po.linksToParse.push_back( u );
-			}
-			else if( Trait::fileExists( u, po.workingPath ) )
+				if( Trait::fileExists( url ) )
+				{
+					url = Trait::absoluteFilePath( url );
+	
+					if( !po.collectRefLinks )
+						po.linksToParse.push_back( url );
+					
+					if( !ref.isEmpty() )
+						url = ref + "/"	+ url;
+					
+					return true;
+				}
+				else if( Trait::fileExists( url, po.workingPath ) )
+				{
+					url = Trait::absoluteFilePath( po.workingPath + "/" + url );
+	
+					if( !po.collectRefLinks )
+						po.linksToParse.push_back( url );
+					
+					if( !ref.isEmpty() )
+						url = ref + "/"	+ url;
+					
+					return true;
+				}
+				else
+					return false;
+			};
+			
+			if( !checkForFile( u ) && u.contains( typename Trait::Char( '#' ) ) )
 			{
-				u = Trait::absoluteFilePath( po.workingPath + "/" + u );
-
-				po.linksToParse.push_back( u );
+				const auto i = u.indexOf( typename Trait::Char( '#' ) );
+				const auto ref = u.sliced( i );
+				u = u.sliced( 0, i );
+				
+				if( !checkForFile( u, ref ) )
+					u = u + ref;
 			}
 		}
 		else

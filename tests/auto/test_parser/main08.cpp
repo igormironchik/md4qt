@@ -991,3 +991,53 @@ TEST_CASE( "242" )
 	REQUIRE( l->url() == u8"https://github.com/igormironchik/md-pdf" );
 	REQUIRE( l->text() == u8"https://github.com/igormironchik/md-pdf" );
 }
+
+/*
+# reference
+
+[link](243-1.md)
+
+*/
+TEST_CASE( "243" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/243.md", true );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 6 );
+	
+	REQUIRE( doc->items().at( 0 )->type() == MD::ItemType::Anchor );
+	
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Heading );
+	auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 1 ).get() );
+	
+	typename TRAIT::String wd =
+#ifdef MD4QT_QT_SUPPORT
+		QDir().absolutePath()
+#else
+		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
+#endif
+		+ u8"/tests/parser/data/";
+
+#ifndef MD4QT_QT_SUPPORT
+	std::string tmp;
+	wd.toUTF8String( tmp );
+	std::replace( tmp.begin(), tmp.end(), '\\', '/' );
+	wd = icu::UnicodeString::fromUTF8( tmp );
+#endif
+
+	const typename TRAIT::String label = u8"#reference/" + wd + u8"243.md";
+		
+	REQUIRE( h->label() == label );
+	
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
+	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::PageBreak );
+	REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::Anchor );
+	REQUIRE( doc->items().at( 5 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 5 ).get() );
+	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
+	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( l->url() == label );
+}
