@@ -8,6 +8,9 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
+// C++ include.
+#include <fstream>
+
 /*
 This sentence uses $\` and \`$ delimiters to show math inline:  $`\sqrt{3x-1}+(1+x)^2`$
 
@@ -1040,4 +1043,156 @@ TEST_CASE( "243" )
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
 	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( l->url() == label );
+}
+
+TEST_CASE( "244" )
+{
+	typename TRAIT::String wd =
+#ifdef MD4QT_QT_SUPPORT
+		QDir().absolutePath()
+#else
+		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
+#endif
+		+ u8"/tests/parser/data";
+
+#ifndef MD4QT_QT_SUPPORT
+{
+	std::string tmp;
+	wd.toUTF8String( tmp );
+	std::replace( tmp.begin(), tmp.end(), '\\', '/' );
+	wd = icu::UnicodeString::fromUTF8( tmp );
+}
+#endif
+	
+	const typename TRAIT::String fn = wd + u8"/244.md";
+	const typename TRAIT::String ln = wd + u8"/244-1.md";
+	
+#ifdef MD4QT_QT_SUPPORT
+	const auto fnData = fn.toLocal8Bit();
+	const auto lnData = ln.toLocal8Bit();
+	
+	const char * fileName = fnData.data();
+	const char * link = lnData.data();
+#else
+	char tmp;
+	const auto len1 = fn.extract( 0, fn.length(), &tmp, 1 );
+	std::vector< char > data1( len1 + 1, 0 );
+	fn.extract( 0, fn.length(), data1.data(), len1 );
+	const char * fileName = data1.data();
+	
+	const auto len2 = ln.extract( 0, ln.length(), &tmp, 1 );
+	std::vector< char > data2( len2 + 1, 0 );
+	ln.extract( 0, ln.length(), data2.data(), len2 );
+	const char * link = data2.data();
+#endif
+	
+	std::ofstream f( fileName, std::ios::out | std::ios::trunc );
+	
+	if( f.good() )
+	{
+		f << "[link](" << link << ")\n";
+		f.close();
+	}
+	else
+		REQUIRE( false );
+	
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/244.md", true );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 5 );
+	
+	REQUIRE( doc->items().at( 0 )->type() == MD::ItemType::Anchor );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::PageBreak );
+	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Anchor );
+	REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::Paragraph );
+	
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 4 ).get() );
+	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->text() == u8"secret" );
+}
+
+TEST_CASE( "244-ref" )
+{
+	typename TRAIT::String wd =
+#ifdef MD4QT_QT_SUPPORT
+		QDir().absolutePath()
+#else
+		std::filesystem::canonical( std::filesystem::current_path() ).u8string()
+#endif
+		+ u8"/tests/parser/data";
+
+#ifndef MD4QT_QT_SUPPORT
+{
+	std::string tmp;
+	wd.toUTF8String( tmp );
+	std::replace( tmp.begin(), tmp.end(), '\\', '/' );
+	wd = icu::UnicodeString::fromUTF8( tmp );
+}
+#endif
+	
+	const typename TRAIT::String fn = wd + u8"/244-ref.md";
+	const typename TRAIT::String label = u8"#ref/" + wd + u8"/244-1.md";
+	const typename TRAIT::String ln = wd + u8"/244-1.md#ref";
+	
+#ifdef MD4QT_QT_SUPPORT
+	const auto fnData = fn.toLocal8Bit();
+	const auto lnData = ln.toLocal8Bit();
+	
+	const char * fileName = fnData.data();
+	const char * link = lnData.data();
+#else
+	char tmp;
+	const auto len1 = fn.extract( 0, fn.length(), &tmp, 1 );
+	std::vector< char > data1( len1 + 1, 0 );
+	fn.extract( 0, fn.length(), data1.data(), len1 );
+	const char * fileName = data1.data();
+	
+	const auto len2 = ln.extract( 0, ln.length(), &tmp, 1 );
+	std::vector< char > data2( len2 + 1, 0 );
+	ln.extract( 0, ln.length(), data2.data(), len2 );
+	const char * link = data2.data();
+#endif
+	
+	std::ofstream f( fileName, std::ios::out | std::ios::trunc );
+	
+	if( f.good() )
+	{
+		f << "[link](" << link << ")\n";
+		f.close();
+	}
+	else
+		REQUIRE( false );
+	
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/244-ref.md", true );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 5 );
+	
+	REQUIRE( doc->items().at( 0 )->type() == MD::ItemType::Anchor );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	
+	{
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
+		auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( l->url() == label );
+	}
+	
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::PageBreak );
+	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Anchor );
+	REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::Paragraph );
+	
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 4 ).get() );
+	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->text() == u8"secret" );
 }

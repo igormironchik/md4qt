@@ -710,7 +710,7 @@ public:
 	{
 		icu::UnicodeString::remove();
 	}
-}; // class StdString
+}; // class UnicodeString
 
 
 //
