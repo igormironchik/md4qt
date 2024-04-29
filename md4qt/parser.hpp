@@ -226,7 +226,7 @@ private:
 inline bool
 checkStack( std::vector< std::pair< std::pair< long long int, bool >, int > > & s,
 	const std::pair< std::pair< long long int, bool >, int > & v, size_t idx )
-{
+{	
 	int value = -v.first.first;
 
 	for( size_t i = s.size() - 1; i >= 0; --i )
@@ -266,33 +266,6 @@ checkStack( std::vector< std::pair< std::pair< long long int, bool >, int > > & 
 	}
 
 	return false;
-}
-
-//! \return Is sequence of emphasis closed, and closing index of the sequence?
-inline std::pair< bool, size_t >
-checkEmphasisSequence( const std::vector< std::pair< std::pair< long long int, bool >, int > > & s, size_t idx )
-{
-	std::vector< std::pair< std::pair< long long int, bool >, int > > st;
-
-	size_t i = 0;
-
-	for( ; i <= idx; ++i )
-		st.push_back( s[ i ] );
-
-	for( ; i < s.size(); ++i )
-	{
-		if( s[ i ].first.first < 0 )
-		{
-			if( checkStack( st, s[ i ], idx ) )
-				return { true, i };
-			else if( st.size() <= idx )
-				return { false, 0 };
-		}
-		else
-			st.push_back( s[ i ] );
-	}
-
-	return { false, 0 };
 }
 
 //! \return Is string a footnote?
@@ -6277,29 +6250,6 @@ longestSequenceWithMoreOpeningsAtStart(
 	return ret;
 }
 
-inline std::vector< std::vector< std::pair< std::pair< long long int, bool >, int > > >
-closedSequences( const std::vector< std::vector< std::pair< std::pair< long long int, bool >, int > > > & vars,
-	size_t idx )
-{
-	std::vector< std::vector< std::pair< std::pair< long long int, bool >, int > > > tmp;
-
-	const auto longest = longestSequenceWithMoreOpeningsAtStart( vars );
-
-	for( const auto & v : vars )
-	{
-		if( longest.size() == v.size() )
-		{
-			bool closed = false;
-			std::tie( closed, std::ignore ) = checkEmphasisSequence( v, idx );
-
-			if( closed )
-				tmp.push_back( v );
-		}
-	}
-
-	return tmp;
-}
-
 inline void
 collectDelimiterVariants( std::vector< std::vector< std::pair< std::pair< long long int, bool >, int > > > & vars,
 	long long int itLength, int type, bool leftFlanking, bool rightFlanking )
@@ -6349,39 +6299,6 @@ createStyles( std::vector< std::pair< Style, long long int > > & s, long long in
 		s.push_back( { Style::Strikethrough, 1 } );
 		++count;
 	}
-}
-
-inline std::vector< std::pair< Style, long long int > >
-createStyles( const std::vector< std::pair< std::pair< long long int, bool >, int > > & s, size_t i,
-	Delimiter::DelimiterType t, long long int & count )
-{
-	std::vector< std::pair< Style, long long int > > styles;
-
-	const size_t idx = i;
-	long long int len = s[ i ].first.first;
-
-	size_t closeIdx = 0;
-	std::tie( std::ignore, closeIdx ) = checkEmphasisSequence( s, i );
-
-	for( i = closeIdx; ; --i )
-	{
-		if( s[ i ].second == s[ idx ].second && s[ i ].first.first < 0 )
-		{
-			auto l = std::abs( s[ i ].first.first );
-
-			createStyles( styles, std::min( l, len ), t, count );
-
-			len -= std::min( l, len );
-
-			if( !len )
-				break;
-		}
-
-		if( i == 0 )
-			break;
-	}
-
-	return styles;
 }
 
 template< class Trait >
@@ -6441,6 +6358,115 @@ emphasisToInt( Delimiter::DelimiterType t )
 	}
 }
 
+//! \return Is sequence of emphasis closed, and closing index of the sequence?
+inline std::pair< bool, size_t >
+checkEmphasisSequence( const std::vector< std::pair< std::pair< long long int, bool >, int > > & s, size_t idx )
+{
+	static const auto strikeType = emphasisToInt( Delimiter::Strikethrough );
+	
+	if( s[ idx ].second == strikeType )
+	{
+		if( s[ idx ].first.first > 0 )
+		{
+			const auto len = s[ idx ].first.first;
+			
+			const auto it = std::find_if( s.cbegin() + idx + 1, s.cend(),
+				[len] ( const auto & p )
+				{
+					if( p.first.first == -len && p.second == strikeType )
+						return true;
+					else
+						return false;
+				} );
+			
+			if( it != s.cend() )
+				return { true, std::distance( s.cbegin(), it ) };
+			else
+				return { false, 0 };
+		}
+		else
+			return { false, 0 };
+	}
+	
+	std::vector< std::pair< std::pair< long long int, bool >, int > > st;
+
+	size_t i = 0;
+
+	for( ; i <= idx; ++i )
+		st.push_back( s[ i ] );
+
+	for( ; i < s.size(); ++i )
+	{
+		if( s[ i ].first.first < 0 )
+		{
+			if( checkStack( st, s[ i ], idx ) )
+				return { true, i };
+			else if( st.size() <= idx )
+				return { false, 0 };
+		}
+		else
+			st.push_back( s[ i ] );
+	}
+
+	return { false, 0 };
+}
+
+inline std::vector< std::vector< std::pair< std::pair< long long int, bool >, int > > >
+closedSequences( const std::vector< std::vector< std::pair< std::pair< long long int, bool >, int > > > & vars,
+	size_t idx )
+{
+	std::vector< std::vector< std::pair< std::pair< long long int, bool >, int > > > tmp;
+
+	const auto longest = longestSequenceWithMoreOpeningsAtStart( vars );
+
+	for( const auto & v : vars )
+	{
+		if( longest.size() == v.size() )
+		{
+			bool closed = false;
+			std::tie( closed, std::ignore ) = checkEmphasisSequence( v, idx );
+
+			if( closed )
+				tmp.push_back( v );
+		}
+	}
+
+	return tmp;
+}
+
+inline std::vector< std::pair< Style, long long int > >
+createStyles( const std::vector< std::pair< std::pair< long long int, bool >, int > > & s, size_t i,
+	Delimiter::DelimiterType t, long long int & count )
+{
+	std::vector< std::pair< Style, long long int > > styles;
+
+	const size_t idx = i;
+	long long int len = s[ i ].first.first;
+
+	size_t closeIdx = 0;
+	std::tie( std::ignore, closeIdx ) = checkEmphasisSequence( s, i );
+
+	for( i = closeIdx; ; --i )
+	{
+		if( s[ i ].second == s[ idx ].second && s[ i ].first.first < 0 )
+		{
+			auto l = std::abs( s[ i ].first.first );
+
+			createStyles( styles, std::min( l, len ), t, count );
+
+			len -= std::min( l, len );
+
+			if( !len )
+				break;
+		}
+
+		if( i == 0 )
+			break;
+	}
+
+	return styles;
+}
+
 template< class Trait >
 inline bool
 isSkipAllEmphasis( const std::vector< std::pair< std::pair< long long int, bool >, int > > & s,
@@ -6481,13 +6507,12 @@ isStyleClosed( typename Delims< Trait >::const_iterator it,
 
 	bool first = true;
 
-	{
-		const auto c = std::count_if( po.styles.cbegin(), po.styles.cend(),
-			[] ( const auto & p ) { return ( p.first == Style::Strikethrough ); } );
-
-		if( c )
-			vars.front().push_back( { { c * 2, false }, 0 } );
-	}
+	std::for_each( po.styles.cbegin(), po.styles.cend(),
+		[&vars] ( const auto & p )
+		{
+			if( p.first == Style::Strikethrough )
+				vars.front().push_back( { { p.second, false }, 0 } );
+		} );
 
 	{
 		{

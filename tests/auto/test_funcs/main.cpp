@@ -285,6 +285,31 @@ TEST_CASE( "emphasis_sequence" )
 		REQUIRE( closed );
 		REQUIRE( idx == 2 );
 	}
+	
+	{
+		const data_t d = { { { 2, false }, 0 }, { { -2, false }, 0 } };
+
+		bool closed = false;
+		size_t idx = 0;
+		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+
+		REQUIRE( closed );
+		REQUIRE( idx == 1 );
+		
+		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 1 );
+
+		REQUIRE( !closed );
+	}
+	
+	{
+		const data_t d = { { { 2, false }, 0 }, { { -2, false }, 1 } };
+
+		bool closed = false;
+		size_t idx = 0;
+		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+
+		REQUIRE( !closed );
+	}
 }
 
 TEST_CASE( "is_footnote" )
