@@ -6369,14 +6369,17 @@ createStyles( std::vector< std::pair< Style, long long int > > & s, long long in
 
 		if( l >= 2 )
 		{
-			s.push_back( { t == Delimiter::Emphasis1 ?
-				Style::Bold1 : Style::Bold2, l / 2 } );
-			count += ( l / 2 ) * 2;
+			for( long long int i = 0; i < l / 2; ++i )
+			{
+				s.push_back( { t == Delimiter::Emphasis1 ?
+					Style::Bold1 : Style::Bold2, 2 } );
+				count += 2;
+			}
 		}
 	}
 	else
 	{
-		s.push_back( { Style::Strikethrough, 1 } );
+		s.push_back( { Style::Strikethrough, l } );
 		++count;
 	}
 }
@@ -6910,15 +6913,12 @@ checkForStyle( typename Delims< Trait >::const_iterator first,
 					{
 						setStyle( po.opts, p.first, true );
 
-						for( long long int i = 0; i < p.second; ++i )
-						{
-							po.styles.push_back( { p.first, len } );
-							
-							if( !po.collectRefLinks )
-								po.openStyles.push_back( { pos, line, pos + len - 1, line } );
-							
-							pos += len;
-						}
+						po.styles.push_back( { p.first, p.second } );
+						
+						if( !po.collectRefLinks )
+							po.openStyles.push_back( { pos, line, pos + p.second - 1, line } );
+						
+						pos += p.second;
 					}
 
 					po.pos = it->m_pos + len;

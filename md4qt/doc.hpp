@@ -971,6 +971,26 @@ public:
 	{
 		m_syntax = s;
 	}
+	
+	const WithPosition & startDelim() const
+	{
+		return m_startDelim;
+	}
+	
+	void setStartDelim( const WithPosition & d ) const
+	{
+		return m_startDelim = d;
+	}
+	
+	const WithPosition & endDelim() const
+	{
+		return m_endDelim;
+	}
+	
+	void setEndDelim( const WithPosition & d ) const
+	{
+		return m_endDelim = d;
+	}
 
 protected:
 	template< class T >
@@ -986,6 +1006,8 @@ private:
 	bool m_inlined;
 	bool m_fensed;
 	typename Trait::String m_syntax;
+	WithPosition m_startDelim;
+	WithPosition m_endDelim;
 
 	DISABLE_COPY( Code )
 }; // class Code

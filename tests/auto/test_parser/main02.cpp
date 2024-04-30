@@ -302,6 +302,10 @@ TEST_CASE( "034" )
 	REQUIRE( l->url() == u8"https://www.google.com" );
 	REQUIRE( l->text() == u8"Google" );
 	REQUIRE( l->opts() == MD::TextOption::BoldText );
+	REQUIRE( l->openStyles().size() == 1 );
+	REQUIRE( l->openStyles().at( 0 ) == MD::StyleDelim{ 0, 0, 1, 0 } );
+	REQUIRE( l->closeStyles().size() == 1 );
+	REQUIRE( l->closeStyles().at( 0 ) == MD::StyleDelim{ 34, 0, 35, 0 } );
 }
 
 /*
@@ -1170,6 +1174,12 @@ TEST_CASE( "039" )
 
 	REQUIRE( t->opts() == MD::TextOption::BoldText );
 	REQUIRE( t->text() == u8"text" );
+	REQUIRE( t->openStyles().size() == 2 );
+	REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ 0, 0, 1, 0 } );
+	REQUIRE( t->openStyles().at( 1 ) == MD::StyleDelim{ 2, 0, 3, 0 } );
+	REQUIRE( t->closeStyles().size() == 2 );
+	REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ 8, 0, 9, 0 } );
+	REQUIRE( t->closeStyles().at( 1 ) == MD::StyleDelim{ 10, 0, 11, 0 } );
 }
 
 /*
