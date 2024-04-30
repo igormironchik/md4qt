@@ -754,6 +754,10 @@ TEST_CASE( "200" )
 	auto t = static_cast< MD::Text< TRAIT > * > ( p->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::StrikethroughText );
 	REQUIRE( t->text() == u8"text" );
+	REQUIRE( t->openStyles().size() == 1 );
+	REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ 0, 0, 0, 0 } );
+	REQUIRE( t->closeStyles().size() == 1 );
+	REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ 5, 0, 5, 0 } );
 }
 
 /*
@@ -774,6 +778,10 @@ TEST_CASE( "201" )
 	auto t = static_cast< MD::Text< TRAIT > * > ( p->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::StrikethroughText );
 	REQUIRE( t->text() == u8"text~text" );
+	REQUIRE( t->openStyles().size() == 1 );
+	REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ 0, 0, 1, 0 } );
+	REQUIRE( t->closeStyles().size() == 1 );
+	REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ 11, 0, 12, 0 } );
 }
 
 /*
@@ -790,6 +798,8 @@ TEST_CASE( "202" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Code );
 	auto c = static_cast< MD::Code< TRAIT > * > ( doc->items().at( 1 ).get() );
 	REQUIRE( c->text().isEmpty() );
+	REQUIRE( c->openStyles().empty() );
+	REQUIRE( c->closeStyles().empty() );
 }
 
 /*
@@ -810,6 +820,8 @@ TEST_CASE( "203" )
 	auto t = static_cast< MD::Text< TRAIT > * > ( p->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
 	REQUIRE( t->text() == u8"~~text~" );
+	REQUIRE( t->openStyles().empty() );
+	REQUIRE( t->closeStyles().empty() );
 }
 
 /*
