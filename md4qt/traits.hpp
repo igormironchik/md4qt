@@ -50,7 +50,7 @@
 
 namespace MD {
 
-template< class String, class Char >
+template< class String, class Char, class Latin1Char >
 class InternalStringT {
 public:
 	InternalStringT() {}
@@ -192,10 +192,10 @@ public:
 			if( i == length() )
 				break;
 
-			result.str.push_back( Char( ' ' ) );
+			result.str.push_back( Latin1Char( ' ' ) );
 		}
 
-		if( !result.isEmpty() && result.str[ result.length() - 1 ] ==  Char( ' ' ) )
+		if( !result.isEmpty() && result.str[ result.length() - 1 ] == Latin1Char( ' ' ) )
 		{
 			result.str.remove( result.length() - 1, 1 );
 
@@ -792,7 +792,7 @@ struct UnicodeStringTrait {
 
 	using Char = UnicodeChar;
 
-	using InternalString = InternalStringT< String, Char >;
+	using InternalString = InternalStringT< String, Char, Char >;
 
 	using TextStream = std::istream;
 
@@ -819,6 +819,18 @@ struct UnicodeStringTrait {
 	static String utf16ToString( const char16_t * u16 )
 	{
 		return UnicodeString( u16 );
+	}
+	
+	//! Convert Latin1 into trait's string.
+	static String latin1ToString( const char * latin1 )
+	{
+		return UnicodeString( latin1 );
+	}
+	
+	//! Convert Latin1 char into trait's char.
+	static Char latin1ToChar( char latin1 )
+	{
+		return UnicodeChar( latin1 );
 	}
 
 	//! \return Does file exist.
@@ -888,7 +900,7 @@ struct QStringTrait {
 
 	using Char = QChar;
 
-	using InternalString = InternalStringT< String, Char >;
+	using InternalString = InternalStringT< String, Char, QLatin1Char >;
 
 	using InternalStringList = std::vector< InternalString >;
 
@@ -916,12 +928,24 @@ struct QStringTrait {
 	{
 		return QString::fromUtf16( u16 );
 	}
+	
+	//! Convert Latin1 into trait's string.
+	static String latin1ToString( const char * latin1 )
+	{
+		return QLatin1String( latin1 );
+	}
+	
+	//! Convert Latin1 char into trait's char.
+	static Char latin1ToChar( char latin1 )
+	{
+		return QLatin1Char( latin1 );
+	}
 
 	//! \return Does file exist.
 	static bool fileExists( const String & fileName, const String & workingPath )
 	{
-		return QFileInfo::exists( ( workingPath.isEmpty() ? QString() : workingPath + "/" ) +
-			fileName );
+		return QFileInfo::exists( ( workingPath.isEmpty() ? QString() : workingPath +
+			latin1ToString( "/" ) ) + fileName );
 	}
 
 	//! \return Does file exist.
