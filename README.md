@@ -221,7 +221,10 @@ I need to know positions in the `Markdown` file of blocks/elements. How
 can I achieve this?
 ---
 
- * Done in version `2.0.5`.
+ * Done in version `2.0.5`. Remember that all positions in `md4qt` start with 0,
+where first symbol on first line will have coordinates `(0,0)`. One more important thing is
+that all ranges of position in `md4qt` are given inclusive, that mean that last column
+of any element will point to the last symbol in this element.
 
 ## How can I easily traverse through the `MD::Document`?
 
