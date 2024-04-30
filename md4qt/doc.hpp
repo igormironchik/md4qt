@@ -68,20 +68,25 @@ enum class ItemType {
 
 
 //
-// Item
+// WithPosition
 //
 
-//! Base class for item in Markdown document.
-template< class Trait >
-class Item {
-protected:
-	Item() = default;
-
+//! Base for any thing with start and end position.
+class WithPosition {
 public:
-	virtual ~Item() = default;
-
-	virtual ItemType type() const = 0;
-
+	WithPosition() = default;
+	
+	WithPosition( long long int startColumn,
+		long long int startLine,
+		long long int endColumn,
+		long long int endLine )
+		:	m_startColumn( startColumn )
+		,	m_startLine( startLine )
+		,	m_endColumn( endColumn )
+		,	m_endLine( endLine )
+	{
+	}
+	
 	long long int startColumn() const { return m_startColumn; }
 	long long int startLine() const { return m_startLine; }
 	long long int endColumn() const { return m_endColumn; }
@@ -91,15 +96,61 @@ public:
 	void setStartLine( long long int l ) { m_startLine = l; }
 	void setEndColumn( long long int c ) { m_endColumn = c; }
 	void setEndLine( long long int l ) { m_endLine = l; }
-
+	
 private:
 	long long int m_startColumn = -1;
 	long long int m_startLine = -1;
 	long long int m_endColumn = -1;
 	long long int m_endLine = -1;
+}; // class WithPosition
 
+
+//
+// Item
+//
+
+//! Base class for item in Markdown document.
+template< class Trait >
+class Item
+	:	public WithPosition
+{
+protected:
+	Item() = default;
+
+public:
+	virtual ~Item() = default;
+
+	virtual ItemType type() const = 0;
+
+private:
 	DISABLE_COPY( Item )
 }; // class Item
+
+
+//
+// StyleDelim
+//
+
+class StyleDelim final
+	:	public WithPosition
+{
+public:
+	StyleDelim( long long int startColumn,
+		long long int startLine,
+		long long int endColumn,
+		long long int endLine )
+		:	WithPosition( startColumn, startLine, endColumn, endLine )
+	{
+	}
+}; // class StyleDelim
+
+inline bool operator == ( const StyleDelim & l, const StyleDelim & r )
+{
+	return ( l.startColumn() == r.startColumn() &&
+		l.startLine() == r.startLine() &&
+		l.endColumn() == r.endColumn() &&
+		l.endLine() == r.endLine() );
+}
 
 
 //
@@ -115,6 +166,8 @@ protected:
 
 public:
 	~ItemWithOpts() override = default;
+	
+	using Styles = typename Trait::template Vector< StyleDelim >;
 
 	int opts() const
 	{
@@ -125,9 +178,31 @@ public:
 	{
 		m_opts = o;
 	}
+	
+	const Styles & openStyles() const
+	{
+		return m_openStyles;
+	}
+	
+	Styles & openStyles()
+	{
+		return m_openStyles;
+	}
+	
+	const Styles & closeStyles() const
+	{
+		return m_closeStyles;
+	}
+	
+	Styles & closeStyles()
+	{
+		return m_closeStyles;
+	}
 
 private:
 	int m_opts = 0;
+	Styles m_openStyles;
+	Styles m_closeStyles;
 
 	DISABLE_COPY( ItemWithOpts )
 }; // class ItemWithOpts

@@ -288,6 +288,10 @@ TEST_CASE( "006" )
 		REQUIRE( dt->startLine() == 0 );
 		REQUIRE( dt->endColumn() == 9 );
 		REQUIRE( dt->endLine() == 0 );
+		REQUIRE( dt->openStyles().size() == 1 );
+		REQUIRE( dt->closeStyles().size() == 1 );
+		REQUIRE( dt->openStyles().at( 0 ) == MD::StyleDelim{ 0, 0, 0, 0 } );
+		REQUIRE( dt->closeStyles().at( 0 ) == MD::StyleDelim{ 10, 0, 10, 0 } );
 	}
 
 	{
@@ -301,6 +305,10 @@ TEST_CASE( "006" )
 		REQUIRE( dt->startLine() == 1 );
 		REQUIRE( dt->endColumn() == 10 );
 		REQUIRE( dt->endLine() == 1 );
+		REQUIRE( dt->openStyles().size() == 1 );
+		REQUIRE( dt->openStyles().at( 0 ) == MD::StyleDelim{ 0, 1, 1, 1 } );
+		REQUIRE( dt->closeStyles().size() == 1 );
+		REQUIRE( dt->closeStyles().at( 0 ) == MD::StyleDelim{ 11, 1, 12, 1 } );
 	}
 
 	{
@@ -314,6 +322,10 @@ TEST_CASE( "006" )
 		REQUIRE( dt->startLine() == 2 );
 		REQUIRE( dt->endColumn() == 10 );
 		REQUIRE( dt->endLine() == 2 );
+		REQUIRE( dt->openStyles().size() == 1 );
+		REQUIRE( dt->openStyles().at( 0 ) == MD::StyleDelim{ 0, 2, 1, 2 } );
+		REQUIRE( dt->closeStyles().size() == 1 );
+		REQUIRE( dt->closeStyles().at( 0 ) == MD::StyleDelim{ 11, 2, 12, 2 } );
 	}
 }
 
@@ -351,6 +363,10 @@ TEST_CASE( "007" )
 		REQUIRE( dt->startLine() == 0 );
 		REQUIRE( dt->endColumn() == 11 );
 		REQUIRE( dt->endLine() == 0 );
+		REQUIRE( dt->openStyles().size() == 2 );
+		REQUIRE( dt->openStyles().at( 0 ) == MD::StyleDelim{ 0, 0, 1, 0 } );
+		REQUIRE( dt->openStyles().at( 1 ) == MD::StyleDelim{ 2, 0, 2, 0 } );
+		REQUIRE( dt->closeStyles().empty() );
 	}
 
 	{
@@ -362,6 +378,8 @@ TEST_CASE( "007" )
 		REQUIRE( dt->startLine() == 1 );
 		REQUIRE( dt->endColumn() == 8 );
 		REQUIRE( dt->endLine() == 1 );
+		REQUIRE( dt->openStyles().empty() );
+		REQUIRE( dt->closeStyles().empty() );
 	}
 
 	{
@@ -373,6 +391,10 @@ TEST_CASE( "007" )
 		REQUIRE( dt->startLine() == 2 );
 		REQUIRE( dt->endColumn() == 8 );
 		REQUIRE( dt->endLine() == 2 );
+		REQUIRE( dt->openStyles().empty() );
+		REQUIRE( dt->closeStyles().size() == 2 );
+		REQUIRE( dt->closeStyles().at( 0 ) == MD::StyleDelim{ 9, 2, 9, 2 } );
+		REQUIRE( dt->closeStyles().at( 1 ) == MD::StyleDelim{ 10, 2, 11, 2 } );
 	}
 }
 
@@ -413,6 +435,11 @@ TEST_CASE( "008" )
 		REQUIRE( dt->startLine() == 0 );
 		REQUIRE( dt->endColumn() == 13 );
 		REQUIRE( dt->endLine() == 0 );
+		REQUIRE( dt->openStyles().size() == 3 );
+		REQUIRE( dt->openStyles().at( 0 ) == MD::StyleDelim{ 0, 0, 1, 0 } );
+		REQUIRE( dt->openStyles().at( 1 ) == MD::StyleDelim{ 2, 0, 3, 0 } );
+		REQUIRE( dt->openStyles().at( 2 ) == MD::StyleDelim{ 4, 0, 4, 0 } );
+		REQUIRE( dt->closeStyles().empty() );
 	}
 
 	{
@@ -427,6 +454,8 @@ TEST_CASE( "008" )
 		REQUIRE( dt->startLine() == 1 );
 		REQUIRE( dt->endColumn() == 8 );
 		REQUIRE( dt->endLine() == 1 );
+		REQUIRE( dt->openStyles().empty() );
+		REQUIRE( dt->closeStyles().empty() );
 	}
 
 	{
@@ -441,6 +470,11 @@ TEST_CASE( "008" )
 		REQUIRE( dt->startLine() == 2 );
 		REQUIRE( dt->endColumn() == 8 );
 		REQUIRE( dt->endLine() == 2 );
+		REQUIRE( dt->closeStyles().size() == 3 );
+		REQUIRE( dt->closeStyles().at( 0 ) == MD::StyleDelim{ 9, 2, 9, 2 } );
+		REQUIRE( dt->closeStyles().at( 1 ) == MD::StyleDelim{ 10, 2, 11, 2 } );
+		REQUIRE( dt->closeStyles().at( 2 ) == MD::StyleDelim{ 12, 2, 13, 2 } );
+		REQUIRE( dt->openStyles().empty() );
 	}
 }
 
@@ -480,6 +514,9 @@ TEST_CASE( "009" )
 		REQUIRE( dt->startLine() == 0 );
 		REQUIRE( dt->endColumn() == 13 );
 		REQUIRE( dt->endLine() == 0 );
+		REQUIRE( dt->openStyles().size() == 1 );
+		REQUIRE( dt->openStyles().at( 0 ) == MD::StyleDelim{ 0, 0, 1, 0 } );
+		REQUIRE( dt->closeStyles().empty() );
 	}
 
 	{
@@ -493,6 +530,9 @@ TEST_CASE( "009" )
 		REQUIRE( dt->startLine() == 1 );
 		REQUIRE( dt->endColumn() == 8 );
 		REQUIRE( dt->endLine() == 1 );
+		REQUIRE( dt->openStyles().empty() );
+		REQUIRE( dt->closeStyles().size() == 1 );
+		REQUIRE( dt->closeStyles().at( 0 ) == MD::StyleDelim{ 9, 1, 10, 1 } );
 	}
 
 	{
@@ -506,6 +546,8 @@ TEST_CASE( "009" )
 		REQUIRE( dt->startLine() == 2 );
 		REQUIRE( dt->endColumn() == 11 );
 		REQUIRE( dt->endLine() == 2 );
+		REQUIRE( dt->openStyles().empty() );
+		REQUIRE( dt->closeStyles().empty() );
 	}
 }
 
@@ -545,6 +587,8 @@ TEST_CASE( "010" )
 		REQUIRE( dt->startLine() == 0 );
 		REQUIRE( dt->endColumn() == 18 );
 		REQUIRE( dt->endLine() == 0 );
+		REQUIRE( dt->openStyles().empty() );
+		REQUIRE( dt->closeStyles().empty() );
 	}
 
 	{
@@ -558,6 +602,8 @@ TEST_CASE( "010" )
 		REQUIRE( dt->startLine() == 1 );
 		REQUIRE( dt->endColumn() == 12 );
 		REQUIRE( dt->endLine() == 1 );
+		REQUIRE( dt->openStyles().empty() );
+		REQUIRE( dt->closeStyles().empty() );
 	}
 
 	{
@@ -571,6 +617,8 @@ TEST_CASE( "010" )
 		REQUIRE( dt->startLine() == 2 );
 		REQUIRE( dt->endColumn() == 14 );
 		REQUIRE( dt->endLine() == 2 );
+		REQUIRE( dt->openStyles().empty() );
+		REQUIRE( dt->closeStyles().empty() );
 	}
 }
 

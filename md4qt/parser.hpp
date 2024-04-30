@@ -3227,6 +3227,8 @@ struct TextParsingOpts {
 	int columnsCount = -1;
 	int opts = TextWithoutFormat;
 	std::vector< std::pair< Style, long long int > > styles = {};
+	typename ItemWithOpts< Trait >::Styles openStyles;
+	std::shared_ptr< ItemWithOpts< Trait > > lastItemWithStyle;
 }; // struct TextParsingOpts
 
 enum class TextPlugin {
@@ -3536,6 +3538,9 @@ makeTextObject( const typename Trait::String & text, bool spaceBefore, bool spac
 		t->setStartLine( po.fr.data.at( startLine ).second.lineNumber );
 		t->setEndColumn( po.fr.data.at( endLine ).first.virginPos( endPos ) );
 		t->setEndLine( po.fr.data.at( endLine ).second.lineNumber );
+		t->openStyles() = po.openStyles;
+		po.openStyles.clear();
+		po.lastItemWithStyle = t;
 
 		po.parent->setEndColumn( po.fr.data.at( endLine ).first.virginPos( endPos ) );
 		po.parent->setEndLine( po.fr.data.at( endLine ).second.lineNumber );
@@ -5061,6 +5066,9 @@ makeInlineCode( long long int startLine, long long int startPos,
 		code->setEndColumn( po.fr.data.at( lastLine ).first.virginPos( lastPos - 1 ) );
 		code->setEndLine( po.fr.data.at( lastLine ).second.lineNumber );
 		code->setOpts( po.opts );
+		code->openStyles() = po.openStyles;
+		po.openStyles.clear();
+		po.lastItemWithStyle = code;
 
 		po.parent->appendItem( code );
 	}
@@ -5414,6 +5422,9 @@ makeLink( const typename Trait::String & url, const typename MdBlock< Trait >::D
 	link->setStartLine( po.fr.data.at( startLine ).second.lineNumber );
 	link->setEndColumn( po.fr.data.at( lastLine ).first.virginPos( lastPos - 1 ) );
 	link->setEndLine( po.fr.data.at( lastLine ).second.lineNumber );
+	link->openStyles() = po.openStyles;
+	po.openStyles.clear();
+	po.lastItemWithStyle = link;
 
 	return link;
 }
@@ -6629,6 +6640,14 @@ incrementIterator( typename Delims< Trait >::const_iterator it,
 }
 
 template< class Trait >
+inline void
+appendCloseStyle( TextParsingOpts< Trait > & po, const StyleDelim & s )
+{
+	if( po.lastItemWithStyle )
+		po.lastItemWithStyle->closeStyles().push_back( s );
+}
+
+template< class Trait >
 inline typename Delims< Trait >::const_iterator
 checkForStyle( typename Delims< Trait >::const_iterator first,
 	typename Delims< Trait >::const_iterator it,
@@ -6727,11 +6746,20 @@ checkForStyle( typename Delims< Trait >::const_iterator first,
 		{
 			if( count > opened )
 				count = opened;
+			
+			auto pos = po.fr.data.at( it->m_line ).first.virginPos( it->m_pos );
+			const auto line = po.fr.data.at( it->m_line ).second.lineNumber;
 
 			if( it->m_type == Delimiter::Strikethrough )
 			{
+				const auto len = it->m_len;
+				
 				for( auto i = 0; i < count; ++i )
+				{
 					closeStyle( po.styles, Style::Strikethrough );
+					appendCloseStyle( po, { pos, line, pos + len - 1, line } );
+					pos += len;
+				}
 
 				if( std::find_if( po.styles.cbegin(), po.styles.cend(),
 					[] ( const auto & p ) { return ( p.first == Style::Strikethrough ); } ) ==
@@ -6748,6 +6776,7 @@ checkForStyle( typename Delims< Trait >::const_iterator first,
 						Style::Italic1 : Style::Italic2 );
 
 					closeStyle( po.styles, st );
+					appendCloseStyle( po, { pos, line, pos++, line } );
 
 					if( std::find_if( po.styles.cbegin(), po.styles.cend(),
 						[&] ( const auto & p ) { return ( p.first == st ); } ) == po.styles.cend() )
@@ -6760,7 +6789,11 @@ checkForStyle( typename Delims< Trait >::const_iterator first,
 						Style::Bold1 : Style::Bold2 );
 
 					for( auto i = 0; i < count / 2; ++i )
+					{
 						closeStyle( po.styles, st );
+						appendCloseStyle( po, { pos, line, pos + 1, line } );
+						pos += 2;
+					}
 
 					if( std::find_if( po.styles.cbegin(), po.styles.cend(),
 						[&] ( const auto & p ) { return ( p.first == st ); } ) == po.styles.cend() )
@@ -6800,12 +6833,22 @@ checkForStyle( typename Delims< Trait >::const_iterator first,
 
 				if( closed )
 				{
+					auto pos = po.fr.data.at( it->m_line ).first.virginPos( it->m_pos );
+					const auto line = po.fr.data.at( it->m_line ).second.lineNumber;
+					
 					for( const auto & p : styles )
 					{
 						setStyle( po.opts, p.first, true );
 
 						for( long long int i = 0; i < p.second; ++i )
+						{
 							po.styles.push_back( { p.first, len } );
+							
+							if( !po.collectRefLinks )
+								po.openStyles.push_back( { pos, line, pos + len - 1, line } );
+							
+							pos += len;
+						}
 					}
 
 					po.pos = it->m_pos + len;
@@ -6847,6 +6890,7 @@ concatenateText( typename Block< Trait >::Items::const_iterator it,
 	t->setSpaceBefore( std::static_pointer_cast< Text< Trait > >( *it )->isSpaceBefore() );
 	t->setStartColumn( (*it)->startColumn() );
 	t->setStartLine( (*it)->startLine() );
+	t->openStyles() = std::static_pointer_cast< Text< Trait > >( *it )->openStyles();
 
 	typename Trait::String data;
 
@@ -6869,6 +6913,7 @@ concatenateText( typename Block< Trait >::Items::const_iterator it,
 	t->setSpaceAfter( std::static_pointer_cast< Text< Trait > >( *it )->isSpaceAfter() );
 	t->setEndColumn( (*it)->endColumn() );
 	t->setEndLine( (*it)->endLine() );
+	t->closeStyles() = std::static_pointer_cast< Text< Trait > >( *it )->closeStyles();
 
 	return t;
 }
@@ -7289,8 +7334,16 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 
 						if( ti >= 0 && ti < p->items().size() )
 						{
+							typename ItemWithOpts< Trait >::Styles openStyles, closeStyles;
+							const auto opts = std::static_pointer_cast< Text< Trait > > (
+								p->items().at( ti ) )->opts();
+							
 							if( j == 0 || s.str.sliced( 0, j ).simplified().isEmpty() )
 							{
+								openStyles = std::static_pointer_cast< ItemWithOpts< Trait > >	(
+									p->items().at( ti ) )->openStyles();
+								closeStyles = std::static_pointer_cast< ItemWithOpts< Trait > >	(
+									p->items().at( ti ) )->closeStyles();
 								p->removeItemAt( ti );
 								po.rawTextData.erase( po.rawTextData.cbegin() + idx );
 								--ret;
@@ -7301,6 +7354,8 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 
 								auto t = std::static_pointer_cast< Text< Trait > > ( p->items().at( ti ) );
 								t->setEndColumn( po.fr.data.at( s.line ).first.virginPos( s.pos + j - 1 ) );
+								closeStyles = t->closeStyles();
+								t->closeStyles() = {};
 								po.rawTextData[ idx ].str = tmp;
 								++idx;
 								auto text = replaceEntity< Trait >( tmp.simplified() );
@@ -7320,6 +7375,7 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 								( i == s.str.length() - 1 && s.str[ i ] != end &&
 									!s.str[ i ].isSpace() ? 0 : 1 ) ) );
 							lnk->setEndLine( po.fr.data.at( s.line ).second.lineNumber );
+							lnk->openStyles() = openStyles;
 
 							if( email && !tmp.toLower().startsWith( typename Trait::String( "mailto:" ) ) )
 								tmp = typename Trait::String( "mailto:" ) + tmp;
@@ -7328,7 +7384,7 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 								tmp = typename Trait::String( "http://" ) + tmp;
 
 							lnk->setUrl( tmp );
-							lnk->setOpts( po.opts );
+							lnk->setOpts( opts );
 							p->insertItem( ti, lnk );
 
 							s.pos += i + ( s.str[ i ] == end ? 0 : 1 );
@@ -7357,8 +7413,11 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 								t->setSpaceAfter( s.spaceAfter );
 								t->setSpaceBefore( s.pos > 0 ?
 									po.fr.data[ s.line ].first[ s.pos - 1 ].isSpace() : true );
+								t->closeStyles() = closeStyles;
 								p->insertItem( ti + 1, t );
 							}
+							else
+								lnk->closeStyles() = closeStyles;
 
 							break;
 						}
