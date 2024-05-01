@@ -125,9 +125,9 @@ TEST_CASE( "062" )
 		REQUIRE( c1->endLine() == 0 );
 		REQUIRE( c1->text() == u8"**" );
 		REQUIRE( c1->openStyles().size() == 1 );
-		REQUIRE( c1->openStyles().at( 0 ) == MD::StyleDelim{ 1, 0, 1, 0 } );
+		REQUIRE( c1->openStyles().at( 0 ) == MD::StyleDelim{ MD::ItalicText, 1, 0, 1, 0 } );
 		REQUIRE( c1->closeStyles().size() == 1 );
-		REQUIRE( c1->closeStyles().at( 0 ) == MD::StyleDelim{ 6, 0, 6, 0 } );
+		REQUIRE( c1->closeStyles().at( 0 ) == MD::StyleDelim{ MD::ItalicText, 6, 0, 6, 0 } );
 	}
 
 	{
@@ -156,9 +156,9 @@ TEST_CASE( "062" )
 		REQUIRE( c1->endLine() == 2 );
 		REQUIRE( c1->text() == u8"**" );
 		REQUIRE( c1->openStyles().size() == 1 );
-		REQUIRE( c1->openStyles().at( 0 ) == MD::StyleDelim{ 1, 2, 1, 2 } );
+		REQUIRE( c1->openStyles().at( 0 ) == MD::StyleDelim{ MD::ItalicText, 1, 2, 1, 2 } );
 		REQUIRE( c1->closeStyles().size() == 1 );
-		REQUIRE( c1->closeStyles().at( 0 ) == MD::StyleDelim{ 8, 2, 8, 2 } );
+		REQUIRE( c1->closeStyles().at( 0 ) == MD::StyleDelim{ MD::ItalicText, 8, 2, 8, 2 } );
 	}
 
 	{
@@ -187,9 +187,9 @@ TEST_CASE( "062" )
 		REQUIRE( c1->endLine() == 4 );
 		REQUIRE( c1->text() == u8"**`**" );
 		REQUIRE( c1->openStyles().size() == 1 );
-		REQUIRE( c1->openStyles().at( 0 ) == MD::StyleDelim{ 1, 4, 1, 4 } );
+		REQUIRE( c1->openStyles().at( 0 ) == MD::StyleDelim{ MD::ItalicText, 1, 4, 1, 4 } );
 		REQUIRE( c1->closeStyles().size() == 1 );
-		REQUIRE( c1->closeStyles().at( 0 ) == MD::StyleDelim{ 11, 4, 11, 4 } );
+		REQUIRE( c1->closeStyles().at( 0 ) == MD::StyleDelim{ MD::ItalicText, 11, 4, 11, 4 } );
 	}
 
 	{
@@ -211,9 +211,9 @@ TEST_CASE( "062" )
 		REQUIRE( c1->endLine() == 6 );
 		REQUIRE( c1->text() == u8"*" );
 		REQUIRE( c1->openStyles().size() == 1 );
-		REQUIRE( c1->openStyles().at( 0 ) == MD::StyleDelim{ 0, 6, 1, 6 } );
+		REQUIRE( c1->openStyles().at( 0 ) == MD::StyleDelim{ MD::BoldText, 0, 6, 1, 6 } );
 		REQUIRE( c1->closeStyles().size() == 1 );
-		REQUIRE( c1->closeStyles().at( 0 ) == MD::StyleDelim{ 5, 6, 6, 6 } );
+		REQUIRE( c1->closeStyles().at( 0 ) == MD::StyleDelim{ MD::BoldText, 5, 6, 6, 6 } );
 
 		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
 		auto t1 = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
@@ -258,11 +258,11 @@ TEST_CASE( "063" )
 		REQUIRE( t->opts() == ( MD::ItalicText | MD::BoldText ) );
 		REQUIRE( t->text() == u8"Lorem." );
 		REQUIRE( t->openStyles().size() == 2 );
-		REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ 0, 0, 0, 0 } );
-		REQUIRE( t->openStyles().at( 1 ) == MD::StyleDelim{ 1, 0, 2, 0 } );
+		REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ MD::ItalicText, 0, 0, 0, 0 } );
+		REQUIRE( t->openStyles().at( 1 ) == MD::StyleDelim{ MD::BoldText, 1, 0, 2, 0 } );
 		REQUIRE( t->closeStyles().size() == 2 );
-		REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ 9, 0, 10, 0 } );
-		REQUIRE( t->closeStyles().at( 1 ) == MD::StyleDelim{ 11, 0, 11, 0 } );
+		REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ MD::BoldText, 9, 0, 10, 0 } );
+		REQUIRE( t->closeStyles().at( 1 ) == MD::StyleDelim{ MD::ItalicText, 11, 0, 11, 0 } );
 	}
 
 	{

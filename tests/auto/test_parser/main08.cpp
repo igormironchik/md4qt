@@ -1219,9 +1219,9 @@ TEST_CASE( "245" )
 	REQUIRE( t->opts() == MD::StrikethroughText );
 	REQUIRE( t->text() == u8"text ~text" );
 	REQUIRE( t->openStyles().size() == 1 );
-	REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ 0, 0, 1, 0 } );
+	REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ MD::StrikethroughText, 0, 0, 1, 0 } );
 	REQUIRE( t->closeStyles().size() == 1 );
-	REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ 12, 0, 13, 0 } );
+	REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ MD::StrikethroughText, 12, 0, 13, 0 } );
 }
 
 /*

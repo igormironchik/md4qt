@@ -128,6 +128,23 @@ private:
 
 
 //
+// TextOption
+//
+
+//! Text option.
+enum TextOption {
+	//! No format.
+	TextWithoutFormat = 0,
+	//! Bold text.
+	BoldText = 1,
+	//! Italic text.
+	ItalicText = 2,
+	//! Strikethrough.
+	StrikethroughText = 4
+}; // enum TextOption
+
+
+//
 // StyleDelim
 //
 
@@ -135,13 +152,28 @@ class StyleDelim final
 	:	public WithPosition
 {
 public:
-	StyleDelim( long long int startColumn,
+	StyleDelim( TextOption s,
+		long long int startColumn,
 		long long int startLine,
 		long long int endColumn,
 		long long int endLine )
 		:	WithPosition( startColumn, startLine, endColumn, endLine )
+		,	m_style( s )
 	{
 	}
+	
+	TextOption style() const
+	{
+		return m_style;
+	}
+	
+	void setStyle( TextOption t )
+	{
+		m_style = t;
+	}
+	
+private:
+	TextOption m_style = TextWithoutFormat;
 }; // class StyleDelim
 
 inline bool operator == ( const StyleDelim & l, const StyleDelim & r )
@@ -149,7 +181,8 @@ inline bool operator == ( const StyleDelim & l, const StyleDelim & r )
 	return ( l.startColumn() == r.startColumn() &&
 		l.startLine() == r.startLine() &&
 		l.endColumn() == r.endColumn() &&
-		l.endLine() == r.endLine() );
+		l.endLine() == r.endLine() &&
+		l.style() == r.style() );
 }
 
 
@@ -286,19 +319,6 @@ private:
 
 	typename Trait::String m_label;
 }; // class Anchor
-
-
-//! Text option.
-enum TextOption {
-	//! No format.
-	TextWithoutFormat = 0,
-	//! Bold text.
-	BoldText = 1,
-	//! Italic text.
-	ItalicText = 2,
-	//! Strikethrough.
-	StrikethroughText = 4
-}; // enum TextOption
 
 
 //

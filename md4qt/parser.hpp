@@ -761,6 +761,27 @@ enum class Style {
 	Unknown
 };
 
+inline TextOption
+styleToTextOption( Style s )
+{
+	switch( s )
+	{
+		case Style::Italic1 :
+		case Style::Italic2 :
+			return ItalicText;
+			
+		case Style::Bold1 :
+		case Style::Bold2 :
+			return BoldText;
+			
+		case Style::Strikethrough :
+			return StrikethroughText;
+			
+		default :
+			return TextWithoutFormat;
+	}
+}
+
 
 //
 // TextPluginFunc
@@ -7252,7 +7273,7 @@ Parser< Trait >::checkForStyle( typename Delims::const_iterator first,
 				for( auto i = 0; i < count; ++i )
 				{
 					closeStyle( po.styles, Style::Strikethrough );
-					appendCloseStyle( po, { pos, line, pos + len - 1, line } );
+					appendCloseStyle( po, { StrikethroughText, pos, line, pos + len - 1, line } );
 					pos += len;
 				}
 
@@ -7271,7 +7292,7 @@ Parser< Trait >::checkForStyle( typename Delims::const_iterator first,
 						Style::Italic1 : Style::Italic2 );
 
 					closeStyle( po.styles, st );
-					appendCloseStyle( po, { pos, line, pos, line } );
+					appendCloseStyle( po, { ItalicText, pos, line, pos, line } );
 					++pos;
 
 					if( std::find_if( po.styles.cbegin(), po.styles.cend(),
@@ -7287,7 +7308,7 @@ Parser< Trait >::checkForStyle( typename Delims::const_iterator first,
 					for( auto i = 0; i < count / 2; ++i )
 					{
 						closeStyle( po.styles, st );
-						appendCloseStyle( po, { pos, line, pos + 1, line } );
+						appendCloseStyle( po, { BoldText, pos, line, pos + 1, line } );
 						pos += 2;
 					}
 
@@ -7339,7 +7360,8 @@ Parser< Trait >::checkForStyle( typename Delims::const_iterator first,
 						po.styles.push_back( { p.first, p.second } );
 						
 						if( !po.collectRefLinks )
-							po.openStyles.push_back( { pos, line, pos + p.second - 1, line } );
+							po.openStyles.push_back( { styleToTextOption( p.first ),
+								pos, line, pos + p.second - 1, line } );
 						
 						pos += p.second;
 					}

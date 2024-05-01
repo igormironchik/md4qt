@@ -275,9 +275,9 @@ TEST_CASE( "124" )
 	REQUIRE( t->endColumn() == 59 );
 	REQUIRE( t->endLine() == 0 );
 	REQUIRE( t->openStyles().size() == 1 );
-	REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ 0, 0, 1, 0 } );
+	REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ MD::BoldText, 0, 0, 1, 0 } );
 	REQUIRE( t->closeStyles().size() == 1 );
-	REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ 60, 0, 61, 0 } );
+	REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ MD::BoldText, 60, 0, 61, 0 } );
 
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::List );
 
@@ -1858,9 +1858,9 @@ TEST_CASE( "144" )
 	REQUIRE( t->opts() == MD::BoldText );
 	REQUIRE( t->text() == u8"text (*)." );
 	REQUIRE( t->openStyles().size() == 1 );
-	REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ 0, 0, 1, 0 } );
+	REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ MD::BoldText, 0, 0, 1, 0 } );
 	REQUIRE( t->closeStyles().size() == 1 );
-	REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ 11, 0, 12, 0 } );
+	REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ MD::BoldText, 11, 0, 12, 0 } );
 }
 
 /*
@@ -1914,11 +1914,11 @@ TEST_CASE( "145" )
 		REQUIRE( t->opts() == ( MD::BoldText | MD::ItalicText ) );
 		REQUIRE( t->text() == u8"text" );
 		REQUIRE( t->openStyles().size() == 2 );
-		REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ 7, 0, 7, 0 } );
-		REQUIRE( t->openStyles().at( 1 ) == MD::StyleDelim{ 8, 0, 9, 0 } );
+		REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ MD::ItalicText, 7, 0, 7, 0 } );
+		REQUIRE( t->openStyles().at( 1 ) == MD::StyleDelim{ MD::BoldText, 8, 0, 9, 0 } );
 		REQUIRE( t->closeStyles().size() == 2 );
-		REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ 14, 0, 15, 0 } );
-		REQUIRE( t->closeStyles().at( 1 ) == MD::StyleDelim{ 16, 0, 16, 0 } );
+		REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ MD::BoldText, 14, 0, 15, 0 } );
+		REQUIRE( t->closeStyles().at( 1 ) == MD::StyleDelim{ MD::ItalicText, 16, 0, 16, 0 } );
 	}
 }
 
@@ -1973,11 +1973,11 @@ TEST_CASE( "146" )
 		REQUIRE( t->opts() == ( MD::BoldText | MD::ItalicText ) );
 		REQUIRE( t->text() == u8"text" );
 		REQUIRE( t->openStyles().size() == 2 );
-		REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ 3, 0, 3, 0 } );
-		REQUIRE( t->openStyles().at( 1 ) == MD::StyleDelim{ 4, 0, 5, 0 } );
+		REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ MD::ItalicText, 3, 0, 3, 0 } );
+		REQUIRE( t->openStyles().at( 1 ) == MD::StyleDelim{ MD::BoldText, 4, 0, 5, 0 } );
 		REQUIRE( t->closeStyles().size() == 2 );
-		REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ 10, 0, 11, 0 } );
-		REQUIRE( t->closeStyles().at( 1 ) == MD::StyleDelim{ 12, 0, 12, 0 } );
+		REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ MD::BoldText, 10, 0, 11, 0 } );
+		REQUIRE( t->closeStyles().at( 1 ) == MD::StyleDelim{ MD::ItalicText, 12, 0, 12, 0 } );
 	}
 }
 
@@ -2018,11 +2018,11 @@ TEST_CASE( "147" )
 		REQUIRE( t->opts() == ( MD::BoldText | MD::ItalicText ) );
 		REQUIRE( t->text() == u8"text" );
 		REQUIRE( t->openStyles().size() == 2 );
-		REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ 0, 0, 0, 0 } );
-		REQUIRE( t->openStyles().at( 1 ) == MD::StyleDelim{ 1, 0, 2, 0 } );
+		REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ MD::ItalicText, 0, 0, 0, 0 } );
+		REQUIRE( t->openStyles().at( 1 ) == MD::StyleDelim{ MD::BoldText, 1, 0, 2, 0 } );
 		REQUIRE( t->closeStyles().size() == 2 );
-		REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ 7, 0, 8, 0 } );
-		REQUIRE( t->closeStyles().at( 1 ) == MD::StyleDelim{ 9, 0, 9, 0 } );
+		REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ MD::BoldText, 7, 0, 8, 0 } );
+		REQUIRE( t->closeStyles().at( 1 ) == MD::StyleDelim{ MD::ItalicText, 9, 0, 9, 0 } );
 	}
 
 	{
@@ -2107,9 +2107,9 @@ TEST_CASE( "148" )
 		REQUIRE( t->isSpaceBefore() );
 		REQUIRE( t->isSpaceAfter() );
 		REQUIRE( t->openStyles().size() == 1 );
-		REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ 18, 0, 19, 0 } );
+		REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ MD::BoldText, 18, 0, 19, 0 } );
 		REQUIRE( t->closeStyles().size() == 1 );
-		REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ 24, 0, 25, 0 } );
+		REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ MD::BoldText, 24, 0, 25, 0 } );
 	}
 
 	REQUIRE( li->items().at( 1 )->type() == MD::ItemType::List );

@@ -755,9 +755,9 @@ TEST_CASE( "200" )
 	REQUIRE( t->opts() == MD::StrikethroughText );
 	REQUIRE( t->text() == u8"text" );
 	REQUIRE( t->openStyles().size() == 1 );
-	REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ 0, 0, 0, 0 } );
+	REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ MD::StrikethroughText, 0, 0, 0, 0 } );
 	REQUIRE( t->closeStyles().size() == 1 );
-	REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ 5, 0, 5, 0 } );
+	REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ MD::StrikethroughText, 5, 0, 5, 0 } );
 }
 
 /*
@@ -779,9 +779,9 @@ TEST_CASE( "201" )
 	REQUIRE( t->opts() == MD::StrikethroughText );
 	REQUIRE( t->text() == u8"text~text" );
 	REQUIRE( t->openStyles().size() == 1 );
-	REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ 0, 0, 1, 0 } );
+	REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ MD::StrikethroughText, 0, 0, 1, 0 } );
 	REQUIRE( t->closeStyles().size() == 1 );
-	REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ 11, 0, 12, 0 } );
+	REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ MD::StrikethroughText, 11, 0, 12, 0 } );
 }
 
 /*
