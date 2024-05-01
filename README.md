@@ -31,6 +31,7 @@ This library parses Markdown into tree structure.
   * [How can I easily traverse through the `MD::Document`?](#how-can-i-easily-traverse-through-the-mddocument)
   * [Why don't you have an implementation for pure `STL` with `std::string`?](#why-dont-you-have-an-implementation-for-pure-stl-with-stdstring)
   * [Where are empty list items and blockquotes?](#where-are-empty-list-items-and-blockquotes)
+  * [Is it possible to write custom text plugin for this parser?](#is-it-possible-to-write-custom-text-plugin-for-this-parser)
 
 # Example
 
@@ -250,3 +251,122 @@ to not support third trait. Maybe because I so lazy?
 * I don't add empty (withouth any data in it) list items in the list. Parser do everything right,
 I just decided to not add empty list items into `MD::Document`. For this reason you can even
 not find whole list if it will contain only empty list items. The same is and for blockquotes.
+
+## Is it possible to write custom text plugin for this parser?
+
+* Since version `3.0.0` in the `MD::Parser` was added a method for adding custom
+text plugins.
+
+  ```cpp
+  //! Add text plugin.
+  void addTextPlugin(
+    //! ID of a plugin. Use TextPlugin::UserDefinedPluginID value for start ID.
+    int id,
+    //! Function of a plugin, that will be invoked to processs raw text.
+    TextPluginFunc< Trait > plugin,
+    //! Should this plugin be used in parsing of internals of links?
+    bool processInLinks )
+  {
+    m_textPlugins.insert( { id, { plugin, processInLinks } } );
+  }
+  ```
+
+  * `ID` of a plugin is a regular `int` that should be (but not mandatory) started from
+
+    ```cpp
+    enum TextPlugin : int {
+      UnknownPluginID = 0,
+      GitHubAutoLinkPluginID = 1,
+      UserDefinedPluginID = 255
+    }; // enum TextPlugin
+    ```
+
+    `UserDefinedPluginID` value. Note that plugins will be invoked corresponding
+    to its `ID`from smallest to largest, so a developer can handle an order of text
+    plugins.
+
+  * Text plugin is a usual function with a signature
+
+    ```cpp
+    template< class Trait >
+    using TextPluginFunc = std::function< void ( std::shared_ptr< Paragraph< Trait > >,
+      TextParsingOpts< Trait > & ) >;
+    ```
+
+    You will get already parsed `Paragraph` with all items in it. And you are
+    able to process remaining raw text data and check it for what you need.
+
+    `TextParsingOpts` is an auxiliary structure with some data. You are interested
+    in `bool collectRefLinks;`, when this flag is `true` the parser is in a state of
+    collecting reference links, and on this stage plugin may do nothing.
+
+    A most important thing in `TextParsingOpts` structure is a
+    `std::vector< TextData > rawTextData;`. This vector contains not processed raw
+    text data from `Markdown`. The size of `rawTextData` is the same as a count of
+    `Text` items in `Paragraph`, and theirs sizes should remain eccual. So, if you replace
+    one of text item with something, for example link, corresponding text item
+    should be removed from `Paragraph` and `rawTextData`. Or if you replace just
+    a part of text item - it should be modified in `Paragraph` and `rawTextData`.
+    Be careful, it's UB, if you will make a mistake here, possibly you will crash.
+
+    One more thing - dont forget to set positions of elements in `Document` to new
+    values if you change something, and don't forget about such things like
+    `openStyles()` and `closeStyles()` of `ItemWithOpts` items. Document should
+    remain correct after your manipulations, so any syntax highlighter, for example,
+    won't do a mistake.
+
+    Not, that `TextData` is
+
+    ```cpp
+    struct TextData {
+      typename Trait::String str;
+      long long int pos = -1;
+      long long int line = -1;
+      bool spaceBefore = false;
+      bool spaceAfter = false;
+    };
+    ```
+
+    And `pos` and `line` here is relative to `MdBlock< Trait > & fr;` member of
+    `TextParsingOpts`, but document require absolute positions in the `Markdown`
+    text. So when you will set positions to new items, use, for example, a following
+    code.
+
+    ```cpp
+    setEndColumn( po.fr.data.at( s.line ).first.virginPos( s.pos ) );
+    ```
+
+    where `s` is an object of `TextData` type.
+
+  * `processInLinks` flag should be set to false if you desire to not process your
+plugin in link's captions, as, for example, links can't contain other links, so
+if you are implementing a plugin for new links this flag should be set to `false`
+for your plugin.
+
+  * In `md4qt` already exists one text plugin for handling GitHub's autolink. A
+    plugin function is quite simple, look.
+
+    ```cpp
+    template< class Trait >
+    inline void
+    githubAutolinkPlugin( std::shared_ptr< Paragraph< Trait > > p,
+      TextParsingOpts< Trait > & po )
+    {
+      if( !po.collectRefLinks )
+      {
+        long long int i = 0;
+
+        while( i >= 0 && i < (long long int) po.rawTextData.size() )
+        {
+          i = processGitHubAutolinkExtension( p, po, i );
+
+          ++i;
+        }
+      }
+    }
+    ```
+
+    But `processGitHubAutolinkExtension()` is not so trivial :) Have a look
+    at its implementation to have a good example, it's placed in `parser.hpp`.
+
+    Good luck with plugining. :)

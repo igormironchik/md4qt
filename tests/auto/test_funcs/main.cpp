@@ -16,6 +16,21 @@
 
 using data_t = std::vector< std::pair< std::pair< long long int, bool >, int > >;
 
+namespace MD {
+
+struct PrivateAccess {
+	static std::pair< bool, size_t > checkEmphasisSequence( const data_t & s, size_t idx )
+	{	
+		return p.checkEmphasisSequence( s, idx );
+	}
+	
+	static Parser< TRAIT > p;
+};
+
+Parser< TRAIT > PrivateAccess::p = Parser< TRAIT > ();
+
+} /* namespace MD */
+
 TEST_CASE( "emphasis_sequence" )
 {
 	{
@@ -23,11 +38,11 @@ TEST_CASE( "emphasis_sequence" )
 
 		bool closed = false;
 		size_t idx = 0;
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 0 );
 
 		REQUIRE( !closed );
 
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 1 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 1 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 2 );
@@ -38,12 +53,12 @@ TEST_CASE( "emphasis_sequence" )
 
 		bool closed = false;
 		size_t idx = 0;
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 0 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 2 );
 
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 1 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 1 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 2 );
@@ -55,16 +70,16 @@ TEST_CASE( "emphasis_sequence" )
 
 		bool closed = false;
 		size_t idx = 0;
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 0 );
 
 		REQUIRE( !closed );
 
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 1 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 1 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 3 );
 
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 2 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 2 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 3 );
@@ -76,17 +91,17 @@ TEST_CASE( "emphasis_sequence" )
 
 		bool closed = false;
 		size_t idx = 0;
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 0 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 3 );
 
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 1 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 1 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 3 );
 
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 2 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 2 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 3 );
@@ -98,16 +113,16 @@ TEST_CASE( "emphasis_sequence" )
 
 		bool closed = false;
 		size_t idx = 0;
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 0 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 5 );
 
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 1 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 1 );
 
 		REQUIRE( !closed );
 
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 2 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 2 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 3 );
@@ -119,17 +134,17 @@ TEST_CASE( "emphasis_sequence" )
 
 		bool closed = false;
 		size_t idx = 0;
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 0 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 5 );
 
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 1 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 1 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 4 );
 
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 2 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 2 );
 
 		REQUIRE( !closed );
 	}
@@ -140,17 +155,17 @@ TEST_CASE( "emphasis_sequence" )
 
 		bool closed = false;
 		size_t idx = 0;
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 0 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 5 );
 
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 1 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 1 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 4 );
 
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 2 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 2 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 3 );
@@ -162,16 +177,16 @@ TEST_CASE( "emphasis_sequence" )
 
 		bool closed = false;
 		size_t idx = 0;
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 0 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 3 );
 
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 1 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 1 );
 
 		REQUIRE( !closed );
 
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 2 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 2 );
 
 		REQUIRE( !closed );
 	}
@@ -182,12 +197,12 @@ TEST_CASE( "emphasis_sequence" )
 
 		bool closed = false;
 		size_t idx = 0;
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 0 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 3 );
 
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 1 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 1 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 2 );
@@ -199,17 +214,17 @@ TEST_CASE( "emphasis_sequence" )
 
 		bool closed = false;
 		size_t idx = 0;
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 0 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 4 );
 
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 1 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 1 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 2 );
 
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 2 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 2 );
 
 		REQUIRE( !closed );
 	}
@@ -219,12 +234,12 @@ TEST_CASE( "emphasis_sequence" )
 
 		bool closed = false;
 		size_t idx = 0;
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 0 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 2 );
 
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 1 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 1 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 2 );
@@ -235,7 +250,7 @@ TEST_CASE( "emphasis_sequence" )
 
 		bool closed = false;
 		size_t idx = 0;
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 0 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 2 );
@@ -246,7 +261,7 @@ TEST_CASE( "emphasis_sequence" )
 
 		bool closed = false;
 		size_t idx = 0;
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 0 );
 
 		REQUIRE( !closed );
 	}
@@ -257,7 +272,7 @@ TEST_CASE( "emphasis_sequence" )
 
 		bool closed = false;
 		size_t idx = 0;
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 0 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 3 );
@@ -269,7 +284,7 @@ TEST_CASE( "emphasis_sequence" )
 
 		bool closed = false;
 		size_t idx = 0;
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 0 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 3 );
@@ -280,7 +295,7 @@ TEST_CASE( "emphasis_sequence" )
 
 		bool closed = false;
 		size_t idx = 0;
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 0 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 2 );
@@ -291,12 +306,12 @@ TEST_CASE( "emphasis_sequence" )
 
 		bool closed = false;
 		size_t idx = 0;
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 0 );
 
 		REQUIRE( closed );
 		REQUIRE( idx == 1 );
 		
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 1 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 1 );
 
 		REQUIRE( !closed );
 	}
@@ -306,7 +321,7 @@ TEST_CASE( "emphasis_sequence" )
 
 		bool closed = false;
 		size_t idx = 0;
-		std::tie( closed, idx ) = MD::checkEmphasisSequence( d, 0 );
+		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 0 );
 
 		REQUIRE( !closed );
 	}
@@ -529,9 +544,10 @@ TEST_CASE( "is_email" )
 	MD::MdBlock< TRAIT > fr; \
 	typename TRAIT::StringList links; \
 	MD::RawHtmlBlock< TRAIT > html; \
+	const MD::TextPluginsMap< TRAIT > textPlugins; \
 	 \
 	MD::TextParsingOpts< TRAIT > po = { fr, parent, nullptr, doc, links, "", "", \
-		false, false, html }; \
+		false, false, html, textPlugins }; \
 	 \
 	auto p = std::make_shared< MD::Paragraph< TRAIT > > ();
 
