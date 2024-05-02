@@ -40,6 +40,7 @@ TEST_CASE( "121" )
 		REQUIRE( b->startLine() == 0 );
 		REQUIRE( b->endColumn() == 1 );
 		REQUIRE( b->endLine() == 2 );
+		REQUIRE( b->delims() == MD::Blockquote< TRAIT >::Delims{ { 0, 0, 0, 0 } } );
 		REQUIRE( b->items().size() == 1 );
 		REQUIRE( b->items().at( 0 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( b->items().at( 0 ).get() );
@@ -861,6 +862,8 @@ TEST_CASE( "131" )
 	REQUIRE( b->startLine() == 0 );
 	REQUIRE( b->endColumn() == 1 );
 	REQUIRE( b->endLine() == 2 );
+	REQUIRE( b->delims() == MD::Blockquote< TRAIT >::Delims{ { 0, 0, 0, 0 },
+		{ 0, 1, 0, 1 }, { 0, 2, 0, 2 } } );
 	REQUIRE( b->items().at( 0 )->type() == MD::ItemType::RawHtml );
 	auto h = static_cast< MD::RawHtml< TRAIT >* > ( b->items().at( 0 ).get() );
 	REQUIRE( h->text() == u8"<!--\ntext" );
@@ -2169,6 +2172,8 @@ TEST_CASE( "149" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Blockquote );
+	auto b = static_cast< MD::Blockquote< TRAIT >* > ( doc->items().at( 2 ).get() );
+	REQUIRE( b->delims() == MD::Blockquote< TRAIT >::Delims{ { 0, 1, 0, 1 } } );
 }
 
 /*
@@ -2210,6 +2215,8 @@ TEST_CASE( "151" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Blockquote );
+	auto b = static_cast< MD::Blockquote< TRAIT >* > ( doc->items().at( 2 ).get() );
+	REQUIRE( b->delims() == MD::Blockquote< TRAIT >::Delims{ { 0, 1, 0, 1 } } );
 	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::List );
 	REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::Heading );
 	
@@ -2221,12 +2228,24 @@ TEST_CASE( "151" )
 	REQUIRE( doc->items().at( 5 )->type() == MD::ItemType::List );
 	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 5 ).get() );
 	REQUIRE( l->items().size() == 2 );
-	REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
-	auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).get() );
-	REQUIRE( li->items().size() == 2 );
-	REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Heading );
-	auto h = static_cast< MD::Heading< TRAIT >* > ( li->items().at( 1 ).get() );
-	REQUIRE( h->delim() == MD::WithPosition{ 2, 7, 2, 7 } );
+	
+	{
+		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+		REQUIRE( li->items().size() == 2 );
+		REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Blockquote );
+		auto b = static_cast< MD::Blockquote< TRAIT >* > ( li->items().at( 1 ).get() );
+		REQUIRE( b->delims() == MD::Blockquote< TRAIT >::Delims{ { 2, 5, 2, 5 } } );
+	}
+	
+	{
+		REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).get() );
+		REQUIRE( li->items().size() == 2 );
+		REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Heading );
+		auto h = static_cast< MD::Heading< TRAIT >* > ( li->items().at( 1 ).get() );
+		REQUIRE( h->delim() == MD::WithPosition{ 2, 7, 2, 7 } );
+	}
 }
 
 /*
@@ -2258,9 +2277,39 @@ TEST_CASE( "152" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Blockquote );
+	
+	{
+		auto b = static_cast< MD::Blockquote< TRAIT >* > ( doc->items().at( 2 ).get() );
+		REQUIRE( b->delims() == MD::Blockquote< TRAIT >::Delims{ { 0, 2, 0, 2 } } );
+	}
+	
 	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::List );
+	
 	REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::Heading );
 	auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 4 ).get() );
 	REQUIRE( h->delim() == MD::WithPosition{ 0, 6, 0, 6 } );
 	REQUIRE( doc->items().at( 5 )->type() == MD::ItemType::List );
+	
+	{
+		auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 5 ).get() );
+		REQUIRE( l->items().size() == 2 );
+		
+		{
+			REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+			REQUIRE( li->items().size() == 2 );
+			REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Blockquote );
+			auto b = static_cast< MD::Blockquote< TRAIT >* > ( li->items().at( 1 ).get() );
+			REQUIRE( b->delims() == MD::Blockquote< TRAIT >::Delims{ { 2, 10, 2, 10 } } );
+		}
+		
+		{
+			REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).get() );
+			REQUIRE( li->items().size() == 2 );
+			REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Heading );
+			auto h = static_cast< MD::Heading< TRAIT >* > ( li->items().at( 1 ).get() );
+			REQUIRE( h->delim() == MD::WithPosition{ 2, 14, 2, 14 } );
+		}
+	}
 }

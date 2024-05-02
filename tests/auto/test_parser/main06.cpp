@@ -706,6 +706,7 @@ TEST_CASE( "163" )
 	REQUIRE( b->startLine() == 2 );
 	REQUIRE( b->endColumn() == 5 );
 	REQUIRE( b->endLine() == 3 );
+	REQUIRE( b->delims() == MD::Blockquote< TRAIT >::Delims{ { 0, 2, 0, 2 }, { 0, 3, 0, 3 } } );
 	REQUIRE( b->items().size() == 1 );
 	REQUIRE( b->items().at( 0 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( b->items().at( 0 ).get() );

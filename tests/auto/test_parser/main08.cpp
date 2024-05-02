@@ -236,6 +236,7 @@ TEST_CASE( "224" )
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Blockquote );
 	auto b = static_cast< MD::Blockquote< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( b->items().size() == 1 );
+	REQUIRE( b->delims() == MD::Blockquote< TRAIT >::Delims{ { 0, 0, 0, 0 } } );
 	REQUIRE( b->items().at( 0 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( b->items().at( 0 ).get() );
 	REQUIRE( p->items().size() == 2 );
@@ -258,6 +259,7 @@ TEST_CASE( "225" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Blockquote );
 	auto b = static_cast< MD::Blockquote< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( b->delims() == MD::Blockquote< TRAIT >::Delims{ { 0, 0, 0, 0 } } );
 	REQUIRE( b->items().size() == 1 );
 	REQUIRE( b->items().at( 0 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( b->items().at( 0 ).get() );

@@ -8321,6 +8321,8 @@ Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
 
 	if( pos > -1 )
 	{
+		typename Blockquote< Trait >::Delims delims;
+		
 		long long int i = 0, j = 0;
 
 		BlockType bt = BlockType::EmptyLine;
@@ -8333,6 +8335,9 @@ Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
 
 			if( gt > -1 )
 			{
+				const auto dp = it->first.virginPos( gt );
+				delims.push_back( { dp, it->second.lineNumber, dp, it->second.lineNumber } );
+				
 				if( it == fr.data.begin() )
 					extra = gt + ( it->first.length() > gt + 1 ?
 						( it->first[ gt + 1 ] == Trait::latin1ToChar( ' ' ) ? 1 : 0 ) : 0 ) + 1;
@@ -8396,6 +8401,7 @@ Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
 		bq->setEndColumn( fr.data.at( j - 1 ).first.virginPos(
 			fr.data.at( j - 1 ).first.length() - 1 ) );
 		bq->setEndLine( fr.data.at( j - 1 ).second.lineNumber );
+		bq->delims() = delims;
 
 		parse( stream, bq, doc, linksToParse, workingPath, fileName, collectRefLinks );
 

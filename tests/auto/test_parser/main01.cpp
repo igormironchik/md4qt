@@ -1005,6 +1005,8 @@ TEST_CASE( "017" )
 	REQUIRE( bq->startLine() == 0 );
 	REQUIRE( bq->endColumn() == 14 );
 	REQUIRE( bq->endLine() == 4 );
+	REQUIRE( bq->delims() == MD::Blockquote< TRAIT >::Delims{ { 0, 0, 0, 0 },
+		{ 0, 1, 0, 1 }, { 0, 2, 0, 2 }, { 0, 3, 0, 3 }, { 0, 4, 0, 4 } } );
 
 	REQUIRE( !bq->isEmpty() );
 	REQUIRE( bq->items().size() == 3 );
@@ -1064,6 +1066,7 @@ TEST_CASE( "017" )
 	REQUIRE( nbq->startLine() == 4 );
 	REQUIRE( nbq->endColumn() == 14 );
 	REQUIRE( nbq->endLine() == 4 );
+	REQUIRE( nbq->delims() == MD::Blockquote< TRAIT >::Delims{ { 1, 4, 1, 4 } } );
 
 	REQUIRE( !nbq->isEmpty() );
 	REQUIRE( nbq->items().size() == 1 );
@@ -1115,6 +1118,8 @@ TEST_CASE( "018" )
 	REQUIRE( bq->startLine() == 0 );
 	REQUIRE( bq->endColumn() == 15 );
 	REQUIRE( bq->endLine() == 4 );
+	REQUIRE( bq->delims() == MD::Blockquote< TRAIT >::Delims{ { 0, 0, 0, 0 },
+		{ 0, 1, 0, 1 }, { 0, 2, 0, 2 }, { 0, 3, 0, 3 }, { 0, 4, 0, 4 } } );
 
 	REQUIRE( !bq->isEmpty() );
 	REQUIRE( bq->items().size() == 3 );
@@ -1174,6 +1179,7 @@ TEST_CASE( "018" )
 	REQUIRE( nbq->startLine() == 4 );
 	REQUIRE( nbq->endColumn() == 15 );
 	REQUIRE( nbq->endLine() == 4 );
+	REQUIRE( nbq->delims() == MD::Blockquote< TRAIT >::Delims{ { 2, 4, 2, 4 } } );
 
 	REQUIRE( !nbq->isEmpty() );
 	REQUIRE( nbq->items().size() == 1 );
@@ -1233,6 +1239,12 @@ TEST_CASE( "019" )
 		REQUIRE( bq->startLine() == 0 + 6 * ( i - 1 ) );
 		REQUIRE( bq->endColumn() == 15 );
 		REQUIRE( bq->endLine() == 4 + 6 * ( i - 1 ) );
+		REQUIRE( bq->delims() == MD::Blockquote< TRAIT >::Delims{
+			{ 0, 0 + ( i - 1 ) * 6, 0, 0 + ( i - 1 ) * 6 },
+			{ 0, 1 + ( i - 1 ) * 6, 0, 1 + ( i - 1 ) * 6 },
+			{ 0, 2 + ( i - 1 ) * 6, 0, 2 + ( i - 1 ) * 6 },
+			{ 0, 3 + ( i - 1 ) * 6, 0, 3 + ( i - 1 ) * 6 },
+			{ 0, 4 + ( i - 1 ) * 6, 0, 4 + ( i - 1 ) * 6 } } );
 
 		REQUIRE( !bq->isEmpty() );
 		REQUIRE( bq->items().size() == 3 );
@@ -1292,6 +1304,8 @@ TEST_CASE( "019" )
 		REQUIRE( nbq->startLine() == 4 + 6 * ( i - 1 ) );
 		REQUIRE( nbq->endColumn() == 15 );
 		REQUIRE( nbq->endLine() == 4 + 6 * ( i - 1 ) );
+		REQUIRE( nbq->delims() == MD::Blockquote< TRAIT >::Delims{
+			{ 2, 4 + ( i - 1 ) * 6, 2, 4 + ( i - 1 ) * 6 } } );
 
 		REQUIRE( !nbq->isEmpty() );
 		REQUIRE( nbq->items().size() == 1 );

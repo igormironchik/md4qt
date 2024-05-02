@@ -218,6 +218,8 @@ TEST_CASE( "032" )
 	REQUIRE( q->startLine() == 0 );
 	REQUIRE( q->endColumn() == 4 );
 	REQUIRE( q->endLine() == 3 );
+	REQUIRE( q->delims() == MD::Blockquote< TRAIT >::Delims{
+		{ 0, 0, 0, 0 }, { 0, 1, 0, 1 }, { 0, 2, 0, 2 }, { 0, 3, 0, 3 } } );
 
 	REQUIRE( q->items().size() == 1 );
 
@@ -1559,6 +1561,7 @@ TEST_CASE( "044" )
 	REQUIRE( bq->startLine() == 2 );
 	REQUIRE( bq->endColumn() == 10 );
 	REQUIRE( bq->endLine() == 2 );
+	REQUIRE( bq->delims() == MD::Blockquote< TRAIT >::Delims{ { 4, 2, 4, 2 } } );
 
 	REQUIRE( bq->items().size() == 1 );
 
@@ -2468,6 +2471,10 @@ TEST_CASE( "059" )
 	REQUIRE( b->startLine() == 0 );
 	REQUIRE( b->endColumn() == 57 );
 	REQUIRE( b->endLine() == 7 );
+	REQUIRE( b->delims() == MD::Blockquote< TRAIT >::Delims{
+		{ 0, 0, 0, 0 }, { 0, 1, 0, 1 }, { 0, 2, 0, 2 }, { 0, 3, 0, 3 },
+		{ 0, 4, 0, 4 }, { 0, 5, 0, 5 }, { 0, 6, 0, 6 }, { 0, 7, 0, 7 }
+		} );
 
 	REQUIRE( b->items().size() == 4 );
 

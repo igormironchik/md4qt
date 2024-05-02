@@ -695,8 +695,22 @@ public:
 	{
 		return ItemType::Blockquote;
 	}
+	
+	using Delims = typename Trait::template Vector< WithPosition >;	
+	
+	const Delims & delims() const
+	{
+		return m_delims;
+	}
+	
+	Delims & delims()
+	{
+		return m_delims;
+	}
 
 private:
+	Delims m_delims;
+	
 	DISABLE_COPY( Blockquote )
 }; // class Blockquote
 
