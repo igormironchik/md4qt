@@ -68,6 +68,19 @@ skipSpaces( long long int i, const typename Trait::String & line )
 	return i;
 }; // skipSpaces
 
+// Returns last non-space character position.
+template< class Trait >
+inline long long int
+lastNonSpacePos( const typename Trait::String & line )
+{
+	long long int i = line.length() - 1;
+
+	while( i > 0 && line[ i ].isSpace() )
+		--i;
+
+	return i;
+}; // lastNonSpacePos
+
 
 //! \return Starting sequence of the same characters.
 template< class Trait >
@@ -3254,6 +3267,8 @@ Parser< Trait >::parseHeading( MdBlock< Trait > & fr,
 			++lvl;
 			++pos;
 		}
+		
+		h->setDelim( { h->startColumn(), h->startLine(), line.virginPos( pos - 1 ), h->startLine() } );
 
 		pos = skipSpaces< Trait >( pos, line.asString() );
 
@@ -7723,7 +7738,8 @@ makeHeading( std::shared_ptr< Block< Trait > > parent,
 	int level,
 	const typename Trait::String & workingPath,
 	const typename Trait::String & fileName,
-	bool collectRefLinks )
+	bool collectRefLinks,
+	const WithPosition & delim )
 {
 	if( !collectRefLinks )
 	{
@@ -7764,6 +7780,7 @@ makeHeading( std::shared_ptr< Block< Trait > > parent,
 		h->setEndLine( lastLine );
 		h->setLevel( level );
 		h->setText( p );
+		h->setDelim( delim );
 
 		typename Trait::String label = Trait::latin1ToString( "#" ) + paragraphToLabel( p.get() );
 
@@ -7982,7 +7999,13 @@ Parser< Trait >::parseFormattedTextLinksImages( MdBlock< Trait > & fr,
 												it->m_pos + it->m_len - 1 ),
 											fr.data[ it->m_line ].second.lineNumber,
 											2, workingPath, fileName,
-											collectRefLinks );
+											collectRefLinks,
+											{ po.fr.data[ it->m_line ].first.virginPos( pos ),
+												fr.data[ it->m_line ].second.lineNumber,
+												po.fr.data[ it->m_line ].first.virginPos(
+													lastNonSpacePos< Trait > (
+														po.fr.data[ it->m_line ].first.asString() ) ),
+												fr.data[ it->m_line ].second.lineNumber } );
 
 										po.checkLineOnNewType = true;
 									}
@@ -8051,7 +8074,14 @@ Parser< Trait >::parseFormattedTextLinksImages( MdBlock< Trait > & fr,
 								fr.data[ it->m_line ].second.lineNumber,
 								it->m_type == Delimiter::H1 ? 1 : 2,
 								workingPath, fileName,
-								collectRefLinks );
+								collectRefLinks,
+								{ po.fr.data[ it->m_line ].first.virginPos( skipSpaces< Trait > ( 0,
+										po.fr.data[ it->m_line ].first.asString() ) ),
+									fr.data[ it->m_line ].second.lineNumber,
+									po.fr.data[ it->m_line ].first.virginPos(
+										lastNonSpacePos< Trait > (
+											po.fr.data[ it->m_line ].first.asString() ) ),
+									fr.data[ it->m_line ].second.lineNumber } );
 
 							po.checkLineOnNewType = true;
 

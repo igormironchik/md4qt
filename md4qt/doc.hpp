@@ -104,6 +104,14 @@ private:
 	long long int m_endLine = -1;
 }; // class WithPosition
 
+inline bool operator == ( const WithPosition & l, const WithPosition & r )
+{
+	return ( l.startColumn() == r.startColumn() &&
+		l.startLine() == r.startLine() &&
+		l.endColumn() == r.endColumn() &&
+		l.endLine() == r.endLine() );
+}
+
 
 //
 // Item
@@ -178,10 +186,7 @@ private:
 
 inline bool operator == ( const StyleDelim & l, const StyleDelim & r )
 {
-	return ( l.startColumn() == r.startColumn() &&
-		l.startLine() == r.startLine() &&
-		l.endColumn() == r.endColumn() &&
-		l.endLine() == r.endLine() &&
+	return ( static_cast< WithPosition > ( l ) == static_cast< WithPosition > ( r ) &&
 		l.style() == r.style() );
 }
 
@@ -652,11 +657,22 @@ public:
 	{
 		m_label = l;
 	}
+	
+	const WithPosition & delim() const
+	{
+		return m_delim;
+	}
+	
+	void setDelim( const WithPosition & d )
+	{
+		m_delim = d;
+	}
 
 private:
 	ParagraphSharedPointer m_text;
 	int m_level = 0;
 	typename Trait::String m_label;
+	WithPosition m_delim;
 
 	DISABLE_COPY( Heading )
 }; // class Heading

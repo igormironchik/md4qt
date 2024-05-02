@@ -289,6 +289,7 @@ TEST_CASE( "226" )
 	REQUIRE( !h->text()->isEmpty() );
 	REQUIRE( h->text()->items().size() == 1 );
 	REQUIRE( h->text()->items().at( 0 )->type() == MD::ItemType::Text );
+	REQUIRE( h->delim() == MD::WithPosition{ 2, 1, 2, 1 } );
 
 	REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 1 ).get() );
@@ -374,6 +375,7 @@ TEST_CASE( "228" )
 				REQUIRE( li->items().size() == 1 );
 				REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Heading );
 				auto h = static_cast< MD::Heading< TRAIT >* > ( li->items().at( 0 ).get() );
+				REQUIRE( h->delim() == MD::WithPosition{ 4, 3, 4, 3 } );
 				REQUIRE( !h->text()->isEmpty() );
 				REQUIRE( h->text()->items().size() == 1 );
 				REQUIRE( h->text()->items().at( 0 )->type() == MD::ItemType::Text );
@@ -432,6 +434,7 @@ TEST_CASE( "230" )
 		REQUIRE( !h->text()->isEmpty() );
 		REQUIRE( h->text()->items().size() == 1 );
 		REQUIRE( h->text()->items().at( 0 )->type() == MD::ItemType::Text );
+		REQUIRE( h->delim() == MD::WithPosition{ 2, 1, 2, 1 } );
 	}
 
 	{
@@ -442,6 +445,7 @@ TEST_CASE( "230" )
 		REQUIRE( !h->text()->isEmpty() );
 		REQUIRE( h->text()->items().size() == 1 );
 		REQUIRE( h->text()->items().at( 0 )->type() == MD::ItemType::Text );
+		REQUIRE( h->delim() == MD::WithPosition{ 2, 4, 2, 4 } );
 	}
 }
 
@@ -1014,6 +1018,7 @@ TEST_CASE( "243" )
 	
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Heading );
 	auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( h->delim() == MD::WithPosition{ 0, 0, 0, 0 } );
 	
 	typename TRAIT::String wd =
 #ifdef MD4QT_QT_SUPPORT

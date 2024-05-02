@@ -1702,6 +1702,9 @@ TEST_CASE( "046" )
 	static const std::vector< long long int > eline = { 1, 5, 8, 12, 17, 22 };
 	static const std::vector< long long int > pcolumn = { 0, 0, 4, 3, 0, 0 };
 	static const std::vector< long long int > pline = { 2, 6, 10, 14, 19, 24 };
+	static const std::vector< MD::WithPosition > delims = {
+		{ 0, 1, 8, 1 }, { 0, 5, 8, 5 }, { 2, 8, 2, 8 },
+		{ 0, 12, 1, 12 }, { 0, 17, 8, 17 }, { 0, 22, 8, 22 } };
 
 	int didx = 1;
 
@@ -1717,6 +1720,7 @@ TEST_CASE( "046" )
 			REQUIRE( h->startLine() == sline.at( idx ) );
 			REQUIRE( h->endColumn() == hecolumn.at( idx ) );
 			REQUIRE( h->endLine() == eline.at( idx ) );
+			REQUIRE( h->delim() == delims.at( idx ) );
 
 			{
 				REQUIRE( h->level() == j );
@@ -1762,6 +1766,7 @@ TEST_CASE( "046" )
 	REQUIRE( h->startLine() == 26 );
 	REQUIRE( h->endColumn() == 25 );
 	REQUIRE( h->endLine() == 26 );
+	REQUIRE( h->delim() == MD::WithPosition{ 0, 26, 2, 26 } );
 
 	REQUIRE( h->level() == 3 );
 	REQUIRE( h->text().get() );
@@ -1970,6 +1975,7 @@ TEST_CASE( "048" )
 		REQUIRE( h->startLine() == 0 );
 		REQUIRE( h->endColumn() == 8 );
 		REQUIRE( h->endLine() == 0 );
+		REQUIRE( h->delim() == MD::WithPosition{ 0, 0, 0, 0 } );
 
 		REQUIRE( h->text().get() );
 		auto p = h->text().get();
@@ -2007,6 +2013,7 @@ TEST_CASE( "048" )
 	REQUIRE( h->startLine() == 2 );
 	REQUIRE( h->endColumn() == 8 );
 	REQUIRE( h->endLine() == 2 );
+	REQUIRE( h->delim() == MD::WithPosition{ 0, 2, 0, 2 } );
 
 	REQUIRE( h->text().get() );
 	auto p = h->text().get();
@@ -2471,6 +2478,7 @@ TEST_CASE( "059" )
 		REQUIRE( i->startLine() == 0 );
 		REQUIRE( i->endColumn() == 21 );
 		REQUIRE( i->endLine() == 0 );
+		REQUIRE( i->delim() == MD::WithPosition{ 2, 0, 3, 0 } );
 	}
 	REQUIRE( b->items().at( 1 )->type() == MD::ItemType::List );
 	{
