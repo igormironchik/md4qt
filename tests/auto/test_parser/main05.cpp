@@ -1152,6 +1152,8 @@ TEST_CASE( "135" )
 	REQUIRE( c->startLine() == 0 );
 	REQUIRE( c->endColumn() == 11 );
 	REQUIRE( c->endLine() == 1 );
+	REQUIRE( c->startDelim() == MD::WithPosition{ 0, 0, 0, 0 } );
+	REQUIRE( c->endDelim() == MD::WithPosition{ 12, 1, 12, 1 } );
 
 	{
 		REQUIRE( dp->items().at( 1 )->type() == MD::ItemType::Text );
@@ -1318,6 +1320,8 @@ TEST_CASE( "137" )
 	REQUIRE( c->startLine() == 0 );
 	REQUIRE( c->endColumn() == 11 );
 	REQUIRE( c->endLine() == 1 );
+	REQUIRE( c->startDelim() == MD::WithPosition{ 0, 0, 0, 0 } );
+	REQUIRE( c->endDelim() == MD::WithPosition{ 12, 1, 12, 1 } );
 
 	REQUIRE( dp->items().at( 1 )->type() == MD::ItemType::Text );
 	auto dt = static_cast< MD::Text< TRAIT >* > ( dp->items().at( 1 ).get() );

@@ -1236,6 +1236,8 @@ TEST_CASE( "040" )
 	REQUIRE( c1->startLine() == 0 );
 	REQUIRE( c1->endColumn() == 15 );
 	REQUIRE( c1->endLine() == 0 );
+	REQUIRE( c1->startDelim() == MD::WithPosition{ 11, 0, 11, 0 } );
+	REQUIRE( c1->endDelim() == MD::WithPosition{ 16, 0, 16, 0 } );
 
 	REQUIRE( c1->text() == u8"code" );
 

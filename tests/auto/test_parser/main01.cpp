@@ -655,6 +655,8 @@ TEST_CASE( "011" )
 	REQUIRE( c->startLine() == 0 );
 	REQUIRE( c->endColumn() == 4 );
 	REQUIRE( c->endLine() == 0 );
+	REQUIRE( c->startDelim() == MD::WithPosition{ 0, 0, 0, 0 } );
+	REQUIRE( c->endDelim() == MD::WithPosition{ 5, 0, 5, 0 } );
 }
 
 /*
@@ -697,6 +699,8 @@ TEST_CASE( "012" )
 	REQUIRE( c->startLine() == 0 );
 	REQUIRE( c->endColumn() == 16 );
 	REQUIRE( c->endLine() == 0 );
+	REQUIRE( c->startDelim() == MD::WithPosition{ 12, 0, 12, 0 } );
+	REQUIRE( c->endDelim() == MD::WithPosition{ 17, 0, 17, 0 } );
 
 	REQUIRE( c->isInlined() == true );
 	REQUIRE( c->text() == u8"text" );
@@ -746,6 +750,8 @@ TEST_CASE( "013" )
 	REQUIRE( c->startLine() == 0 );
 	REQUIRE( c->endColumn() == 10 );
 	REQUIRE( c->endLine() == 1 );
+	REQUIRE( c->startDelim() == MD::WithPosition{ 0, 0, 1, 0 } );
+	REQUIRE( c->endDelim() == MD::WithPosition{ 11, 1, 12, 1 } );
 }
 
 TEST_CASE( "014" )

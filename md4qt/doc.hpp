@@ -1049,9 +1049,9 @@ public:
 		return m_startDelim;
 	}
 	
-	void setStartDelim( const WithPosition & d ) const
+	void setStartDelim( const WithPosition & d )
 	{
-		return m_startDelim = d;
+		m_startDelim = d;
 	}
 	
 	const WithPosition & endDelim() const
@@ -1059,9 +1059,9 @@ public:
 		return m_endDelim;
 	}
 	
-	void setEndDelim( const WithPosition & d ) const
+	void setEndDelim( const WithPosition & d )
 	{
-		return m_endDelim = d;
+		m_endDelim = d;
 	}
 
 protected:

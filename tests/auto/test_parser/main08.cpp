@@ -192,6 +192,9 @@ TEST_CASE( "222" )
 	REQUIRE( c->items().size() == 2 );
 	REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Math );
 	REQUIRE( c->items().at( 1 )->type() == MD::ItemType::Code );
+	auto ic = static_cast< MD::Code< TRAIT >* > ( c->items().at( 1 ).get() );
+	REQUIRE( ic->startDelim() == MD::WithPosition{ 39, 5, 39, 5 } );
+	REQUIRE( ic->endDelim() == MD::WithPosition{ 70, 5, 70, 5 } );
 }
 
 /*
@@ -930,6 +933,9 @@ TEST_CASE( "240" )
 		}
 	
 		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Code );
+		auto c = static_cast< MD::Code< TRAIT >* > ( p->items().at( 1 ).get() );
+		REQUIRE( c->startDelim() == MD::WithPosition{ 15, 0, 15, 0 } );
+		REQUIRE( c->endDelim() == MD::WithPosition{ 20, 0, 20, 0 } );
 		
 		{
 			REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Link );
@@ -952,6 +958,9 @@ TEST_CASE( "240" )
 		}
 	
 		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Code );
+		auto c = static_cast< MD::Code< TRAIT >* > ( p->items().at( 1 ).get() );
+		REQUIRE( c->startDelim() == MD::WithPosition{ 19, 2, 19, 2 } );
+		REQUIRE( c->endDelim() == MD::WithPosition{ 24, 2, 24, 2 } );
 		
 		{
 			REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Link );

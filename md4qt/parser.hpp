@@ -1683,6 +1683,12 @@ private:
 	bool isNewBlockIn( MdBlock< Trait > & fr,
 		long long int startLine, long long int endLine );
 	
+	void makeInlineCode( long long int startLine, long long int startPos,
+		long long int lastLine, long long int lastPos,
+		TextParsingOpts< Trait > & po,
+		typename Delims::const_iterator startDelimIt,
+		typename Delims::const_iterator endDelimIt );
+	
 private:
 	friend struct PrivateAccess;
 
@@ -5548,9 +5554,11 @@ Parser< Trait >::checkForAutolinkHtml( typename Delims::const_iterator it,
 
 template< class Trait >
 inline void
-makeInlineCode( long long int startLine, long long int startPos,
+Parser< Trait >::makeInlineCode( long long int startLine, long long int startPos,
 	long long int lastLine, long long int lastPos,
-	TextParsingOpts< Trait > & po )
+	TextParsingOpts< Trait > & po,
+	typename Delims::const_iterator startDelimIt,
+	typename Delims::const_iterator endDelimIt )
 {
 	typename Trait::String c;
 
@@ -5585,6 +5593,22 @@ makeInlineCode( long long int startLine, long long int startPos,
 		code->setStartLine( po.fr.data.at( startLine ).second.lineNumber );
 		code->setEndColumn( po.fr.data.at( lastLine ).first.virginPos( lastPos - 1 ) );
 		code->setEndLine( po.fr.data.at( lastLine ).second.lineNumber );
+		code->setStartDelim( {
+			po.fr.data.at( startDelimIt->m_line ).first.virginPos( startDelimIt->m_pos +
+				( startDelimIt->m_backslashed ? 1 : 0 ) ),
+			po.fr.data.at( startDelimIt->m_line ).second.lineNumber,
+			po.fr.data.at( startDelimIt->m_line ).first.virginPos( startDelimIt->m_pos +
+				( startDelimIt->m_backslashed ? 1 : 0 ) ) +
+				startDelimIt->m_len - 1 - ( startDelimIt->m_backslashed ? 1 : 0 ),
+			po.fr.data.at( startDelimIt->m_line ).second.lineNumber } );
+		code->setEndDelim( {
+			po.fr.data.at( endDelimIt->m_line ).first.virginPos( endDelimIt->m_pos +
+				( endDelimIt->m_backslashed ? 1 : 0 ) ),
+			po.fr.data.at( endDelimIt->m_line ).second.lineNumber,
+			po.fr.data.at( endDelimIt->m_line ).first.virginPos( endDelimIt->m_pos +
+				( endDelimIt->m_backslashed ? 1 : 0 ) +
+				endDelimIt->m_len - 1 - ( endDelimIt->m_backslashed ? 1 : 0 ) ),
+			po.fr.data.at( endDelimIt->m_line ).second.lineNumber } );
 		code->setOpts( po.opts );
 		code->openStyles() = po.openStyles;
 		po.openStyles.clear();
@@ -5632,7 +5656,8 @@ Parser< Trait >::checkForInlineCode( typename Delims::const_iterator it,
 					po.pos = start->m_pos + start->m_len;
 
 					makeInlineCode( start->m_line, start->m_pos + start->m_len,
-						it->m_line, it->m_pos + ( it->m_backslashed ? 1 : 0 ), po );
+						it->m_line, it->m_pos + ( it->m_backslashed ? 1 : 0 ), po,
+						start, it );
 
 					po.line = it->m_line;
 					po.pos = it->m_pos + it->m_len;

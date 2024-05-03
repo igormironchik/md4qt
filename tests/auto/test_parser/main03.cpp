@@ -124,6 +124,8 @@ TEST_CASE( "062" )
 		REQUIRE( c1->startLine() == 0 );
 		REQUIRE( c1->endColumn() == 4 );
 		REQUIRE( c1->endLine() == 0 );
+		REQUIRE( c1->startDelim() == MD::WithPosition{ 2, 0, 2, 0 } );
+		REQUIRE( c1->endDelim() == MD::WithPosition{ 5, 0, 5, 0 } );
 		REQUIRE( c1->text() == u8"**" );
 		REQUIRE( c1->openStyles().size() == 1 );
 		REQUIRE( c1->openStyles().at( 0 ) == MD::StyleDelim{ MD::ItalicText, 1, 0, 1, 0 } );
@@ -155,6 +157,8 @@ TEST_CASE( "062" )
 		REQUIRE( c1->startLine() == 2 );
 		REQUIRE( c1->endColumn() == 5 );
 		REQUIRE( c1->endLine() == 2 );
+		REQUIRE( c1->startDelim() == MD::WithPosition{ 2, 2, 3, 2 } );
+		REQUIRE( c1->endDelim() == MD::WithPosition{ 6, 2, 7, 2 } );
 		REQUIRE( c1->text() == u8"**" );
 		REQUIRE( c1->openStyles().size() == 1 );
 		REQUIRE( c1->openStyles().at( 0 ) == MD::StyleDelim{ MD::ItalicText, 1, 2, 1, 2 } );
@@ -186,6 +190,8 @@ TEST_CASE( "062" )
 		REQUIRE( c1->startLine() == 4 );
 		REQUIRE( c1->endColumn() == 8 );
 		REQUIRE( c1->endLine() == 4 );
+		REQUIRE( c1->startDelim() == MD::WithPosition{ 2, 4, 3, 4 } );
+		REQUIRE( c1->endDelim() == MD::WithPosition{ 9, 4, 10, 4 } );
 		REQUIRE( c1->text() == u8"**`**" );
 		REQUIRE( c1->openStyles().size() == 1 );
 		REQUIRE( c1->openStyles().at( 0 ) == MD::StyleDelim{ MD::ItalicText, 1, 4, 1, 4 } );
@@ -210,6 +216,8 @@ TEST_CASE( "062" )
 		REQUIRE( c1->startLine() == 6 );
 		REQUIRE( c1->endColumn() == 3 );
 		REQUIRE( c1->endLine() == 6 );
+		REQUIRE( c1->startDelim() == MD::WithPosition{ 2, 6, 2, 6 } );
+		REQUIRE( c1->endDelim() == MD::WithPosition{ 4, 6, 4, 6 } );
 		REQUIRE( c1->text() == u8"*" );
 		REQUIRE( c1->openStyles().size() == 1 );
 		REQUIRE( c1->openStyles().at( 0 ) == MD::StyleDelim{ MD::BoldText, 0, 6, 1, 6 } );
