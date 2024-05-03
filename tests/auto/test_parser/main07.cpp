@@ -109,6 +109,9 @@ TEST_CASE( "184" )
 				REQUIRE( c->startLine() == 6 );
 				REQUIRE( c->endColumn() == 7 );
 				REQUIRE( c->endLine() == 6 );
+				REQUIRE( c->startDelim() == MD::WithPosition{ 4, 5, 6, 5 } );
+				REQUIRE( c->endDelim() == MD::WithPosition{ 4, 7, 6, 7 } );
+				REQUIRE( c->syntaxPos() == MD::WithPosition{ 7, 5, 10, 5 } );
 				REQUIRE( c->text() == u8"code" );
 			}
 
@@ -180,6 +183,9 @@ TEST_CASE( "186" )
 	REQUIRE( c->endColumn() == 5 );
 	REQUIRE( c->endLine() == 1 );
 	REQUIRE( c->text() == u8"- code" );
+	REQUIRE( c->startDelim() == MD::WithPosition{ 0, 0, 2, 0 } );
+	REQUIRE( c->endDelim() == MD::WithPosition{ 0, 2, 2, 2 } );
+	REQUIRE( c->syntaxPos() == MD::WithPosition{ -1, -1, -1, -1 } );
 }
 
 /*
@@ -488,7 +494,7 @@ TEST_CASE( "189" )
 
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Code );
 	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 2 ).get() );
-	REQUIRE( !c->isInlined() );
+	REQUIRE( !c->isInline() );
 	REQUIRE( c->text() == u8"code" );
 }
 
@@ -509,6 +515,9 @@ TEST_CASE( "190" )
 	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( c->syntax() == u8"c++" );
 	REQUIRE( c->text() == u8"    code" );
+	REQUIRE( c->startDelim() == MD::WithPosition{ 1, 0, 3, 0 } );
+	REQUIRE( c->endDelim() == MD::WithPosition{ 1, 2, 3, 2 } );
+	REQUIRE( c->syntaxPos() == MD::WithPosition{ 4, 0, 6, 0 } );
 }
 
 /*
@@ -534,6 +543,9 @@ TEST_CASE( "191" )
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Code );
 	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 2 ).get() );
 	REQUIRE( c->text() == u8"code" );
+	REQUIRE( c->startDelim() == MD::WithPosition{ 0, 4, 2, 4 } );
+	REQUIRE( c->endDelim() == MD::WithPosition{ 0, 6, 2, 6 } );
+	REQUIRE( c->syntaxPos() == MD::WithPosition{ -1, -1, -1, -1 } );
 	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Paragraph );
 
 	REQUIRE( doc->footnotesMap().size() == 1 );
@@ -747,7 +759,7 @@ TEST_CASE( "199" )
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Code );
 	auto c = static_cast< MD::Code< TRAIT > * > ( p->items().at( 1 ).get() );
-	REQUIRE( c->isInlined() );
+	REQUIRE( c->isInline() );
 	REQUIRE( c->text() == u8"    text    " );
 }
 

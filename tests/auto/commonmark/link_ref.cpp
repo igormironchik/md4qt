@@ -428,7 +428,7 @@ TEST_CASE( "211" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Code );
 	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( !c->isInlined() );
+	REQUIRE( !c->isInline() );
 	REQUIRE( c->text() == u8"[foo]: /url \"title\"" );
 
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
@@ -449,7 +449,7 @@ TEST_CASE( "212" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Code );
 	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( !c->isInlined() );
+	REQUIRE( !c->isInline() );
 	REQUIRE( c->text() == u8"[foo]: /url" );
 
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );

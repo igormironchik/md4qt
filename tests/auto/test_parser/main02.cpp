@@ -230,8 +230,11 @@ TEST_CASE( "032" )
 	REQUIRE( c->startLine() == 1 );
 	REQUIRE( c->endColumn() == 18 );
 	REQUIRE( c->endLine() == 2 );
+	REQUIRE( c->startDelim() == MD::WithPosition{ 2, 0, 4, 0 } );
+	REQUIRE( c->endDelim() == MD::WithPosition{ 2, 3, 4, 3 } );
+	REQUIRE( c->syntaxPos() == MD::WithPosition{ 5, 0, 7, 0 } );
 
-	REQUIRE( c->isInlined() == false );
+	REQUIRE( c->isInline() == false );
 	REQUIRE( c->text() == u8"if( a < b )\n  do_something();" );
 }
 
@@ -2195,8 +2198,11 @@ TEST_CASE( "052" )
 		REQUIRE( c->startLine() == 1 );
 		REQUIRE( c->endColumn() == 19 );
 		REQUIRE( c->endLine() == 1 );
+		REQUIRE( c->startDelim() == MD::WithPosition{ 0, 0, 2, 0 } );
+		REQUIRE( c->endDelim() == MD::WithPosition{ 0, 2, 2, 2 } );
+		REQUIRE( c->syntaxPos() == MD::WithPosition{ 3, 0, 6, 0 } );
 
-		REQUIRE( c->isInlined() == false );
+		REQUIRE( c->isInline() == false );
 		REQUIRE( c->text() == u8"_```` *bold* _italic" );
 		REQUIRE( c->syntax() == u8"code" );
 	}
@@ -2223,8 +2229,11 @@ TEST_CASE( "053" )
 		REQUIRE( c->startLine() == 0 );
 		REQUIRE( c->endColumn() == 6 );
 		REQUIRE( c->endLine() == 0 );
-		REQUIRE( !c->isInlined() );
+		REQUIRE( !c->isInline() );
 		REQUIRE( c->text().isEmpty() );
+		REQUIRE( c->startDelim() == MD::WithPosition{ 0, 0, 2, 0 } );
+		REQUIRE( c->endDelim() == MD::WithPosition{ 0, 1, 2, 1 } );
+		REQUIRE( c->syntaxPos() == MD::WithPosition{ 3, 0, 5, 0 } );
 	}
 }
 
@@ -2245,12 +2254,15 @@ TEST_CASE( "054" )
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Code );
 		auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 1 ).get() );
 		REQUIRE( c->syntax() == u8"java" );
-		REQUIRE( !c->isInlined() );
+		REQUIRE( !c->isInline() );
 		REQUIRE( c->text().isEmpty() );
 		REQUIRE( c->startColumn() == 7 );
 		REQUIRE( c->startLine() == 0 );
 		REQUIRE( c->endColumn() == 7 );
 		REQUIRE( c->endLine() == 0 );
+		REQUIRE( c->startDelim() == MD::WithPosition{ 0, 0, 2, 0 } );
+		REQUIRE( c->endDelim() == MD::WithPosition{ -1, -1, -1, -1 } );
+		REQUIRE( c->syntaxPos() == MD::WithPosition{ 3, 0, 6, 0 } );
 	}
 }
 
@@ -2382,7 +2394,7 @@ TEST_CASE( "056" )
 	REQUIRE( c->endColumn() == 24 );
 	REQUIRE( c->endLine() == 6 );
 
-	REQUIRE( c->isInlined() == false );
+	REQUIRE( c->isInline() == false );
 	REQUIRE( c->text() ==
 		u8"if( a > b )\n\n  do_something();\n\nelse\n\n  dont_do_anything();" );
 }
@@ -2411,8 +2423,11 @@ TEST_CASE( "057" )
 	REQUIRE( c->startLine() == 1 );
 	REQUIRE( c->endColumn() == 3 );
 	REQUIRE( c->endLine() == 3 );
+	REQUIRE( c->startDelim() == MD::WithPosition{ 0, 0, 2, 0 } );
+	REQUIRE( c->endDelim() == MD::WithPosition{ 0, 4, 2, 4 } );
+	REQUIRE( c->syntaxPos() == MD::WithPosition{ -1, -1, -1, -1 } );
 
-	REQUIRE( c->isInlined() == false );
+	REQUIRE( c->isInline() == false );
 	REQUIRE( c->text() == u8"code\n\ncode" );
 }
 

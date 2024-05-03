@@ -138,6 +138,9 @@ TEST_CASE( "122" )
 	REQUIRE( m->startLine() == 1 );
 	REQUIRE( m->endColumn() == 1 );
 	REQUIRE( m->endLine() == 9 );
+	REQUIRE( m->startDelim() == MD::WithPosition{ 0, 0, 2, 0 } );
+	REQUIRE( m->endDelim() == MD::WithPosition{ 0, 10, 2, 10 } );
+	REQUIRE( m->syntaxPos() == MD::WithPosition{ 3, 0, 6, 0 } );
 }
 
 /*
@@ -313,7 +316,10 @@ TEST_CASE( "124" )
 	REQUIRE( c->endColumn() == 39 );
 	REQUIRE( c->endLine() == 12 );
 	REQUIRE( c->syntax() == u8"cpp" );
-	REQUIRE( !c->isInlined() );
+	REQUIRE( !c->isInline() );
+	REQUIRE( c->startDelim() == MD::WithPosition{ 3, 3, 5, 3 } );
+	REQUIRE( c->endDelim() == MD::WithPosition{ 3, 13, 5, 13 } );
+	REQUIRE( c->syntaxPos() == MD::WithPosition{ 6, 3, 8, 3 } );
 	REQUIRE( c->text() == u8"template< class Trait >\n"
 						  "inline void\n"
 						  "Parser< Trait >::parse( StringListStream< Trait > & stream,\n"
@@ -759,12 +765,15 @@ TEST_CASE( "128" )
 
 		auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 2 ).get() );
 
-		REQUIRE( !c->isInlined() );
+		REQUIRE( !c->isInline() );
 		REQUIRE( c->text() == u8"#include <iostream>\n\nint main() { return 0; }" );
 		REQUIRE( c->startColumn() == 0 );
 		REQUIRE( c->startLine() == 2 );
 		REQUIRE( c->endColumn() == 23 );
 		REQUIRE( c->endLine() == 4 );
+		REQUIRE( c->startDelim() == MD::WithPosition{ 0, 1, 2, 1 } );
+		REQUIRE( c->endDelim() == MD::WithPosition{ 0, 5, 2, 5 } );
+		REQUIRE( c->syntaxPos() == MD::WithPosition{ 3, 1, 5, 1 } );
 	}
 
 	{
@@ -1434,6 +1443,9 @@ TEST_CASE( "138" )
 		REQUIRE( c->startLine() == 6 );
 		REQUIRE( c->endColumn() == 6 );
 		REQUIRE( c->endLine() == 6 );
+		REQUIRE( c->startDelim() == MD::WithPosition{ 3, 5, 5, 5 } );
+		REQUIRE( c->endDelim() == MD::WithPosition{ 3, 7, 5, 7 } );
+		REQUIRE( c->syntaxPos() == MD::WithPosition{ -1, -1, -1, -1 } );
 		REQUIRE( c->text() == u8"code" );
 	}
 
@@ -1853,6 +1865,9 @@ TEST_CASE( "143" )
 	REQUIRE( c->startLine() == 1 );
 	REQUIRE( c->endColumn() == 2 );
 	REQUIRE( c->endLine() == 5 );
+	REQUIRE( c->startDelim() == MD::WithPosition{ 0, 0, 2, 0 } );
+	REQUIRE( c->endDelim() == MD::WithPosition{ 0, 6, 2, 6 } );
+	REQUIRE( c->syntaxPos() == MD::WithPosition{ -1, -1, -1, -1 } );
 
 	REQUIRE( c->text() == u8"/**\n * Code\n *\n * Code\n */" );
 }
@@ -2167,6 +2182,9 @@ TEST_CASE( "148" )
 	REQUIRE( c->startLine() == 8 );
 	REQUIRE( c->endColumn() == 7 );
 	REQUIRE( c->endLine() == 8 );
+	REQUIRE( c->startDelim() == MD::WithPosition{ 4, 7, 6, 7 } );
+	REQUIRE( c->endDelim() == MD::WithPosition{ 4, 9, 6, 9 } );
+	REQUIRE( c->syntaxPos() == MD::WithPosition{ -1, -1, -1, -1 } );
 	REQUIRE( c->text() == u8"code" );
 }
 

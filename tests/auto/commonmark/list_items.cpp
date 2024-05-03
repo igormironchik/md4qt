@@ -39,7 +39,7 @@ TEST_CASE( "253" )
 	{
 		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Code );
 		auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 2 ).get() );
-		REQUIRE( !c->isInlined() );
+		REQUIRE( !c->isInline() );
 		REQUIRE( c->text() == u8"indented code" );
 	}
 
@@ -95,7 +95,7 @@ TEST_CASE( "254" )
 	{
 		REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Code );
 		auto c = static_cast< MD::Code< TRAIT >* > ( li->items().at( 1 ).get() );
-		REQUIRE( !c->isInlined() );
+		REQUIRE( !c->isInline() );
 		REQUIRE( c->text() == u8"indented code" );
 	}
 
@@ -208,7 +208,7 @@ TEST_CASE( "257" )
 
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Code );
 	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 2 ).get() );
-	REQUIRE( !c->isInlined() );
+	REQUIRE( !c->isInline() );
 	REQUIRE( c->text() == u8" two" );
 }
 
@@ -420,7 +420,7 @@ TEST_CASE( "263" )
 	{
 		REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Code );
 		auto c = static_cast< MD::Code< TRAIT >* > ( li->items().at( 1 ).get() );
-		REQUIRE( !c->isInlined() );
+		REQUIRE( !c->isInline() );
 		REQUIRE( c->text() == u8"bar" );
 	}
 
@@ -475,7 +475,7 @@ TEST_CASE( "264" )
 	{
 		REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Code );
 		auto c = static_cast< MD::Code< TRAIT >* > ( li->items().at( 1 ).get() );
-		REQUIRE( !c->isInlined() );
+		REQUIRE( !c->isInline() );
 		REQUIRE( c->text() == u8"bar\n\n\nbaz" );
 	}
 }
@@ -624,7 +624,7 @@ TEST_CASE( "270" )
 	{
 		REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Code );
 		auto c = static_cast< MD::Code< TRAIT >* > ( li->items().at( 1 ).get() );
-		REQUIRE( !c->isInlined() );
+		REQUIRE( !c->isInline() );
 		REQUIRE( c->text() == u8"bar" );
 	}
 }
@@ -658,7 +658,7 @@ TEST_CASE( "271" )
 	{
 		REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Code );
 		auto c = static_cast< MD::Code< TRAIT >* > ( li->items().at( 1 ).get() );
-		REQUIRE( !c->isInlined() );
+		REQUIRE( !c->isInline() );
 		REQUIRE( c->text() == u8"bar" );
 	}
 }

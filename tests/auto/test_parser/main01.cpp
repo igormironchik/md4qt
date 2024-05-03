@@ -649,7 +649,7 @@ TEST_CASE( "011" )
 
 	auto c = static_cast< MD::Code< TRAIT >* > ( dp->items().at( 0 ).get() );
 
-	REQUIRE( c->isInlined() == true );
+	REQUIRE( c->isInline() == true );
 	REQUIRE( c->text() == u8"code" );
 	REQUIRE( c->startColumn() == 1 );
 	REQUIRE( c->startLine() == 0 );
@@ -702,7 +702,7 @@ TEST_CASE( "012" )
 	REQUIRE( c->startDelim() == MD::WithPosition{ 12, 0, 12, 0 } );
 	REQUIRE( c->endDelim() == MD::WithPosition{ 17, 0, 17, 0 } );
 
-	REQUIRE( c->isInlined() == true );
+	REQUIRE( c->isInline() == true );
 	REQUIRE( c->text() == u8"text" );
 
 	REQUIRE( dp->items().at( 2 )->type() == MD::ItemType::Text );
@@ -744,7 +744,7 @@ TEST_CASE( "013" )
 
 	auto c = static_cast< MD::Code< TRAIT >* > ( dp->items().at( 0 ).get() );
 
-	REQUIRE( c->isInlined() == true );
+	REQUIRE( c->isInline() == true );
 	REQUIRE( c->text() == u8"Use this `code` in the code" );
 	REQUIRE( c->startColumn() == 2 );
 	REQUIRE( c->startLine() == 0 );
@@ -1365,8 +1365,11 @@ TEST_CASE( "020" )
 	REQUIRE( c->startLine() == 1 );
 	REQUIRE( c->endColumn() == 20 );
 	REQUIRE( c->endLine() == 4 );
+	REQUIRE( c->startDelim() == MD::WithPosition{ 0, 0, 2, 0 } );
+	REQUIRE( c->endDelim() == MD::WithPosition{ 0, 5, 2, 5 } );
+	REQUIRE( c->syntaxPos() == MD::WithPosition{ 3, 0, 5, 0 } );
 
-	REQUIRE( c->isInlined() == false );
+	REQUIRE( c->isInline() == false );
 	REQUIRE( c->text() ==
 		u8"if( a > b )\n  do_something();\nelse\n  dont_do_anything();" );
 	REQUIRE( c->syntax() == u8"cpp" );
@@ -1394,8 +1397,11 @@ TEST_CASE( "021" )
 	REQUIRE( c->startLine() == 0 );
 	REQUIRE( c->endColumn() == 24 );
 	REQUIRE( c->endLine() == 3 );
+	REQUIRE( c->startDelim() == MD::WithPosition{ -1, -1, -1, -1 } );
+	REQUIRE( c->endDelim() == MD::WithPosition{ -1, -1, -1, -1 } );
+	REQUIRE( c->syntaxPos() == MD::WithPosition{ -1, -1, -1, -1 } );
 
-	REQUIRE( c->isInlined() == false );
+	REQUIRE( c->isInline() == false );
 	REQUIRE( c->text() ==
 		u8"if( a > b )\n  do_something();\nelse\n  dont_do_anything();" );
 }
@@ -1424,7 +1430,7 @@ TEST_CASE( "022" )
 	REQUIRE( c->endColumn() == 21 );
 	REQUIRE( c->endLine() == 3 );
 
-	REQUIRE( c->isInlined() == false );
+	REQUIRE( c->isInline() == false );
 	REQUIRE( c->text() ==
 		u8"if( a > b )\n  do_something();\nelse\n  dont_do_anything();" );
 }
@@ -1934,7 +1940,7 @@ TEST_CASE( "027" )
 			REQUIRE( c->endColumn() == 9 );
 			REQUIRE( c->endLine() == 2 + 4 * i );
 
-			REQUIRE( c->isInlined() == false );
+			REQUIRE( c->isInline() == false );
 			REQUIRE( c->text() == u8"code" );
 		}
 	}
@@ -2025,8 +2031,11 @@ TEST_CASE( "028" )
 			REQUIRE( c->startLine() == 3 + 6 * i );
 			REQUIRE( c->endColumn() == 7 );
 			REQUIRE( c->endLine() == 3 + 6 * i );
+			REQUIRE( c->startDelim() == MD::WithPosition{ 4, 2 + 6 * i, 6, 2 + 6 * i } );
+			REQUIRE( c->endDelim() == MD::WithPosition{ 4, 4 + 6 * i, 6, 4 + 6 * i } );
+			REQUIRE( c->syntaxPos() == MD::WithPosition{ -1, -1, -1, -1 } );
 
-			REQUIRE( c->isInlined() == false );
+			REQUIRE( c->isInline() == false );
 			REQUIRE( c->text() == u8"code" );
 		}
 	}

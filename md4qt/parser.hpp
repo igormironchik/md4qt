@@ -378,7 +378,8 @@ isCodeFences( const typename Trait::String & s, bool closing = false )
 
 template< class Trait >
 inline typename Trait::String
-readEscapedSequence( long long int i, const typename Trait::String & str )
+readEscapedSequence( long long int i, const typename Trait::String & str,
+	long long int * endPos = nullptr )
 {
 	bool backslash = false;
 	const auto start = i;
@@ -403,6 +404,9 @@ readEscapedSequence( long long int i, const typename Trait::String & str )
 
 		++i;
 	}
+	
+	if( endPos )
+		*endPos = i - 1;
 
 	return str.sliced( start, i - start );
 }
@@ -444,9 +448,13 @@ removeBackslashes( const typename Trait::InternalString & s )
 //! \return Is string a start of code?
 template< class Trait >
 inline bool
-isStartOfCode( const typename Trait::String & str, typename Trait::String * syntax = nullptr )
+isStartOfCode( const typename Trait::String & str, typename Trait::String * syntax = nullptr,
+	WithPosition * delim = nullptr, WithPosition * syntaxPos = nullptr )
 {
 	long long int p = skipSpaces< Trait >( 0, str );
+	
+	if( delim )
+		delim->setStartColumn( p );
 
 	if( p > 3 )
 		return false;
@@ -470,6 +478,9 @@ isStartOfCode( const typename Trait::String & str, typename Trait::String * synt
 			++c;
 			++p;
 		}
+		
+		if( delim )
+			delim->setEndColumn( p - 1 );
 
 		if( c < 3 )
 			return false;
@@ -477,10 +488,19 @@ isStartOfCode( const typename Trait::String & str, typename Trait::String * synt
 		if( syntax )
 		{
 			p = skipSpaces< Trait >( p, str );
+			long long int endSyntaxPos = p;
 
 			if( p < str.size() )
+			{
 				*syntax = removeBackslashes< Trait >(
-					readEscapedSequence< Trait >( p, str ) ).asString();
+					readEscapedSequence< Trait >( p, str, &endSyntaxPos ) ).asString();
+				
+				if( syntaxPos )
+				{
+					syntaxPos->setStartColumn( p );
+					syntaxPos->setEndColumn( endSyntaxPos );
+				}
+			}
 		}
 
 		return true;
@@ -1315,7 +1335,10 @@ private:
 		bool collectRefLinks,
 		int indent, const typename Trait::String & syntax,
 		long long int emptyColumn, long long int startLine,
-		bool fensedCode );
+		bool fensedCode,
+		const WithPosition & startDelim = {},
+		const WithPosition & endDelim = {},
+		const WithPosition & syntaxPos = {} );
 	void parseListItem( MdBlock< Trait > & fr,
 		std::shared_ptr< Block< Trait > > parent,
 		std::shared_ptr< Document< Trait > > doc,
@@ -8900,9 +8923,23 @@ Parser< Trait >::parseCode( MdBlock< Trait > & fr,
 
 		if( indent != fr.data.front().first.length() )
 		{
+			WithPosition startDelim, endDelim, syntaxPos;
 			typename Trait::String syntax;
-			isStartOfCode< Trait >( fr.data.front().first.asString(), &syntax );
+			isStartOfCode< Trait >( fr.data.front().first.asString(), &syntax,
+				&startDelim, &syntaxPos );
 			syntax = replaceEntity< Trait >( syntax );
+			startDelim.setStartLine( fr.data.front().second.lineNumber );
+			startDelim.setEndLine( startDelim.startLine() );
+			startDelim.setStartColumn( fr.data.front().first.virginPos( startDelim.startColumn() ) );
+			startDelim.setEndColumn( fr.data.front().first.virginPos( startDelim.endColumn() ) );
+			
+			if( syntaxPos.startColumn() != -1 )
+			{
+				syntaxPos.setStartLine( startDelim.startLine() );
+				syntaxPos.setEndLine( startDelim.startLine() );
+				syntaxPos.setStartColumn( fr.data.front().first.virginPos( syntaxPos.startColumn() ) );
+				syntaxPos.setEndColumn( fr.data.front().first.virginPos( syntaxPos.endColumn() ) );
+			}
 
 			const long long int startPos = fr.data.front().first.virginPos( indent );
 			const long long int emptyColumn = fr.data.front().first.virginPos(
@@ -8913,7 +8950,21 @@ Parser< Trait >::parseCode( MdBlock< Trait > & fr,
 			const long long int endLine = fr.data.back().second.lineNumber;
 
 			fr.data.erase( fr.data.cbegin() );
-			fr.data.erase( std::prev( fr.data.cend() ) );
+			
+			{
+				const auto it =  std::prev( fr.data.cend() );
+				
+				if( it->second.lineNumber > -1 )
+				{
+					endDelim.setStartColumn( it->first.virginPos(
+						skipSpaces< Trait > ( 0, it->first.asString() ) ) );
+					endDelim.setStartLine( it->second.lineNumber );
+					endDelim.setEndLine( endDelim.startLine() );
+					endDelim.setEndColumn( it->first.virginPos( it->first.length() - 1 ) );
+				}
+				
+				fr.data.erase( it );
+			}
 
 			if( syntax.toLower() == Trait::latin1ToString( "math" ) )
 			{
@@ -8958,6 +9009,9 @@ Parser< Trait >::parseCode( MdBlock< Trait > & fr,
 
 					m->setInline( false );
 					m->setExpr( math );
+					m->setStartDelim( startDelim );
+					m->setEndDelim( endDelim );
+					m->setSyntaxPos( syntaxPos );
 					p->appendItem( m );
 
 					parent->appendItem( p );
@@ -8965,7 +9019,7 @@ Parser< Trait >::parseCode( MdBlock< Trait > & fr,
 			}
 			else
 				parseCodeIndentedBySpaces( fr, parent, collectRefLinks, indent, syntax,
-					emptyColumn, startLine, true );
+					emptyColumn, startLine, true, startDelim, endDelim, syntaxPos );
 		}
 	}
 }
@@ -8977,7 +9031,10 @@ Parser< Trait >::parseCodeIndentedBySpaces( MdBlock< Trait > & fr,
 	bool collectRefLinks, int indent,
 	const typename Trait::String & syntax,
 	long long int emptyColumn, long long int startLine,
-	bool fensedCode )
+	bool fensedCode,
+	const WithPosition & startDelim,
+	const WithPosition & endDelim,
+	const WithPosition & syntaxPos )
 {
 	if( !collectRefLinks )
 	{
@@ -9003,6 +9060,9 @@ Parser< Trait >::parseCodeIndentedBySpaces( MdBlock< Trait > & fr,
 
 		std::shared_ptr< Code< Trait > > codeItem( new Code< Trait >( code, fensedCode, false ) );
 		codeItem->setSyntax( syntax );
+		codeItem->setStartDelim( startDelim );
+		codeItem->setEndDelim( endDelim );
+		codeItem->setSyntaxPos( syntaxPos );
 
 		if( !fr.data.empty() )
 		{

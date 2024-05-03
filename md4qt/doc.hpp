@@ -437,52 +437,6 @@ private:
 
 
 //
-// Math
-//
-
-//! Math expression.
-template< class Trait >
-class Math final
-	:	public Item< Trait >
-{
-public:
-	Math() = default;
-	~Math() override = default;
-
-	ItemType type() const override
-	{
-		return ItemType::Math;
-	}
-
-	const typename Trait::String & expr() const
-	{
-		return m_expr;
-	}
-
-	void setExpr( const typename Trait::String & e )
-	{
-		m_expr = e;
-	}
-
-	bool isInline() const
-	{
-		return m_inline;
-	}
-
-	void setInline( bool on = true )
-	{
-		m_inline = on;
-	}
-
-private:
-	typename Trait::String m_expr;
-	bool m_inline = false;
-
-	DISABLE_COPY( Math )
-}; // class Math
-
-
-//
 // LineBreak
 //
 
@@ -1001,7 +955,7 @@ private:
 
 //! Code.
 template< class Trait >
-class Code final
+class Code
 	:	public ItemWithOpts< Trait >
 {
 public:
@@ -1029,9 +983,14 @@ public:
 		m_text = t;
 	}
 
-	bool isInlined() const
+	bool isInline() const
 	{
 		return m_inlined;
+	}
+	
+	void setInline( bool on = true )
+	{
+		m_inlined = on;
 	}
 
 	const typename Trait::String & syntax() const
@@ -1042,6 +1001,16 @@ public:
 	void setSyntax( const typename Trait::String & s )
 	{
 		m_syntax = s;
+	}
+	
+	const WithPosition & syntaxPos() const
+	{
+		return m_syntaxPos;
+	}
+	
+	void setSyntaxPos( const WithPosition & p )
+	{
+		m_syntaxPos = p;
 	}
 	
 	const WithPosition & startDelim() const
@@ -1075,14 +1044,52 @@ protected:
 
 private:
 	typename Trait::String m_text;
-	bool m_inlined;
-	bool m_fensed;
+	bool m_inlined = true;
+	bool m_fensed = false;
 	typename Trait::String m_syntax;
-	WithPosition m_startDelim;
-	WithPosition m_endDelim;
+	WithPosition m_startDelim = {};
+	WithPosition m_endDelim = {};
+	WithPosition m_syntaxPos = {};
 
 	DISABLE_COPY( Code )
 }; // class Code
+
+
+//
+// Math
+//
+
+//! Math expression.
+template< class Trait >
+class Math final
+	:	public Code< Trait >
+{
+public:
+	Math()
+		:	Code< Trait >( typename Trait::String(), false, true )
+	{
+	}
+	
+	~Math() override = default;
+
+	ItemType type() const override
+	{
+		return ItemType::Math;
+	}
+
+	const typename Trait::String & expr() const
+	{
+		return Code< Trait >::text();
+	}
+
+	void setExpr( const typename Trait::String & e )
+	{
+		Code< Trait >::setText( e );
+	}
+
+private:
+	DISABLE_COPY( Math )
+}; // class Math
 
 
 //

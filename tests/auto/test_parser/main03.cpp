@@ -76,7 +76,7 @@ TEST_CASE( "061" )
 	REQUIRE( c->startLine() == 2 );
 	REQUIRE( c->endColumn() == 23 );
 	REQUIRE( c->endLine() == 2 );
-	REQUIRE( c->isInlined() == false );
+	REQUIRE( c->isInline() == false );
 	REQUIRE( c->syntax().isEmpty() );
 	REQUIRE( c->text() == u8"<code goes here>" );
 }
@@ -438,6 +438,9 @@ TEST_CASE( "066" )
 	REQUIRE( m->endLine() == 1 );
 	REQUIRE( m->expr() == u8"x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}" );
 	REQUIRE( !m->isInline() );
+	REQUIRE( m->startDelim() == MD::WithPosition{ 0, 0, 2, 0 } );
+	REQUIRE( m->endDelim() == MD::WithPosition{ 0, 2, 2, 2 } );
+	REQUIRE( m->syntaxPos() == MD::WithPosition{ 3, 0, 6, 0 } );
 }
 
 /*
@@ -552,6 +555,9 @@ TEST_CASE( "067" )
 		REQUIRE( c->startLine() == 6 );
 		REQUIRE( c->endColumn() == 6 );
 		REQUIRE( c->endLine() == 6 );
+		REQUIRE( c->startDelim() == MD::WithPosition{ 3, 5, 5, 5 } );
+		REQUIRE( c->endDelim() == MD::WithPosition{ 3, 7, 5, 7 } );
+		REQUIRE( c->syntaxPos() == MD::WithPosition{ -1, -1, -1, -1 } );
 
 		REQUIRE( c->text() == u8"Code" );
 	}

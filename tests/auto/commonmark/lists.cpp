@@ -515,7 +515,7 @@ TEST_CASE( "309" )
 
 	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Code );
 	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 3 ).get() );
-	REQUIRE( !c->isInlined() );
+	REQUIRE( !c->isInline() );
 	REQUIRE( c->text() == u8"code" );
 }
 
@@ -656,7 +656,7 @@ TEST_CASE( "313" )
 
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Code );
 	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 2 ).get() );
-	REQUIRE( !c->isInlined() );
+	REQUIRE( !c->isInline() );
 	REQUIRE( c->text() == u8"3. c" );
 }
 

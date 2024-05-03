@@ -79,6 +79,9 @@ TEST_CASE( "153" )
 	REQUIRE( c->startLine() == 3 );
 	REQUIRE( c->endColumn() == 5 );
 	REQUIRE( c->endLine() == 16 );
+	REQUIRE( c->startDelim() == MD::WithPosition{ 4, 2, 6, 2 } );
+	REQUIRE( c->endDelim() == MD::WithPosition{ 4, 17, 6, 17 } );
+	REQUIRE( c->syntaxPos() == MD::WithPosition{ 7, 2, 16, 2 } );
 	REQUIRE( c->text() == u8"\n// very bad\nfunction\n*\nfoo() {\n  // ...\n}\n\n"
 		"// very bad\nconst wat = function\n*\n() {\n  // ...\n};" );
 }
@@ -139,6 +142,9 @@ TEST_CASE( "154" )
 	REQUIRE( c->startLine() == 3 );
 	REQUIRE( c->endColumn() == 4 );
 	REQUIRE( c->endLine() == 12 );
+	REQUIRE( c->startDelim() == MD::WithPosition{ 4, 2, 6, 2 } );
+	REQUIRE( c->endDelim() == MD::WithPosition{ 4, 13, 6, 13 } );
+	REQUIRE( c->syntaxPos() == MD::WithPosition{ 7, 2, 16, 2 } );
 	REQUIRE( c->text() == u8"/**\n * make() returns a new element\n * based on the passed-in "
 		"tag name\n */\nfunction make(tag) {\n\n  // ...\n\n  return element;\n}" );
 }
@@ -201,6 +207,9 @@ TEST_CASE( "155" )
 		REQUIRE( c->endColumn() == 7 );
 		REQUIRE( c->endLine() == 3 );
 		REQUIRE( c->text() == u8"int i;" );
+		REQUIRE( c->startDelim() == MD::WithPosition{ 2, 2, 4, 2 } );
+		REQUIRE( c->endDelim() == MD::WithPosition{ 2, 4, 4, 4 } );
+		REQUIRE( c->syntaxPos() == MD::WithPosition{ -1, -1, -1, -1 } );
 	}
 
 	{
@@ -226,6 +235,9 @@ TEST_CASE( "155" )
 		REQUIRE( c->startLine() == 9 );
 		REQUIRE( c->endColumn() == 7 );
 		REQUIRE( c->endLine() == 9 );
+		REQUIRE( c->startDelim() == MD::WithPosition{ 2, 8, 4, 8 } );
+		REQUIRE( c->endDelim() == MD::WithPosition{ -1, -1, -1, -1 } );
+		REQUIRE( c->syntaxPos() == MD::WithPosition{ -1, -1, -1, -1 } );
 		REQUIRE( c->text() == u8"int i;" );
 	}
 
@@ -236,6 +248,9 @@ TEST_CASE( "155" )
 	REQUIRE( c->endColumn() == 5 );
 	REQUIRE( c->endLine() == 12 );
 	REQUIRE( c->text() == u8"int i;" );
+	REQUIRE( c->startDelim() == MD::WithPosition{ 0, 11, 2, 11 } );
+	REQUIRE( c->endDelim() == MD::WithPosition{ 0, 13, 2, 13 } );
+	REQUIRE( c->syntaxPos() == MD::WithPosition{ -1, -1, -1, -1 } );
 }
 
 /*
@@ -617,6 +632,9 @@ TEST_CASE( "161" )
 		REQUIRE( c->startLine() == 2 );
 		REQUIRE( c->endColumn() == 31 );
 		REQUIRE( c->endLine() == 7 );
+		REQUIRE( c->startDelim() == MD::WithPosition{ 4, 1, 6, 1 } );
+		REQUIRE( c->endDelim() == MD::WithPosition{ 4, 8, 6, 8 } );
+		REQUIRE( c->syntaxPos() == MD::WithPosition{ 7, 1, 10, 1 } );
 		REQUIRE( c->text() == u8"- name: ...\n"
 			"  uses: conda-incubator/setup-miniconda@v2\n"
 			"  with:\n"
@@ -884,7 +902,7 @@ TEST_CASE( "166" )
 	REQUIRE( c->endColumn() == 7 );
 	REQUIRE( c->endLine() == 5 );
 	REQUIRE( c->text() == u8"code\n\n\ncode" );
-	REQUIRE( !c->isInlined() );
+	REQUIRE( !c->isInline() );
 }
 
 /*
@@ -1614,6 +1632,9 @@ TEST_CASE( "180" )
 	REQUIRE( c->startLine() == 2 );
 	REQUIRE( c->endColumn() == 8 );
 	REQUIRE( c->endLine() == 4 );
+	REQUIRE( c->startDelim() == MD::WithPosition{ -1, -1, -1, -1 } );
+	REQUIRE( c->endDelim() == MD::WithPosition{ -1, -1, -1, -1 } );
+	REQUIRE( c->syntaxPos() == MD::WithPosition{ -1, -1, -1, -1 } );
 	REQUIRE( c->text() == u8"```\n# This\n```" );
 
 	{
