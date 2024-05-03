@@ -64,6 +64,7 @@ TEST_CASE( "153" )
 	REQUIRE( i->startLine() == 0 );
 	REQUIRE( i->endColumn() == 6 );
 	REQUIRE( i->endLine() == 17 );
+	REQUIRE( i->delim() == MD::WithPosition{ 2, 0, 2, 0 } );
 
 	REQUIRE( i->items().at( 0 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( i->items().at( 0 ).get() );
@@ -123,6 +124,7 @@ TEST_CASE( "154" )
 	REQUIRE( i->startLine() == 0 );
 	REQUIRE( i->endColumn() == 6 );
 	REQUIRE( i->endLine() == 13 );
+	REQUIRE( i->delim() == MD::WithPosition{ 2, 0, 2, 0 } );
 
 	REQUIRE( i->items().at( 0 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( i->items().at( 0 ).get() );
@@ -183,6 +185,7 @@ TEST_CASE( "155" )
 		REQUIRE( i->startLine() == 0 );
 		REQUIRE( i->endColumn() == 4 );
 		REQUIRE( i->endLine() == 4 );
+		REQUIRE( i->delim() == MD::WithPosition{ 0, 0, 0, 0 } );
 
 		REQUIRE( i->items().at( 0 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( i->items().at( 0 ).get() );
@@ -208,6 +211,7 @@ TEST_CASE( "155" )
 		REQUIRE( i->startLine() == 6 );
 		REQUIRE( i->endColumn() == 7 );
 		REQUIRE( i->endLine() == 9 );
+		REQUIRE( i->delim() == MD::WithPosition{ 0, 6, 0, 6 } );
 
 		REQUIRE( i->items().at( 0 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( i->items().at( 0 ).get() );
@@ -598,6 +602,7 @@ TEST_CASE( "161" )
 		REQUIRE( i->startLine() == 0 );
 		REQUIRE( i->endColumn() == 6 );
 		REQUIRE( i->endLine() == 8 );
+		REQUIRE( i->delim() == MD::WithPosition{ 2, 0, 2, 0 } );
 
 		REQUIRE( i->items().at( 0 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( i->items().at( 0 ).get() );
@@ -658,6 +663,7 @@ TEST_CASE( "162" )
 	REQUIRE( i->startLine() == 3 );
 	REQUIRE( i->endColumn() == 5 );
 	REQUIRE( i->endLine() == 3 );
+	REQUIRE( i->delim() == MD::WithPosition{ 0, 3, 0, 3 } );
 	REQUIRE( i->items().size() == 1 );
 	REQUIRE( i->items().at( 0 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( i->items().at( 0 ).get() );
@@ -763,6 +769,7 @@ TEST_CASE( "164" )
 	REQUIRE( i->startLine() == 3 );
 	REQUIRE( i->endColumn() == 5 );
 	REQUIRE( i->endLine() == 3 );
+	REQUIRE( i->delim() == MD::WithPosition{ 0, 3, 0, 3 } );
 	REQUIRE( i->items().size() == 1 );
 	REQUIRE( i->items().at( 0 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( i->items().at( 0 ).get() );
@@ -1592,6 +1599,7 @@ TEST_CASE( "180" )
 	REQUIRE( i->startLine() == 0 );
 	REQUIRE( i->endColumn() == 6 );
 	REQUIRE( i->endLine() == 6 );
+	REQUIRE( i->delim() == MD::WithPosition{ 0, 0, 0, 0 } );
 
 	REQUIRE( i->items().at( 0 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( i->items().at( 0 ).get() );

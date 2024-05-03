@@ -50,6 +50,7 @@ TEST_CASE( "061" )
 	REQUIRE( li->startLine() == 0 );
 	REQUIRE( li->endColumn() == 23 );
 	REQUIRE( li->endLine() == 2 );
+	REQUIRE( li->delim() == MD::WithPosition{ 0, 0, 0, 0 } );
 
 	REQUIRE( li->items().size() == 2 );
 
@@ -491,6 +492,7 @@ TEST_CASE( "067" )
 	REQUIRE( item->startLine() == 2 );
 	REQUIRE( item->endColumn() == 5 );
 	REQUIRE( item->endLine() == 7 );
+	REQUIRE( item->delim() == MD::WithPosition{ 1, 2, 1, 2 } );
 
 	REQUIRE( item->listType() == MD::ListItem< TRAIT >::Unordered );
 

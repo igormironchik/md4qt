@@ -345,6 +345,7 @@ TEST_CASE( "035" )
 		REQUIRE( i1->startLine() == 0 );
 		REQUIRE( i1->endColumn() == 3 );
 		REQUIRE( i1->endLine() == 0 );
+		REQUIRE( i1->delim() == MD::WithPosition{ 0, 0, 1, 0 } );
 
 		REQUIRE( i1->listType() == MD::ListItem< TRAIT >::Ordered );
 		REQUIRE( i1->orderedListPreState() == MD::ListItem< TRAIT >::Start );
@@ -372,6 +373,7 @@ TEST_CASE( "035" )
 		REQUIRE( i1->startLine() == 1 );
 		REQUIRE( i1->endColumn() == 6 );
 		REQUIRE( i1->endLine() == 3 );
+		REQUIRE( i1->delim() == MD::WithPosition{ 0, 1, 1, 1 } );
 
 		REQUIRE( i1->listType() == MD::ListItem< TRAIT >::Ordered );
 		REQUIRE( i1->orderedListPreState() == MD::ListItem< TRAIT >::Continue );
@@ -406,6 +408,7 @@ TEST_CASE( "035" )
 			REQUIRE( i1->startLine() == 2 );
 			REQUIRE( i1->endColumn() == 6 );
 			REQUIRE( i1->endLine() == 2 );
+			REQUIRE( i1->delim() == MD::WithPosition{ 3, 2, 4, 2 } );
 
 			REQUIRE( i1->listType() == MD::ListItem< TRAIT >::Ordered );
 			REQUIRE( i1->orderedListPreState() == MD::ListItem< TRAIT >::Start );
@@ -431,6 +434,7 @@ TEST_CASE( "035" )
 			REQUIRE( i1->startLine() == 3 );
 			REQUIRE( i1->endColumn() == 6 );
 			REQUIRE( i1->endLine() == 3 );
+			REQUIRE( i1->delim() == MD::WithPosition{ 3, 3, 4, 3 } );
 
 			REQUIRE( i1->listType() == MD::ListItem< TRAIT >::Ordered );
 			REQUIRE( i1->orderedListPreState() == MD::ListItem< TRAIT >::Continue );
@@ -457,6 +461,7 @@ TEST_CASE( "035" )
 		REQUIRE( i1->startLine() == 4 );
 		REQUIRE( i1->endColumn() == 3 );
 		REQUIRE( i1->endLine() == 4 );
+		REQUIRE( i1->delim() == MD::WithPosition{ 0, 4, 1, 4 } );
 
 		REQUIRE( i1->listType() == MD::ListItem< TRAIT >::Ordered );
 		REQUIRE( i1->orderedListPreState() == MD::ListItem< TRAIT >::Continue );
@@ -1014,6 +1019,7 @@ TEST_CASE( "038" )
 		REQUIRE( i1->startLine() == 0 );
 		REQUIRE( i1->endColumn() == 3 );
 		REQUIRE( i1->endLine() == 0 );
+		REQUIRE( i1->delim() == MD::WithPosition{ 0, 0, 1, 0 } );
 
 		REQUIRE( i1->listType() == MD::ListItem< TRAIT >::Ordered );
 		REQUIRE( i1->orderedListPreState() == MD::ListItem< TRAIT >::Start );
@@ -1041,6 +1047,7 @@ TEST_CASE( "038" )
 		REQUIRE( i1->startLine() == 1 );
 		REQUIRE( i1->endColumn() == 4 );
 		REQUIRE( i1->endLine() == 3 );
+		REQUIRE( i1->delim() == MD::WithPosition{ 0, 1, 1, 1 } );
 
 		REQUIRE( i1->listType() == MD::ListItem< TRAIT >::Ordered );
 		REQUIRE( i1->orderedListPreState() == MD::ListItem< TRAIT >::Continue );
@@ -1075,6 +1082,7 @@ TEST_CASE( "038" )
 			REQUIRE( i1->startLine() == 2 );
 			REQUIRE( i1->endColumn() == 4 );
 			REQUIRE( i1->endLine() == 2 );
+			REQUIRE( i1->delim() == MD::WithPosition{ 1, 2, 2, 2 } );
 
 			REQUIRE( i1->listType() == MD::ListItem< TRAIT >::Ordered );
 			REQUIRE( i1->orderedListPreState() == MD::ListItem< TRAIT >::Start );
@@ -1100,6 +1108,7 @@ TEST_CASE( "038" )
 			REQUIRE( i1->startLine() == 3 );
 			REQUIRE( i1->endColumn() == 4 );
 			REQUIRE( i1->endLine() == 3 );
+			REQUIRE( i1->delim() == MD::WithPosition{ 1, 3, 2, 3 } );
 
 			REQUIRE( i1->listType() == MD::ListItem< TRAIT >::Ordered );
 			REQUIRE( i1->orderedListPreState() == MD::ListItem< TRAIT >::Continue );
@@ -1126,6 +1135,7 @@ TEST_CASE( "038" )
 		REQUIRE( i1->startLine() == 4 );
 		REQUIRE( i1->endColumn() == 3 );
 		REQUIRE( i1->endLine() == 4 );
+		REQUIRE( i1->delim() == MD::WithPosition{ 0, 4, 1, 4 } );
 
 		REQUIRE( i1->listType() == MD::ListItem< TRAIT >::Ordered );
 		REQUIRE( i1->orderedListPreState() == MD::ListItem< TRAIT >::Continue );
@@ -1282,6 +1292,7 @@ TEST_CASE( "041" )
 		REQUIRE( item->startLine() == 4 * i );
 		REQUIRE( item->endColumn() == 17 );
 		REQUIRE( item->endLine() == 2 + 4 * i );
+		REQUIRE( item->delim() == MD::WithPosition{ 0, i * 4, 0, i * 4 } );
 
 		REQUIRE( item->listType() == MD::ListItem< TRAIT >::Unordered );
 
@@ -1383,6 +1394,7 @@ TEST_CASE( "042" )
 		REQUIRE( li->startLine() == i );
 		REQUIRE( li->endColumn() == 22 );
 		REQUIRE( li->endLine() == i );
+		REQUIRE( li->delim() == MD::WithPosition{ 0, i, 0, i } );
 
 		REQUIRE( li->items().size() == 1 );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
@@ -1533,6 +1545,7 @@ TEST_CASE( "044" )
 	REQUIRE( li->startLine() == 0 );
 	REQUIRE( li->endColumn() == 10 );
 	REQUIRE( li->endLine() == 2 );
+	REQUIRE( li->delim() == MD::WithPosition{ 0, 0, 0, 0 } );
 
 	REQUIRE( li->items().size() == 2 );
 	REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
@@ -2438,6 +2451,7 @@ TEST_CASE( "058" )
 	REQUIRE( li->startLine() == 4 );
 	REQUIRE( li->endColumn() == 12 );
 	REQUIRE( li->endLine() == 6 );
+	REQUIRE( li->delim() == MD::WithPosition{ 1, 4, 1, 4 } );
 
 	REQUIRE( li->items().size() == 2 );
 	REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
@@ -2494,6 +2508,15 @@ TEST_CASE( "059" )
 		REQUIRE( i->startLine() == 2 );
 		REQUIRE( i->endColumn() == 35 );
 		REQUIRE( i->endLine() == 3 );
+		
+		REQUIRE( i->items().size() == 2 );
+		
+		for( int j = 0; j < 2; ++j )
+		{
+			REQUIRE( i->items().at( j )->type() == MD::ItemType::ListItem );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( i->items().at( j ).get() );
+			REQUIRE( li->delim() == MD::WithPosition{ 2, 2 + j, 3, 2 + j } );
+		}
 	}
 	REQUIRE( b->items().at( 2 )->type() == MD::ItemType::Paragraph );
 	{
@@ -2544,9 +2567,18 @@ TEST_CASE( "060" )
 	REQUIRE( li->startLine() == 0 );
 	REQUIRE( li->endColumn() == 8 );
 	REQUIRE( li->endLine() == 1 );
+	REQUIRE( li->delim() == MD::WithPosition{ 1, 0, 1, 0 } );
 
 	REQUIRE( li->items().size() == 2 );
 
 	REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
 	REQUIRE( li->items().at( 1 )->type() == MD::ItemType::List );
+	
+	{
+		auto l = static_cast< MD::List< TRAIT >* > ( li->items().at( 1 ).get() );
+		REQUIRE( l->items().size() == 1 );
+		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+		auto nli = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+		REQUIRE( nli->delim() == MD::WithPosition{ 3, 1, 3, 1 } );
+	}
 }

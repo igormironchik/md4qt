@@ -8646,15 +8646,21 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 		fr.data.back().first.length() - 1 ) );
 	item->setEndLine( fr.data.back().second.lineNumber );
 
-	int i = 0;
+	int i = 0, len = 0;
 
-	if( isOrderedList< Trait >( fr.data.front().first.asString(), &i ) )
+	if( isOrderedList< Trait >( fr.data.front().first.asString(), &i, &len ) )
 	{
 		item->setListType( ListItem< Trait >::Ordered );
 		item->setStartNumber( i );
+		item->setDelim( { item->startColumn(), item->startLine(),
+			item->startColumn() + len, item->startLine() } );
 	}
 	else
+	{
 		item->setListType( ListItem< Trait >::Unordered );
+		item->setDelim( { item->startColumn(), item->startLine(),
+			item->startColumn(), item->startLine() } );
+	}
 
 	if( item->listType() == ListItem< Trait >::Ordered )
 		item->setOrderedListPreState( i == 1 ?
@@ -8692,6 +8698,8 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 		{
 			if( data.front().first[ p ] == Trait::latin1ToChar( '[' ) )
 			{
+				const auto startTaskDelimPos = data.front().first.virginPos( p );
+				
 				++p;
 
 				if( p < data.front().first.length() )
@@ -8708,6 +8716,9 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 						{
 							if( data.front().first[ p ] == Trait::latin1ToChar( ']' ) )
 							{
+								item->setTaskDelim( { startTaskDelimPos, item->startLine(),
+									data.front().first.virginPos( p ), item->startLine() } );
+								
 								taskList = true;
 
 								data[ 0 ].first = data[ 0 ].first.sliced( p + 1 );

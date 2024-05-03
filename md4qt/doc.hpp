@@ -794,6 +794,26 @@ public:
 	{
 		m_isChecked = on;
 	}
+	
+	const WithPosition & delim() const
+	{
+		return m_delim;
+	}
+	
+	void setDelim( const WithPosition & d )
+	{
+		m_delim = d;
+	}
+	
+	const WithPosition & taskDelim() const
+	{
+		return m_taskDelim;
+	}
+	
+	void setTaskDelim( const WithPosition & d )
+	{
+		m_taskDelim = d;
+	}
 
 private:
 	ListType m_listType = Unordered;
@@ -801,6 +821,8 @@ private:
 	int m_startNumber = 1;
 	bool m_isTaskList = false;
 	bool m_isChecked = false;
+	WithPosition m_delim = {};
+	WithPosition m_taskDelim = {};
 
 	DISABLE_COPY( ListItem )
 }; // class ListItem

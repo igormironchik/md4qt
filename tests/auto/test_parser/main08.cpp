@@ -116,6 +116,7 @@ TEST_CASE( "220" )
 	REQUIRE( l->items().size() == 1 );
 	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
 	auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( li->delim() == MD::WithPosition{ 0, 1, 0, 1 } );
 	REQUIRE( li->items().size() == 1 );
 	REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
 
@@ -212,6 +213,7 @@ TEST_CASE( "223" )
 	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( l->items().size() == 1 );
 	auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( li->delim() == MD::WithPosition{ 0, 0, 0, 0 } );
 	REQUIRE( li->items().size() == 1 );
 	REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).get() );
@@ -285,6 +287,7 @@ TEST_CASE( "226" )
 	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( l->items().size() == 1 );
 	auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( li->delim() == MD::WithPosition{ 0, 0, 0, 0 } );
 	REQUIRE( li->items().size() == 2 );
 	REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Heading );
 	auto h = static_cast< MD::Heading< TRAIT >* > ( li->items().at( 0 ).get() );
@@ -319,6 +322,7 @@ TEST_CASE( "227" )
 
 		{
 			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+			REQUIRE( li->delim() == MD::WithPosition{ 0, 0, 0, 0 } );
 			REQUIRE( li->items().size() == 1 );
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::List );
 			auto l = static_cast< MD::List< TRAIT >* > ( li->items().at( 0 ).get() );
@@ -326,6 +330,7 @@ TEST_CASE( "227" )
 
 			{
 				auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+				REQUIRE( li->delim() == MD::WithPosition{ 2, 0, 2, 0 } );
 				REQUIRE( li->items().size() == 1 );
 				REQUIRE( li->items().at( 0 )->type() == MD::ItemType::List );
 				auto l = static_cast< MD::List< TRAIT >* > ( li->items().at( 0 ).get() );
@@ -333,6 +338,7 @@ TEST_CASE( "227" )
 
 				{
 					auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+					REQUIRE( li->delim() == MD::WithPosition{ 4, 0, 4, 0 } );
 					REQUIRE( li->items().size() == 1 );
 					REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
 					auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).get() );
@@ -367,6 +373,7 @@ TEST_CASE( "228" )
 
 		{
 			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+			REQUIRE( li->delim() == MD::WithPosition{ 0, 0, 0, 0 } );
 			REQUIRE( li->items().size() == 1 );
 			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::List );
 			auto l = static_cast< MD::List< TRAIT >* > ( li->items().at( 0 ).get() );
@@ -374,6 +381,7 @@ TEST_CASE( "228" )
 
 			{
 				auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+				REQUIRE( li->delim() == MD::WithPosition{ 2, 1, 2, 1 } );
 				REQUIRE( li->items().size() == 1 );
 				REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Heading );
 				auto h = static_cast< MD::Heading< TRAIT >* > ( li->items().at( 0 ).get() );
@@ -430,6 +438,7 @@ TEST_CASE( "230" )
 
 	{
 		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+		REQUIRE( li->delim() == MD::WithPosition{ 0, 0, 0, 0 } );
 		REQUIRE( li->items().size() == 1 );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Heading );
 		auto h = static_cast< MD::Heading< TRAIT >* > ( li->items().at( 0 ).get() );
@@ -441,6 +450,7 @@ TEST_CASE( "230" )
 
 	{
 		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).get() );
+		REQUIRE( li->delim() == MD::WithPosition{ 0, 3, 0, 3 } );
 		REQUIRE( li->items().size() == 1 );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Heading );
 		auto h = static_cast< MD::Heading< TRAIT >* > ( li->items().at( 0 ).get() );
