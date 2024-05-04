@@ -82,6 +82,7 @@ TEST_CASE( "219" )
 		REQUIRE( fr->text() == u8"[^1]" );
 		REQUIRE( fr->isSpaceBefore() );
 		REQUIRE( fr->isSpaceAfter() );
+		REQUIRE( fr->idPos() == MD::WithPosition{ 1, 2, 2, 2 } );
 	}
 
 	{
@@ -494,6 +495,7 @@ TEST_CASE( "231" )
 	REQUIRE( l->endColumn() == 13 );
 	REQUIRE( l->endLine() == 0 );
 	REQUIRE( l->url() == u8"http://www.google.com" );
+	REQUIRE( l->textPos() == MD::WithPosition{ 0, 0, 13, 0 } );
 }
 
 /*
@@ -521,6 +523,7 @@ TEST_CASE( "232" )
 		REQUIRE( l->endColumn() == 13 );
 		REQUIRE( l->endLine() == 0 );
 		REQUIRE( l->url() == u8"http://www.google.com" );
+		REQUIRE( l->textPos() == MD::WithPosition{ 0, 0, 13, 0 } );
 	}
 
 	{
@@ -531,6 +534,7 @@ TEST_CASE( "232" )
 		REQUIRE( l->endColumn() == 30 );
 		REQUIRE( l->endLine() == 0 );
 		REQUIRE( l->url() == u8"http://www.google.com" );
+		REQUIRE( l->textPos() == MD::WithPosition{ 17, 0, 30, 0 } );
 	}
 }
 
@@ -569,6 +573,7 @@ TEST_CASE( "233" )
 		REQUIRE( l->endColumn() == 14 );
 		REQUIRE( l->endLine() == 0 );
 		REQUIRE( l->url() == u8"http://www.google.com" );
+		REQUIRE( l->textPos() == MD::WithPosition{ 1, 0, 14, 0 } );
 	}
 
 	{
@@ -617,6 +622,7 @@ TEST_CASE( "234" )
 		REQUIRE( l->endColumn() == 14 );
 		REQUIRE( l->endLine() == 0 );
 		REQUIRE( l->url() == u8"http://www.google.com" );
+		REQUIRE( l->textPos() == MD::WithPosition{ 1, 0, 14, 0 } );
 	}
 
 	{
@@ -637,6 +643,7 @@ TEST_CASE( "234" )
 		REQUIRE( l->endColumn() == 41 );
 		REQUIRE( l->endLine() == 0 );
 		REQUIRE( l->url() == u8"https://www.google.com" );
+		REQUIRE( l->textPos() == MD::WithPosition{ 20, 0, 41, 0 } );
 	}
 
 	{
@@ -676,6 +683,7 @@ TEST_CASE( "235" )
 		REQUIRE( l->endColumn() == 13 );
 		REQUIRE( l->endLine() == 0 );
 		REQUIRE( l->url() == u8"http://www.google.com" );
+		REQUIRE( l->textPos() == MD::WithPosition{ 0, 0, 13, 0 } );
 	}
 
 	{
@@ -686,6 +694,7 @@ TEST_CASE( "235" )
 		REQUIRE( l->endColumn() == 13 );
 		REQUIRE( l->endLine() == 1 );
 		REQUIRE( l->url() == u8"http://www.google.com" );
+		REQUIRE( l->textPos() == MD::WithPosition{ 0, 1, 13, 1 } );
 	}
 }
 
@@ -740,6 +749,7 @@ TEST_CASE( "236" )
 		REQUIRE( l->endColumn() == 18 );
 		REQUIRE( l->endLine() == 1 );
 		REQUIRE( l->url() == u8"http://www.google.com" );
+		REQUIRE( l->textPos() == MD::WithPosition{ 5, 1, 18, 1 } );
 	}
 
 	{
@@ -800,6 +810,7 @@ TEST_CASE( "237" )
 		REQUIRE( l->endColumn() == 13 );
 		REQUIRE( l->endLine() == 1 );
 		REQUIRE( l->url() == u8"http://www.google.com" );
+		REQUIRE( l->textPos() == MD::WithPosition{ 0, 1, 13, 1 } );
 	}
 
 	{
@@ -860,6 +871,7 @@ TEST_CASE( "238" )
 		REQUIRE( l->endColumn() == 13 );
 		REQUIRE( l->endLine() == 1 );
 		REQUIRE( l->url() == u8"http://www.google.com" );
+		REQUIRE( l->textPos() == MD::WithPosition{ 0, 1, 13, 1 } );
 	}
 
 	{
@@ -899,6 +911,7 @@ TEST_CASE( "239" )
 		REQUIRE( l->endColumn() == 13 );
 		REQUIRE( l->endLine() == 0 );
 		REQUIRE( l->url() == u8"mailto:igor@gmail.com" );
+		REQUIRE( l->textPos() == MD::WithPosition{ 0, 0, 13, 0 } );
 	}
 
 	{
@@ -909,6 +922,7 @@ TEST_CASE( "239" )
 		REQUIRE( l->endColumn() == 20 );
 		REQUIRE( l->endLine() == 1 );
 		REQUIRE( l->url() == u8"mailto:igor@gmail.com" );
+		REQUIRE( l->textPos() == MD::WithPosition{ 0, 1, 20, 1 } );
 	}
 }
 
@@ -937,6 +951,7 @@ TEST_CASE( "240" )
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
 			auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
 			REQUIRE( l->url() == u8"http://www.google.com" );
+			REQUIRE( l->textPos() == MD::WithPosition{ 0, 0, 13, 0 } );
 		}
 	
 		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Code );
@@ -948,6 +963,7 @@ TEST_CASE( "240" )
 			REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Link );
 			auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 2 ).get() );
 			REQUIRE( l->url() == u8"http://www.google.com" );
+			REQUIRE( l->textPos() == MD::WithPosition{ 22, 0, 35, 0 } );
 		}
 	}
 	
@@ -962,6 +978,7 @@ TEST_CASE( "240" )
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
 			auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
 			REQUIRE( l->url() == u8"http://www.google.com" );
+			REQUIRE( l->textPos() == MD::WithPosition{ 2, 2, 15, 2 } );
 		}
 	
 		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Code );
@@ -973,6 +990,7 @@ TEST_CASE( "240" )
 			REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Link );
 			auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 2 ).get() );
 			REQUIRE( l->url() == u8"http://www.google.com" );
+			REQUIRE( l->textPos() == MD::WithPosition{ 28, 2, 41, 2 } );
 		}
 	}
 }
@@ -997,6 +1015,7 @@ TEST_CASE( "241" )
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
 	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( l->url() == u8"https://www.patreon.com/onqtam" );
+	REQUIRE( l->textPos() == MD::WithPosition{ 1, 0, 89, 0 } );
 	
 	REQUIRE( !l->p()->isEmpty() );
 	auto pp = l->p().get();
@@ -1024,6 +1043,7 @@ TEST_CASE( "242" )
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
 	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( l->url() == u8"https://github.com/igormironchik/md-pdf" );
+	REQUIRE( l->textPos() == MD::WithPosition{ 1, 0, 39, 0 } );
 	REQUIRE( l->text() == u8"https://github.com/igormironchik/md-pdf" );
 }
 
@@ -1076,6 +1096,7 @@ TEST_CASE( "243" )
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
 	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( l->url() == label );
+	REQUIRE( l->textPos() == MD::WithPosition{ 1, 0, 4, 0 } );
 }
 
 TEST_CASE( "244" )

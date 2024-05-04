@@ -871,6 +871,8 @@ TEST_CASE( "204" )
 	REQUIRE( p->items().size() == 3 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Link );
+	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 1 ).get() );
+	REQUIRE( l->textPos() == MD::WithPosition{ 6, 3, 9, 3 } );
 	REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
 }
 
@@ -1057,6 +1059,12 @@ TEST_CASE( "210" )
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( i->items().at( 0 ).get() );
 	REQUIRE( p->items().size() == 2 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
+	
+	{
+		auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( l->textPos() == MD::WithPosition{ 3, 0, 7, 0 } );
+	}
+	
 	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
 }
 

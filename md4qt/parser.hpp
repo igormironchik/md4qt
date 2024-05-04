@@ -1142,6 +1142,8 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 									!s.str[ i ].isSpace() ? 0 : 1 ) ) );
 							lnk->setEndLine( po.fr.data.at( s.line ).second.lineNumber );
 							lnk->openStyles() = openStyles;
+							lnk->setTextPos( { lnk->startColumn(), lnk->startLine(),
+								lnk->endColumn(), lnk->endLine() } );
 
 							if( email && !tmp.toLower().startsWith( Trait::latin1ToString( "mailto:" ) ) )
 								tmp = Trait::latin1ToString( "mailto:" ) + tmp;
@@ -1453,14 +1455,16 @@ private:
 		TextParsingOpts< Trait > & po,
 		bool doNotCreateTextOnFail,
 		long long int startLine, long long int startPos,
-		long long int lastLine, long long int lastPos );
+		long long int lastLine, long long int lastPos,
+		const WithPosition & textPos );
 	
 	std::shared_ptr< Link< Trait > > makeLink( const typename Trait::String & url,
 		const typename MdBlock< Trait >::Data & text,
 		TextParsingOpts< Trait > & po,
 		bool doNotCreateTextOnFail,
 		long long int startLine, long long int startPos,
-		long long int lastLine, long long int lastPos );
+		long long int lastLine, long long int lastPos,
+		const WithPosition & textPos );
 	
 	struct Delimiter {
 		enum DelimiterType {
@@ -1514,7 +1518,9 @@ private:
 		long long int lastLineForText, long long int lastPosForText,
 		typename Delims::const_iterator lastIt,
 		const typename MdBlock< Trait >::Data & linkText,
-		bool doNotCreateTextOnFail );
+		bool doNotCreateTextOnFail,
+		const WithPosition & textPos,
+		const WithPosition & linkTextPos );
 	
 	typename Delims::const_iterator checkForImage(
 		typename Delims::const_iterator it,
@@ -1527,7 +1533,9 @@ private:
 		long long int lastLineForText, long long int lastPosForText,
 		typename Delims::const_iterator lastIt,
 		const typename MdBlock< Trait >::Data & linkText,
-		bool doNotCreateTextOnFail );
+		bool doNotCreateTextOnFail,
+		const WithPosition & textPos,
+		const WithPosition & linkTextPos );
 	
 	typename Delims::const_iterator checkForLink(
 		typename Delims::const_iterator it,
@@ -1600,17 +1608,20 @@ private:
 	readTextBetweenSquareBrackets( typename Delims::const_iterator start,
 		typename Delims::const_iterator it, typename Delims::const_iterator last,
 		TextParsingOpts< Trait > & po,
-		bool doNotCreateTextOnFail );
+		bool doNotCreateTextOnFail,
+		WithPosition * pos = nullptr );
 	
 	std::pair< typename MdBlock< Trait >::Data, typename Delims::const_iterator >
 	checkForLinkText( typename Delims::const_iterator it,
 		typename Delims::const_iterator last,
-		TextParsingOpts< Trait > & po );
+		TextParsingOpts< Trait > & po,
+		WithPosition * pos = nullptr );
 	
 	std::pair< typename MdBlock< Trait >::Data, typename Delims::const_iterator >
 	checkForLinkLabel( typename Delims::const_iterator it,
 		typename Delims::const_iterator last,
-		TextParsingOpts< Trait > & po );
+		TextParsingOpts< Trait > & po,
+		WithPosition * pos = nullptr );
 	
 	std::tuple< typename Trait::String, typename Trait::String,
 		typename Delims::const_iterator, bool >
@@ -1636,14 +1647,15 @@ private:
 	
 		typename MdBlock< Trait >::Data text;
 	
-		std::tie( text, it ) = checkForLinkLabel( start, last, po );
+		WithPosition labelPos;
+		std::tie( text, it ) = checkForLinkLabel( start, last, po, &labelPos );
 	
 		if( it != start && !toSingleLine( text ).simplified().isEmpty() )
 		{
 			if( (this->*functor)( text,
 					po, start->m_line, start->m_pos,
 					start->m_line, start->m_pos + start->m_len,
-					it, {}, false ) )
+					it, {}, false, labelPos, {} ) )
 			{
 				return it;
 			}
@@ -5555,6 +5567,10 @@ Parser< Trait >::checkForAutolinkHtml( typename Delims::const_iterator it,
 					lnk->setEndLine( po.fr.data.at( nit->m_line ).second.lineNumber );
 					lnk->setUrl( url.simplified() );
 					lnk->setOpts( po.opts );
+					lnk->setTextPos( { po.fr.data[ it->m_line ].first.virginPos( it->m_pos + 1 ),
+						po.fr.data[ it->m_line ].second.lineNumber,
+						po.fr.data[ nit->m_line ].first.virginPos( nit->m_pos - 1 ),
+						po.fr.data[ nit->m_line ].second.lineNumber } );
 					po.parent->appendItem( lnk );
 				}
 
@@ -5708,7 +5724,8 @@ inline std::pair< typename MdBlock< Trait >::Data, typename Parser< Trait >::Del
 Parser< Trait >::readTextBetweenSquareBrackets( typename Delims::const_iterator start,
 	typename Delims::const_iterator it, typename Delims::const_iterator last,
 	TextParsingOpts< Trait > & po,
-	bool doNotCreateTextOnFail )
+	bool doNotCreateTextOnFail,
+	WithPosition * pos )
 {
 	if( it != last && it->m_line <= po.lastTextLine )
 	{
@@ -5716,6 +5733,20 @@ Parser< Trait >::readTextBetweenSquareBrackets( typename Delims::const_iterator 
 		{
 			const auto p = start->m_pos + start->m_len;
 			const auto n = it->m_pos - p;
+			
+			if( pos )
+			{
+				long long int startPos, startLine, endPos, endLine;
+				std::tie( startPos, startLine ) = nextPosition(
+					po.fr, po.fr.data[ start->m_line ].first.virginPos(
+						start->m_pos + start->m_len - 1 ),
+					po.fr.data[ start->m_line ].second.lineNumber );
+				std::tie( endPos, endLine ) = prevPosition( po.fr,
+					po.fr.data[ it->m_line ].first.virginPos( it->m_pos ),
+					po.fr.data[ it->m_line ].second.lineNumber );
+				
+				*pos = { startPos, startLine, endPos, endLine };
+			}
 
 			return { { { po.fr.data.at( start->m_line ).first.sliced( p, n ).simplified(),
 				{ po.fr.data.at( start->m_line ).second.lineNumber } } }, it };
@@ -5740,6 +5771,20 @@ Parser< Trait >::readTextBetweenSquareBrackets( typename Delims::const_iterator 
 					else
 						res.push_back( { po.fr.data.at( i ).first.simplified(),
 							po.fr.data.at( i ).second } );
+				}
+				
+				if( pos )
+				{
+					long long int startPos, startLine, endPos, endLine;
+					std::tie( startPos, startLine ) = nextPosition(
+						po.fr, po.fr.data[ start->m_line ].first.virginPos(
+							start->m_pos + start->m_len - 1 ),
+						po.fr.data[ start->m_line ].second.lineNumber );
+					std::tie( endPos, endLine ) = prevPosition( po.fr,
+						po.fr.data[ it->m_line ].first.virginPos( it->m_pos ),
+						po.fr.data[ it->m_line ].second.lineNumber );
+					
+					*pos = { startPos, startLine, endPos, endLine };
 				}
 
 				return { res, it };
@@ -5766,7 +5811,8 @@ template< class Trait >
 inline std::pair< typename MdBlock< Trait >::Data, typename Parser< Trait >::Delims::const_iterator >
 Parser< Trait >::checkForLinkText( typename Delims::const_iterator it,
 	typename Delims::const_iterator last,
-	TextParsingOpts< Trait > & po )
+	TextParsingOpts< Trait > & po,
+	WithPosition * pos )
 {
 	const auto start = it;
 
@@ -5811,8 +5857,8 @@ Parser< Trait >::checkForLinkText( typename Delims::const_iterator it,
 		if( quit )
 			break;
 	}
-
-	const auto r =  readTextBetweenSquareBrackets( start, it, last, po, false );
+	
+	const auto r =  readTextBetweenSquareBrackets( start, it, last, po, false, pos );
 
 	po.collectRefLinks = collectRefLinks;
 	resetHtmlTag( po.html );
@@ -5826,7 +5872,8 @@ template< class Trait >
 inline std::pair< typename MdBlock< Trait >::Data, typename Parser< Trait >::Delims::const_iterator >
 Parser< Trait >::checkForLinkLabel( typename Delims::const_iterator it,
 	typename Delims::const_iterator last,
-	TextParsingOpts< Trait > & po )
+	TextParsingOpts< Trait > & po,
+	WithPosition * pos )
 {
 	const auto start = it;
 
@@ -5858,7 +5905,7 @@ Parser< Trait >::checkForLinkLabel( typename Delims::const_iterator it,
 			break;
 	}
 
-	return readTextBetweenSquareBrackets( start, it, last, po, true );
+	return readTextBetweenSquareBrackets( start, it, last, po, true, pos );
 }
 
 template< class Trait >
@@ -5885,7 +5932,8 @@ Parser< Trait >::makeLink( const typename Trait::String & url,
 	TextParsingOpts< Trait > & po,
 	bool doNotCreateTextOnFail,
 	long long int startLine, long long int startPos,
-	long long int lastLine, long long int lastPos )
+	long long int lastLine, long long int lastPos,
+	const WithPosition & textPos )
 {
 	typename Trait::String u = ( url.startsWith( Trait::latin1ToString( "#" ) ) ?
 		url : removeBackslashes< Trait >( replaceEntity< Trait >( url ) ).asString() );
@@ -5945,6 +5993,7 @@ Parser< Trait >::makeLink( const typename Trait::String & url,
 	std::shared_ptr< Link< Trait > > link( new Link< Trait > );
 	link->setUrl( u );
 	link->setOpts( po.opts );
+	link->setTextPos( textPos );
 
 	MdBlock< Trait > block = { text, 0 };
 
@@ -6012,7 +6061,9 @@ Parser< Trait >::createShortcutLink( const typename MdBlock< Trait >::Data & tex
 	long long int lastLineForText, long long int lastPosForText,
 	typename Delims::const_iterator lastIt,
 	const typename MdBlock< Trait >::Data & linkText,
-	bool doNotCreateTextOnFail )
+	bool doNotCreateTextOnFail,
+	const WithPosition & textPos,
+	const WithPosition & linkTextPos )
 {
 	const auto u = Trait::latin1ToString( "#" ) +
 		toSingleLine( text ).simplified().toCaseFolded().toUpper();
@@ -6027,11 +6078,13 @@ Parser< Trait >::createShortcutLink( const typename MdBlock< Trait >::Data & tex
 	{
 		if( !po.collectRefLinks )
 		{
+			const auto isLinkTextEmpty = toSingleLine( linkText ).simplified().isEmpty();
+			
 			const auto link = makeLink( u,
-				removeBackslashes< Trait >( toSingleLine (
-					linkText ).simplified().isEmpty() ? text : linkText ),
+				removeBackslashes< Trait >( isLinkTextEmpty ? text : linkText ),
 				po, doNotCreateTextOnFail, startLine, startPos,
-				lastIt->m_line, lastIt->m_pos + lastIt->m_len );
+				lastIt->m_line, lastIt->m_pos + lastIt->m_len,
+				( isLinkTextEmpty ? textPos : linkTextPos ) );
 
 			if( link.get() )
 			{	
@@ -6065,7 +6118,8 @@ Parser< Trait >::makeImage( const typename Trait::String & url,
 	TextParsingOpts< Trait > & po,
 	bool doNotCreateTextOnFail,
 	long long int startLine, long long int startPos,
-	long long int lastLine, long long int lastPos )
+	long long int lastLine, long long int lastPos,
+	const WithPosition & textPos )
 {
 	std::shared_ptr< Image< Trait > > img( new Image< Trait > );
 
@@ -6100,6 +6154,7 @@ Parser< Trait >::makeImage( const typename Trait::String & url,
 	img->setStartLine( po.fr.data.at( startLine ).second.lineNumber );
 	img->setEndColumn( po.fr.data.at( lastLine ).first.virginPos( lastPos - 1 ) );
 	img->setEndLine( po.fr.data.at( lastLine ).second.lineNumber );
+	img->setTextPos( textPos );
 
 	return img;
 }
@@ -6112,7 +6167,9 @@ Parser< Trait >::createShortcutImage( const typename MdBlock< Trait >::Data & te
 	long long int lastLineForText, long long int lastPosForText,
 	typename Delims::const_iterator lastIt,
 	const typename MdBlock< Trait >::Data & linkText,
-	bool doNotCreateTextOnFail )
+	bool doNotCreateTextOnFail,
+	const WithPosition & textPos,
+	const WithPosition & linkTextPos )
 {
 	const auto url = Trait::latin1ToString( "#" ) +
 		toSingleLine( text ).simplified().toCaseFolded().toUpper() +
@@ -6128,10 +6185,13 @@ Parser< Trait >::createShortcutImage( const typename MdBlock< Trait >::Data & te
 	{
 		if( !po.collectRefLinks )
 		{
+			const auto isLinkTextEmpty = toSingleLine( linkText ).simplified().isEmpty();
+			
 			const auto img = makeImage( iit->second->url(),
-				( toSingleLine( linkText ).simplified().isEmpty() ? text : linkText ), po,
+				( isLinkTextEmpty ? text : linkText ), po,
 				doNotCreateTextOnFail, startLine, startPos,
-				lastIt->m_line, lastIt->m_pos + lastIt->m_len );
+				lastIt->m_line, lastIt->m_pos + lastIt->m_len,
+				( isLinkTextEmpty ? textPos : linkTextPos ) );
 
 			po.parent->appendItem( img );
 
@@ -6427,7 +6487,8 @@ Parser< Trait >::checkForImage( typename Delims::const_iterator it,
 	po.wasRefLink = false;
 	po.firstInParagraph = false;
 
-	std::tie( text, it ) = checkForLinkText( it, last, po );
+	WithPosition textPos;
+	std::tie( text, it ) = checkForLinkText( it, last, po, &textPos );
 
 	if( it != start )
 	{
@@ -6448,7 +6509,7 @@ Parser< Trait >::checkForImage( typename Delims::const_iterator it,
 					if( !po.collectRefLinks )
 						po.parent->appendItem( makeImage( url, text, po, false,
 							start->m_line, start->m_pos,
-							iit->m_line, iit->m_pos + iit->m_len ) );
+							iit->m_line, iit->m_pos + iit->m_len, textPos ) );
 
 					po.line = iit->m_line;
 					po.pos = iit->m_pos + iit->m_len;
@@ -6458,7 +6519,7 @@ Parser< Trait >::checkForImage( typename Delims::const_iterator it,
 				else if( createShortcutImage( text,
 							po, start->m_line, start->m_pos,
 							start->m_line, start->m_pos + start->m_len,
-							it, {}, false ) )
+							it, {}, false, textPos, {} ) )
 				{
 					return it;
 				}
@@ -6470,7 +6531,8 @@ Parser< Trait >::checkForImage( typename Delims::const_iterator it,
 				typename MdBlock< Trait >::Data label;
 				typename Delims::const_iterator lit;
 
-				std::tie( label, lit ) = checkForLinkLabel( std::next( it ), last, po );
+				WithPosition labelPos;
+				std::tie( label, lit ) = checkForLinkLabel( std::next( it ), last, po, &labelPos );
 
 				if( lit != std::next( it ) )
 				{
@@ -6480,7 +6542,7 @@ Parser< Trait >::checkForImage( typename Delims::const_iterator it,
 						createShortcutImage( label,
 							po, start->m_line, start->m_pos,
 							start->m_line, start->m_pos + start->m_len,
-							lit, text, true ) )
+							lit, text, true, labelPos, textPos ) )
 					{
 						return lit;
 					}
@@ -6488,7 +6550,7 @@ Parser< Trait >::checkForImage( typename Delims::const_iterator it,
 						createShortcutImage( text,
 							po, start->m_line, start->m_pos,
 							start->m_line, start->m_pos + start->m_len,
-							lit, {}, false ) )
+							lit, {}, false, textPos, {} ) )
 					{
 						return lit;
 					}
@@ -6496,7 +6558,7 @@ Parser< Trait >::checkForImage( typename Delims::const_iterator it,
 				else if( createShortcutImage( text,
 					po, start->m_line, start->m_pos,
 					start->m_line, start->m_pos + start->m_len,
-					it, {}, false ) )
+					it, {}, false, textPos, {} ) )
 				{
 					return it;
 				}
@@ -6530,7 +6592,8 @@ Parser< Trait >::checkForLink( typename Delims::const_iterator it,
 
 	const auto ns = skipSpaces< Trait >( 0, po.fr.data.at( po.line ).first.asString() );
 
-	std::tie( text, it ) = checkForLinkText( it, last, po );
+	WithPosition textPos;
+	std::tie( text, it ) = checkForLinkText( it, last, po, &textPos );
 
 	if( it != start )
 	{
@@ -6552,6 +6615,7 @@ Parser< Trait >::checkForLink( typename Delims::const_iterator it,
 				fnr->setEndColumn( po.fr.data.at( it->m_line ).first.virginPos(
 					it->m_pos + it->m_len - 1 ) );
 				fnr->setEndLine( po.fr.data.at( it->m_line ).second.lineNumber );
+				fnr->setIdPos( textPos );
 
 				typename Trait::String fnrText = Trait::latin1ToString( "[" );
 				bool firstFnrText = true;
@@ -6596,7 +6660,9 @@ Parser< Trait >::checkForLink( typename Delims::const_iterator it,
 					typename Delims::const_iterator iit;
 					bool ok;
 
-					std::tie( text, it ) = checkForLinkLabel( start, last, po );
+					WithPosition labelPos;
+					
+					std::tie( text, it ) = checkForLinkLabel( start, last, po, &labelPos );
 
 					if( it != start && !toSingleLine( text ).simplified().isEmpty() )
 					{
@@ -6617,6 +6683,7 @@ Parser< Trait >::checkForLink( typename Delims::const_iterator it,
 							link->setEndColumn( po.fr.data.at( iit->m_line ).first
 								.virginPos( iit->m_pos + iit->m_len - 1 ) );
 							link->setEndLine( po.fr.data.at( iit->m_line ).second.lineNumber );
+							link->setTextPos( labelPos );
 
 							url = removeBackslashes< Trait >(
 								replaceEntity< Trait >( url ) ).asString();
@@ -6664,7 +6731,8 @@ Parser< Trait >::checkForLink( typename Delims::const_iterator it,
 				if( ok )
 				{
 					const auto link = makeLink( url, removeBackslashes< Trait >( text ), po, false,
-						start->m_line, start->m_pos, iit->m_line, iit->m_pos + iit->m_len );
+						start->m_line, start->m_pos, iit->m_line, iit->m_pos + iit->m_len,
+						textPos );
 
 					if( link.get() )
 					{
@@ -6682,7 +6750,7 @@ Parser< Trait >::checkForLink( typename Delims::const_iterator it,
 				else if( createShortcutLink( text,
 							po, start->m_line, start->m_pos,
 							start->m_line, start->m_pos + start->m_len,
-							it, {}, false ) )
+							it, {}, false, textPos, {} ) )
 				{
 					return it;
 				}
@@ -6694,7 +6762,8 @@ Parser< Trait >::checkForLink( typename Delims::const_iterator it,
 				typename MdBlock< Trait >::Data label;
 				typename Delims::const_iterator lit;
 
-				std::tie( label, lit ) = checkForLinkLabel( std::next( it ), last, po );
+				WithPosition labelPos;
+				std::tie( label, lit ) = checkForLinkLabel( std::next( it ), last, po, &labelPos );
 
 				const auto isLabelEmpty = toSingleLine( label ).simplified().isEmpty();
 
@@ -6703,14 +6772,14 @@ Parser< Trait >::checkForLink( typename Delims::const_iterator it,
 					if( !isLabelEmpty && createShortcutLink( label,
 							po, start->m_line, start->m_pos,
 							start->m_line, start->m_pos + start->m_len,
-							lit, text, true ) )
+							lit, text, true, labelPos, textPos ) )
 					{
 						return lit;
 					}
 					else if( isLabelEmpty && createShortcutLink( text,
 							po, start->m_line, start->m_pos,
 							start->m_line, start->m_pos + start->m_len,
-							it, {}, false ) )
+							it, {}, false, textPos, {} ) )
 					{
 						po.line = lit->m_line;
 						po.pos = lit->m_pos + lit->m_len;
@@ -6721,7 +6790,7 @@ Parser< Trait >::checkForLink( typename Delims::const_iterator it,
 				else if( createShortcutLink( text,
 							po, start->m_line, start->m_pos,
 							start->m_line, start->m_pos + start->m_len,
-							it, {}, false ) )
+							it, {}, false, textPos, {} ) )
 				{
 					return it;
 				}

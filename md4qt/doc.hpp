@@ -863,11 +863,22 @@ public:
 	{
 		m_p = v;
 	}
+	
+	const WithPosition & textPos() const
+	{
+		return m_textPos;
+	}
+	
+	void setTextPos( const WithPosition & pos )
+	{
+		m_textPos = pos;
+	}
 
 private:
 	typename Trait::String m_url;
 	typename Trait::String m_text;
 	ParagraphSharedPointer m_p;
+	WithPosition m_textPos = {};
 
 	DISABLE_COPY( Image )
 }; // class Image
@@ -938,12 +949,23 @@ public:
 	{
 		m_p = v;
 	}
+	
+	const WithPosition & textPos() const
+	{
+		return m_textPos;
+	}
+	
+	void setTextPos( const WithPosition & pos )
+	{
+		m_textPos = pos;
+	}
 
 private:
 	typename Trait::String m_url;
 	typename Trait::String m_text;
 	ImageSharedPointer m_img;
 	ParagraphSharedPointer m_p;
+	WithPosition m_textPos = {};
 
 	DISABLE_COPY( Link )
 }; // class Link
@@ -1256,9 +1278,20 @@ public:
 	{
 		return m_id;
 	}
+	
+	const WithPosition & idPos() const
+	{
+		return m_idPos;
+	}
+	
+	void setIdPos( const WithPosition & pos )
+	{
+		m_idPos = pos;
+	}
 
 private:
 	typename Trait::String m_id;
+	WithPosition m_idPos;
 
 	DISABLE_COPY( FootnoteRef )
 }; // class FootnoteRef

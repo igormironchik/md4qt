@@ -85,6 +85,7 @@ TEST_CASE( "031" )
 	REQUIRE( l1->endLine() == 0 );
 
 	REQUIRE( l1->text() == u8"link 1" );
+	REQUIRE( l1->textPos() == MD::WithPosition{ 23, 0, 28, 0 } );
 	REQUIRE( l1->url() == wd + u8"/a.md" );
 
 	REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Link );
@@ -101,6 +102,7 @@ TEST_CASE( "031" )
 	REQUIRE( l2->img().get() );
 	REQUIRE( l2->img()->text() == u8"image 1" );
 	REQUIRE( l2->img()->url() == wd + u8"/" + u8"a.png" );
+	REQUIRE( l2->textPos() == MD::WithPosition{ 38, 0, 54, 0 } );
 
 	REQUIRE( p->items().at( 3 )->type() == MD::ItemType::Link );
 
@@ -115,6 +117,7 @@ TEST_CASE( "031" )
 	const TRAIT::String label = u8"#LABEL/" + wd + u8"/031.md";
 
 	REQUIRE( l3->url() == label );
+	REQUIRE( l3->textPos() == MD::WithPosition{ 64, 0, 69, 0 } );
 
 	REQUIRE( p->items().at( 4 )->type() == MD::ItemType::FootnoteRef );
 
@@ -125,6 +128,7 @@ TEST_CASE( "031" )
 	REQUIRE( f1->endLine() == 0 );
 
 	REQUIRE( f1->id() == u8"#^REF/" + wd + u8"/031.md" );
+	REQUIRE( f1->idPos() == MD::WithPosition{ 80, 0, 83, 0 } );
 
 	REQUIRE( !doc->labeledLinks().empty() );
 	const auto lit = doc->labeledLinks().find( label );
@@ -150,6 +154,7 @@ TEST_CASE( "031" )
 		REQUIRE( f1->startLine() == 4 );
 		REQUIRE( f1->endColumn() == 5 );
 		REQUIRE( f1->endLine() == 4 );
+		REQUIRE( f1->idPos() == MD::WithPosition{ 1, 4, 4, 4 } );
 
 		REQUIRE( f1->id() == u8"#^REF/" + wd + u8"/031.md" );
 
@@ -188,6 +193,7 @@ TEST_CASE( "031" )
 		REQUIRE( l->startLine() == 8 );
 		REQUIRE( l->endColumn() == 15 );
 		REQUIRE( l->endLine() == 8 );
+		REQUIRE( l->textPos() == MD::WithPosition{ 1, 8, 6, 8 } );
 
 		REQUIRE( l->url() == u8"#label/" + wd + u8"/031.md" );
 	}
@@ -270,6 +276,7 @@ TEST_CASE( "033" )
 	REQUIRE( l->endLine() == 0 );
 
 	REQUIRE( l->url() == u8"http://www.google.com" );
+	REQUIRE( l->textPos() == MD::WithPosition{ 1, 0, 21, 0 } );
 	REQUIRE( l->text().isEmpty() );
 }
 
@@ -303,6 +310,7 @@ TEST_CASE( "034" )
 	REQUIRE( l->startLine() == 0 );
 	REQUIRE( l->endColumn() == 33 );
 	REQUIRE( l->endLine() == 0 );
+	REQUIRE( l->textPos() == MD::WithPosition{ 3, 0, 8, 0 } );
 
 	REQUIRE( l->url() == u8"https://www.google.com" );
 	REQUIRE( l->text() == u8"Google" );
@@ -513,6 +521,7 @@ TEST_CASE( "036" )
 	REQUIRE( l->startLine() == 0 );
 	REQUIRE( l->endColumn() == 46 );
 	REQUIRE( l->endLine() == 0 );
+	REQUIRE( l->textPos() == MD::WithPosition{ 1, 0, 6, 0 } );
 
 	REQUIRE( l->url() == u8"www.google.com" );
 	REQUIRE( l->text() == u8"Google" );
@@ -589,6 +598,7 @@ TEST_CASE( "037" )
 		REQUIRE( l->startLine() == 0 );
 		REQUIRE( l->endColumn() == 24 );
 		REQUIRE( l->endLine() == 0 );
+		REQUIRE( l->textPos() == MD::WithPosition{ 11, 0, 24, 0 } );
 		REQUIRE( l->url() == u8"http://www.google.com" );
 
 		{
@@ -742,6 +752,7 @@ TEST_CASE( "037" )
 		REQUIRE( l->endColumn() == 24 );
 		REQUIRE( l->endLine() == 12 );
 		REQUIRE( l->url() == u8"http://www.google.com" );
+		REQUIRE( l->textPos() == MD::WithPosition{ 11, 12, 24, 12 } );
 
 		{
 			REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
@@ -783,6 +794,7 @@ TEST_CASE( "037" )
 		REQUIRE( i->startLine() == 14 );
 		REQUIRE( i->endColumn() == 42 );
 		REQUIRE( i->endLine() == 14 );
+		REQUIRE( i->textPos() == MD::WithPosition{ 3, 14, 8, 14 } );
 
 		REQUIRE( i->url() == u8"https://www.google.com/logo.png" );
 		REQUIRE( i->text() == u8"Google" );
@@ -985,6 +997,7 @@ TEST_CASE( "037" )
 		REQUIRE( l->endColumn() == 14 );
 		REQUIRE( l->endLine() == 30 );
 		REQUIRE( l->url() == u8"http://www.google.com" );
+		REQUIRE( l->textPos() == MD::WithPosition{ 1, 30, 14, 30 } );
 	}
 }
 /*
@@ -1418,6 +1431,7 @@ TEST_CASE( "042" )
 		REQUIRE( lnk->startLine() == i );
 		REQUIRE( lnk->endColumn() == 22 );
 		REQUIRE( lnk->endLine() == i );
+		REQUIRE( lnk->textPos() == MD::WithPosition{ 3, i, 11, i } );
 
 		REQUIRE( lnk->text() == u8"Chapter 1" );
 		REQUIRE( lnk->url() == wd + u8"/042-1.md" );
@@ -2104,6 +2118,7 @@ TEST_CASE( "050" )
 	REQUIRE( l0->endColumn() == 8 );
 	REQUIRE( l0->endLine() == 0 );
 	REQUIRE( l0->text() == u8"a]" );
+	REQUIRE( l0->textPos() == MD::WithPosition{ 1, 0, 3, 0 } );
 
 	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Link );
 	auto l1 = static_cast< MD::Link< TRAIT >* > ( p->items().at( 1 ).get() );
@@ -2112,6 +2127,7 @@ TEST_CASE( "050" )
 	REQUIRE( l1->endColumn() == 8 );
 	REQUIRE( l1->endLine() == 1 );
 	REQUIRE( l1->text() == u8"b\\" );
+	REQUIRE( l1->textPos() == MD::WithPosition{ 1, 1, 3, 1 } );
 
 	REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Link );
 	auto l2 = static_cast< MD::Link< TRAIT >* > ( p->items().at( 2 ).get() );
@@ -2120,6 +2136,7 @@ TEST_CASE( "050" )
 	REQUIRE( l2->endColumn() == 9 );
 	REQUIRE( l2->endLine() == 2 );
 	REQUIRE( l2->text() == u8"c-d" );
+	REQUIRE( l2->textPos() == MD::WithPosition{ 1, 2, 4, 2 } );
 
 	REQUIRE( p->items().at( 3 )->type() == MD::ItemType::Link );
 	auto l3 = static_cast< MD::Link< TRAIT >* > ( p->items().at( 3 ).get() );
@@ -2128,6 +2145,7 @@ TEST_CASE( "050" )
 	REQUIRE( l3->endColumn() == 7 );
 	REQUIRE( l3->endLine() == 3 );
 	REQUIRE( l3->text() == u8"\\" );
+	REQUIRE( l3->textPos() == MD::WithPosition{ 1, 3, 2, 3 } );
 }
 
 /*
