@@ -361,6 +361,8 @@ TEST_CASE( "065" )
 		REQUIRE( m->endLine() == 0 );
 		REQUIRE( m->expr() == u8"a \\ne 0" );
 		REQUIRE( m->isInline() );
+		REQUIRE( m->startDelim() == MD::WithPosition{ 5, 0, 5, 0 } );
+		REQUIRE( m->endDelim() == MD::WithPosition{ 13, 0, 13, 0 } );
 	}
 
 	{
@@ -383,6 +385,8 @@ TEST_CASE( "065" )
 		REQUIRE( m->endLine() == 0 );
 		REQUIRE( m->expr() == u8"(ax^2 + bx + c = 0)" );
 		REQUIRE( m->isInline() );
+		REQUIRE( m->startDelim() == MD::WithPosition{ 43, 0, 43, 0 } );
+		REQUIRE( m->endDelim() == MD::WithPosition{ 63, 0, 63, 0 } );
 	}
 
 	{
@@ -405,6 +409,8 @@ TEST_CASE( "065" )
 		REQUIRE( m->endLine() == 1 );
 		REQUIRE( m->expr() == u8" x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a} " );
 		REQUIRE( !m->isInline() );
+		REQUIRE( m->startDelim() == MD::WithPosition{ 0, 1, 1, 1 } );
+		REQUIRE( m->endDelim() == MD::WithPosition{ 40, 1, 41, 1 } );
 	}
 }
 

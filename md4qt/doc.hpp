@@ -1032,14 +1032,15 @@ public:
 	{
 		m_endDelim = d;
 	}
-
-protected:
-	template< class T >
-	friend struct UnprotectedDocsMethods;
-
+	
 	bool isFensedCode() const
 	{
 		return m_fensed;
+	}
+	
+	void setFensedCode( bool on = true )
+	{
+		m_fensed = on;
 	}
 
 private:

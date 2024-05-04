@@ -33,6 +33,8 @@ TEST_CASE( "218" )
 	{
 		auto m = static_cast< MD::Math< TRAIT > * > ( p->items().at( 1 ).get() );
 		REQUIRE( m->expr() == u8"\\` and \\`" );
+		REQUIRE( m->startDelim() == MD::WithPosition{ 19, 0, 19, 0 } );
+		REQUIRE( m->endDelim() == MD::WithPosition{ 29, 0, 29, 0 } );
 	}
 
 	REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
@@ -41,6 +43,8 @@ TEST_CASE( "218" )
 	{
 		auto m = static_cast< MD::Math< TRAIT > * > ( p->items().at( 3 ).get() );
 		REQUIRE( m->expr() == u8"\\sqrt{3x-1}+(1+x)^2" );
+		REQUIRE( m->startDelim() == MD::WithPosition{ 64, 0, 64, 0 } );
+		REQUIRE( m->endDelim() == MD::WithPosition{ 86, 0, 86, 0 } );
 	}
 }
 
@@ -162,6 +166,9 @@ TEST_CASE( "221" )
 	auto c = static_cast< MD::TableCell< TRAIT > * > ( t->rows()[ 1 ]->cells()[ 0 ].get() );
 	REQUIRE( c->items().size() == 2 );
 	REQUIRE( c->items().at( 0 )->type() == MD::ItemType::Math );
+	auto m = static_cast< MD::Math< TRAIT >* > ( c->items().at( 0 ).get() );
+	REQUIRE( m->startDelim() == MD::WithPosition{ 1, 2, 1, 2 } );
+	REQUIRE( m->endDelim() == MD::WithPosition{ 14, 2, 14, 2 } );
 	REQUIRE( c->items().at( 1 )->type() == MD::ItemType::Code );
 }
 

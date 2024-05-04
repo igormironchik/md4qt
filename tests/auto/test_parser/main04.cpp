@@ -1657,4 +1657,6 @@ TEST_CASE( "120" )
 	REQUIRE( m->startLine() == 2 );
 	REQUIRE( m->endColumn() == 1 );
 	REQUIRE( m->endLine() == 10 );
+	REQUIRE( m->startDelim() == MD::WithPosition{ 0, 1, 1, 1 } );
+	REQUIRE( m->endDelim() == MD::WithPosition{ 0, 11, 1, 11 } );
 }

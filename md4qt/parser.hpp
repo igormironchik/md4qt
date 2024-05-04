@@ -3669,11 +3669,6 @@ struct UnprotectedDocsMethods {
 	{
 		p->setDirty( on );
 	}
-
-	static bool isFensedCode( std::shared_ptr< Code< Trait > > code )
-	{
-		return code->isFensedCode();
-	}
 };
 
 template< class Trait >
@@ -5484,6 +5479,15 @@ Parser< Trait >::checkForMath( typename Delims::const_iterator it,
 			m->setEndColumn( endColumn );
 			m->setEndLine( endLine );
 			m->setInline( it->m_len == 1 );
+			m->setStartDelim( { po.fr.data[ it->m_line ].first.virginPos( it->m_pos ),
+				po.fr.data[ it->m_line ].second.lineNumber,
+				po.fr.data[ it->m_line ].first.virginPos( it->m_pos + it->m_len - 1 ),
+				po.fr.data[ it->m_line ].second.lineNumber } );
+			m->setEndDelim( { po.fr.data[ end->m_line ].first.virginPos( end->m_pos ),
+				po.fr.data[ end->m_line ].second.lineNumber,
+				po.fr.data[ end->m_line ].first.virginPos( end->m_pos + end->m_len - 1 ),
+				po.fr.data[ end->m_line ].second.lineNumber } );
+			m->setFensedCode( false );
 
 			if( math.startsWith( Trait::latin1ToString( "`" ) ) &&
 				math.endsWith( Trait::latin1ToString( "`" ) ) &&
@@ -9012,6 +9016,7 @@ Parser< Trait >::parseCode( MdBlock< Trait > & fr,
 					m->setStartDelim( startDelim );
 					m->setEndDelim( endDelim );
 					m->setSyntaxPos( syntaxPos );
+					m->setFensedCode( true );
 					p->appendItem( m );
 
 					parent->appendItem( p );
@@ -9086,7 +9091,7 @@ Parser< Trait >::parseCodeIndentedBySpaces( MdBlock< Trait > & fr,
 		{
 			auto c = std::static_pointer_cast< Code< Trait > > ( parent->items().back() );
 
-			if( !UnprotectedDocsMethods< Trait >::isFensedCode( c ) )
+			if( !c->isFensedCode() )
 			{
 				auto line = c->endLine();
 				auto text = c->text();
