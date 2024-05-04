@@ -72,9 +72,10 @@ enum class ItemType {
 //
 
 //! Base for any thing with start and end position.
-class WithPosition {
+class WithPosition {	
 public:
 	WithPosition() = default;
+	virtual ~WithPosition() = default;
 	
 	WithPosition( long long int startColumn,
 		long long int startLine,
@@ -126,7 +127,7 @@ protected:
 	Item() = default;
 
 public:
-	virtual ~Item() = default;
+	~Item() override = default;
 
 	virtual ItemType type() const = 0;
 
@@ -169,6 +170,8 @@ public:
 		,	m_style( s )
 	{
 	}
+	
+	~StyleDelim() override = default;
 	
 	TextOption style() const
 	{
@@ -806,27 +809,22 @@ private:
 
 
 //
-// Image
+// LinkBase
 //
 
-//! Image.
+//! Base class for links.
 template< class Trait >
-class Image final
-	:	public Item< Trait >
+class LinkBase
+	:	public ItemWithOpts< Trait >
 {
 public:
-	Image()
+	LinkBase()
 		:	m_p( new Paragraph< Trait > )
-	{
+	{	
 	}
-
-	~Image() override = default;
-
-	ItemType type() const override
-	{
-		return ItemType::Image;
-	}
-
+	
+	~LinkBase() override = default;
+	
 	using ParagraphSharedPointer = std::shared_ptr< Paragraph< Trait > >;
 
 	const typename Trait::String & url() const
@@ -873,13 +871,47 @@ public:
 	{
 		m_textPos = pos;
 	}
+	
+	const WithPosition & urlPos() const
+	{
+		return m_urlPos;
+	}
+	
+	void setUrlPos( const WithPosition & pos )
+	{
+		m_urlPos = pos;
+	}
 
 private:
 	typename Trait::String m_url;
 	typename Trait::String m_text;
 	ParagraphSharedPointer m_p;
 	WithPosition m_textPos = {};
+	WithPosition m_urlPos = {};
 
+	DISABLE_COPY( LinkBase )
+}; // class LinkBase
+
+
+//
+// Image
+//
+
+//! Image.
+template< class Trait >
+class Image final
+	:	public LinkBase< Trait >
+{
+public:
+	Image() = default;
+	~Image() override = default;
+
+	ItemType type() const override
+	{
+		return ItemType::Image;
+	}
+
+private:
 	DISABLE_COPY( Image )
 }; // class Image
 
@@ -891,12 +923,12 @@ private:
 //! Link.
 template< class Trait >
 class Link
-	:	public ItemWithOpts< Trait >
+	:	public LinkBase< Trait >
 {
 public:
 	Link()
-		:	m_img( new Image< Trait > )
-		,	m_p( new Paragraph< Trait > )
+		:	LinkBase< Trait > ()
+		,	m_img( new Image< Trait > )
 	{
 	}
 
@@ -907,28 +939,7 @@ public:
 		return ItemType::Link;
 	}
 
-	const typename Trait::String & url() const
-	{
-		return m_url;
-	}
-
-	void setUrl( const typename Trait::String & u )
-	{
-		m_url = u;
-	}
-
-	const typename Trait::String & text() const
-	{
-		return m_text;
-	}
-
-	void setText( const typename Trait::String & t )
-	{
-		m_text = t;
-	}
-
 	using ImageSharedPointer = std::shared_ptr< Image< Trait > >;
-	using ParagraphSharedPointer = std::shared_ptr< Paragraph< Trait > >;
 
 	ImageSharedPointer img() const
 	{
@@ -940,32 +951,8 @@ public:
 		m_img = i;
 	}
 
-	ParagraphSharedPointer p() const
-	{
-		return m_p;
-	}
-
-	void setP( ParagraphSharedPointer v )
-	{
-		m_p = v;
-	}
-	
-	const WithPosition & textPos() const
-	{
-		return m_textPos;
-	}
-	
-	void setTextPos( const WithPosition & pos )
-	{
-		m_textPos = pos;
-	}
-
 private:
-	typename Trait::String m_url;
-	typename Trait::String m_text;
 	ImageSharedPointer m_img;
-	ParagraphSharedPointer m_p;
-	WithPosition m_textPos = {};
 
 	DISABLE_COPY( Link )
 }; // class Link
@@ -982,7 +969,8 @@ class Code
 {
 public:
 	explicit Code( const typename Trait::String & t, bool fensedCode, bool inl )
-		:	m_text( t )
+		:	ItemWithOpts< Trait > ()
+		,	m_text( t )
 		,	m_inlined( inl )
 		,	m_fensed( fensedCode )
 	{
