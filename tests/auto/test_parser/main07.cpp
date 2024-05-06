@@ -1236,6 +1236,7 @@ TEST_CASE( "216" )
 	REQUIRE( doc->footnotesMap().size() == 1 );
 	auto f = static_cast< MD::Footnote< TRAIT > * > ( doc->footnotesMap().cbegin()->second.get() );
 	REQUIRE( f->items().size() == 1 );
+	REQUIRE( f->idPos() == MD::WithPosition{ 0, 1, 4, 1 } );
 	auto pp = static_cast< MD::Paragraph< TRAIT > * > ( f->items().at( 0 ).get() );
 	REQUIRE( pp->items().size() == 3 );
 	REQUIRE( pp->items().at( 2 )->type() == MD::ItemType::FootnoteRef );

@@ -1677,6 +1677,7 @@ TEST_CASE( "045" )
 	REQUIRE( f->startLine() == 0 );
 	REQUIRE( f->endColumn() == 21 );
 	REQUIRE( f->endLine() == 4 );
+	REQUIRE( f->idPos() == MD::WithPosition{ 1, 0, 12, 0 } );
 
 	static const std::vector< long long int > start = { 14, 4, 1 };
 
@@ -2353,6 +2354,7 @@ TEST_CASE( "055" )
 	REQUIRE( f->startLine() == 0 );
 	REQUIRE( f->endColumn() == 21 );
 	REQUIRE( f->endLine() == 4 );
+	REQUIRE( f->idPos() == MD::WithPosition{ 1, 0, 12, 0 } );
 
 	static const std::vector< long long int > start = { 14, 4, 1 };
 

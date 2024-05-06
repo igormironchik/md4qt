@@ -8457,6 +8457,12 @@ Parser< Trait >::parseFootnote( MdBlock< Trait > & fr,
 				fr.data.at( it->m_line ).first[ it->m_pos + 1 ] == Trait::latin1ToChar( ':' ) &&
 				fr.data.at( it->m_line ).first[ it->m_pos + 2 ].isSpace() )
 			{
+				f->setIdPos( { fr.data[ delims.cbegin()->m_line ].first.virginPos(
+						delims.cbegin()->m_pos ),
+					fr.data[ delims.cbegin()->m_line ].second.lineNumber,
+					fr.data.at( it->m_line ).first.virginPos( it->m_pos + 1 ),
+					fr.data.at( it->m_line ).second.lineNumber } );
+				
 				{
 					typename MdBlock< Trait >::Data tmp;
 					std::copy( fr.data.cbegin() + it->m_line, fr.data.cend(),

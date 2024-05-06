@@ -1302,8 +1302,20 @@ public:
 	{
 		return ItemType::Footnote;
 	}
+	
+	const WithPosition & idPos() const
+	{
+		return m_idPos;
+	}
+	
+	void setIdPos( const WithPosition & pos )
+	{
+		m_idPos = pos;
+	}
 
 private:
+	WithPosition m_idPos = {};
+	
 	DISABLE_COPY( Footnote )
 }; // class Footnote
 
