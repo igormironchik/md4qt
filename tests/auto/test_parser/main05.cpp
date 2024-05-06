@@ -422,6 +422,7 @@ TEST_CASE( "125" )
 		REQUIRE( l->endColumn() == 18 );
 		REQUIRE( l->endLine() == 0 );
 		REQUIRE( l->textPos() == MD::WithPosition{ 3, 0, 8, 0 } );
+		REQUIRE( l->urlPos() == MD::WithPosition{ 11, 0, 17, 0 } );
 	}
 
 	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
@@ -571,6 +572,7 @@ TEST_CASE( "126" )
 		REQUIRE( i->endColumn() == 39 );
 		REQUIRE( i->endLine() == 4 );
 		REQUIRE( i->textPos() == MD::WithPosition{ 2, 4, 19, 4 } );
+		REQUIRE( i->urlPos() == MD::WithPosition{ 22, 4, 38, 4 } );
 	}
 
 	{
@@ -1005,6 +1007,7 @@ TEST_CASE( "133" )
 		auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( l->url() == u8"#standalone-gpu-ready-solution/" + wd + u8"/133.md" );
 		REQUIRE( l->textPos() == MD::WithPosition{ 1, 0, 29, 0 } );
+		REQUIRE( l->urlPos() == MD::WithPosition{ 32, 0, 61, 0 } );
 		REQUIRE( doc->labeledHeadings().find( l->url() ) != doc->labeledHeadings().cend() );
 	}
 
@@ -1013,6 +1016,7 @@ TEST_CASE( "133" )
 		auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 1 ).get() );
 		REQUIRE( l->url() == u8"#files-in-workdata-too/" + wd + u8"/133.md" );
 		REQUIRE( l->textPos() == MD::WithPosition{ 1, 1, 24, 1 } );
+		REQUIRE( l->urlPos() == MD::WithPosition{ 27, 1, 48, 1 } );
 		REQUIRE( doc->labeledHeadings().find( l->url() ) != doc->labeledHeadings().cend() );
 	}
 	
@@ -1741,6 +1745,7 @@ TEST_CASE( "141" )
 	REQUIRE( i->endColumn() == 105 );
 	REQUIRE( i->endLine() == 0 );
 	REQUIRE( i->textPos() == MD::WithPosition{ 2, 0, 19, 0 } );
+	REQUIRE( i->urlPos() == MD::WithPosition{ 22, 0, 104, 0 } );
 
 	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
 
@@ -2152,6 +2157,7 @@ TEST_CASE( "148" )
 		REQUIRE( l->endColumn() == 16 );
 		REQUIRE( l->endLine() == 0 );
 		REQUIRE( l->textPos() == MD::WithPosition{ 5, 0, 8, 0 } );
+		REQUIRE( l->urlPos() == MD::WithPosition{ 11, 0, 15, 0 } );
 
 		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );

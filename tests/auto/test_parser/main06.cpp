@@ -370,6 +370,7 @@ TEST_CASE( "157" )
 		REQUIRE( l->endColumn() == 67 );
 		REQUIRE( l->endLine() == 1 );
 		REQUIRE( l->textPos() == MD::WithPosition{ 20, 1, 35, 1 } );
+		REQUIRE( l->urlPos() == MD::WithPosition{ 38, 1, 66, 1 } );
 	}
 
 	{
@@ -491,6 +492,7 @@ TEST_CASE( "158" )
 		REQUIRE( l->endColumn() == 67 );
 		REQUIRE( l->endLine() == 1 );
 		REQUIRE( l->textPos() == MD::WithPosition{ 20, 1, 35, 1 } );
+		REQUIRE( l->urlPos() == MD::WithPosition{ 38, 1, 66, 1 } );
 	}
 
 	{
@@ -1676,6 +1678,7 @@ TEST_CASE( "181" )
 	REQUIRE( l->endColumn() == 537 );
 	REQUIRE( l->endLine() == 0 );
 	REQUIRE( l->textPos() == MD::WithPosition{ 1, 0, 424, 0 } );
+	REQUIRE( l->urlPos() == MD::WithPosition{ 427, 0, 536, 0 } );
 	REQUIRE( l->url() == u8"https://steampipe.io?utm_id=gspreadme&utm_source=github&"
 		"utm_medium=repo&utm_campaign=github&utm_content=readme" );
 	REQUIRE( l->p().get() );

@@ -1144,6 +1144,7 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 							lnk->openStyles() = openStyles;
 							lnk->setTextPos( { lnk->startColumn(), lnk->startLine(),
 								lnk->endColumn(), lnk->endLine() } );
+							lnk->setUrlPos( lnk->textPos() );
 
 							if( email && !tmp.toLower().startsWith( Trait::latin1ToString( "mailto:" ) ) )
 								tmp = Trait::latin1ToString( "mailto:" ) + tmp;
@@ -1456,7 +1457,8 @@ private:
 		bool doNotCreateTextOnFail,
 		long long int startLine, long long int startPos,
 		long long int lastLine, long long int lastPos,
-		const WithPosition & textPos );
+		const WithPosition & textPos,
+		const WithPosition & urlPos );
 	
 	std::shared_ptr< Link< Trait > > makeLink( const typename Trait::String & url,
 		const typename MdBlock< Trait >::Data & text,
@@ -1464,7 +1466,8 @@ private:
 		bool doNotCreateTextOnFail,
 		long long int startLine, long long int startPos,
 		long long int lastLine, long long int lastPos,
-		const WithPosition & textPos );
+		const WithPosition & textPos,
+		const WithPosition & urlPos );
 	
 	struct Delimiter {
 		enum DelimiterType {
@@ -1627,13 +1630,15 @@ private:
 		typename Delims::const_iterator, bool >
 	checkForInlineLink( typename Delims::const_iterator it,
 		typename Delims::const_iterator last,
-		TextParsingOpts< Trait > & po );
+		TextParsingOpts< Trait > & po,
+		WithPosition * urlPos = nullptr );
 	
 	inline std::tuple< typename Trait::String, typename Trait::String,
 		typename Delims::const_iterator, bool >
 	checkForRefLink( typename Delims::const_iterator it,
 		typename Delims::const_iterator last,
-		TextParsingOpts< Trait > & po );
+		TextParsingOpts< Trait > & po,
+		WithPosition * urlPos = nullptr );
 	
 	typename Trait::String toSingleLine( const typename MdBlock< Trait >::Data & d );
 	
@@ -5571,6 +5576,7 @@ Parser< Trait >::checkForAutolinkHtml( typename Delims::const_iterator it,
 						po.fr.data[ it->m_line ].second.lineNumber,
 						po.fr.data[ nit->m_line ].first.virginPos( nit->m_pos - 1 ),
 						po.fr.data[ nit->m_line ].second.lineNumber } );
+					lnk->setUrlPos( lnk->textPos() );
 					po.parent->appendItem( lnk );
 				}
 
@@ -5933,7 +5939,8 @@ Parser< Trait >::makeLink( const typename Trait::String & url,
 	bool doNotCreateTextOnFail,
 	long long int startLine, long long int startPos,
 	long long int lastLine, long long int lastPos,
-	const WithPosition & textPos )
+	const WithPosition & textPos ,
+	const WithPosition & urlPos )
 {
 	typename Trait::String u = ( url.startsWith( Trait::latin1ToString( "#" ) ) ?
 		url : removeBackslashes< Trait >( replaceEntity< Trait >( url ) ).asString() );
@@ -5994,6 +6001,7 @@ Parser< Trait >::makeLink( const typename Trait::String & url,
 	link->setUrl( u );
 	link->setOpts( po.opts );
 	link->setTextPos( textPos );
+	link->setUrlPos( urlPos );
 
 	MdBlock< Trait > block = { text, 0 };
 
@@ -6084,7 +6092,7 @@ Parser< Trait >::createShortcutLink( const typename MdBlock< Trait >::Data & tex
 				removeBackslashes< Trait >( isLinkTextEmpty ? text : linkText ),
 				po, doNotCreateTextOnFail, startLine, startPos,
 				lastIt->m_line, lastIt->m_pos + lastIt->m_len,
-				( isLinkTextEmpty ? textPos : linkTextPos ) );
+				( isLinkTextEmpty ? textPos : linkTextPos ), textPos );
 
 			if( link.get() )
 			{	
@@ -6119,7 +6127,8 @@ Parser< Trait >::makeImage( const typename Trait::String & url,
 	bool doNotCreateTextOnFail,
 	long long int startLine, long long int startPos,
 	long long int lastLine, long long int lastPos,
-	const WithPosition & textPos )
+	const WithPosition & textPos,
+	const WithPosition & urlPos )
 {
 	std::shared_ptr< Image< Trait > > img( new Image< Trait > );
 
@@ -6155,6 +6164,7 @@ Parser< Trait >::makeImage( const typename Trait::String & url,
 	img->setEndColumn( po.fr.data.at( lastLine ).first.virginPos( lastPos - 1 ) );
 	img->setEndLine( po.fr.data.at( lastLine ).second.lineNumber );
 	img->setTextPos( textPos );
+	img->setUrlPos( urlPos );
 
 	return img;
 }
@@ -6191,7 +6201,7 @@ Parser< Trait >::createShortcutImage( const typename MdBlock< Trait >::Data & te
 				( isLinkTextEmpty ? text : linkText ), po,
 				doNotCreateTextOnFail, startLine, startPos,
 				lastIt->m_line, lastIt->m_pos + lastIt->m_len,
-				( isLinkTextEmpty ? textPos : linkTextPos ) );
+				( isLinkTextEmpty ? textPos : linkTextPos ), textPos );
 
 			po.parent->appendItem( img );
 
@@ -6223,7 +6233,8 @@ skipSpacesUpTo1Line( long long int & line, long long int & pos, const typename M
 template< class Trait >
 inline std::tuple< long long int, long long int, bool, typename Trait::String, long long int >
 readLinkDestination( long long int line, long long int pos,
-	const TextParsingOpts< Trait > & po )
+	const TextParsingOpts< Trait > & po,
+	WithPosition * urlPos = nullptr )
 {
 	skipSpacesUpTo1Line< Trait >( line, pos, po.fr.data );
 
@@ -6236,6 +6247,12 @@ readLinkDestination( long long int line, long long int pos,
 		if( s[ pos ] == Trait::latin1ToChar( '<' ) )
 		{
 			++pos;
+			
+			if( urlPos )
+			{
+				urlPos->setStartColumn( po.fr.data[ line ].first.virginPos( pos ) );
+				urlPos->setStartLine( po.fr.data[ line ].second.lineNumber );
+			}
 
 			const auto start = pos;
 
@@ -6261,7 +6278,14 @@ readLinkDestination( long long int line, long long int pos,
 
 			if( pos < s.size() && s[ pos ] == Trait::latin1ToChar( '>' ) )
 			{
+				if( urlPos )
+				{
+					urlPos->setEndColumn( po.fr.data[ line ].first.virginPos( pos - 1 ) );
+					urlPos->setEndLine( po.fr.data[ line ].second.lineNumber );
+				}
+				
 				++pos;
+				
 				return { line, pos, true, s.sliced( start, pos - start - 1 ), destLine };
 			}
 			else
@@ -6272,6 +6296,12 @@ readLinkDestination( long long int line, long long int pos,
 			long long int pc = 0;
 
 			const auto start = pos;
+			
+			if( urlPos )
+			{
+				urlPos->setStartColumn( po.fr.data[ line ].first.virginPos( pos ) );
+				urlPos->setStartLine( po.fr.data[ line ].second.lineNumber );
+			}
 
 			while( pos < s.size() )
 			{
@@ -6285,7 +6315,15 @@ readLinkDestination( long long int line, long long int pos,
 				else if( !backslash && s[ pos ] == Trait::latin1ToChar( ' ' ) )
 				{
 					if( !pc )
+					{
+						if( urlPos )
+						{
+							urlPos->setEndColumn( po.fr.data[ line ].first.virginPos( pos - 1 ) );
+							urlPos->setEndLine( po.fr.data[ line ].second.lineNumber );
+						}
+						
 						return { line, pos, true, s.sliced( start, pos - start ), destLine };
+					}
 					else
 						return { line, pos, false, {}, destLine };
 				}
@@ -6294,7 +6332,15 @@ readLinkDestination( long long int line, long long int pos,
 				else if( !backslash && s[ pos ] == Trait::latin1ToChar( ')' ) )
 				{
 					if( !pc )
+					{
+						if( urlPos )
+						{
+							urlPos->setEndColumn( po.fr.data[ line ].first.virginPos( pos - 1 ) );
+							urlPos->setEndLine( po.fr.data[ line ].second.lineNumber );
+						}
+						
 						return { line, pos, true, s.sliced( start, pos - start ), destLine };
+					}
 					else
 						--pc;
 				}
@@ -6303,6 +6349,12 @@ readLinkDestination( long long int line, long long int pos,
 					backslash = false;
 
 				++pos;
+			}
+			
+			if( urlPos )
+			{
+				urlPos->setEndColumn( po.fr.data[ line ].first.virginPos( pos - 1 ) );
+				urlPos->setEndLine( po.fr.data[ line ].second.lineNumber );
 			}
 
 			return { line, pos, true, s.sliced( start, pos - start ), destLine };
@@ -6391,7 +6443,8 @@ inline std::tuple< typename Trait::String, typename Trait::String,
 	typename Parser< Trait >::Delims::const_iterator, bool >
 Parser< Trait >::checkForInlineLink( typename Delims::const_iterator it,
 	typename Delims::const_iterator last,
-	TextParsingOpts< Trait > & po )
+	TextParsingOpts< Trait > & po,
+	WithPosition * urlPos )
 {
 	long long int p = it->m_pos + it->m_len;
 	long long int l = it->m_line;
@@ -6399,7 +6452,7 @@ Parser< Trait >::checkForInlineLink( typename Delims::const_iterator it,
 	typename Trait::String dest, title;
 	long long int destStartLine = 0;
 
-	std::tie( l, p, ok, dest, destStartLine ) = readLinkDestination< Trait >( l, p, po );
+	std::tie( l, p, ok, dest, destStartLine ) = readLinkDestination< Trait >( l, p, po, urlPos );
 
 	if( !ok )
 		return { {}, {}, it, false };
@@ -6428,7 +6481,8 @@ inline std::tuple< typename Trait::String, typename Trait::String,
 	typename Parser< Trait >::Delims::const_iterator, bool >
 Parser< Trait >::checkForRefLink( typename Delims::const_iterator it,
 	typename Delims::const_iterator last,
-	TextParsingOpts< Trait > & po )
+	TextParsingOpts< Trait > & po,
+	WithPosition * urlPos )
 {
 	long long int p = it->m_pos + it->m_len + 1;
 	long long int l = it->m_line;
@@ -6436,7 +6490,7 @@ Parser< Trait >::checkForRefLink( typename Delims::const_iterator it,
 	typename Trait::String dest, title;
 	long long int destStartLine = 0;
 
-	std::tie( l, p, ok, dest, destStartLine ) = readLinkDestination< Trait >( l, p, po );
+	std::tie( l, p, ok, dest, destStartLine ) = readLinkDestination< Trait >( l, p, po, urlPos );
 
 	if( !ok )
 		return { {}, {}, it, false };
@@ -6502,14 +6556,16 @@ Parser< Trait >::checkForImage( typename Delims::const_iterator it,
 				typename Delims::const_iterator iit;
 				bool ok;
 
-				std::tie( url, title, iit, ok ) = checkForInlineLink( std::next( it ), last, po );
+				WithPosition urlPos;
+				std::tie( url, title, iit, ok ) = checkForInlineLink( std::next( it ), last, po,
+					&urlPos );
 
 				if( ok )
 				{
 					if( !po.collectRefLinks )
 						po.parent->appendItem( makeImage( url, text, po, false,
 							start->m_line, start->m_pos,
-							iit->m_line, iit->m_pos + iit->m_len, textPos ) );
+							iit->m_line, iit->m_pos + iit->m_len, textPos, urlPos ) );
 
 					po.line = iit->m_line;
 					po.pos = iit->m_pos + iit->m_len;
@@ -6666,7 +6722,8 @@ Parser< Trait >::checkForLink( typename Delims::const_iterator it,
 
 					if( it != start && !toSingleLine( text ).simplified().isEmpty() )
 					{
-						std::tie( url, title, iit, ok ) = checkForRefLink( it, last, po );
+						WithPosition urlPos;
+						std::tie( url, title, iit, ok ) = checkForRefLink( it, last, po, &urlPos );
 
 						if( ok )
 						{
@@ -6684,6 +6741,7 @@ Parser< Trait >::checkForLink( typename Delims::const_iterator it,
 								.virginPos( iit->m_pos + iit->m_len - 1 ) );
 							link->setEndLine( po.fr.data.at( iit->m_line ).second.lineNumber );
 							link->setTextPos( labelPos );
+							link->setUrlPos( urlPos );
 
 							url = removeBackslashes< Trait >(
 								replaceEntity< Trait >( url ) ).asString();
@@ -6726,13 +6784,15 @@ Parser< Trait >::checkForLink( typename Delims::const_iterator it,
 				typename Delims::const_iterator iit;
 				bool ok;
 
-				std::tie( url, title, iit, ok ) = checkForInlineLink( std::next( it ), last, po );
+				WithPosition urlPos;
+				std::tie( url, title, iit, ok ) = checkForInlineLink( std::next( it ), last, po,
+					&urlPos );
 
 				if( ok )
 				{
 					const auto link = makeLink( url, removeBackslashes< Trait >( text ), po, false,
 						start->m_line, start->m_pos, iit->m_line, iit->m_pos + iit->m_len,
-						textPos );
+						textPos, urlPos );
 
 					if( link.get() )
 					{

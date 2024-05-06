@@ -2281,6 +2281,8 @@ TEST_CASE( "030" )
 	REQUIRE( i1->startLine() == 0 );
 	REQUIRE( i1->endColumn() == 21 );
 	REQUIRE( i1->endLine() == 0 );
+	REQUIRE( i1->textPos() == MD::WithPosition{ 7, 0, 13, 0 } );
+	REQUIRE( i1->urlPos() == MD::WithPosition{ 16, 0, 20, 0 } );
 
 	typename TRAIT::String wd =
 #ifdef MD4QT_QT_SUPPORT
@@ -2317,6 +2319,8 @@ TEST_CASE( "030" )
 	REQUIRE( i2->startLine() == 0 );
 	REQUIRE( i2->endColumn() == 50 );
 	REQUIRE( i2->endLine() == 0 );
+	REQUIRE( i2->textPos() == MD::WithPosition{ 34, 0, 42, 0 } );
+	REQUIRE( i2->urlPos() == MD::WithPosition{ 45, 0, 49, 0 } );
 
 	REQUIRE( i2->text() == u8"Image 2" );
 	REQUIRE( i2->url() == wd + u8"b.png" );
@@ -2338,6 +2342,8 @@ TEST_CASE( "030" )
 	REQUIRE( i3->startLine() == 0 );
 	REQUIRE( i3->endColumn() == 111 );
 	REQUIRE( i3->endLine() == 0 );
+	REQUIRE( i3->textPos() == MD::WithPosition{ 58, 0, 65, 0 } );
+	REQUIRE( i3->urlPos() == MD::WithPosition{ 69, 0, 95, 0 } );
 
 	REQUIRE( i3->text() == u8"Image 3" );
 	REQUIRE( i3->url() == u8"http://www.where.com/c.jpeg" );
