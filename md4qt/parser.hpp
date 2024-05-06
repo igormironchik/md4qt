@@ -1256,6 +1256,9 @@ public:
 	std::shared_ptr< Document< Trait > > parse(
 		//! Stream to parse.
 		typename Trait::TextStream & stream,
+		//! Absolute path to the root folder for the document.
+		//! This path will be used to resolve local links.
+		const typename Trait::String & path,
 		//! This argument needed only for anchor.
 		const typename Trait::String & fileName );
 	
@@ -1761,11 +1764,12 @@ Parser< Trait >::parse( const typename Trait::String & fileName, bool recursive,
 template< class Trait >
 inline std::shared_ptr< Document< Trait > >
 Parser< Trait >::parse( typename Trait::TextStream & stream,
+	const typename Trait::String & path,
 	const typename Trait::String & fileName )
 {
 	std::shared_ptr< Document< Trait > > doc( new Document< Trait > );
 
-	parseStream( stream, Trait::latin1ToString( "" ), fileName, false, doc,
+	parseStream( stream, path, fileName, false, doc,
 		typename Trait::StringList() );
 
 	clearCache();

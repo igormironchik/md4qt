@@ -1481,16 +1481,26 @@ TEST_CASE( "118-1" )
 		QTextStream stream( file.readAll() );
 		file.close();
 
+		typename TRAIT::String wd = QDir().absolutePath();
 #else
 	std::ifstream stream( fileName, std::ios::in | std::ios::binary );
+	
+	typename TRAIT::String wd = std::filesystem::canonical(
+		std::filesystem::current_path() ).u8string();
+	
+	{
+		std::string tmp;
+		wd.toUTF8String( tmp );
+		std::replace( tmp.begin(), tmp.end(), '\\', '/' );
+		wd = icu::UnicodeString::fromUTF8( tmp );
+	}
 
 	if( stream.good() )
 	{
 #endif
-
 		MD::Parser< TRAIT > parser;
 
-		auto doc = parser.parse( stream, fileName );
+		auto doc = parser.parse( stream, wd, fileName );
 
 #ifndef MD4QT_QT_SUPPORT
 		stream.close();
