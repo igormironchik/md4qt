@@ -1374,38 +1374,45 @@ TEST_CASE( "174" )
 
 	auto doc = parser.parse( "tests/parser/data/174.md" );
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 4 );
-
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->startColumn() == 0 );
-	REQUIRE( p->startLine() == 0 );
-	REQUIRE( p->endColumn() == 3 );
-	REQUIRE( p->endLine() == 0 );
-	REQUIRE( p->items().size() == 1 );
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->startColumn() == 0 );
-	REQUIRE( t->startLine() == 0 );
-	REQUIRE( t->endColumn() == 3 );
-	REQUIRE( t->endLine() == 0 );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"Text" );
-
-	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::HorizontalLine );
-
+	auto checkDoc = []( std::shared_ptr< MD::Document< TRAIT > > doc )
 	{
-		REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Table );
-		auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 3 ).get() );
+		REQUIRE( doc->isEmpty() == false );
+		REQUIRE( doc->items().size() == 4 );
+	
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 0 );
+		REQUIRE( p->endColumn() == 3 );
+		REQUIRE( p->endLine() == 0 );
+		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->startColumn() == 0 );
-		REQUIRE( t->startLine() == 2 );
-		REQUIRE( t->endColumn() == 7 );
-		REQUIRE( t->endLine() == 4 );
-
-		REQUIRE( t->columnsCount() == 1 );
-		REQUIRE( t->rows().size() == 2 );
-	}
+		REQUIRE( t->startLine() == 0 );
+		REQUIRE( t->endColumn() == 3 );
+		REQUIRE( t->endLine() == 0 );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == u8"Text" );
+	
+		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::HorizontalLine );
+	
+		{
+			REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Table );
+			auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 3 ).get() );
+			REQUIRE( t->startColumn() == 0 );
+			REQUIRE( t->startLine() == 2 );
+			REQUIRE( t->endColumn() == 7 );
+			REQUIRE( t->endLine() == 4 );
+	
+			REQUIRE( t->columnsCount() == 1 );
+			REQUIRE( t->rows().size() == 2 );
+		}
+	};
+	
+	checkDoc( doc );
+	
+	checkDoc( std::static_pointer_cast< MD::Document< TRAIT > > ( doc->clone() ) );
 }
 
 /*

@@ -328,90 +328,97 @@ TEST_CASE( "065" )
 
 	auto doc = parser.parse( "tests/parser/data/065.md" );
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
-
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->startColumn() == 0 );
-	REQUIRE( p->startLine() == 0 );
-	REQUIRE( p->endColumn() == 41 );
-	REQUIRE( p->endLine() == 1 );
-
-	REQUIRE( p->items().size() == 6 );
-
+	auto checkDoc = []( std::shared_ptr< MD::Document< TRAIT > > doc )
 	{
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( t->startColumn() == 0 );
-		REQUIRE( t->startLine() == 0 );
-		REQUIRE( t->endColumn() == 4 );
-		REQUIRE( t->endLine() == 0 );
-		REQUIRE( t->isSpaceAfter() );
-		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == u8"When" );
-	}
-
-	{
-		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Math );
-		auto m = static_cast< MD::Math< TRAIT >* > ( p->items().at( 1 ).get() );
-		REQUIRE( m->startColumn() == 6 );
-		REQUIRE( m->startLine() == 0 );
-		REQUIRE( m->endColumn() == 12 );
-		REQUIRE( m->endLine() == 0 );
-		REQUIRE( m->expr() == u8"a \\ne 0" );
-		REQUIRE( m->isInline() );
-		REQUIRE( m->startDelim() == MD::WithPosition{ 5, 0, 5, 0 } );
-		REQUIRE( m->endDelim() == MD::WithPosition{ 13, 0, 13, 0 } );
-	}
-
-	{
-		REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 2 ).get() );
-		REQUIRE( t->startColumn() == 14 );
-		REQUIRE( t->startLine() == 0 );
-		REQUIRE( t->endColumn() == 42 );
-		REQUIRE( t->endLine() == 0 );
-		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == u8", there are two solutions to" );
-	}
-
-	{
-		REQUIRE( p->items().at( 3 )->type() == MD::ItemType::Math );
-		auto m = static_cast< MD::Math< TRAIT >* > ( p->items().at( 3 ).get() );
-		REQUIRE( m->startColumn() == 44 );
-		REQUIRE( m->startLine() == 0 );
-		REQUIRE( m->endColumn() == 62 );
-		REQUIRE( m->endLine() == 0 );
-		REQUIRE( m->expr() == u8"(ax^2 + bx + c = 0)" );
-		REQUIRE( m->isInline() );
-		REQUIRE( m->startDelim() == MD::WithPosition{ 43, 0, 43, 0 } );
-		REQUIRE( m->endDelim() == MD::WithPosition{ 63, 0, 63, 0 } );
-	}
-
-	{
-		REQUIRE( p->items().at( 4 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 4 ).get() );
-		REQUIRE( t->startColumn() == 64 );
-		REQUIRE( t->startLine() == 0 );
-		REQUIRE( t->endColumn() == 76 );
-		REQUIRE( t->endLine() == 0 );
-		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == u8"and they are" );
-	}
-
-	{
-		REQUIRE( p->items().at( 5 )->type() == MD::ItemType::Math );
-		auto m = static_cast< MD::Math< TRAIT >* > ( p->items().at( 5 ).get() );
-		REQUIRE( m->startColumn() == 2 );
-		REQUIRE( m->startLine() == 1 );
-		REQUIRE( m->endColumn() == 39 );
-		REQUIRE( m->endLine() == 1 );
-		REQUIRE( m->expr() == u8" x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a} " );
-		REQUIRE( !m->isInline() );
-		REQUIRE( m->startDelim() == MD::WithPosition{ 0, 1, 1, 1 } );
-		REQUIRE( m->endDelim() == MD::WithPosition{ 40, 1, 41, 1 } );
-	}
+		REQUIRE( doc->isEmpty() == false );
+		REQUIRE( doc->items().size() == 2 );
+	
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 0 );
+		REQUIRE( p->endColumn() == 41 );
+		REQUIRE( p->endLine() == 1 );
+	
+		REQUIRE( p->items().size() == 6 );
+	
+		{
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( t->startColumn() == 0 );
+			REQUIRE( t->startLine() == 0 );
+			REQUIRE( t->endColumn() == 4 );
+			REQUIRE( t->endLine() == 0 );
+			REQUIRE( t->isSpaceAfter() );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8"When" );
+		}
+	
+		{
+			REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Math );
+			auto m = static_cast< MD::Math< TRAIT >* > ( p->items().at( 1 ).get() );
+			REQUIRE( m->startColumn() == 6 );
+			REQUIRE( m->startLine() == 0 );
+			REQUIRE( m->endColumn() == 12 );
+			REQUIRE( m->endLine() == 0 );
+			REQUIRE( m->expr() == u8"a \\ne 0" );
+			REQUIRE( m->isInline() );
+			REQUIRE( m->startDelim() == MD::WithPosition{ 5, 0, 5, 0 } );
+			REQUIRE( m->endDelim() == MD::WithPosition{ 13, 0, 13, 0 } );
+		}
+	
+		{
+			REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 2 ).get() );
+			REQUIRE( t->startColumn() == 14 );
+			REQUIRE( t->startLine() == 0 );
+			REQUIRE( t->endColumn() == 42 );
+			REQUIRE( t->endLine() == 0 );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8", there are two solutions to" );
+		}
+	
+		{
+			REQUIRE( p->items().at( 3 )->type() == MD::ItemType::Math );
+			auto m = static_cast< MD::Math< TRAIT >* > ( p->items().at( 3 ).get() );
+			REQUIRE( m->startColumn() == 44 );
+			REQUIRE( m->startLine() == 0 );
+			REQUIRE( m->endColumn() == 62 );
+			REQUIRE( m->endLine() == 0 );
+			REQUIRE( m->expr() == u8"(ax^2 + bx + c = 0)" );
+			REQUIRE( m->isInline() );
+			REQUIRE( m->startDelim() == MD::WithPosition{ 43, 0, 43, 0 } );
+			REQUIRE( m->endDelim() == MD::WithPosition{ 63, 0, 63, 0 } );
+		}
+	
+		{
+			REQUIRE( p->items().at( 4 )->type() == MD::ItemType::Text );
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 4 ).get() );
+			REQUIRE( t->startColumn() == 64 );
+			REQUIRE( t->startLine() == 0 );
+			REQUIRE( t->endColumn() == 76 );
+			REQUIRE( t->endLine() == 0 );
+			REQUIRE( t->opts() == MD::TextWithoutFormat );
+			REQUIRE( t->text() == u8"and they are" );
+		}
+	
+		{
+			REQUIRE( p->items().at( 5 )->type() == MD::ItemType::Math );
+			auto m = static_cast< MD::Math< TRAIT >* > ( p->items().at( 5 ).get() );
+			REQUIRE( m->startColumn() == 2 );
+			REQUIRE( m->startLine() == 1 );
+			REQUIRE( m->endColumn() == 39 );
+			REQUIRE( m->endLine() == 1 );
+			REQUIRE( m->expr() == u8" x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a} " );
+			REQUIRE( !m->isInline() );
+			REQUIRE( m->startDelim() == MD::WithPosition{ 0, 1, 1, 1 } );
+			REQUIRE( m->endDelim() == MD::WithPosition{ 40, 1, 41, 1 } );
+		}
+	};
+	
+	checkDoc( doc );
+	
+	checkDoc( std::static_pointer_cast< MD::Document< TRAIT > > ( doc->clone() ) );
 }
 
 /*

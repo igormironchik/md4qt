@@ -51,158 +51,165 @@ TEST_CASE( "031" )
 	wd = icu::UnicodeString::fromUTF8( tmp );
 #endif
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 8 );
-
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->startColumn() == 0 );
-	REQUIRE( p->startLine() == 0 );
-	REQUIRE( p->endColumn() == 84 );
-	REQUIRE( p->endLine() == 0 );
-
-	REQUIRE( p->items().size() == 5 );
-
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-
-	auto t0 = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t0->startColumn() == 0 );
-	REQUIRE( t0->startLine() == 0 );
-	REQUIRE( t0->endColumn() == 20 );
-	REQUIRE( t0->endLine() == 0 );
-	REQUIRE( t0->isSpaceAfter() );
-
-	REQUIRE( t0->text() == u8"[link 0][wrong-label]" );
-	REQUIRE( t0->opts() == MD::TextWithoutFormat );
-
-	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Link );
-
-	auto l1 = static_cast< MD::Link< TRAIT >* > ( p->items().at( 1 ).get() );
-	REQUIRE( l1->startColumn() == 22 );
-	REQUIRE( l1->startLine() == 0 );
-	REQUIRE( l1->endColumn() == 35 );
-	REQUIRE( l1->endLine() == 0 );
-
-	REQUIRE( l1->text() == u8"link 1" );
-	REQUIRE( l1->textPos() == MD::WithPosition{ 23, 0, 28, 0 } );
-	REQUIRE( l1->url() == wd + u8"/a.md" );
-	REQUIRE( l1->urlPos() == MD::WithPosition{ 31, 0, 34, 0 } );
-
-	REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Link );
-
-	auto l2 = static_cast< MD::Link< TRAIT >* > ( p->items().at( 2 ).get() );
-	REQUIRE( l2->startColumn() == 37 );
-	REQUIRE( l2->startLine() == 0 );
-	REQUIRE( l2->endColumn() == 61 );
-	REQUIRE( l2->endLine() == 0 );
-
-	REQUIRE( l2->url() == wd + u8"/b.md" );
-	REQUIRE( l2->opts() == MD::TextOption::TextWithoutFormat );
-
-	REQUIRE( l2->img().get() );
-	REQUIRE( l2->img()->text() == u8"image 1" );
-	REQUIRE( l2->img()->url() == wd + u8"/" + u8"a.png" );
-	REQUIRE( l2->textPos() == MD::WithPosition{ 38, 0, 54, 0 } );
-	REQUIRE( l2->urlPos() == MD::WithPosition{ 57, 0, 60, 0 } );
-
-	REQUIRE( p->items().at( 3 )->type() == MD::ItemType::Link );
-
-	auto l3 = static_cast< MD::Link< TRAIT >* > ( p->items().at( 3 ).get() );
-	REQUIRE( l3->startColumn() == 63 );
-	REQUIRE( l3->startLine() == 0 );
-	REQUIRE( l3->endColumn() == 77 );
-	REQUIRE( l3->endLine() == 0 );
-
-	REQUIRE( l3->text() == u8"link 3" );
-
-	const TRAIT::String label = u8"#LABEL/" + wd + u8"/031.md";
-
-	REQUIRE( l3->url() == label );
-	REQUIRE( l3->textPos() == MD::WithPosition{ 64, 0, 69, 0 } );
-	REQUIRE( l3->urlPos() == MD::WithPosition{ 72, 0, 76, 0 } );
-
-	REQUIRE( p->items().at( 4 )->type() == MD::ItemType::FootnoteRef );
-
-	auto f1 = static_cast< MD::FootnoteRef< TRAIT >* > ( p->items().at( 4 ).get() );
-	REQUIRE( f1->startColumn() == 79 );
-	REQUIRE( f1->startLine() == 0 );
-	REQUIRE( f1->endColumn() == 84 );
-	REQUIRE( f1->endLine() == 0 );
-
-	REQUIRE( f1->id() == u8"#^REF/" + wd + u8"/031.md" );
-	REQUIRE( f1->idPos() == MD::WithPosition{ 80, 0, 83, 0 } );
-
-	REQUIRE( !doc->labeledLinks().empty() );
-	const auto lit = doc->labeledLinks().find( label );
-	REQUIRE( lit != doc->labeledLinks().cend() );
-	REQUIRE( lit->second->url() == u8"http://www.where.com/a.md" );
-
-
+	auto checkDoc = [&wd]( std::shared_ptr< MD::Document< TRAIT > > doc )
 	{
-		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
-
-		p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
+		REQUIRE( doc->isEmpty() == false );
+		REQUIRE( doc->items().size() == 8 );
+	
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 		REQUIRE( p->startColumn() == 0 );
-		REQUIRE( p->startLine() == 4 );
-		REQUIRE( p->endColumn() == 10 );
-		REQUIRE( p->endLine() == 4 );
-
-		REQUIRE( p->items().size() == 2 );
-
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::FootnoteRef );
-
-		f1 = static_cast< MD::FootnoteRef< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( f1->startColumn() == 0 );
-		REQUIRE( f1->startLine() == 4 );
-		REQUIRE( f1->endColumn() == 5 );
-		REQUIRE( f1->endLine() == 4 );
-		REQUIRE( f1->idPos() == MD::WithPosition{ 1, 4, 4, 4 } );
-
+		REQUIRE( p->startLine() == 0 );
+		REQUIRE( p->endColumn() == 84 );
+		REQUIRE( p->endLine() == 0 );
+	
+		REQUIRE( p->items().size() == 5 );
+	
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	
+		auto t0 = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t0->startColumn() == 0 );
+		REQUIRE( t0->startLine() == 0 );
+		REQUIRE( t0->endColumn() == 20 );
+		REQUIRE( t0->endLine() == 0 );
+		REQUIRE( t0->isSpaceAfter() );
+	
+		REQUIRE( t0->text() == u8"[link 0][wrong-label]" );
+		REQUIRE( t0->opts() == MD::TextWithoutFormat );
+	
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Link );
+	
+		auto l1 = static_cast< MD::Link< TRAIT >* > ( p->items().at( 1 ).get() );
+		REQUIRE( l1->startColumn() == 22 );
+		REQUIRE( l1->startLine() == 0 );
+		REQUIRE( l1->endColumn() == 35 );
+		REQUIRE( l1->endLine() == 0 );
+	
+		REQUIRE( l1->text() == u8"link 1" );
+		REQUIRE( l1->textPos() == MD::WithPosition{ 23, 0, 28, 0 } );
+		REQUIRE( l1->url() == wd + u8"/a.md" );
+		REQUIRE( l1->urlPos() == MD::WithPosition{ 31, 0, 34, 0 } );
+	
+		REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Link );
+	
+		auto l2 = static_cast< MD::Link< TRAIT >* > ( p->items().at( 2 ).get() );
+		REQUIRE( l2->startColumn() == 37 );
+		REQUIRE( l2->startLine() == 0 );
+		REQUIRE( l2->endColumn() == 61 );
+		REQUIRE( l2->endLine() == 0 );
+	
+		REQUIRE( l2->url() == wd + u8"/b.md" );
+		REQUIRE( l2->opts() == MD::TextOption::TextWithoutFormat );
+	
+		REQUIRE( l2->img().get() );
+		REQUIRE( l2->img()->text() == u8"image 1" );
+		REQUIRE( l2->img()->url() == wd + u8"/" + u8"a.png" );
+		REQUIRE( l2->textPos() == MD::WithPosition{ 38, 0, 54, 0 } );
+		REQUIRE( l2->urlPos() == MD::WithPosition{ 57, 0, 60, 0 } );
+	
+		REQUIRE( p->items().at( 3 )->type() == MD::ItemType::Link );
+	
+		auto l3 = static_cast< MD::Link< TRAIT >* > ( p->items().at( 3 ).get() );
+		REQUIRE( l3->startColumn() == 63 );
+		REQUIRE( l3->startLine() == 0 );
+		REQUIRE( l3->endColumn() == 77 );
+		REQUIRE( l3->endLine() == 0 );
+	
+		REQUIRE( l3->text() == u8"link 3" );
+	
+		const TRAIT::String label = u8"#LABEL/" + wd + u8"/031.md";
+	
+		REQUIRE( l3->url() == label );
+		REQUIRE( l3->textPos() == MD::WithPosition{ 64, 0, 69, 0 } );
+		REQUIRE( l3->urlPos() == MD::WithPosition{ 72, 0, 76, 0 } );
+	
+		REQUIRE( p->items().at( 4 )->type() == MD::ItemType::FootnoteRef );
+	
+		auto f1 = static_cast< MD::FootnoteRef< TRAIT >* > ( p->items().at( 4 ).get() );
+		REQUIRE( f1->startColumn() == 79 );
+		REQUIRE( f1->startLine() == 0 );
+		REQUIRE( f1->endColumn() == 84 );
+		REQUIRE( f1->endLine() == 0 );
+	
 		REQUIRE( f1->id() == u8"#^REF/" + wd + u8"/031.md" );
-
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
-		REQUIRE( t->isSpaceBefore() );
-		REQUIRE( t->startColumn() == 6 );
-		REQUIRE( t->startLine() == 4 );
-		REQUIRE( t->endColumn() == 10 );
-		REQUIRE( t->endLine() == 4 );
-
-		REQUIRE( t->text() == u8"text" );
-
-		REQUIRE( doc->labeledLinks().size() == 2 );
-
-		const auto lit = doc->labeledLinks().find( u8"#1/" + wd + u8"/031.md" );
+		REQUIRE( f1->idPos() == MD::WithPosition{ 80, 0, 83, 0 } );
+	
+		REQUIRE( !doc->labeledLinks().empty() );
+		const auto lit = doc->labeledLinks().find( label );
 		REQUIRE( lit != doc->labeledLinks().cend() );
-
-		REQUIRE( lit->second->url() == wd + u8"/a.md" );
-	}
-
-	{
-		REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Paragraph );
-
-		p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 3 ).get() );
-		REQUIRE( p->startColumn() == 0 );
-		REQUIRE( p->startLine() == 8 );
-		REQUIRE( p->endColumn() == 15 );
-		REQUIRE( p->endLine() == 8 );
-
-		REQUIRE( p->items().size() == 1 );
-
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
-
-		auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( l->startColumn() == 0 );
-		REQUIRE( l->startLine() == 8 );
-		REQUIRE( l->endColumn() == 15 );
-		REQUIRE( l->endLine() == 8 );
-		REQUIRE( l->textPos() == MD::WithPosition{ 1, 8, 6, 8 } );
-		REQUIRE( l->urlPos() == MD::WithPosition{ 9, 8, 14, 8 } );
-
-		REQUIRE( l->url() == u8"#label/" + wd + u8"/031.md" );
-	}
-
-	REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::PageBreak );
+		REQUIRE( lit->second->url() == u8"http://www.where.com/a.md" );
+	
+	
+		{
+			REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
+	
+			p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
+			REQUIRE( p->startColumn() == 0 );
+			REQUIRE( p->startLine() == 4 );
+			REQUIRE( p->endColumn() == 10 );
+			REQUIRE( p->endLine() == 4 );
+	
+			REQUIRE( p->items().size() == 2 );
+	
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::FootnoteRef );
+	
+			f1 = static_cast< MD::FootnoteRef< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( f1->startColumn() == 0 );
+			REQUIRE( f1->startLine() == 4 );
+			REQUIRE( f1->endColumn() == 5 );
+			REQUIRE( f1->endLine() == 4 );
+			REQUIRE( f1->idPos() == MD::WithPosition{ 1, 4, 4, 4 } );
+	
+			REQUIRE( f1->id() == u8"#^REF/" + wd + u8"/031.md" );
+	
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+			REQUIRE( t->isSpaceBefore() );
+			REQUIRE( t->startColumn() == 6 );
+			REQUIRE( t->startLine() == 4 );
+			REQUIRE( t->endColumn() == 10 );
+			REQUIRE( t->endLine() == 4 );
+	
+			REQUIRE( t->text() == u8"text" );
+	
+			REQUIRE( doc->labeledLinks().size() == 2 );
+	
+			const auto lit = doc->labeledLinks().find( u8"#1/" + wd + u8"/031.md" );
+			REQUIRE( lit != doc->labeledLinks().cend() );
+	
+			REQUIRE( lit->second->url() == wd + u8"/a.md" );
+		}
+	
+		{
+			REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Paragraph );
+	
+			p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 3 ).get() );
+			REQUIRE( p->startColumn() == 0 );
+			REQUIRE( p->startLine() == 8 );
+			REQUIRE( p->endColumn() == 15 );
+			REQUIRE( p->endLine() == 8 );
+	
+			REQUIRE( p->items().size() == 1 );
+	
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
+	
+			auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
+			REQUIRE( l->startColumn() == 0 );
+			REQUIRE( l->startLine() == 8 );
+			REQUIRE( l->endColumn() == 15 );
+			REQUIRE( l->endLine() == 8 );
+			REQUIRE( l->textPos() == MD::WithPosition{ 1, 8, 6, 8 } );
+			REQUIRE( l->urlPos() == MD::WithPosition{ 9, 8, 14, 8 } );
+	
+			REQUIRE( l->url() == u8"#label/" + wd + u8"/031.md" );
+		}
+	
+		REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::PageBreak );
+	};
+	
+	checkDoc( doc );
+	
+	checkDoc( std::static_pointer_cast< MD::Document< TRAIT > > ( doc->clone() ) );
 }
 
 /*
@@ -218,34 +225,41 @@ TEST_CASE( "032" )
 
 	auto doc = parser.parse( "tests/parser/data/032.md" );
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
-
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Blockquote );
-
-	auto q = static_cast< MD::Blockquote< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( q->startColumn() == 0 );
-	REQUIRE( q->startLine() == 0 );
-	REQUIRE( q->endColumn() == 4 );
-	REQUIRE( q->endLine() == 3 );
-	REQUIRE( q->delims() == MD::Blockquote< TRAIT >::Delims{
-		{ 0, 0, 0, 0 }, { 0, 1, 0, 1 }, { 0, 2, 0, 2 }, { 0, 3, 0, 3 } } );
-
-	REQUIRE( q->items().size() == 1 );
-
-	REQUIRE( q->items().at( 0 )->type() == MD::ItemType::Code );
-
-	auto c = static_cast< MD::Code< TRAIT >* > ( q->items().at( 0 ).get() );
-	REQUIRE( c->startColumn() == 2 );
-	REQUIRE( c->startLine() == 1 );
-	REQUIRE( c->endColumn() == 18 );
-	REQUIRE( c->endLine() == 2 );
-	REQUIRE( c->startDelim() == MD::WithPosition{ 2, 0, 4, 0 } );
-	REQUIRE( c->endDelim() == MD::WithPosition{ 2, 3, 4, 3 } );
-	REQUIRE( c->syntaxPos() == MD::WithPosition{ 5, 0, 7, 0 } );
-
-	REQUIRE( c->isInline() == false );
-	REQUIRE( c->text() == u8"if( a < b )\n  do_something();" );
+	auto checkDoc = []( std::shared_ptr< MD::Document< TRAIT > > doc )
+	{
+		REQUIRE( doc->isEmpty() == false );
+		REQUIRE( doc->items().size() == 2 );
+	
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Blockquote );
+	
+		auto q = static_cast< MD::Blockquote< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( q->startColumn() == 0 );
+		REQUIRE( q->startLine() == 0 );
+		REQUIRE( q->endColumn() == 4 );
+		REQUIRE( q->endLine() == 3 );
+		REQUIRE( q->delims() == MD::Blockquote< TRAIT >::Delims{
+			{ 0, 0, 0, 0 }, { 0, 1, 0, 1 }, { 0, 2, 0, 2 }, { 0, 3, 0, 3 } } );
+	
+		REQUIRE( q->items().size() == 1 );
+	
+		REQUIRE( q->items().at( 0 )->type() == MD::ItemType::Code );
+	
+		auto c = static_cast< MD::Code< TRAIT >* > ( q->items().at( 0 ).get() );
+		REQUIRE( c->startColumn() == 2 );
+		REQUIRE( c->startLine() == 1 );
+		REQUIRE( c->endColumn() == 18 );
+		REQUIRE( c->endLine() == 2 );
+		REQUIRE( c->startDelim() == MD::WithPosition{ 2, 0, 4, 0 } );
+		REQUIRE( c->endDelim() == MD::WithPosition{ 2, 3, 4, 3 } );
+		REQUIRE( c->syntaxPos() == MD::WithPosition{ 5, 0, 7, 0 } );
+	
+		REQUIRE( c->isInline() == false );
+		REQUIRE( c->text() == u8"if( a < b )\n  do_something();" );
+	};
+	
+	checkDoc( doc );
+	
+	checkDoc( std::static_pointer_cast< MD::Document< TRAIT > > ( doc->clone() ) );
 }
 
 /*
@@ -1742,97 +1756,7 @@ TEST_CASE( "046" )
 	auto doc = parser.parse( "tests/parser/data/046.md" );
 
 	REQUIRE( !doc->isEmpty() );
-	REQUIRE( doc->items().size() == 14 );
-
-	static const std::vector< long long int > hcolumn = { 0, 0, 2, 0, 0, 0 };
-	static const std::vector< long long int > hecolumn = { 8, 8, 12, 11, 8, 8 };
-	static const std::vector< long long int > sline = { 0, 4, 8, 12, 16, 21 };
-	static const std::vector< long long int > eline = { 1, 5, 8, 12, 17, 22 };
-	static const std::vector< long long int > pcolumn = { 0, 0, 4, 3, 0, 0 };
-	static const std::vector< long long int > pline = { 2, 6, 10, 14, 19, 24 };
-	static const std::vector< MD::WithPosition > delims = {
-		{ 0, 1, 8, 1 }, { 0, 5, 8, 5 }, { 2, 8, 2, 8 },
-		{ 0, 12, 1, 12 }, { 0, 17, 8, 17 }, { 0, 22, 8, 22 } };
-
-	int didx = 1;
-
-	for( int i = 1; i < 4; ++i )
-	{
-		for( int j = 1; j < 3; ++j )
-		{
-			REQUIRE( doc->items().at( didx )->type() == MD::ItemType::Heading );
-
-			auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( didx ).get() );
-			const size_t idx = ( ( i - 1 ) * 2 ) + j - 1;
-			REQUIRE( h->startColumn() == hcolumn.at( idx ) );
-			REQUIRE( h->startLine() == sline.at( idx ) );
-			REQUIRE( h->endColumn() == hecolumn.at( idx ) );
-			REQUIRE( h->endLine() == eline.at( idx ) );
-			REQUIRE( h->delim() == delims.at( idx ) );
-
-			{
-				REQUIRE( h->level() == j );
-				REQUIRE( h->text().get() );
-				auto p = h->text().get();
-				REQUIRE( p->startColumn() == pcolumn.at( idx ) );
-				REQUIRE( p->startLine() == sline.at( idx ) );
-				REQUIRE( p->endColumn() == pcolumn.at( idx ) + 8 );
-				REQUIRE( p->endLine() == p->startLine() );
-				REQUIRE( p->items().size() == 1 );
-				REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-				auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-				REQUIRE( t->text() == u8"Heading " + to_string( j ) );
-				REQUIRE( t->startColumn() == pcolumn.at( idx ) );
-				REQUIRE( t->startLine() == sline.at( idx ) );
-				REQUIRE( t->endColumn() == pcolumn.at( idx ) + 8 );
-				REQUIRE( t->endLine() == t->startLine() );
-			}
-
-			++didx;
-
-			REQUIRE( doc->items().at( didx )->type() == MD::ItemType::Paragraph );
-
-			auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( didx ).get() );
-			REQUIRE( p->startColumn() == 0 );
-			REQUIRE( p->startLine() == pline.at( idx ) );
-			REQUIRE( p->endColumn() == 10 );
-			REQUIRE( p->endLine() == p->startLine() );
-
-			REQUIRE( p->items().size() == 1 );
-			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-			REQUIRE( static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() )->text() ==
-				u8"Paragraph " + to_string( j ) );
-
-			++didx;
-		}
-	}
-
-	REQUIRE( doc->items().at( didx )->type() == MD::ItemType::Heading );
-
-	auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( didx ).get() );
-	REQUIRE( h->startColumn() == 0 );
-	REQUIRE( h->startLine() == 26 );
-	REQUIRE( h->endColumn() == 25 );
-	REQUIRE( h->endLine() == 26 );
-	REQUIRE( h->delim() == MD::WithPosition{ 0, 26, 2, 26 } );
-
-	REQUIRE( h->level() == 3 );
-	REQUIRE( h->text().get() );
-	auto p = h->text().get();
-	REQUIRE( p->startColumn() == 4 );
-	REQUIRE( p->startLine() == 26 );
-	REQUIRE( p->endColumn() == 12 );
-	REQUIRE( p->endLine() == 26 );
-	REQUIRE( p->items().size() == 1 );
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->startColumn() == 4 );
-	REQUIRE( t->startLine() == 26 );
-	REQUIRE( t->endColumn() == 12 );
-	REQUIRE( t->endLine() == 26 );
-	REQUIRE( t->text() == u8"Heading 3" );
-	REQUIRE( h->isLabeled() );
-
+	
 	typename TRAIT::String wd =
 #ifdef MD4QT_QT_SUPPORT
 		QDir().absolutePath()
@@ -1847,15 +1771,113 @@ TEST_CASE( "046" )
 	std::replace( tmp.begin(), tmp.end(), '\\', '/' );
 	wd = icu::UnicodeString::fromUTF8( tmp );
 #endif
-
-	const typename TRAIT::String label = u8"#heading-3/" + wd + u8"046.md";
-
-	REQUIRE( h->label() == label );
-
-	REQUIRE( doc->labeledHeadings().size() == 3 );
-	const auto hit = doc->labeledHeadings().find( label );
-	REQUIRE( hit != doc->labeledHeadings().cend() );
-	REQUIRE( hit->second.get() == h );
+	
+	auto checkDoc = [&wd] ( std::shared_ptr< MD::Document< TRAIT > > doc )
+	{
+		REQUIRE( doc->items().size() == 14 );
+	
+		static const std::vector< long long int > hcolumn = { 0, 0, 2, 0, 0, 0 };
+		static const std::vector< long long int > hecolumn = { 8, 8, 12, 11, 8, 8 };
+		static const std::vector< long long int > sline = { 0, 4, 8, 12, 16, 21 };
+		static const std::vector< long long int > eline = { 1, 5, 8, 12, 17, 22 };
+		static const std::vector< long long int > pcolumn = { 0, 0, 4, 3, 0, 0 };
+		static const std::vector< long long int > pline = { 2, 6, 10, 14, 19, 24 };
+		static const std::vector< MD::WithPosition > delims = {
+			{ 0, 1, 8, 1 }, { 0, 5, 8, 5 }, { 2, 8, 2, 8 },
+			{ 0, 12, 1, 12 }, { 0, 17, 8, 17 }, { 0, 22, 8, 22 } };
+	
+		int didx = 1;
+	
+		for( int i = 1; i < 4; ++i )
+		{
+			for( int j = 1; j < 3; ++j )
+			{
+				REQUIRE( doc->items().at( didx )->type() == MD::ItemType::Heading );
+	
+				auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( didx ).get() );
+				const size_t idx = ( ( i - 1 ) * 2 ) + j - 1;
+				REQUIRE( h->startColumn() == hcolumn.at( idx ) );
+				REQUIRE( h->startLine() == sline.at( idx ) );
+				REQUIRE( h->endColumn() == hecolumn.at( idx ) );
+				REQUIRE( h->endLine() == eline.at( idx ) );
+				REQUIRE( h->delim() == delims.at( idx ) );
+	
+				{
+					REQUIRE( h->level() == j );
+					REQUIRE( h->text().get() );
+					auto p = h->text().get();
+					REQUIRE( p->startColumn() == pcolumn.at( idx ) );
+					REQUIRE( p->startLine() == sline.at( idx ) );
+					REQUIRE( p->endColumn() == pcolumn.at( idx ) + 8 );
+					REQUIRE( p->endLine() == p->startLine() );
+					REQUIRE( p->items().size() == 1 );
+					REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+					auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+					REQUIRE( t->text() == u8"Heading " + to_string( j ) );
+					REQUIRE( t->startColumn() == pcolumn.at( idx ) );
+					REQUIRE( t->startLine() == sline.at( idx ) );
+					REQUIRE( t->endColumn() == pcolumn.at( idx ) + 8 );
+					REQUIRE( t->endLine() == t->startLine() );
+				}
+	
+				++didx;
+	
+				REQUIRE( doc->items().at( didx )->type() == MD::ItemType::Paragraph );
+	
+				auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( didx ).get() );
+				REQUIRE( p->startColumn() == 0 );
+				REQUIRE( p->startLine() == pline.at( idx ) );
+				REQUIRE( p->endColumn() == 10 );
+				REQUIRE( p->endLine() == p->startLine() );
+	
+				REQUIRE( p->items().size() == 1 );
+				REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+				REQUIRE( static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() )->text() ==
+					u8"Paragraph " + to_string( j ) );
+	
+				++didx;
+			}
+		}
+	
+		REQUIRE( doc->items().at( didx )->type() == MD::ItemType::Heading );
+	
+		auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( didx ).get() );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 26 );
+		REQUIRE( h->endColumn() == 25 );
+		REQUIRE( h->endLine() == 26 );
+		REQUIRE( h->delim() == MD::WithPosition{ 0, 26, 2, 26 } );
+	
+		REQUIRE( h->level() == 3 );
+		REQUIRE( h->text().get() );
+		auto p = h->text().get();
+		REQUIRE( p->startColumn() == 4 );
+		REQUIRE( p->startLine() == 26 );
+		REQUIRE( p->endColumn() == 12 );
+		REQUIRE( p->endLine() == 26 );
+		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->startColumn() == 4 );
+		REQUIRE( t->startLine() == 26 );
+		REQUIRE( t->endColumn() == 12 );
+		REQUIRE( t->endLine() == 26 );
+		REQUIRE( t->text() == u8"Heading 3" );
+		REQUIRE( h->isLabeled() );
+	
+		const typename TRAIT::String label = u8"#heading-3/" + wd + u8"046.md";
+	
+		REQUIRE( h->label() == label );
+	
+		REQUIRE( doc->labeledHeadings().size() == 3 );
+		const auto hit = doc->labeledHeadings().find( label );
+		REQUIRE( hit != doc->labeledHeadings().cend() );
+		REQUIRE( hit->second.get() == h );
+	};
+	
+	checkDoc( doc );
+	
+	checkDoc( std::static_pointer_cast< MD::Document< TRAIT > > ( doc->clone() ) );
 }
 
 /*
@@ -1875,131 +1897,138 @@ TEST_CASE( "047" )
 
 	auto doc = parser.parse( "tests/parser/data/047.md" );
 
-	REQUIRE( !doc->isEmpty() );
-	REQUIRE( doc->items().size() == 3 );
-
-	static const std::vector< long long int > scolumn = { 0, 2 };
-	static const std::vector< long long int > ecolumn1 = { 18, 22 };
-	static const std::vector< long long int > ecolumn2 = { 16, 22 };
-
-	for( int i = 1; i < 3; ++i )
+	auto checkDoc = []( std::shared_ptr< MD::Document< TRAIT > > doc )
 	{
-		REQUIRE( doc->items().at( i )->type() == MD::ItemType::Table );
-
-		auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( i ).get() );
-		REQUIRE( t->startColumn() == 0 );
-		REQUIRE( t->startLine() == ( ( i - 1 ) * 4 ) + 1 );
-		REQUIRE( t->endColumn() == ecolumn2.at( i - 1 ) );
-		REQUIRE( t->endLine() == ( ( i - 1 ) * 4 ) + 3 );
-
-		REQUIRE( t->columnsCount() == 2 );
-		REQUIRE( t->rows().size() == 2 );
-
-		auto r0 = t->rows().at( 0 );
-		REQUIRE( r0->startColumn() == 0 );
-		REQUIRE( r0->startLine() == ( ( i - 1 ) * 4 ) + 1 );
-		REQUIRE( r0->endColumn() == ecolumn1.at( i - 1 ) ) ;
-		REQUIRE( r0->endLine() == r0->startLine() );
-
-		REQUIRE( r0->type() == MD::ItemType::TableRow );
-
-		REQUIRE( r0->cells().size() == 2 );
-
+		REQUIRE( !doc->isEmpty() );
+		REQUIRE( doc->items().size() == 3 );
+	
+		static const std::vector< long long int > scolumn = { 0, 2 };
+		static const std::vector< long long int > ecolumn1 = { 18, 22 };
+		static const std::vector< long long int > ecolumn2 = { 16, 22 };
+	
+		for( int i = 1; i < 3; ++i )
 		{
-			REQUIRE( r0->cells().at( 0 )->type() == MD::ItemType::TableCell );
-			auto c0 = static_cast< MD::TableCell< TRAIT >* > ( r0->cells().at( 0 ).get() );
-			REQUIRE( c0->startColumn() == 0 );
-			REQUIRE( c0->startLine() == r0->startLine() );
-			REQUIRE( c0->endColumn() == c0->startColumn() + 9 + scolumn.at( i - 1 ) ) ;
-			REQUIRE( c0->endLine() == c0->startLine() );
-
-			REQUIRE( c0->items().size() == 1 );
-			REQUIRE( c0->items().at( 0 )->type() == MD::ItemType::Text );
-
-			auto t0 = static_cast< MD::Text< TRAIT >* > ( c0->items().at( 0 ).get() );
-			REQUIRE( t0->startColumn() == scolumn.at( i - 1 ) );
-			REQUIRE( t0->startLine() == c0->startLine() );
-			REQUIRE( t0->endColumn() == t0->startColumn() + 7 );
-			REQUIRE( t0->endLine() == t0->startLine() );
-
-			REQUIRE( t0->text() == u8"Column 1" );
+			REQUIRE( doc->items().at( i )->type() == MD::ItemType::Table );
+	
+			auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( i ).get() );
+			REQUIRE( t->startColumn() == 0 );
+			REQUIRE( t->startLine() == ( ( i - 1 ) * 4 ) + 1 );
+			REQUIRE( t->endColumn() == ecolumn2.at( i - 1 ) );
+			REQUIRE( t->endLine() == ( ( i - 1 ) * 4 ) + 3 );
+	
+			REQUIRE( t->columnsCount() == 2 );
+			REQUIRE( t->rows().size() == 2 );
+	
+			auto r0 = t->rows().at( 0 );
+			REQUIRE( r0->startColumn() == 0 );
+			REQUIRE( r0->startLine() == ( ( i - 1 ) * 4 ) + 1 );
+			REQUIRE( r0->endColumn() == ecolumn1.at( i - 1 ) ) ;
+			REQUIRE( r0->endLine() == r0->startLine() );
+	
+			REQUIRE( r0->type() == MD::ItemType::TableRow );
+	
+			REQUIRE( r0->cells().size() == 2 );
+	
+			{
+				REQUIRE( r0->cells().at( 0 )->type() == MD::ItemType::TableCell );
+				auto c0 = static_cast< MD::TableCell< TRAIT >* > ( r0->cells().at( 0 ).get() );
+				REQUIRE( c0->startColumn() == 0 );
+				REQUIRE( c0->startLine() == r0->startLine() );
+				REQUIRE( c0->endColumn() == c0->startColumn() + 9 + scolumn.at( i - 1 ) ) ;
+				REQUIRE( c0->endLine() == c0->startLine() );
+	
+				REQUIRE( c0->items().size() == 1 );
+				REQUIRE( c0->items().at( 0 )->type() == MD::ItemType::Text );
+	
+				auto t0 = static_cast< MD::Text< TRAIT >* > ( c0->items().at( 0 ).get() );
+				REQUIRE( t0->startColumn() == scolumn.at( i - 1 ) );
+				REQUIRE( t0->startLine() == c0->startLine() );
+				REQUIRE( t0->endColumn() == t0->startColumn() + 7 );
+				REQUIRE( t0->endLine() == t0->startLine() );
+	
+				REQUIRE( t0->text() == u8"Column 1" );
+			}
+	
+			{
+				auto c1 = static_cast< MD::TableCell< TRAIT >* > ( r0->cells().at( 1 ).get() );
+				REQUIRE( c1->startColumn() == scolumn.at( i - 1 ) + 9 );
+				REQUIRE( c1->startLine() == r0->startLine() );
+				REQUIRE( c1->endColumn() == ecolumn1.at( i - 1 ) );
+				REQUIRE( c1->endLine() == c1->startLine() );
+	
+				REQUIRE( c1->items().size() == 1 );
+				REQUIRE( c1->items().at( 0 )->type() == MD::ItemType::Text );
+	
+				auto t1 = static_cast< MD::Text< TRAIT >* > ( c1->items().at( 0 ).get() );
+				REQUIRE( t1->startColumn() == scolumn.at( i - 1 ) + 9 + 2 );
+				REQUIRE( t1->startLine() == r0->startLine() );
+				REQUIRE( t1->endColumn() == c1->startColumn() + 9 );
+				REQUIRE( t1->endLine() == c1->startLine() );
+	
+				REQUIRE( t1->text() == u8"Column 2" );
+			}
+	
+			auto r1 = t->rows().at( 1 );
+			REQUIRE( r1->startColumn() == 0 );
+			REQUIRE( r1->startLine() == 3 + ( ( i - 1 ) * 4 ) );
+			REQUIRE( r1->endColumn() == ecolumn2.at( i - 1 ) );
+			REQUIRE( r1->endLine() == r1->startLine() );
+	
+			REQUIRE( r1->cells().size() == 2 );
+	
+			{
+				auto c0 = static_cast< MD::TableCell< TRAIT >* > ( r1->cells().at( 0 ).get() );
+				REQUIRE( c0->startColumn() == 0 );
+				REQUIRE( c0->startLine() == r1->startLine() );
+				REQUIRE( c0->endColumn() == c0->startColumn() + 9 + scolumn.at( i - 1 ) );
+				REQUIRE( c0->endLine() == c0->startLine() );
+	
+				REQUIRE( c0->items().size() == 1 );
+				REQUIRE( c0->items().at( 0 )->type() == MD::ItemType::Text );
+	
+				auto t0 = static_cast< MD::Text< TRAIT >* > ( c0->items().at( 0 ).get() );
+				REQUIRE( t0->startColumn() == scolumn.at( i -1 ) );
+				REQUIRE( t0->startLine() == r1->startLine() );
+				REQUIRE( t0->endColumn() == t0->startColumn() + 5 );
+				REQUIRE( t0->endLine() == t0->startLine() );
+	
+				REQUIRE( t0->text() == u8"Cell 1" );
+			}
+	
+			{
+				auto c1 = static_cast< MD::TableCell< TRAIT >* > ( r1->cells().at( 1 ).get() );
+				REQUIRE( c1->startColumn() == scolumn.at( i - 1 ) + 9 );
+				REQUIRE( c1->startLine() == r1->startLine() );
+				REQUIRE( c1->endColumn() == ecolumn2.at( i - 1 ) );
+				REQUIRE( c1->endLine() == c1->startLine() );
+	
+				REQUIRE( c1->items().size() == 1 );
+				REQUIRE( c1->items().at( 0 )->type() == MD::ItemType::Text );
+	
+				auto t1 = static_cast< MD::Text< TRAIT >* > ( c1->items().at( 0 ).get() );
+				REQUIRE( t1->startColumn() == scolumn.at( i - 1 ) + 9 + 2 );
+				REQUIRE( t1->startLine() == r1->startLine() );
+				REQUIRE( t1->endColumn() == t1->startColumn() + 5 );
+				REQUIRE( t1->endLine() == t1->startLine() );
+	
+				REQUIRE( t1->text() == u8"Cell 2" );
+			}
 		}
-
-		{
-			auto c1 = static_cast< MD::TableCell< TRAIT >* > ( r0->cells().at( 1 ).get() );
-			REQUIRE( c1->startColumn() == scolumn.at( i - 1 ) + 9 );
-			REQUIRE( c1->startLine() == r0->startLine() );
-			REQUIRE( c1->endColumn() == ecolumn1.at( i - 1 ) );
-			REQUIRE( c1->endLine() == c1->startLine() );
-
-			REQUIRE( c1->items().size() == 1 );
-			REQUIRE( c1->items().at( 0 )->type() == MD::ItemType::Text );
-
-			auto t1 = static_cast< MD::Text< TRAIT >* > ( c1->items().at( 0 ).get() );
-			REQUIRE( t1->startColumn() == scolumn.at( i - 1 ) + 9 + 2 );
-			REQUIRE( t1->startLine() == r0->startLine() );
-			REQUIRE( t1->endColumn() == c1->startColumn() + 9 );
-			REQUIRE( t1->endLine() == c1->startLine() );
-
-			REQUIRE( t1->text() == u8"Column 2" );
-		}
-
-		auto r1 = t->rows().at( 1 );
-		REQUIRE( r1->startColumn() == 0 );
-		REQUIRE( r1->startLine() == 3 + ( ( i - 1 ) * 4 ) );
-		REQUIRE( r1->endColumn() == ecolumn2.at( i - 1 ) );
-		REQUIRE( r1->endLine() == r1->startLine() );
-
-		REQUIRE( r1->cells().size() == 2 );
-
-		{
-			auto c0 = static_cast< MD::TableCell< TRAIT >* > ( r1->cells().at( 0 ).get() );
-			REQUIRE( c0->startColumn() == 0 );
-			REQUIRE( c0->startLine() == r1->startLine() );
-			REQUIRE( c0->endColumn() == c0->startColumn() + 9 + scolumn.at( i - 1 ) );
-			REQUIRE( c0->endLine() == c0->startLine() );
-
-			REQUIRE( c0->items().size() == 1 );
-			REQUIRE( c0->items().at( 0 )->type() == MD::ItemType::Text );
-
-			auto t0 = static_cast< MD::Text< TRAIT >* > ( c0->items().at( 0 ).get() );
-			REQUIRE( t0->startColumn() == scolumn.at( i -1 ) );
-			REQUIRE( t0->startLine() == r1->startLine() );
-			REQUIRE( t0->endColumn() == t0->startColumn() + 5 );
-			REQUIRE( t0->endLine() == t0->startLine() );
-
-			REQUIRE( t0->text() == u8"Cell 1" );
-		}
-
-		{
-			auto c1 = static_cast< MD::TableCell< TRAIT >* > ( r1->cells().at( 1 ).get() );
-			REQUIRE( c1->startColumn() == scolumn.at( i - 1 ) + 9 );
-			REQUIRE( c1->startLine() == r1->startLine() );
-			REQUIRE( c1->endColumn() == ecolumn2.at( i - 1 ) );
-			REQUIRE( c1->endLine() == c1->startLine() );
-
-			REQUIRE( c1->items().size() == 1 );
-			REQUIRE( c1->items().at( 0 )->type() == MD::ItemType::Text );
-
-			auto t1 = static_cast< MD::Text< TRAIT >* > ( c1->items().at( 0 ).get() );
-			REQUIRE( t1->startColumn() == scolumn.at( i - 1 ) + 9 + 2 );
-			REQUIRE( t1->startLine() == r1->startLine() );
-			REQUIRE( t1->endColumn() == t1->startColumn() + 5 );
-			REQUIRE( t1->endLine() == t1->startLine() );
-
-			REQUIRE( t1->text() == u8"Cell 2" );
-		}
-	}
-
-	auto table = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 1 ).get() );
-
-	REQUIRE( table->columnAlignment( 0 ) == MD::Table< TRAIT >::AlignLeft );
-	REQUIRE( table->columnAlignment( 1 ) == MD::Table< TRAIT >::AlignLeft );
-
-	table = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 2 ).get() );
-
-	REQUIRE( table->columnAlignment( 0 ) == MD::Table< TRAIT >::AlignCenter );
-	REQUIRE( table->columnAlignment( 1 ) == MD::Table< TRAIT >::AlignRight );
+	
+		auto table = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 1 ).get() );
+	
+		REQUIRE( table->columnAlignment( 0 ) == MD::Table< TRAIT >::AlignLeft );
+		REQUIRE( table->columnAlignment( 1 ) == MD::Table< TRAIT >::AlignLeft );
+	
+		table = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 2 ).get() );
+	
+		REQUIRE( table->columnAlignment( 0 ) == MD::Table< TRAIT >::AlignCenter );
+		REQUIRE( table->columnAlignment( 1 ) == MD::Table< TRAIT >::AlignRight );
+	};
+	
+	checkDoc( doc );
+	
+	checkDoc( std::static_pointer_cast< MD::Document< TRAIT > > ( doc->clone() ) );
 }
 
 /*
@@ -2088,18 +2117,26 @@ TEST_CASE( "049" )
 {
 	MD::Parser< TRAIT > parser;
 	auto doc = parser.parse( "tests/parser/data/049.md" );
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
-
-	REQUIRE( doc->items().at( 0 )->type() == MD::ItemType::Anchor );
-
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
-	auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( h->text() == u8"<!-- --> 1<!-- -->" );
-	REQUIRE( h->startColumn() == 0 );
-	REQUIRE( h->startLine() == 0 );
-	REQUIRE( h->endColumn() == 17 );
-	REQUIRE( h->endLine() == 0 );
+	
+	auto checkDoc = []( std::shared_ptr< MD::Document< TRAIT > > doc )
+	{
+		REQUIRE( doc->isEmpty() == false );
+		REQUIRE( doc->items().size() == 2 );
+	
+		REQUIRE( doc->items().at( 0 )->type() == MD::ItemType::Anchor );
+	
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( h->text() == u8"<!-- --> 1<!-- -->" );
+		REQUIRE( h->startColumn() == 0 );
+		REQUIRE( h->startLine() == 0 );
+		REQUIRE( h->endColumn() == 17 );
+		REQUIRE( h->endLine() == 0 );
+	};
+	
+	checkDoc( doc );
+	
+	checkDoc( std::static_pointer_cast< MD::Document< TRAIT > > ( doc->clone() ) );
 }
 
 /*
@@ -2316,15 +2353,7 @@ TEST_CASE( "055" )
 	MD::Parser< TRAIT > parser;
 
 	auto doc = parser.parse( "tests/parser/data/055.md", false );
-
-	REQUIRE( doc->type() == MD::ItemType::Document );
-
-	REQUIRE( !doc->isEmpty() );
-	REQUIRE( doc->items().size() == 2 );
-	REQUIRE( doc->items().at( 0 )->type() == MD::ItemType::Anchor );
-
-	REQUIRE( doc->footnotesMap().size() == 1 );
-
+	
 	typename TRAIT::String wd =
 #ifdef MD4QT_QT_SUPPORT
 		QDir().absolutePath()
@@ -2340,67 +2369,82 @@ TEST_CASE( "055" )
 	wd = icu::UnicodeString::fromUTF8( tmp );
 #endif
 
-	const typename TRAIT::String label = u8"#^footnote/" + wd + u8"055.md";
-
-	const auto fit = doc->footnotesMap().find( label );
-	REQUIRE( fit != doc->footnotesMap().cend() );
-
-	auto f = fit->second;
-
-	REQUIRE( f->type() == MD::ItemType::Footnote );
-
-	REQUIRE( f->items().size() == 3 );
-	REQUIRE( f->startColumn() == 0 );
-	REQUIRE( f->startLine() == 0 );
-	REQUIRE( f->endColumn() == 21 );
-	REQUIRE( f->endLine() == 4 );
-	REQUIRE( f->idPos() == MD::WithPosition{ 1, 0, 12, 0 } );
-
-	static const std::vector< long long int > start = { 14, 4, 1 };
-
-	for( int i = 0; i < 3; ++i )
+	auto checkDoc = [&wd]( std::shared_ptr< MD::Document< TRAIT > > doc )
 	{
-		REQUIRE( f->items().at( i )->type() == MD::ItemType::Paragraph );
-
-		auto p = static_cast< MD::Paragraph< TRAIT >* > ( f->items().at( i ).get() );
-		REQUIRE( p->startColumn() == start.at( i ) );
-		REQUIRE( p->startLine() == 2 * i );
-		REQUIRE( p->endColumn() == start.at( i ) + 20 );
-		REQUIRE( p->endLine() == 2 * i );
-
+		REQUIRE( doc->type() == MD::ItemType::Document );
+	
+		REQUIRE( !doc->isEmpty() );
+		REQUIRE( doc->items().size() == 2 );
+		REQUIRE( doc->items().at( 0 )->type() == MD::ItemType::Anchor );
+	
+		REQUIRE( doc->footnotesMap().size() == 1 );
+	
+		const typename TRAIT::String label = u8"#^footnote/" + wd + u8"055.md";
+	
+		const auto fit = doc->footnotesMap().find( label );
+		REQUIRE( fit != doc->footnotesMap().cend() );
+	
+		auto f = fit->second;
+	
+		REQUIRE( f->type() == MD::ItemType::Footnote );
+	
+		REQUIRE( f->items().size() == 3 );
+		REQUIRE( f->startColumn() == 0 );
+		REQUIRE( f->startLine() == 0 );
+		REQUIRE( f->endColumn() == 21 );
+		REQUIRE( f->endLine() == 4 );
+		REQUIRE( f->idPos() == MD::WithPosition{ 1, 0, 12, 0 } );
+	
+		static const std::vector< long long int > start = { 14, 4, 1 };
+	
+		for( int i = 0; i < 3; ++i )
+		{
+			REQUIRE( f->items().at( i )->type() == MD::ItemType::Paragraph );
+	
+			auto p = static_cast< MD::Paragraph< TRAIT >* > ( f->items().at( i ).get() );
+			REQUIRE( p->startColumn() == start.at( i ) );
+			REQUIRE( p->startLine() == 2 * i );
+			REQUIRE( p->endColumn() == start.at( i ) + 20 );
+			REQUIRE( p->endLine() == 2 * i );
+	
+			REQUIRE( p->items().size() == 1 );
+	
+			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	
+			auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	
+			REQUIRE( t->startColumn() == start.at( i ) );
+			REQUIRE( t->startLine() == 2 * i );
+			REQUIRE( t->endColumn() == start.at( i ) + 20 );
+			REQUIRE( t->endLine() == 2 * i );
+	
+			REQUIRE( t->text() == u8"Paragraph in footnote" );
+		}
+	
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( p->startColumn() == 0 );
+		REQUIRE( p->startLine() == 6 );
+		REQUIRE( p->endColumn() == 3 );
+		REQUIRE( p->endLine() == 6 );
+	
 		REQUIRE( p->items().size() == 1 );
-
+	
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-
+	
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-
-		REQUIRE( t->startColumn() == start.at( i ) );
-		REQUIRE( t->startLine() == 2 * i );
-		REQUIRE( t->endColumn() == start.at( i ) + 20 );
-		REQUIRE( t->endLine() == 2 * i );
-
-		REQUIRE( t->text() == u8"Paragraph in footnote" );
-	}
-
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->startColumn() == 0 );
-	REQUIRE( p->startLine() == 6 );
-	REQUIRE( p->endColumn() == 3 );
-	REQUIRE( p->endLine() == 6 );
-
-	REQUIRE( p->items().size() == 1 );
-
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->startColumn() == 0 );
-	REQUIRE( t->startLine() == 6 );
-	REQUIRE( t->endColumn() == 3 );
-	REQUIRE( t->endLine() == 6 );
-
-	REQUIRE( t->text() == u8"Text" );
+		REQUIRE( t->startColumn() == 0 );
+		REQUIRE( t->startLine() == 6 );
+		REQUIRE( t->endColumn() == 3 );
+		REQUIRE( t->endLine() == 6 );
+	
+		REQUIRE( t->text() == u8"Text" );
+	};
+	
+	checkDoc( doc );
+	
+	checkDoc( std::static_pointer_cast< MD::Document< TRAIT > > ( doc->clone() ) );
 }
 
 /*
