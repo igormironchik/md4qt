@@ -142,7 +142,7 @@ public:
 	HtmlVisitor() = default;
 	~HtmlVisitor() override = default;
 
-	typename Trait::String toHtml( std::shared_ptr< Document< Trait > > doc,
+	virtual typename Trait::String toHtml( std::shared_ptr< Document< Trait > > doc,
 		const typename Trait::String & hrefForRefBackImage )
 	{
 		html.clear();
@@ -680,7 +680,7 @@ protected:
 		}
 	}
 
-	void onFootnotes( const typename Trait::String & hrefForRefBackImage )
+	virtual void onFootnotes( const typename Trait::String & hrefForRefBackImage )
 	{
 		if( !fns.empty() )
 			html.push_back( Trait::latin1ToString( "<section class=\"footnotes\"><ol>" ) );
