@@ -655,7 +655,6 @@ protected:
 			html.push_back( Trait::latin1ToString( "</li>\n" ) );
 	}
 
-private:
 	void onHeading(
 		//! Heading.
 		Heading< Trait > * h,
@@ -742,7 +741,7 @@ private:
 			html.push_back( Trait::latin1ToString( "</ol></section>\n" ) );
 	}
 
-private:
+protected:
 	typename Trait::String html;
 	//! Just collect footnote references?
 	bool justCollectFootnoteRefs = false;
@@ -768,8 +767,6 @@ toHtml( std::shared_ptr< Document< Trait > > doc, bool wrapInBodyTag = true,
 	const typename Trait::String & hrefForRefBackImage = {} )
 {
 	typename Trait::String html;
-
-	typename Trait::template Vector< std::pair< typename Trait::String, long long int > > fns;
 
 	if( wrapInBodyTag )
 		html.push_back( Trait::latin1ToString( "<!DOCTYPE html>\n<html><head></head><body>\n" ) );
