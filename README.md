@@ -32,6 +32,9 @@ This library parses Markdown into tree structure.
   * [Why don't you have an implementation for pure `STL` with `std::string`?](#why-dont-you-have-an-implementation-for-pure-stl-with-stdstring)
   * [Where are empty list items and blockquotes?](#where-are-empty-list-items-and-blockquotes)
   * [Is it possible to write custom text plugin for this parser?](#is-it-possible-to-write-custom-text-plugin-for-this-parser)
+  * [Is it possible to find `Markdown` item by its position?](#is-it-possible-to-find-markdown-item-by-its-position)
+  * [I want to walk through the document and find all items of given type. How can I do it?](#i-want-to-walk-through-the-document-and-find-all-items-of-given-type-how-can-i-do-it)
+
 
 # Example
 
@@ -370,3 +373,29 @@ for your plugin.
     at its implementation to have a good example, it's placed in `parser.hpp`.
 
     Good luck with plugining. :)
+
+## Is it possible to find `Markdown` item by its position?
+
+ * Since version `3.0.0` was added new structure `MD::PosCache`. You can pass
+`MD::Document` into its `initialize()` method and find first item with all its
+nested first children by given position with `findFirstInCache()` method.
+
+## I want to walk through the document and find all items of given type. How can I do it?
+
+ * Since version `3.0.0` was added algorithm `forEach()`.
+
+   ```cpp
+   //! Calls function for each item in the document with the given type.
+   template< class Trait >
+   inline void
+   forEach(
+     //! Vector of item's types to be processed.
+     const typename Trait::template Vector< ItemType > & types,
+     //! Document.
+     std::shared_ptr< Document< Trait > > doc,
+     //! Functor object.
+     ItemFunctor< Trait > func,
+     //! Maximun nesting level.
+     //! 0 means infinity, 1 - only top level items...
+     unsigned int maxNestingLevel = 0 );
+   ```
