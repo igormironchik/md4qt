@@ -115,7 +115,7 @@ protected:
 		//! paragraph in list item, for example.
 		bool wrap )
 	{
-		long long int l = ( !p->items().isEmpty() ? p->items().at( 0 )->startLine() : -1 );
+		long long int l = ( !p->items().empty() ? p->items().at( 0 )->startLine() : -1 );
 
 		for( auto it = p->items().begin(), last = p->items().end(); it != last; ++it )
 		{

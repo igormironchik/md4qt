@@ -756,7 +756,7 @@ protected:
 
 	//! Vector of processed footnotes references.
 	typename Trait::template Vector< FootnoteRefStuff > fns;
-}; // class Visitor
+}; // class HtmlVisitor
 
 } /* namespace details */
 
