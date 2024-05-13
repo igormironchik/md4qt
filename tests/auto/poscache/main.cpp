@@ -327,6 +327,37 @@ TEST_CASE( "030" )
 }
 
 /*
+[link 0][wrong-label] [link 1](a.md) [![image 1](a.png)](b.md) [link 3][label] [^ref]
+
+[label]: http://www.where.com/a.md (caption)
+
+[^ref] text
+
+[1]: a.md 'title'
+
+[link 4](#label)
+
+*/
+TEST_CASE( "031" )
+{
+	prepareTest( typename TRAIT::String( "031.md" ) );
+	
+	{
+		auto items = g_cache.findFirstInCache( { 22, 0, 22, 0 } );
+		REQUIRE( items.size() == 2 );
+		REQUIRE( items.at( 0 )->type() == MD::ItemType::Paragraph );
+		REQUIRE( items.at( 1 )->type() == MD::ItemType::Link );
+	}
+	
+	{
+		auto items = g_cache.findFirstInCache( { 80, 0, 80, 0 } );
+		REQUIRE( items.size() == 2 );
+		REQUIRE( items.at( 0 )->type() == MD::ItemType::Paragraph );
+		REQUIRE( items.at( 1 )->type() == MD::ItemType::FootnoteRef );
+	}
+}
+
+/*
  [^footnote]: Paragraph in footnote
 
     Paragraph in footnote
@@ -348,6 +379,55 @@ TEST_CASE( "045" )
 		auto items = g_cache.findFirstInCache( { 4, 2, 4, 2 } );
 		REQUIRE( items.size() == 3 );
 		REQUIRE( items.at( 0 )->type() == MD::ItemType::Footnote );
+		REQUIRE( items.at( 1 )->type() == MD::ItemType::Paragraph );
+		REQUIRE( items.at( 2 )->type() == MD::ItemType::Text );
+	}
+}
+
+/*
+Heading 1
+=========
+Paragraph 1
+
+Heading 2
+---------
+Paragraph 2
+
+  # Heading 1
+
+Paragraph 1
+
+## Heading 2
+
+Paragraph 2
+
+Heading 1
+=========
+
+Paragraph 1
+
+Heading 2
+---------
+
+Paragraph 2
+
+### Heading 3 {#heading-3}
+
+*/
+TEST_CASE( "046" )
+{
+	prepareTest( typename TRAIT::String( "046.md" ) );
+	
+	{
+		auto items = g_cache.findFirstInCache( { 0, 1, 0, 1 } );
+		REQUIRE( items.size() == 1 );
+		REQUIRE( items.at( 0 )->type() == MD::ItemType::Heading );
+	}
+	
+	{
+		auto items = g_cache.findFirstInCache( { 0, 0, 0, 0 } );
+		REQUIRE( items.size() == 3 );
+		REQUIRE( items.at( 0 )->type() == MD::ItemType::Heading );
 		REQUIRE( items.at( 1 )->type() == MD::ItemType::Paragraph );
 		REQUIRE( items.at( 2 )->type() == MD::ItemType::Text );
 	}
@@ -379,5 +459,59 @@ TEST_CASE( "047" )
 		auto items = g_cache.findFirstInCache( { 0, 2, 0, 2 } );
 		REQUIRE( items.size() == 1 );
 		REQUIRE( items.at( 0 )->type() == MD::ItemType::Table );
+	}
+}
+
+/*
+When $a \ne 0$, there are two solutions to $(ax^2 + bx + c = 0)$ and they are
+$$ x = {-b \pm \sqrt{b^2-4ac} \over 2a} $$
+
+*/
+TEST_CASE( "065" )
+{
+	prepareTest( typename TRAIT::String( "065.md" ) );
+	
+	{
+		auto items = g_cache.findFirstInCache( { 5, 0, 5, 0 } );
+		REQUIRE( items.size() == 2 );
+		REQUIRE( items.at( 0 )->type() == MD::ItemType::Paragraph );
+		REQUIRE( items.at( 1 )->type() == MD::ItemType::Math );
+	}
+}
+
+/*
+| table |
+| ----- |
+| <img src="img/img.png"> |
+
+*/
+TEST_CASE( "168" )
+{
+	prepareTest( typename TRAIT::String( "168.md" ) );
+
+	{
+		auto items = g_cache.findFirstInCache( { 2, 2, 2, 2 } );
+		REQUIRE( items.size() == 2 );
+		REQUIRE( items.at( 0 )->type() == MD::ItemType::Table );
+		REQUIRE( items.at( 1 )->type() == MD::ItemType::RawHtml );
+	}
+}
+	
+/*
+Text
+***
+| table |
+| --- |
+| data |
+
+*/
+TEST_CASE( "174" )
+{
+	prepareTest( typename TRAIT::String( "174.md" ) );
+
+	{
+		auto items = g_cache.findFirstInCache( { 0, 1, 0, 1 } );
+		REQUIRE( items.size() == 1 );
+		REQUIRE( items.at( 0 )->type() == MD::ItemType::HorizontalLine );
 	}
 }
