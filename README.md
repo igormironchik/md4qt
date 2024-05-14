@@ -374,6 +374,18 @@ for your plugin.
 
     Good luck with plugining. :)
 
+  * Let I will show you on example how raw text data correlate with paragraph. Just two
+    diagrams and you won't have anymore questions. Look.
+
+    Consider we want to replace any occurence of `@X` by some kind of a link. Before
+    modifications we had.
+
+    ![](./doc/paragraph_before.png)
+
+    And after work of your plugin we should have.
+
+    ![](./doc/paragraph_after.png)
+
 ## Is it possible to find `Markdown` item by its position?
 
  * Since version `3.0.0` was added new structure `MD::PosCache`. You can pass
