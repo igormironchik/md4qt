@@ -306,7 +306,7 @@ text plugins.
     A most important thing in `TextParsingOpts` structure is a
     `std::vector< TextData > rawTextData;`. This vector contains not processed raw
     text data from `Markdown`. The size of `rawTextData` is the same as a count of
-    `Text` items in `Paragraph`, and theirs sizes should remain eccual. So, if you replace
+    `Text` items in `Paragraph`, and theirs sizes should remain equal. So, if you replace
     one of text item with something, for example link, corresponding text item
     should be removed from `Paragraph` and `rawTextData`. Or if you replace just
     a part of text item - it should be modified in `Paragraph` and `rawTextData`.
@@ -318,7 +318,7 @@ text plugins.
     remain correct after your manipulations, so any syntax highlighter, for example,
     won't do a mistake.
 
-    Not, that `TextData` is
+    Note, that `TextData` is
 
     ```cpp
     struct TextData {
