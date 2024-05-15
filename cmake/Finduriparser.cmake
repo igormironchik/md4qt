@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2022-2024 Igor Mironchik <igor.mironchik@gmail.com>
+# SPDX-License-Identifier: MIT
 
 if( NOT URIPARSER_INCLUDE_DIR )
 	find_path( URIPARSER_INCLUDE_DIR NAMES Uri.h PATH_SUFFIXES uriparser )
