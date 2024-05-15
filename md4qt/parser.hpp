@@ -6751,9 +6751,9 @@ Parser< Trait >::checkForLink( typename Delims::const_iterator it,
 							link->setStartColumn( po.fr.data.at( start->m_line ).first
 								.virginPos( start->m_pos ) );
 							link->setStartLine( po.fr.data.at( start->m_line ).second.lineNumber );
-							link->setEndColumn( po.fr.data.at( iit->m_line ).first
-								.virginPos( iit->m_pos + iit->m_len - 1 ) );
-							link->setEndLine( po.fr.data.at( iit->m_line ).second.lineNumber );
+							link->setEndColumn( po.fr.data.at( po.line ).first
+								.virginPos( po.pos ) );
+							link->setEndLine( po.fr.data.at( po.line ).second.lineNumber );
 							link->setTextPos( labelPos );
 							link->setUrlPos( urlPos );
 
