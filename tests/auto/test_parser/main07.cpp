@@ -900,6 +900,17 @@ TEST_CASE( "205" )
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Link );
 	REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+	
+	REQUIRE( doc->labeledLinks().size() == 1 );
+	auto it = doc->labeledLinks().cbegin();
+	
+	{
+		auto l = static_cast< MD::Link< TRAIT >* > ( it->second.get() );
+		REQUIRE( l->startColumn() == 0 );
+		REQUIRE( l->startLine() == 2 );
+		REQUIRE( l->endColumn() == 29 );
+		REQUIRE( l->endLine() == 2 );
+	}
 }
 
 /*
@@ -925,6 +936,13 @@ TEST_CASE( "206" )
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Link );
 	REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
+	
+	REQUIRE( doc->labeledLinks().size() == 1 );
+	auto l = static_cast< MD::Link< TRAIT >* > ( doc->labeledLinks().cbegin()->second.get() );
+	REQUIRE( l->startColumn() == 0 );
+	REQUIRE( l->startLine() == 2 );
+	REQUIRE( l->endColumn() == 29 );
+	REQUIRE( l->endLine() == 2 );
 }
 
 /*
@@ -953,6 +971,27 @@ TEST_CASE( "207" )
 	REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
 	REQUIRE( p->items().at( 3 )->type() == MD::ItemType::Link );
 	REQUIRE( p->items().at( 4 )->type() == MD::ItemType::Text );
+	
+	REQUIRE( doc->labeledLinks().size() == 2 );
+	auto it = doc->labeledLinks().cbegin();
+	
+	{
+		auto l = static_cast< MD::Link< TRAIT >* > ( it->second.get() );
+		REQUIRE( l->startColumn() == 0 );
+		REQUIRE( l->startLine() == 1 );
+		REQUIRE( l->endColumn() == 30 );
+		REQUIRE( l->endLine() == 1 );
+	}
+	
+	++it;
+	
+	{
+		auto l = static_cast< MD::Link< TRAIT >* > ( it->second.get() );
+		REQUIRE( l->startColumn() == 0 );
+		REQUIRE( l->startLine() == 3 );
+		REQUIRE( l->endColumn() == 30 );
+		REQUIRE( l->endLine() == 3 );
+	}
 }
 
 /*
@@ -1068,6 +1107,17 @@ TEST_CASE( "210" )
 	}
 	
 	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+	
+	REQUIRE( doc->labeledLinks().size() == 1 );
+	auto it = doc->labeledLinks().cbegin();
+	
+	{
+		auto l = static_cast< MD::Link< TRAIT >* > ( it->second.get() );
+		REQUIRE( l->startColumn() == 0 );
+		REQUIRE( l->startLine() == 2 );
+		REQUIRE( l->endColumn() == 30 );
+		REQUIRE( l->endLine() == 2 );
+	}
 }
 
 /*

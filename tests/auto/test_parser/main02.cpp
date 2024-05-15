@@ -35,6 +35,27 @@ TEST_CASE( "031" )
 	MD::Parser< TRAIT > parser;
 
 	auto doc = parser.parse( "tests/parser/data/031.md" );
+	
+	REQUIRE( doc->labeledLinks().size() == 2 );
+	auto it = doc->labeledLinks().cbegin();
+	
+	{
+		auto l = static_cast< MD::Link< TRAIT >* > ( it->second.get() );
+		REQUIRE( l->startColumn() == 0 );
+		REQUIRE( l->startLine() == 6 );
+		REQUIRE( l->endColumn() == 16 );
+		REQUIRE( l->endLine() == 6 );
+	}
+	
+	++it;
+	
+	{
+		auto l = static_cast< MD::Link< TRAIT >* > ( it->second.get() );
+		REQUIRE( l->startColumn() == 0 );
+		REQUIRE( l->startLine() == 2 );
+		REQUIRE( l->endColumn() == 43 );
+		REQUIRE( l->endLine() == 2 );
+	}
 
 	typename TRAIT::String wd =
 #ifdef MD4QT_QT_SUPPORT
