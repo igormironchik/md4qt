@@ -380,11 +380,11 @@ for your plugin.
     Consider we want to replace any occurence of `@X` by some kind of a link. Before
     modifications we had.
 
-    ![](./doc/paragraph_before.png)
+    ![](./doc/paragraph_before.svg)
 
     And after work of your plugin we should have.
 
-    ![](./doc/paragraph_after.png)
+    ![](./doc/paragraph_after.svg)
 
 ## Is it possible to find `Markdown` item by its position?
 
