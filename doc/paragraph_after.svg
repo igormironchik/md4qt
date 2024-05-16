@@ -27,9 +27,9 @@
      inkscape:snap-grids="true"
      units="px"
      width="200px"
-     inkscape:zoom="1.2408446"
-     inkscape:cx="299.7958"
-     inkscape:cy="136.19755"
+     inkscape:zoom="0.94633393"
+     inkscape:cx="340.26044"
+     inkscape:cy="114.12462"
      inkscape:window-width="1920"
      inkscape:window-height="1008"
      inkscape:window-x="0"
@@ -107,6 +107,13 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
+    <rect
+       style="fill:#ffffff;stroke:#fe0000;stroke-width:0.254221;stroke-opacity:0.00113472"
+       id="rect914"
+       width="140.22917"
+       height="27.78125"
+       x="0"
+       y="0" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52778px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583;stroke-opacity:1"
