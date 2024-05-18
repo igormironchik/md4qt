@@ -155,7 +155,7 @@ TEST_CASE( "004" )
 
 	{
 		REQUIRE( dp->items().at( 0 )->type() == MD::ItemType::Text );
-		auto dt = static_cast< MD::Text< TRAIT >* > ( dp->items().at( 0 ).get() );
+		auto dt = static_cast< MD::Text< TRAIT >* > ( dp->getItemAt( 0 ).get() );
 		REQUIRE( dt->opts() == MD::TextOption::TextWithoutFormat );
 		REQUIRE( dt->text() == u8"Line 1..." );
 		REQUIRE( dt->startColumn() == 0 );
