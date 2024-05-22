@@ -7620,7 +7620,8 @@ concatenateText( typename Block< Trait >::Items::const_iterator it,
 	t->setSpaceBefore( std::static_pointer_cast< Text< Trait > >( *it )->isSpaceBefore() );
 	t->setStartColumn( (*it)->startColumn() );
 	t->setStartLine( (*it)->startLine() );
-	t->openStyles() = std::static_pointer_cast< Text< Trait > >( *it )->openStyles();
+	
+	typename ItemWithOpts< Trait >::Styles close;
 
 	typename Trait::String data;
 
@@ -7635,6 +7636,14 @@ concatenateText( typename Block< Trait >::Items::const_iterator it,
 
 		if( tt->isSpaceAfter() )
 			data.push_back( Trait::latin1ToChar( ' ' ) );
+		
+		if( !tt->openStyles().empty() )
+			std::copy( tt->openStyles().cbegin(), tt->openStyles().cend(),
+				std::back_inserter( t->openStyles() ) );
+		
+		if( !tt->closeStyles().empty() )
+			std::copy( tt->closeStyles().cbegin(), tt->closeStyles().cend(),
+				std::back_inserter( close ) );
 	}
 
 	it = std::prev( it );
@@ -7643,7 +7652,7 @@ concatenateText( typename Block< Trait >::Items::const_iterator it,
 	t->setSpaceAfter( std::static_pointer_cast< Text< Trait > >( *it )->isSpaceAfter() );
 	t->setEndColumn( (*it)->endColumn() );
 	t->setEndLine( (*it)->endLine() );
-	t->closeStyles() = std::static_pointer_cast< Text< Trait > >( *it )->closeStyles();
+	t->closeStyles() = close;
 
 	return t;
 }

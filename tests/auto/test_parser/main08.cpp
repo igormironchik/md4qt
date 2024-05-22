@@ -1322,3 +1322,32 @@ TEST_CASE( "246" )
 	REQUIRE( t->openStyles().empty() );
 	REQUIRE( t->closeStyles().empty() );
 }
+
+/*
+**text **text****
+
+*/
+TEST_CASE( "247" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/247.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+	
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 1 );
+	
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->opts() == MD::BoldText );
+	REQUIRE( t->text() == u8"text text" );
+	REQUIRE( t->openStyles().size() == 2 );
+	REQUIRE( t->openStyles().at( 0 ) == MD::StyleDelim{ MD::BoldText, 0, 0, 1, 0 } );
+	REQUIRE( t->openStyles().at( 1 ) == MD::StyleDelim{ MD::BoldText, 7, 0, 8, 0 } );
+	REQUIRE( t->closeStyles().size() == 2 );
+	REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ MD::BoldText, 13, 0, 14, 0 } );
+	REQUIRE( t->closeStyles().at( 1 ) == MD::StyleDelim{ MD::BoldText, 15, 0, 16, 0 } );
+}
