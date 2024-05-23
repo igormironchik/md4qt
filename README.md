@@ -412,6 +412,16 @@ virgin positions.
   virginSubstr( const MdBlock< Trait > & fr, const WithPosition & virginPos );
   ```
 
+  And a function to get local position from virgin one.
+
+  ```cpp
+  template< class Trait >
+  inline std::pair< long long int, long long int >
+  localPosFromVirgin( const MdBlock< Trait > & fr,
+    long long int virginColumn,
+    long long int virginLine )
+  ```
+
 ## Is it possible to find `Markdown` item by its position?
 
  * Since version `3.0.0` was added new structure `MD::PosCache`. You can pass

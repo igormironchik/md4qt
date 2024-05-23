@@ -847,6 +847,8 @@ TEST_CASE( "virgin_substr" )
 	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 1, 10, 1 } ) == u8"**text**" );
 	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 2, 1, 2 } ).isEmpty() );
 	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 6, 1, 1, 2 } ) == u8"**\n" );
+	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 6, 1, 0, 2 } ) == u8"**\n" );
+	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 6, 1, 2, 2 } ) == u8"**\nt" );
 	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 2, 10, 3 } ) == u8"text__\ntext" );
 	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 0, 10, 2 } ) == u8"**text**\ntext__" );
 	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 10, 0, 20 } ).isEmpty() );
@@ -857,4 +859,30 @@ TEST_CASE( "virgin_substr" )
 		
 		REQUIRE( MD::virginSubstr< TRAIT > ( dd, { 0, 3, 7, 4 } ).isEmpty() );
 	}
+}
+
+TEST_CASE( "local_pos_from_virgin" )
+{
+	MD::MdBlock< TRAIT > data;
+	data.data.push_back( { typename TRAIT::String( "**text**" ), { 1 } } );
+	data.data.push_back( { typename TRAIT::String( "**text**" ), { 2 } } );
+	data.data.push_back( { typename TRAIT::String( "**text**" ), { 3 } } );
+	
+	using pair = std::pair< long long int, long long int >;
+	
+	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 0, 0 ) == pair{ -1, -1 } );
+	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 8, 1 ) == pair{ -1, -1 } );
+	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 0, 2 ) == pair{ 0, 1 } );
+	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 1, 1 ) == pair{ 1, 0 } );
+	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 0, 4 ) == pair{ -1, -1 } );
+	
+	data.data[ 0 ].first.remove( 0, 2 );
+	
+	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 0, 1 ) == pair{ -1, -1 } );
+	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 2, 1 ) == pair{ 0, 0 } );
+	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 4, 1 ) == pair{ 2, 0 } );
+	
+	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 1, 2 ) == pair{ 1, 1 } );
+	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 2, 3 ) == pair{ 2, 2 } );
+	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 100, 3 ) == pair{ -1, -1 } );
 }

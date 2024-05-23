@@ -988,6 +988,40 @@ virginSubstr( const MdBlock< Trait > & fr, const WithPosition & virginPos )
 
 
 //
+// localPosFromVirgin
+//
+
+//! \return Local position ( { column, line } ) in fragment for given virgin position if exists.
+//! \return { -1, -1 } if there is no given position.
+template< class Trait >
+inline std::pair< long long int, long long int >
+localPosFromVirgin( const MdBlock< Trait > & fr,
+	long long int virginColumn,
+	long long int virginLine )
+{
+	if( fr.data.empty() )
+		return { -1, -1 };
+	
+	if( fr.data.front().second.lineNumber > virginLine ||
+		fr.data.back().second.lineNumber < virginLine )
+			return { -1, -1 };
+	
+	auto line = virginLine - fr.data.front().second.lineNumber;
+	
+	if( fr.data.at( line ).first.isEmpty() )
+		return { -1, -1 };
+	
+	const auto vzpos = fr.data.at( line ).first.virginPos( 0 );
+	
+	if( vzpos > virginColumn ||
+		virginColumn > vzpos + fr.data.at( line ).first.length() - 1 )
+			return { -1, -1 };
+	
+	return { virginColumn - vzpos, line };
+}
+
+
+//
 // GitHubAutolinkPlugin
 //
 
