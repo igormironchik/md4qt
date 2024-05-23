@@ -885,4 +885,14 @@ TEST_CASE( "local_pos_from_virgin" )
 	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 1, 2 ) == pair{ 1, 1 } );
 	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 2, 3 ) == pair{ 2, 2 } );
 	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 100, 3 ) == pair{ -1, -1 } );
+	
+	{
+		MD::MdBlock< TRAIT > dd;
+		
+		REQUIRE( MD::localPosFromVirgin< TRAIT > ( dd, 0, 0 ) == pair{ -1, -1 } );
+		
+		dd.data.push_back( { typename TRAIT::String( "" ), { 1 } } );
+		
+		REQUIRE( MD::localPosFromVirgin< TRAIT > ( dd, 0, 1 ) == pair{ -1, -1 } );
+	}
 }
