@@ -823,3 +823,38 @@ TEST_CASE( "optimize_paragraph" )
 		checkT( { 2, 2, 1 }, po );
 	}
 }
+
+TEST_CASE( "virgin_substr" )
+{
+	MD::MdBlock< TRAIT > data;
+	data.data.push_back( { typename TRAIT::String( "**text**" ), { 1 } } );
+	data.data.push_back( { typename TRAIT::String( "__text__" ), { 2 } } );
+	data.data.push_back( { typename TRAIT::String( "text" ), { 3 } } );
+	data.data.push_back( { typename TRAIT::String( "~~text~~" ), { 4 } } );
+	data.data.push_back( { typename TRAIT::String( "~text*" ), { 5 } } );
+	
+	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 0, 1, 0 } ).isEmpty() );
+	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 1, 1, 1 } ) == u8"**" );
+	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 1, 10, 1 } ) == u8"**text**" );
+	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 2, 1, 2 } ) == u8"__" );
+	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 6, 1, 1, 2 } ) == u8"**\n__" );
+	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 3, 0, 10 } ) == u8"text\n~~text~~\n~text*" );
+	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 0, 100, 100 } ) == u8"**text**\n__text__\ntext\n~~text~~\n~text*" );
+	
+	data.data[ 1 ].first.remove( 0, 2 );
+	
+	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 1, 1, 1 } ) == u8"**" );
+	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 1, 10, 1 } ) == u8"**text**" );
+	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 2, 1, 2 } ).isEmpty() );
+	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 6, 1, 1, 2 } ) == u8"**\n" );
+	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 2, 10, 3 } ) == u8"text__\ntext" );
+	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 0, 10, 2 } ) == u8"**text**\ntext__" );
+	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 10, 0, 20 } ).isEmpty() );
+	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 3, 7, 4 } ) == u8"text\n~~text~~" );
+	
+	{
+		MD::MdBlock< TRAIT > dd;
+		
+		REQUIRE( MD::virginSubstr< TRAIT > ( dd, { 0, 3, 7, 4 } ).isEmpty() );
+	}
+}

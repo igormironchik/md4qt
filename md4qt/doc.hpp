@@ -173,7 +173,7 @@ class StyleDelim final
 	:	public WithPosition
 {
 public:
-	StyleDelim( TextOption s,
+	StyleDelim( int s,
 		long long int startColumn,
 		long long int startLine,
 		long long int endColumn,
@@ -185,18 +185,18 @@ public:
 	
 	~StyleDelim() override = default;
 	
-	TextOption style() const
+	int style() const
 	{
 		return m_style;
 	}
 	
-	void setStyle( TextOption t )
+	void setStyle( int t )
 	{
 		m_style = t;
 	}
 	
 private:
-	TextOption m_style = TextWithoutFormat;
+	int m_style = TextWithoutFormat;
 }; // class StyleDelim
 
 inline bool operator == ( const StyleDelim & l, const StyleDelim & r )

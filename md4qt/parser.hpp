@@ -922,6 +922,72 @@ struct TextParsingOpts {
 
 
 //
+// virginSubstr
+//
+
+//! \return Substring from fragment with given virgin positions.
+template< class Trait >
+inline typename Trait::String
+virginSubstr( const MdBlock< Trait > & fr, const WithPosition & virginPos )
+{
+	if( fr.data.empty() )
+		return {};
+	
+	long long int startLine = virginPos.startLine() < fr.data.at( 0 ).second.lineNumber ?
+		( virginPos.endLine() < fr.data.at( 0 ).second.lineNumber ? -1 : 0 ) :
+		virginPos.startLine() - fr.data.at( 0 ).second.lineNumber;
+	
+	if( startLine >= fr.data.size() || startLine < 0 )
+		return {};
+	
+	auto spos = virginPos.startColumn() - fr.data.at( startLine ).first.virginPos( 0 );
+	
+	if( spos < 0 )
+		spos = 0;
+	
+	long long int epos = 0;
+	long long int linesCount = virginPos.endLine() - virginPos.startLine() -
+		( virginPos.startLine() < fr.data.at( 0 ).second.lineNumber ?
+			fr.data.at( 0 ).second.lineNumber - virginPos.startLine() : 0 );
+	
+	if( startLine + linesCount > fr.data.size() )
+	{
+		linesCount = fr.data.size() - startLine - 1;
+		epos = fr.data.back().first.length();
+	}
+	else
+		epos = virginPos.endColumn() -
+			fr.data.at( linesCount + startLine ).first.virginPos( 0 ) + 1;
+	
+	if( epos < 0 )
+		epos = 0;
+	
+	if( epos > fr.data.at( linesCount + startLine ).first.length() )
+		epos = fr.data.at( linesCount + startLine ).first.length();
+	
+	typename Trait::String str = ( linesCount ?
+		fr.data.at( startLine ).first.sliced( spos ).asString() :
+		fr.data.at( startLine ).first.sliced( spos, epos - spos ).asString() );
+	
+	long long int i = startLine + 1;
+	
+	for( ; i < startLine + linesCount; ++i )
+	{
+		str.push_back( typename Trait::String( "\n" ) );
+		str.push_back( fr.data.at( i ).first.asString() );
+	}
+	
+	if( linesCount )
+	{
+		str.push_back( typename Trait::String( "\n" ) );
+		str.push_back( fr.data.at( i ).first.sliced( 0, epos ).asString() );
+	}
+	
+	return str;
+}
+
+
+//
 // GitHubAutolinkPlugin
 //
 
