@@ -4914,6 +4914,8 @@ eatRawHtml( long long int line, long long int pos, long long int toLine, long lo
 				po.parent->setEndLine( po.html.html->endLine() );
 				initLastItemWithOpts< Trait >( po, po.html.html );
 				po.html.html->setOpts( po.opts );
+				po.isSpaceBefore = false;
+				po.lastText = nullptr;
 			}
 			else
 				po.tmpHtml = po.html.html;
@@ -5634,6 +5636,8 @@ Parser< Trait >::checkForMath( typename Delims::const_iterator it,
 
 			po.pos = end->m_pos + end->m_len;
 			po.line = end->m_line;
+			po.isSpaceBefore = false;
+			po.lastText = nullptr;
 		}
 
 		return end;
@@ -5698,6 +5702,8 @@ Parser< Trait >::checkForAutolinkHtml( typename Delims::const_iterator it,
 
 				po.wasRefLink = false;
 				po.firstInParagraph = false;
+				po.isSpaceBefore = false;
+				po.lastText = nullptr;
 
 				if( updatePos )
 				{
@@ -5783,6 +5789,8 @@ Parser< Trait >::makeInlineCode( long long int startLine, long long int startPos
 
 	po.wasRefLink = false;
 	po.firstInParagraph = false;
+	po.isSpaceBefore = false;
+	po.lastText = nullptr;
 }
 
 template< class Trait >
@@ -6171,6 +6179,9 @@ Parser< Trait >::makeLink( const typename Trait::String & url,
 	link->setEndLine( po.fr.data.at( lastLine ).second.lineNumber );
 	
 	initLastItemWithOpts< Trait >( po, link );
+	
+	po.isSpaceBefore = false;
+	po.lastText = nullptr;
 
 	return link;
 }
@@ -6281,6 +6292,9 @@ Parser< Trait >::makeImage( const typename Trait::String & url,
 	img->setUrlPos( urlPos );
 	
 	initLastItemWithOpts< Trait >( po, img );
+	
+	po.isSpaceBefore = false;
+	po.lastText = nullptr;
 
 	return img;
 }
