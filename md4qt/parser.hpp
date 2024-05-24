@@ -4912,6 +4912,8 @@ eatRawHtml( long long int line, long long int pos, long long int toLine, long lo
 				po.parent->appendItem( po.html.html );
 				po.parent->setEndColumn( po.html.html->endColumn() );
 				po.parent->setEndLine( po.html.html->endLine() );
+				initLastItemWithOpts< Trait >( po, po.html.html );
+				po.html.html->setOpts( po.opts );
 			}
 			else
 				po.tmpHtml = po.html.html;

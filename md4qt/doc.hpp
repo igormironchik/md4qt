@@ -377,7 +377,7 @@ private:
 //! Raw HTML.
 template< class Trait >
 class RawHtml final
-	:	public Item< Trait >
+	:	public ItemWithOpts< Trait >
 {
 public:
 	RawHtml() = default;
@@ -386,7 +386,7 @@ public:
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		auto h = std::make_shared< RawHtml< Trait > > ();
-		h->applyPositions( *this );
+		h->applyItemWithOpts( *this );
 		h->setText( m_text );
 		h->setFreeTag( m_isFreeTag );
 		

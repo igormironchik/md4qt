@@ -1351,3 +1351,30 @@ TEST_CASE( "247" )
 	REQUIRE( t->closeStyles().at( 0 ) == MD::StyleDelim{ MD::BoldText, 13, 0, 14, 0 } );
 	REQUIRE( t->closeStyles().at( 1 ) == MD::StyleDelim{ MD::BoldText, 15, 0, 16, 0 } );
 }
+
+/*
+*<a>*
+
+*/
+TEST_CASE( "248" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/248.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+	
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 1 );
+	
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( h->opts() == MD::ItalicText );
+	REQUIRE( h->text() == u8"<a>" );
+	REQUIRE( h->openStyles().size() == 1 );
+	REQUIRE( h->openStyles().at( 0 ) == MD::StyleDelim{ MD::ItalicText, 0, 0, 0, 0 } );
+	REQUIRE( h->closeStyles().size() == 1 );
+	REQUIRE( h->closeStyles().at( 0 ) == MD::StyleDelim{ MD::ItalicText, 4, 0, 4, 0 } );
+}
