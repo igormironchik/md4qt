@@ -28,7 +28,7 @@ This library parses Markdown into tree structure.
   * [`ICU` is slower then `Qt6`? Really?](#icu-is-slower-then-qt6-really)
   * [Why is parsing wrong on Windows with `std::ifstream`?](#why-is-parsing-wrong-on-windows-with-stdifstream)
   * [How can I convert `MD::Document` into `HTML`?](#how-can-i-convert-mddocument-into-html)
-  * [I need to know positions in the `Markdown` file of blocks/elements. How can I achieve this?](#i-need-to-know-positions-in-the-markdown-file-of-blockselements-howcan-i-achieve-this)
+  * [How can I obtain positions of blocks/elements in `Markdown` file?](#how-can-i-obtain-positions-of-blockselements-in-markdown-file)
   * [How can I easily traverse through the `MD::Document`?](#how-can-i-easily-traverse-through-the-mddocument)
   * [Why don't you have an implementation for pure `STL` with `std::string`?](#why-dont-you-have-an-implementation-for-pure-stl-with-stdstring)
   * [Where are empty list items and blockquotes?](#where-are-empty-list-items-and-blockquotes)
@@ -38,9 +38,9 @@ This library parses Markdown into tree structure.
     * [What is `processInLinks` flag for?](#what-is-processinlinks-flag-for)
     * [Could you show an example of a plugin?](#could-you-show-an-example-of-a-plugin)
     * [I didn't understand how raw text data correlates with a paragraph.](#i-didnt-understand-how-raw-text-data-correlates-with-a-paragraph)
-    * [I want to write a plugin for custom text style, and want to know a string of `StyleDelim`. How can I get it?](#i-want-to-write-a-plugin-for-custom-text-style-and-want-to-know-a-string-of-styledelim-how-can-i-get-it)
+    * [How can I get a string of `StyleDelim`?](#how-can-i-get-a-string-of-styledelim)
   * [Is it possible to find `Markdown` item by its position?](#is-it-possible-to-find-markdown-item-by-its-position)
-  * [I want to walk through the document and find all items of given type. How can I do it?](#i-want-to-walk-through-the-document-and-find-all-items-of-given-type-how-can-i-do-it)
+  * [How can I walk through the document and find all items of given type?](#how-can-i-walk-through-the-document-and-find-all-items-of-given-type)
 
 # Example
 
@@ -230,8 +230,7 @@ How can I convert `MD::Document` into `HTML`?
    }
    ```
 
-I need to know positions in the `Markdown` file of blocks/elements. How
-can I achieve this?
+How can I obtain positions of blocks/elements in `Markdown` file?
 ---
 
  * Done in version `2.0.5`. Remember that all positions in `md4qt` start with 0,
@@ -405,7 +404,7 @@ for your plugin.
 
   ![](./doc/paragraph_after.svg)
 
-### I want to write a plugin for custom text style, and want to know a string of `StyleDelim`. How can I get it?
+### How can I get a string of `StyleDelim`?
 
 * Since version `3.0.0` was added a function to get a substring from text fragment with given
 virgin positions.
@@ -432,7 +431,7 @@ virgin positions.
 `MD::Document` into its `initialize()` method and find first item with all its
 nested first children by given position with `findFirstInCache()` method.
 
-## I want to walk through the document and find all items of given type. How can I do it?
+## How can I walk through the document and find all items of given type?
 
  * Since version `3.0.0` was added algorithm `forEach()`.
 
