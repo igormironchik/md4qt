@@ -16,6 +16,7 @@ This library parses Markdown into tree structure.
 
 * [Example](#example)
 * [Benchmark](#benchmark)
+* [Playground](#playground)
 * [Q/A](#qa)
   * [Why another AST Markdown parser?](#why-another-ast-markdown-parser)
   * [What should I know about links in the document?](#what-should-i-know-about-links-in-the-document)
@@ -84,7 +85,6 @@ major extensions. Conclusion why it's slower you can read [here](tests/md_benchm
 | --- | --- | --- | --- |
 | ~284 microseconds | ~427 microseconds | ~6700 microseconds | ~3394 microseconds |
 
-
 > [!NOTE]
 >
 > *This measurement done with test file in [markdown-it (Rust)](https://github.com/markdown-it-rust/markdown-it)*
@@ -94,6 +94,10 @@ major extensions. Conclusion why it's slower you can read [here](tests/md_benchm
 > **Keep in mind that `markdown-it (Rust)` doesn't support all GFM extensions, so it's not honest
 > to compare. `md4qt` supports GitHub's autolinks extension, that `markdown-it (Rust)` doesn't, and
 > this requires ~500 microseconds, for example...**
+
+# Playground
+
+You can play in action with `md4qt` in [Markdown Tools](https://github.com/igormironchik/markdown-tools). There you can find `Markdown` editor/viewer/converter to `PDF`.
 
 # Q/A
 
