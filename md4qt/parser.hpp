@@ -973,13 +973,13 @@ virginSubstr( const MdBlock< Trait > & fr, const WithPosition & virginPos )
 	
 	for( ; i < startLine + linesCount; ++i )
 	{
-		str.push_back( typename Trait::String( "\n" ) );
+		str.push_back( Trait::latin1ToString( "\n" ) );
 		str.push_back( fr.data.at( i ).first.asString() );
 	}
 	
 	if( linesCount )
 	{
-		str.push_back( typename Trait::String( "\n" ) );
+		str.push_back( Trait::latin1ToString( "\n" ) );
 		str.push_back( fr.data.at( i ).first.sliced( 0, epos ).asString() );
 	}
 	
