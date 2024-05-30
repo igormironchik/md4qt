@@ -8,6 +8,7 @@
 
 // md4qt include.
 #include "doc.hpp"
+#include "utils.hpp"
 
 // C++ include.
 #include <string>
@@ -115,6 +116,8 @@ protected:
 		//! paragraph in list item, for example.
 		bool wrap )
 	{
+		MD_UNUSED( wrap )
+		
 		long long int l = ( !p->items().empty() ? p->items().at( 0 )->startLine() : -1 );
 
 		for( auto it = p->items().begin(), last = p->items().end(); it != last; ++it )
@@ -260,6 +263,8 @@ protected:
 		//! Is this item first in the list?
 		bool first )
 	{
+		MD_UNUSED( first )
+		
 		for( auto it = i->items().cbegin(), last = i->items().cend(); it != last; ++it )
 		{
 			switch( (*it)->type() )

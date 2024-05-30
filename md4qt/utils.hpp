@@ -13,9 +13,17 @@ namespace MD {
 //
 
 //! Macro for disabling copy.
-#define DISABLE_COPY( Class ) \
+#define MD_DISABLE_COPY( Class ) \
 	Class( const Class & ) = delete; \
 	Class & operator= ( const Class & ) = delete;
+
+
+//
+// UNUSED
+//
+
+//! Avoid "unused parameter" warnings.
+#define MD_UNUSED( x ) (void) x;
 
 } /* namespace MD */
 

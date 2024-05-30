@@ -1839,7 +1839,7 @@ private:
 	typename Trait::StringList m_parsedFiles;
 	TextPluginsMap< Trait > m_textPlugins;
 
-	DISABLE_COPY( Parser )
+	MD_DISABLE_COPY( Parser )
 }; // class Parser
 
 
@@ -4194,6 +4194,8 @@ makeTextObjectWithLineBreak( const typename Trait::String & text, bool spaceBefo
 	long long int startPos, long long int startLine,
 	long long int endPos, long long int endLine )
 {
+	MD_UNUSED( spaceAfter )
+	
 	makeTextObject( text, spaceBefore, true, po,
 		startPos, startLine, endPos, endLine );
 
@@ -5319,6 +5321,8 @@ Parser< Trait >::htmlTagRule( typename Delims::const_iterator it,
 	typename Delims::const_iterator last,
 	TextParsingOpts< Trait > & po )
 {
+	MD_UNUSED( last )
+	
 	typename Trait::String tag;
 
 	std::tie( tag, std::ignore ) = readHtmlTag( it, po );
@@ -6065,6 +6069,8 @@ Parser< Trait >::makeLink( const typename Trait::String & url,
 	const WithPosition & textPos ,
 	const WithPosition & urlPos )
 {
+	MD_UNUSED( doNotCreateTextOnFail )
+	
 	typename Trait::String u = ( url.startsWith( Trait::latin1ToString( "#" ) ) ?
 		url : removeBackslashes< Trait >( replaceEntity< Trait >( url ) ).asString() );
 
@@ -6255,6 +6261,8 @@ Parser< Trait >::makeImage( const typename Trait::String & url,
 	const WithPosition & textPos,
 	const WithPosition & urlPos )
 {
+	MD_UNUSED( doNotCreateTextOnFail )
+	
 	std::shared_ptr< Image< Trait > > img( new Image< Trait > );
 
 	typename Trait::String u = ( url.startsWith( Trait::latin1ToString( "#" ) ) ? url :
