@@ -3,9 +3,11 @@
 	SPDX-License-Identifier: MIT
 -->
 
-# Conclusion
+# Why `md4qt` is slower `cmark-gfm`?
 
 Guys, this is a fight of `QString` and `char *` :)
+
+## C/C++/Qt
 
 ```cpp
 #include <chrono>
@@ -21,7 +23,8 @@ int main( int argc, char ** argv )
 
         {
             const QString s = QStringLiteral(
-                "abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd" );
+                "abcdabcdabcdabcdabcdabcdabcdabcd"
+                "abcdabcdabcdabcdabcdabcdabcdabcdabcdabcd" );
             QString t;
 
             for( auto i = 0; i < s.size(); ++i )
@@ -33,7 +36,8 @@ int main( int argc, char ** argv )
 
         const auto end = std::chrono::high_resolution_clock::now();
 
-        const auto d = std::chrono::duration_cast< std::chrono::nanoseconds > ( end - start );
+        const auto d = std::chrono::duration_cast< std::chrono::nanoseconds > (
+            end - start );
 
         std::cout << "QString: " << d.count() << " ns" << std::endl;
     }
@@ -42,7 +46,8 @@ int main( int argc, char ** argv )
         const auto start = std::chrono::high_resolution_clock::now();
 
         {
-            const std::string s( "abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd" );
+            const std::string s( "abcdabcdabcdabcdabcdabcdabcd"
+                "abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd" );
             std::string t;
 
             for( auto i = 0; i < s.size(); ++i )
@@ -54,7 +59,8 @@ int main( int argc, char ** argv )
 
         const auto end = std::chrono::high_resolution_clock::now();
 
-        const auto d = std::chrono::duration_cast< std::chrono::nanoseconds > ( end - start );
+        const auto d = std::chrono::duration_cast< std::chrono::nanoseconds > (
+            end - start );
 
         std::cout << "std::string: " << d.count() << " ns" << std::endl;
     }
@@ -63,7 +69,8 @@ int main( int argc, char ** argv )
         const auto start = std::chrono::high_resolution_clock::now();
 
         {
-            const char * s = "abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd";
+            const char * s = "abcdabcdabcdabcdabcdabcdabcd"
+                "abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd";
             const auto len = strlen( s );
             char * t = (char*) malloc( len / 4 + 1 );
 
@@ -82,7 +89,8 @@ int main( int argc, char ** argv )
 
         const auto end = std::chrono::high_resolution_clock::now();
 
-        const auto d = std::chrono::duration_cast< std::chrono::nanoseconds > ( end - start );
+        const auto d = std::chrono::duration_cast< std::chrono::nanoseconds > (
+            end - start );
 
         std::cout << "char*: " << d.count() << " ns" << std::endl;
     }
@@ -91,12 +99,12 @@ int main( int argc, char ** argv )
 }
 ```
 
-## Results
+### Results
 
 ```
-QString: 14211 ns
-std::string: 4039 ns
-char*: 317 ns
+QString: 11354 ns
+std::string: 7118 ns
+char*: 398 ns
 ```
 
 ## And Java for fun :)
@@ -107,7 +115,8 @@ public class JavaProgram {
    public static void main(String []args) {
       long start = System.nanoTime();
       
-      String s = "abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd";
+      String s = "abcdabcdabcdabcdabcdabcdabcdabcdabcd" +
+          "abcdabcdabcdabcdabcdabcdabcdabcdabcd";
       String t = "";
       
       for(int i = 0; i < s.length(); ++i)
@@ -127,11 +136,11 @@ public class JavaProgram {
 
 ```
 $ java JavaProgram 
-Java: 108094986 ns.
+Java: 37983904 ns.
 $ java JavaProgram 
-Java: 74303385 ns.
+Java: 45452295 ns.
 $ java JavaProgram 
-Java: 85103451 ns.
+Java: 45725337 ns.
 $ java JavaProgram 
-Java: 96809767 ns.
+Java: 32287526 ns.
 ```
