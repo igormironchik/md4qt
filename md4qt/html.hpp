@@ -108,7 +108,7 @@ protected:
 	virtual void openStyle( const typename ItemWithOpts< Trait >::Styles & styles )
 	{
 		int tmp = 0;
-		
+
 		for( const auto & s : styles )
 		{
 			switch( s.style() )
@@ -122,7 +122,7 @@ protected:
 					}
 				}
 					break;
-					
+
 				case TextOption::ItalicText :
 				{
 					if( !( tmp & TextOption::ItalicText ) )
@@ -132,7 +132,7 @@ protected:
 					}
 				}
 					break;
-					
+
 				case TextOption::StrikethroughText :
 				{
 					if( !( tmp & TextOption::StrikethroughText ) )
@@ -142,17 +142,17 @@ protected:
 					}
 				}
 					break;
-					
+
 				default :
 					break;
 			}
 		}
 	}
-	
+
 	virtual void closeStyle( const typename ItemWithOpts< Trait >::Styles & styles )
 	{
 		int tmp = 0;
-		
+
 		for( const auto & s : styles )
 		{
 			switch( s.style() )
@@ -166,7 +166,7 @@ protected:
 					}
 				}
 					break;
-					
+
 				case TextOption::ItalicText :
 				{
 					if( !( tmp & TextOption::ItalicText ) )
@@ -176,7 +176,7 @@ protected:
 					}
 				}
 					break;
-					
+
 				case TextOption::StrikethroughText :
 				{
 					if( !( tmp & TextOption::StrikethroughText ) )
@@ -186,13 +186,13 @@ protected:
 					}
 				}
 					break;
-					
+
 				default :
 					break;
 			}
 		}
 	}
-	
+
 	void onAddLineEnding() override
 	{
 		if( !justCollectFootnoteRefs )
@@ -214,7 +214,7 @@ protected:
 
 			if( t->isSpaceAfter() )
 				html.push_back( Trait::latin1ToString( " " ) );
-			
+
 			closeStyle( t->closeStyles() );
 		}
 	}
@@ -568,13 +568,13 @@ protected:
 			html.push_back( Trait::latin1ToString( "\">" ) );
 		}
 
-		if( !l->img()->isEmpty() )
+		if( l->p() && !l->p()->isEmpty() )
+			onParagraph( l->p().get(), false );
+		else if( !l->img()->isEmpty() )
 		{
 			if( !justCollectFootnoteRefs )
 				onImage( l->img().get() );
 		}
-		else if( l->p() && !l->p()->isEmpty() )
-			onParagraph( l->p().get(), false );
 		else if( !l->text().isEmpty() )
 		{
 			if( !justCollectFootnoteRefs )
@@ -601,13 +601,13 @@ protected:
 		if( !justCollectFootnoteRefs )
 		{
 			openStyle( i->openStyles() );
-			
+
 			html.push_back( Trait::latin1ToString( "<img src=\"" ) );
 			html.push_back( i->url() );
 			html.push_back( Trait::latin1ToString( "\" alt=\"" ) );
 			html.push_back( prepareTextForHtml< Trait >( i->text() ) );
 			html.push_back( Trait::latin1ToString( "\" style=\"max-width:100%;\" />" ) );
-			
+
 			closeStyle( i->closeStyles() );
 		}
 	}
@@ -626,7 +626,7 @@ protected:
 			if( !justCollectFootnoteRefs )
 			{
 				openStyle( ref->openStyles() );
-				
+
 				html.push_back( Trait::latin1ToString( "<sup>" ) );
 				html.push_back( Trait::latin1ToString( "<a href=\"#" ) );
 				html.push_back( ref->id() );
@@ -668,7 +668,7 @@ protected:
 			if( !justCollectFootnoteRefs )
 			{
 				html.push_back( Trait::latin1ToString( "</a></sup>" ) );
-				
+
 				closeStyle( ref->closeStyles() );
 			}
 		}
