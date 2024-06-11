@@ -36,6 +36,7 @@ This library parses Markdown into tree structure.
     * [What is a `ID` of a plugin?](#what-is-a-id-of-a-plugin)
     * [What is a `TextPluginFunc< Trait >`?](#what-is-a-textpluginfunc-trait-)
     * [What is `processInLinks` flag for?](#what-is-processinlinks-flag-for)
+    * [What for is a `userData` argument?](#what-for-is-a-userdata-argument)
     * [Could you show an example of a plugin?](#could-you-show-an-example-of-a-plugin)
     * [I didn't understand how raw text data correlates with a paragraph.](#i-didnt-understand-how-raw-text-data-correlates-with-a-paragraph)
     * [How can I get a string of `StyleDelim`?](#how-can-i-get-a-string-of-styledelim)
@@ -276,10 +277,9 @@ text plugins.
     //! Function of a plugin, that will be invoked to processs raw text.
     TextPluginFunc< Trait > plugin,
     //! Should this plugin be used in parsing of internals of links?
-    bool processInLinks )
-  {
-    m_textPlugins.insert( { id, { plugin, processInLinks } } );
-  }
+    bool processInLinks,
+    //! User data that will be passed to plugin function.
+    const typename Trait::StringList & userData );
   ```
 
 ### What is a `ID` of a plugin?
@@ -305,7 +305,7 @@ text plugins.
   ```cpp
   template< class Trait >
   using TextPluginFunc = std::function< void ( std::shared_ptr< Paragraph< Trait > >,
-    TextParsingOpts< Trait > & ) >;
+    TextParsingOpts< Trait > &, const typename Trait::StringList & ) >;
   ```
 
   You will get already parsed `Paragraph` with all items in it. And you are
@@ -314,6 +314,9 @@ text plugins.
   `TextParsingOpts` is an auxiliary structure with some data. You are interested
   in `bool collectRefLinks;`, when this flag is `true` the parser is in a state of
   collecting reference links, and on this stage plugin may do nothing.
+
+  A last argument of plugin function is a user data, that was passed to 
+  `MD::Parser::addTextPlugin()` method.
 
   A most important thing in `TextParsingOpts` structure is a
   `std::vector< TextData > rawTextData;`. This vector contains not processed raw
@@ -324,7 +327,7 @@ text plugins.
   a part of text item - it should be modified in `Paragraph` and `rawTextData`.
   Be careful, it's UB, if you will make a mistake here, possibly you will crash.
 
-  One more thing - dont forget to set positions of elements in `Document` to new
+  One more thing - don't forget to set positions of elements in `Document` to new
   values if you change something, and don't forget about such things like
   `openStyles()` and `closeStyles()` of `ItemWithOpts` items. Document should
   remain correct after your manipulations, so any syntax highlighter, for example,
@@ -359,6 +362,11 @@ text plugins.
 plugin in link's captions, as, for example, links can't contain other links, so
 if you are implementing a plugin for new links this flag should be set to `false`
 for your plugin.
+
+### What for is a `userData` argument?
+
+* This list of strings will be passed to plugin function. This is auxiliary data
+that can be handy for plugin implementation.
 
 ### Could you show an example of a plugin?
 
