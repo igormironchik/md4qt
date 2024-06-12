@@ -122,3 +122,73 @@ TEST_CASE( "251" )
 	REQUIRE( t->endLine() == 0 );
 	REQUIRE( t->text() == u8"headig" );
 }
+
+/*
+`code` \
+-
+
+*/
+TEST_CASE( "252" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/252.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Heading );
+	auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( h->text()->items().size() == 2 );
+	REQUIRE( h->text()->items().at( 1 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text< TRAIT >* > ( h->text()->items().at( 1 ).get() );
+	REQUIRE( t->text() == u8"\\" );
+	REQUIRE( t->startColumn() == 7 );
+	REQUIRE( t->endColumn() == 7 );
+}
+
+/*
+{#id} \
+-
+
+*/
+TEST_CASE( "253" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/253.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Heading );
+	auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( h->text()->items().size() == 1 );
+	REQUIRE( h->text()->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text< TRAIT >* > ( h->text()->items().at( 0 ).get() );
+	REQUIRE( t->text() == u8"{#id} \\" );
+	REQUIRE( t->startColumn() == 0 );
+	REQUIRE( t->endColumn() == 6 );
+	REQUIRE( h->labelPos() == MD::WithPosition{ -1, -1, -1, -1 } );
+}
+
+/*
+{#id}
+-
+
+*/
+TEST_CASE( "254" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/254.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Heading );
+	auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( h->text()->items().empty() );
+	REQUIRE( h->labelPos() == MD::WithPosition{ 0, 0, 4, 0 } );
+	REQUIRE( h->label().startsWith( typename TRAIT::String( "#id" ) ) );
+}
