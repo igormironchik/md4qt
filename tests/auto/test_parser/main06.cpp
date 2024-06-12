@@ -882,7 +882,8 @@ TEST_CASE( "166" )
 	REQUIRE( h->startLine() == 0 );
 	REQUIRE( h->endColumn() == 2 );
 	REQUIRE( h->endLine() == 1 );
-	REQUIRE( h->delim() == MD::WithPosition{ 0, 1, 2, 1 } );
+	REQUIRE( h->delims().size() == 1 );
+	REQUIRE( h->delims().front() == MD::WithPosition{ 0, 1, 2, 1 } );
 	REQUIRE( h->level() == 2 );
 	REQUIRE( h->text().get() );
 	auto p = h->text().get();
@@ -988,7 +989,8 @@ TEST_CASE( "167" )
 		REQUIRE( h->startLine() == 13 );
 		REQUIRE( h->endColumn() == 0 );
 		REQUIRE( h->endLine() == 14 );
-		REQUIRE( h->delim() == MD::WithPosition{ 0, 14, 0, 14 } );
+		REQUIRE( h->delims().size() == 1 );
+		REQUIRE( h->delims().front() == MD::WithPosition{ 0, 14, 0, 14 } );
 		REQUIRE( h->level() == 2 );
 		REQUIRE( h->text().get() );
 		auto p = h->text().get();
@@ -1378,7 +1380,7 @@ TEST_CASE( "174" )
 	{
 		REQUIRE( doc->isEmpty() == false );
 		REQUIRE( doc->items().size() == 4 );
-	
+
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 		REQUIRE( p->startColumn() == 0 );
@@ -1394,9 +1396,9 @@ TEST_CASE( "174" )
 		REQUIRE( t->endLine() == 0 );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
 		REQUIRE( t->text() == u8"Text" );
-	
+
 		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::HorizontalLine );
-	
+
 		{
 			REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Table );
 			auto t = static_cast< MD::Table< TRAIT >* > ( doc->items().at( 3 ).get() );
@@ -1404,14 +1406,14 @@ TEST_CASE( "174" )
 			REQUIRE( t->startLine() == 2 );
 			REQUIRE( t->endColumn() == 7 );
 			REQUIRE( t->endLine() == 4 );
-	
+
 			REQUIRE( t->columnsCount() == 1 );
 			REQUIRE( t->rows().size() == 2 );
 		}
 	};
-	
+
 	checkDoc( doc );
-	
+
 	checkDoc( std::static_pointer_cast< MD::Document< TRAIT > > ( doc->clone() ) );
 }
 
@@ -1730,7 +1732,8 @@ TEST_CASE( "182" )
 		REQUIRE( h->startLine() == 2 );
 		REQUIRE( h->endColumn() == 2 );
 		REQUIRE( h->endLine() == 2 );
-		REQUIRE( h->delim() == MD::WithPosition{ 0, 2, 0, 2 } );
+		REQUIRE( h->delims().size() == 1 );
+		REQUIRE( h->delims().front() == MD::WithPosition{ 0, 2, 0, 2 } );
 		REQUIRE( h->level() == 1 );
 		REQUIRE( h->text().get() );
 		auto p = h->text().get();
@@ -1749,7 +1752,8 @@ TEST_CASE( "182" )
 		REQUIRE( h->startLine() == 3 );
 		REQUIRE( h->endColumn() == 4 );
 		REQUIRE( h->endLine() == 3 );
-		REQUIRE( h->delim() == MD::WithPosition{ 0, 3, 1, 3 } );
+		REQUIRE( h->delims().size() == 1 );
+		REQUIRE( h->delims().front() == MD::WithPosition{ 0, 3, 1, 3 } );
 		REQUIRE( h->level() == 2 );
 		REQUIRE( h->text().get() );
 		auto p = h->text().get();
@@ -1768,7 +1772,8 @@ TEST_CASE( "182" )
 		REQUIRE( h->startLine() == 4 );
 		REQUIRE( h->endColumn() == 6 );
 		REQUIRE( h->endLine() == 4 );
-		REQUIRE( h->delim() == MD::WithPosition{ 0, 4, 2, 4 } );
+		REQUIRE( h->delims().size() == 1 );
+		REQUIRE( h->delims().front() == MD::WithPosition{ 0, 4, 2, 4 } );
 		REQUIRE( h->level() == 3 );
 		REQUIRE( h->text().get() );
 		auto p = h->text().get();
@@ -1803,7 +1808,8 @@ TEST_CASE( "183" )
 		REQUIRE( h->startLine() == 0 );
 		REQUIRE( h->endColumn() == 2 );
 		REQUIRE( h->endLine() == 0 );
-		REQUIRE( h->delim() == MD::WithPosition{ 0, 0, 0, 0 } );
+		REQUIRE( h->delims().size() == 1 );
+		REQUIRE( h->delims().front() == MD::WithPosition{ 0, 0, 0, 0 } );
 		REQUIRE( h->level() == 1 );
 		REQUIRE( h->text().get() );
 		auto p = h->text().get();
@@ -1822,7 +1828,8 @@ TEST_CASE( "183" )
 		REQUIRE( h->startLine() == 1 );
 		REQUIRE( h->endColumn() == 4 );
 		REQUIRE( h->endLine() == 1 );
-		REQUIRE( h->delim() == MD::WithPosition{ 0, 1, 1, 1 } );
+		REQUIRE( h->delims().size() == 1 );
+		REQUIRE( h->delims().front() == MD::WithPosition{ 0, 1, 1, 1 } );
 		REQUIRE( h->level() == 2 );
 		REQUIRE( h->text().get() );
 		auto p = h->text().get();
@@ -1841,7 +1848,8 @@ TEST_CASE( "183" )
 		REQUIRE( h->startLine() == 2 );
 		REQUIRE( h->endColumn() == 6 );
 		REQUIRE( h->endLine() == 2 );
-		REQUIRE( h->delim() == MD::WithPosition{ 0, 2, 2, 2 } );
+		REQUIRE( h->delims().size() == 1 );
+		REQUIRE( h->delims().front() == MD::WithPosition{ 0, 2, 2, 2 } );
 		REQUIRE( h->level() == 3 );
 		REQUIRE( h->text().get() );
 		auto p = h->text().get();

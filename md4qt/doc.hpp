@@ -72,11 +72,11 @@ enum class ItemType {
 //
 
 //! Base for any thing with start and end position.
-class WithPosition {	
+class WithPosition {
 public:
 	WithPosition() = default;
 	virtual ~WithPosition() = default;
-	
+
 	WithPosition( long long int startColumn,
 		long long int startLine,
 		long long int endColumn,
@@ -87,13 +87,13 @@ public:
 		,	m_endLine( endLine )
 	{
 	}
-	
+
 	void applyPositions( const WithPosition & other )
 	{
 		if( this != &other )
 			*this = other;
 	}
-	
+
 	long long int startColumn() const { return m_startColumn; }
 	long long int startLine() const { return m_startLine; }
 	long long int endColumn() const { return m_endColumn; }
@@ -103,7 +103,7 @@ public:
 	void setStartLine( long long int l ) { m_startLine = l; }
 	void setEndColumn( long long int c ) { m_endColumn = c; }
 	void setEndLine( long long int l ) { m_endLine = l; }
-	
+
 private:
 	long long int m_startColumn = -1;
 	long long int m_startLine = -1;
@@ -140,7 +140,7 @@ public:
 	~Item() override = default;
 
 	virtual ItemType type() const = 0;
-	
+
 	virtual std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const = 0;
 
 private:
@@ -182,19 +182,19 @@ public:
 		,	m_style( s )
 	{
 	}
-	
+
 	~StyleDelim() override = default;
-	
+
 	int style() const
 	{
 		return m_style;
 	}
-	
+
 	void setStyle( int t )
 	{
 		m_style = t;
 	}
-	
+
 private:
 	int m_style = TextWithoutFormat;
 }; // class StyleDelim
@@ -219,7 +219,7 @@ protected:
 
 public:
 	~ItemWithOpts() override = default;
-	
+
 	void applyItemWithOpts( const ItemWithOpts< Trait > & other )
 	{
 		if( this != &other )
@@ -230,7 +230,7 @@ public:
 			m_closeStyles = other.m_closeStyles;
 		}
 	}
-	
+
 	using Styles = typename Trait::template Vector< StyleDelim >;
 
 	int opts() const
@@ -242,22 +242,22 @@ public:
 	{
 		m_opts = o;
 	}
-	
+
 	const Styles & openStyles() const
 	{
 		return m_openStyles;
 	}
-	
+
 	Styles & openStyles()
 	{
 		return m_openStyles;
 	}
-	
+
 	const Styles & closeStyles() const
 	{
 		return m_closeStyles;
 	}
-	
+
 	Styles & closeStyles()
 	{
 		return m_closeStyles;
@@ -289,11 +289,11 @@ public:
 	{
 		return ItemType::PageBreak;
 	}
-	
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		MD_UNUSED( doc )
-		
+
 		return std::make_shared< PageBreak< Trait > > ();
 	}
 
@@ -319,14 +319,14 @@ public:
 	{
 		return ItemType::HorizontalLine;
 	}
-	
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		MD_UNUSED( doc )
-		
+
 		auto h = std::make_shared< HorizontalLine< Trait > > ();
 		h->applyPositions( *this );
-		
+
 		return h;
 	}
 
@@ -351,11 +351,11 @@ public:
 	}
 
 	~Anchor() override = default;
-	
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		MD_UNUSED( doc )
-		
+
 		return std::make_shared< Anchor< Trait > > ( m_label );
 	}
 
@@ -388,16 +388,16 @@ class RawHtml final
 public:
 	RawHtml() = default;
 	~RawHtml() override = default;
-	
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		MD_UNUSED( doc )
-		
+
 		auto h = std::make_shared< RawHtml< Trait > > ();
 		h->applyItemWithOpts( *this );
 		h->setText( m_text );
 		h->setFreeTag( m_isFreeTag );
-		
+
 		return h;
 	}
 
@@ -453,7 +453,7 @@ class Text
 public:
 	Text() = default;
 	~Text() override = default;
-	
+
 	void applyText( const Text< Trait > & t )
 	{
 		if( this != &t )
@@ -464,14 +464,14 @@ public:
 			setSpaceAfter( t.isSpaceAfter() );
 		}
 	}
-	
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		MD_UNUSED( doc )
-		
+
 		auto t = std::make_shared< Text< Trait > > ();
 		t->applyText( *this );
-		
+
 		return t;
 	}
 
@@ -531,14 +531,14 @@ class LineBreak final
 public:
 	LineBreak() = default;
 	~LineBreak() override = default;
-	
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		MD_UNUSED( doc )
-		
+
 		auto b = std::make_shared< LineBreak< Trait > > ();
 		b->applyText( *this );
-		
+
 		return b;
 	}
 
@@ -570,15 +570,15 @@ public:
 
 	using ItemSharedPointer = std::shared_ptr< Item< Trait > >;
 	using Items = typename Trait::template Vector< ItemSharedPointer >;
-	
+
 	void applyBlock( const Block< Trait > & other, Document< Trait > * doc = nullptr )
 	{
 		if( this != &other )
 		{
 			WithPosition::applyPositions( other );
-			
+
 			m_items.clear();
-			
+
 			for( const auto & i : other.items() )
 				appendItem( i->clone( doc ) );
 		}
@@ -604,7 +604,7 @@ public:
 		if( idx >= 0 && idx < m_items.size() )
 			m_items.erase( m_items.cbegin() + idx );
 	}
-	
+
 	ItemSharedPointer getItemAt( long long int idx ) const
 	{
 		return m_items.at( idx );
@@ -634,13 +634,13 @@ class Paragraph final
 public:
 	Paragraph() = default;
 	~Paragraph() override = default;
-	
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		auto p = std::make_shared< Paragraph< Trait > > ();
 		p->setDirty( m_dirty );
 		p->applyBlock( *this, doc );
-		
+
 		return p;
 	}
 
@@ -689,7 +689,9 @@ public:
 	}
 
 	~Heading() override = default;
-	
+
+	using Delims = typename Trait::template Vector< WithPosition >;
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		auto h = std::make_shared< Heading< Trait > > ();
@@ -697,11 +699,12 @@ public:
 		h->setText( std::static_pointer_cast< Paragraph< Trait > >( m_text->clone( doc ) ) );
 		h->setLevel( m_level );
 		h->setLabel( m_label );
-		h->setDelim( m_delim );
-		
+		h->setDelims( m_delims );
+		h->setLabelPos( m_labelPos );
+
 		if( doc && isLabeled() )
 			doc->insertLabeledHeading( m_label, h );
-		
+
 		return h;
 	}
 
@@ -746,22 +749,33 @@ public:
 	{
 		m_label = l;
 	}
-	
-	const WithPosition & delim() const
+
+	const Delims & delims() const
 	{
-		return m_delim;
+		return m_delims;
 	}
-	
-	void setDelim( const WithPosition & d )
+
+	void setDelims( const Delims & d )
 	{
-		m_delim = d;
+		m_delims = d;
+	}
+
+	const WithPosition & labelPos() const
+	{
+		return m_labelPos;
+	}
+
+	void setLabelPos( const WithPosition & p )
+	{
+		m_labelPos = p;
 	}
 
 private:
 	ParagraphSharedPointer m_text;
 	int m_level = 0;
 	typename Trait::String m_label;
-	WithPosition m_delim;
+	Delims m_delims;
+	WithPosition m_labelPos;
 
 	MD_DISABLE_COPY( Heading )
 }; // class Heading
@@ -779,13 +793,13 @@ class Blockquote final
 public:
 	Blockquote() = default;
 	~Blockquote() override = default;
-	
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		auto b = std::make_shared< Blockquote< Trait > > ();
 		b->applyBlock( *this, doc );
 		b->delims() = m_delims;
-		
+
 		return b;
 	}
 
@@ -793,14 +807,14 @@ public:
 	{
 		return ItemType::Blockquote;
 	}
-	
-	using Delims = typename Trait::template Vector< WithPosition >;	
-	
+
+	using Delims = typename Trait::template Vector< WithPosition >;
+
 	const Delims & delims() const
 	{
 		return m_delims;
 	}
-	
+
 	Delims & delims()
 	{
 		return m_delims;
@@ -808,7 +822,7 @@ public:
 
 private:
 	Delims m_delims;
-	
+
 	MD_DISABLE_COPY( Blockquote )
 }; // class Blockquote
 
@@ -825,7 +839,7 @@ class ListItem final
 public:
 	ListItem() = default;
 	~ListItem() override = default;
-	
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		auto l = std::make_shared< ListItem< Trait > > ();
@@ -837,7 +851,7 @@ public:
 		l->setChecked( m_isChecked );
 		l->setDelim( m_delim );
 		l->setTaskDelim( m_taskDelim );
-		
+
 		return l;
 	}
 
@@ -907,22 +921,22 @@ public:
 	{
 		m_isChecked = on;
 	}
-	
+
 	const WithPosition & delim() const
 	{
 		return m_delim;
 	}
-	
+
 	void setDelim( const WithPosition & d )
 	{
 		m_delim = d;
 	}
-	
+
 	const WithPosition & taskDelim() const
 	{
 		return m_taskDelim;
 	}
-	
+
 	void setTaskDelim( const WithPosition & d )
 	{
 		m_taskDelim = d;
@@ -953,12 +967,12 @@ class List final
 public:
 	List() = default;
 	~List() override = default;
-	
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		auto l = std::make_shared< List< Trait > > ();
 		l->applyBlock( *this, doc );
-		
+
 		return l;
 	}
 
@@ -984,11 +998,11 @@ class LinkBase
 public:
 	LinkBase()
 		:	m_p( new Paragraph< Trait > )
-	{	
+	{
 	}
-	
+
 	~LinkBase() override = default;
-	
+
 	void applyLinkBase( const LinkBase< Trait> & other, Document< Trait > * doc = nullptr )
 	{
 		if( this != &other )
@@ -1001,7 +1015,7 @@ public:
 			setUrlPos( other.urlPos() );
 		}
 	}
-	
+
 	using ParagraphSharedPointer = std::shared_ptr< Paragraph< Trait > >;
 
 	const typename Trait::String & url() const
@@ -1038,22 +1052,22 @@ public:
 	{
 		m_p = v;
 	}
-	
+
 	const WithPosition & textPos() const
 	{
 		return m_textPos;
 	}
-	
+
 	void setTextPos( const WithPosition & pos )
 	{
 		m_textPos = pos;
 	}
-	
+
 	const WithPosition & urlPos() const
 	{
 		return m_urlPos;
 	}
-	
+
 	void setUrlPos( const WithPosition & pos )
 	{
 		m_urlPos = pos;
@@ -1082,12 +1096,12 @@ class Image final
 public:
 	Image() = default;
 	~Image() override = default;
-	
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		auto i = std::make_shared< Image< Trait > > ();
 		i->applyLinkBase( *this, doc );
-		
+
 		return i;
 	}
 
@@ -1116,13 +1130,13 @@ public:
 		,	m_img( new Image< Trait > )
 	{
 	}
-	
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		auto l = std::make_shared< Link< Trait > > ();
 		l->applyLinkBase( *this, doc );
 		l->setImg( std::static_pointer_cast< Image< Trait > > ( m_img->clone( doc ) ) );
-		
+
 		return l;
 	}
 
@@ -1171,7 +1185,7 @@ public:
 	}
 
 	~Code() override = default;
-	
+
 	void applyCode( const Code< Trait > & other )
 	{
 		if( this != &other )
@@ -1186,14 +1200,14 @@ public:
 			setFensedCode( other.isFensedCode() );
 		}
 	}
-	
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		MD_UNUSED( doc )
-		
+
 		auto c = std::make_shared< Code< Trait > > ( m_text, m_fensed, m_inlined );
 		c->applyCode( *this );
-		
+
 		return c;
 	}
 
@@ -1216,7 +1230,7 @@ public:
 	{
 		return m_inlined;
 	}
-	
+
 	void setInline( bool on = true )
 	{
 		m_inlined = on;
@@ -1231,42 +1245,42 @@ public:
 	{
 		m_syntax = s;
 	}
-	
+
 	const WithPosition & syntaxPos() const
 	{
 		return m_syntaxPos;
 	}
-	
+
 	void setSyntaxPos( const WithPosition & p )
 	{
 		m_syntaxPos = p;
 	}
-	
+
 	const WithPosition & startDelim() const
 	{
 		return m_startDelim;
 	}
-	
+
 	void setStartDelim( const WithPosition & d )
 	{
 		m_startDelim = d;
 	}
-	
+
 	const WithPosition & endDelim() const
 	{
 		return m_endDelim;
 	}
-	
+
 	void setEndDelim( const WithPosition & d )
 	{
 		m_endDelim = d;
 	}
-	
+
 	bool isFensedCode() const
 	{
 		return m_fensed;
 	}
-	
+
 	void setFensedCode( bool on = true )
 	{
 		m_fensed = on;
@@ -1299,16 +1313,16 @@ public:
 		:	Code< Trait >( typename Trait::String(), false, true )
 	{
 	}
-	
+
 	~Math() override = default;
-	
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		MD_UNUSED( doc )
-		
+
 		auto m = std::make_shared< Math< Trait > > ();
 		m->applyCode( *this );
-		
+
 		return m;
 	}
 
@@ -1344,12 +1358,12 @@ class TableCell final
 public:
 	TableCell() = default;
 	~TableCell() override = default;
-	
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		auto c = std::make_shared< TableCell< Trait > > ();
 		c->applyBlock( *this, doc );
-		
+
 		return c;
 	}
 
@@ -1375,15 +1389,15 @@ class TableRow final
 public:
 	TableRow() = default;
 	~TableRow() override = default;
-	
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		auto t = std::make_shared< TableRow< Trait > > ();
 		t->applyPositions( *this );
-		
+
 		for( const auto & c : cells() )
 			t->appendCell( std::static_pointer_cast< TableCell< Trait > > ( c->clone( doc ) ) );
-		
+
 		return t;
 	}
 
@@ -1429,18 +1443,18 @@ class Table final
 public:
 	Table() = default;
 	~Table() override = default;
-	
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		auto t = std::make_shared< Table< Trait > > ();
 		t->applyPositions( *this );
-		
+
 		for( const auto & r : rows() )
 			t->appendRow( std::static_pointer_cast< TableRow< Trait > >( r->clone( doc ) ) );
-		
+
 		for( int i = 0; i < columnsCount(); ++i )
 			t->setColumnAlignment( i, columnAlignment( i ) );
-		
+
 		return t;
 	}
 
@@ -1518,15 +1532,15 @@ public:
 	}
 
 	~FootnoteRef() override = default;
-	
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		MD_UNUSED( doc )
-		
+
 		auto f = std::make_shared< FootnoteRef< Trait > > ( m_id );
 		f->applyText( *this );
 		f->setIdPos( m_idPos );
-		
+
 		return f;
 	}
 
@@ -1539,12 +1553,12 @@ public:
 	{
 		return m_id;
 	}
-	
+
 	const WithPosition & idPos() const
 	{
 		return m_idPos;
 	}
-	
+
 	void setIdPos( const WithPosition & pos )
 	{
 		m_idPos = pos;
@@ -1570,13 +1584,13 @@ class Footnote final
 public:
 	Footnote() = default;
 	~Footnote() override = default;
-	
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		auto f = std::make_shared< Footnote< Trait > > ();
 		f->applyBlock( *this, doc );
 		f->setIdPos( m_idPos );
-		
+
 		return f;
 	}
 
@@ -1584,12 +1598,12 @@ public:
 	{
 		return ItemType::Footnote;
 	}
-	
+
 	const WithPosition & idPos() const
 	{
 		return m_idPos;
 	}
-	
+
 	void setIdPos( const WithPosition & pos )
 	{
 		m_idPos = pos;
@@ -1597,7 +1611,7 @@ public:
 
 private:
 	WithPosition m_idPos = {};
-	
+
 	MD_DISABLE_COPY( Footnote )
 }; // class Footnote
 
@@ -1619,22 +1633,22 @@ public:
 	{
 		return ItemType::Document;
 	}
-	
+
 	std::shared_ptr< Item< Trait > > clone( Document< Trait > * doc = nullptr ) const override
 	{
 		MD_UNUSED( doc )
-		
+
 		auto d = std::make_shared< Document< Trait > > ();
 		d->applyBlock( *this, d.get() );
-		
+
 		for( auto it = m_footnotes.cbegin(), last = m_footnotes.cend(); it != last; ++it )
 			d->insertFootnote( it->first, std::static_pointer_cast< Footnote< Trait > > (
 				it->second->clone( d.get() ) ) );
-		
+
 		for( auto it = m_labeledLinks.cbegin(), last = m_labeledLinks.cend(); it != last; ++it )
 			d->insertLabeledLink( it->first, std::static_pointer_cast< Link< Trait > > (
 				it->second->clone( d.get() ) ) );
-		
+
 		return d;
 	}
 

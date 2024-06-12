@@ -3234,30 +3234,34 @@ Parser< Trait >::parseText( MdBlock< Trait > & fr,
 }
 
 template< class Trait >
-inline typename Trait::String
-findAndRemoveHeaderLabel( typename Trait::String & s )
+inline std::pair< typename Trait::String, WithPosition >
+findAndRemoveHeaderLabel( typename Trait::InternalString & s )
 {
-	const auto start = s.indexOf( Trait::latin1ToString( "{#" ) );
+	const auto start = s.asString().indexOf( Trait::latin1ToString( "{#" ) );
 
 	if( start >= 0 )
 	{
 		long long int p = start + 2;
 
-		for( ; p < s.size(); ++p )
+		for( ; p < s.length(); ++p )
 		{
 			if( s[ p ] == Trait::latin1ToChar( '}' ) )
 				break;
 		}
 
-		if( p < s.size() && s[ p ] == Trait::latin1ToChar( '}' ) )
+		if( p < s.length() && s[ p ] == Trait::latin1ToChar( '}' ) )
 		{
-			const auto label = s.sliced( start, p - start + 1 );
+			WithPosition pos;
+			pos.setStartColumn( s.virginPos( start ) );
+			pos.setEndColumn( s.virginPos( p ) );
+
+			const auto label = s.sliced( start, p - start + 1 ).asString();
 			s.remove( start, p - start + 1 );
-			return label;
+			return { label, pos };
 		}
 	}
 
-	return typename Trait::String();
+	return {};
 }
 
 template< class Trait >
@@ -3352,7 +3356,7 @@ paragraphToLabel( Paragraph< Trait > * p )
 }
 
 template< class Trait >
-inline void
+inline WithPosition
 findAndRemoveClosingSequence( typename Trait::InternalString & s )
 {
 	long long int end = -1;
@@ -3361,7 +3365,7 @@ findAndRemoveClosingSequence( typename Trait::InternalString & s )
 	for( long long int i = s.length() - 1; i >= 0 ; --i )
 	{
 		if( !s[ i ].isSpace() && s[ i ] != Trait::latin1ToChar( '#' ) && end == -1 )
-			return;
+			return {};
 
 		if( s[ i ] == Trait::latin1ToChar( '#' ) )
 		{
@@ -3376,15 +3380,24 @@ findAndRemoveClosingSequence( typename Trait::InternalString & s )
 					break;
 				}
 				else if( s[ i - 1 ] != Trait::latin1ToChar( '#' ) )
-					return;
+					return {};
 			}
 			else
 				start = 0;
 		}
 	}
 
+	WithPosition ret;
+
 	if( start != -1 && end != -1 )
+	{
+		ret.setStartColumn( s.virginPos( start ) );
+		ret.setEndColumn( s.virginPos( end ) );
+
 		s.remove( start, end - start + 1 );
+	}
+
+	return ret;
 }
 
 template< class Trait >
@@ -3422,23 +3435,44 @@ Parser< Trait >::parseHeading( MdBlock< Trait > & fr,
 			++pos;
 		}
 
-		h->setDelim( { h->startColumn(), h->startLine(), line.virginPos( pos - 1 ), h->startLine() } );
+		WithPosition startDelim = { h->startColumn(), h->startLine(),
+			line.virginPos( pos - 1 ), h->startLine() };
 
 		pos = skipSpaces< Trait >( pos, line.asString() );
 
 		if( pos > 0 )
 			fr.data.front().first = line.sliced( pos );
 
-		const auto label = findAndRemoveHeaderLabel< Trait >( fr.data.front().first.asString() );
+		auto label = findAndRemoveHeaderLabel< Trait >( fr.data.front().first );
 
-		findAndRemoveClosingSequence< Trait >( fr.data.front().first );
+		typename Heading< Trait >::Delims delims = { startDelim };
+
+		auto endDelim = findAndRemoveClosingSequence< Trait >( fr.data.front().first );
+
+		if( endDelim.startColumn() != -1 )
+		{
+			endDelim.setStartLine( fr.data.front().second.lineNumber );
+			endDelim.setEndLine( endDelim.startLine() );
+
+			delims.push_back( endDelim );
+		}
+
+		h->setDelims( delims );
 
 		h->setLevel( lvl );
 
-		if( !label.isEmpty() )
-			h->setLabel( label.sliced( 1, label.length() - 2 ) + Trait::latin1ToString( "/" ) +
+		if( !label.first.isEmpty() )
+		{
+			h->setLabel( label.first.sliced( 1, label.first.length() - 2 ) +
+				Trait::latin1ToString( "/" ) +
 				( !workingPath.isEmpty() ? workingPath + Trait::latin1ToString( "/" ) :
 					Trait::latin1ToString( "" ) ) + fileName );
+
+			label.second.setStartLine( fr.data.front().second.lineNumber );
+			label.second.setEndLine( label.second.startLine() );
+
+			h->setLabelPos( label.second );
+		}
 
 		std::shared_ptr< Paragraph< Trait > > p( new Paragraph< Trait > );
 
@@ -8076,7 +8110,8 @@ makeHeading( std::shared_ptr< Block< Trait > > parent,
 	const typename Trait::String & workingPath,
 	const typename Trait::String & fileName,
 	bool collectRefLinks,
-	const WithPosition & delim )
+	const WithPosition & delim,
+	TextParsingOpts< Trait > & po )
 {
 	if( !collectRefLinks )
 	{
@@ -8094,6 +8129,8 @@ makeHeading( std::shared_ptr< Block< Trait > > parent,
 					( lb->isSpaceBefore() ? Trait::latin1ToString( " " ) : typename Trait::String() ) +
 					lb->text() ).simplified() );
 				lt->setEndColumn( lt->endColumn() + lb->text().length() );
+				po.rawTextData.back().str += ( lb->isSpaceBefore() ?
+					Trait::latin1ToString( " " ) : typename Trait::String() ) + lb->text();
 			}
 			else
 			{
@@ -8107,6 +8144,61 @@ makeHeading( std::shared_ptr< Block< Trait > > parent,
 				t->setEndLine( lb->endLine() );
 
 				p->appendItem( t );
+
+				const auto pos = localPosFromVirgin( po.fr, lb->startColumn(), lb->startLine() );
+
+				po.rawTextData.push_back( { lb->text(), pos.first, pos.second,
+					lb->isSpaceBefore(), true } );
+			}
+		}
+
+		std::pair< typename Trait::String, WithPosition > label;
+
+		if( p->items().back()->type() == ItemType::Text )
+		{
+			auto t = std::static_pointer_cast< Text< Trait > >( p->items().back() );
+
+			if( t->opts() == TextWithoutFormat )
+			{
+				auto text = po.rawTextData.back();
+				typename Trait::InternalString tmp( text.str );
+				label = findAndRemoveHeaderLabel< Trait > ( tmp );
+				const auto ns = ( label.second.startColumn() != -1 ?
+					skipSpaces< Trait > ( label.second.startColumn(), text.str ) :
+					tmp.length() );
+				label.second.setStartColumn( t->startColumn() + label.second.startColumn() );
+				label.second.setEndColumn( t->startColumn() + label.second.endColumn() );
+				label.second.setStartLine( t->startLine() );
+				label.second.setEndLine( t->endLine() );
+
+				if( !label.first.isEmpty() && ns >= tmp.length() )
+				{
+					label.first = label.first.sliced( 1, label.first.length() - 2 );
+
+					if( tmp.asString().simplified().isEmpty() )
+					{
+						p->removeItemAt( p->items().size() - 1 );
+
+						if( !p->items().empty() )
+						{
+							const auto last = std::static_pointer_cast< WithPosition >(
+								p->items().back() );
+							p->setEndColumn( last->endColumn() );
+							p->setEndLine( last->endLine() );
+						}
+					}
+					else
+					{
+						auto s = replaceEntity< Trait >( tmp.asString().simplified() );
+						s = removeBackslashes< Trait >( s ).asString();
+						t->setText( s );
+						t->setEndColumn( label.second.startColumn() - 1 );
+						t->setSpaceAfter( true );
+						p->setEndColumn( t->endColumn() );
+					}
+				}
+				else
+					label.first.clear();
 			}
 		}
 
@@ -8116,18 +8208,27 @@ makeHeading( std::shared_ptr< Block< Trait > > parent,
 		h->setEndColumn( lastColumn );
 		h->setEndLine( lastLine );
 		h->setLevel( level );
-		h->setText( p );
-		h->setDelim( delim );
 
-		typename Trait::String label = Trait::latin1ToString( "#" ) + paragraphToLabel( p.get() );
+		if( !p->items().empty() )
+			h->setText( p );
 
-		label += Trait::latin1ToString( "/" ) +
-			( !workingPath.isEmpty() ? workingPath + Trait::latin1ToString( "/" ) :
-				typename Trait::String() ) + fileName;
+		h->setDelims( { delim } );
 
-		h->setLabel( label );
+		if( label.first.isEmpty() && !p->items().empty() )
+			label.first = Trait::latin1ToString( "#" ) + paragraphToLabel( p.get() );
+		else
+			h->setLabelPos( label.second );
 
-		doc->insertLabeledHeading( label, h );
+		if( !label.first.isEmpty() )
+		{
+			label.first += Trait::latin1ToString( "/" ) +
+				( !workingPath.isEmpty() ? workingPath + Trait::latin1ToString( "/" ) :
+					typename Trait::String() ) + fileName;
+
+			h->setLabel( label.first );
+
+			doc->insertLabeledHeading( label.first, h );
+		}
 
 		parent->appendItem( h );
 	}
@@ -8343,7 +8444,8 @@ Parser< Trait >::parseFormattedTextLinksImages( MdBlock< Trait > & fr,
 												po.fr.data[ it->m_line ].first.virginPos(
 													lastNonSpacePos< Trait > (
 														po.fr.data[ it->m_line ].first.asString() ) ),
-												fr.data[ it->m_line ].second.lineNumber } );
+												fr.data[ it->m_line ].second.lineNumber },
+											po );
 
 										po.checkLineOnNewType = true;
 									}
@@ -8419,7 +8521,8 @@ Parser< Trait >::parseFormattedTextLinksImages( MdBlock< Trait > & fr,
 									po.fr.data[ it->m_line ].first.virginPos(
 										lastNonSpacePos< Trait > (
 											po.fr.data[ it->m_line ].first.asString() ) ),
-									fr.data[ it->m_line ].second.lineNumber } );
+									fr.data[ it->m_line ].second.lineNumber },
+								po );
 
 							po.checkLineOnNewType = true;
 

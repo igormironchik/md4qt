@@ -376,3 +376,28 @@ TEST_CASE( "insert" )
 	REQUIRE( s.virginPos( 0 ) == 0 );
 	REQUIRE( s.virginPos( 1 ) == 0 );
 }
+
+TEST_CASE( "double_remove" )
+{
+	TRAIT::InternalString s( "a b c d" );
+
+	s.remove( 2, 1 );
+
+	REQUIRE( s.asString() == "a  c d" );
+
+	s = s.simplified();
+
+	REQUIRE( s.asString() == "a c d" );
+
+	s.remove( 2, 1 );
+
+	REQUIRE( s.asString() == "a  d" );
+
+	s = s.simplified();
+
+	REQUIRE( s.asString() == "a d" );
+
+	REQUIRE( s.virginPos( 0 ) == 0 );
+	REQUIRE( s.virginPos( 1 ) == 1 );
+	REQUIRE( s.virginPos( 2 ) == 6 );
+}

@@ -305,7 +305,8 @@ TEST_CASE( "226" )
 	REQUIRE( !h->text()->isEmpty() );
 	REQUIRE( h->text()->items().size() == 1 );
 	REQUIRE( h->text()->items().at( 0 )->type() == MD::ItemType::Text );
-	REQUIRE( h->delim() == MD::WithPosition{ 2, 1, 2, 1 } );
+	REQUIRE( h->delims().size() == 1 );
+	REQUIRE( h->delims().front() == MD::WithPosition{ 2, 1, 2, 1 } );
 
 	REQUIRE( li->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 1 ).get() );
@@ -396,7 +397,8 @@ TEST_CASE( "228" )
 				REQUIRE( li->items().size() == 1 );
 				REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Heading );
 				auto h = static_cast< MD::Heading< TRAIT >* > ( li->items().at( 0 ).get() );
-				REQUIRE( h->delim() == MD::WithPosition{ 4, 3, 4, 3 } );
+				REQUIRE( h->delims().size() == 1 );
+				REQUIRE( h->delims().front() == MD::WithPosition{ 4, 3, 4, 3 } );
 				REQUIRE( !h->text()->isEmpty() );
 				REQUIRE( h->text()->items().size() == 1 );
 				REQUIRE( h->text()->items().at( 0 )->type() == MD::ItemType::Text );
@@ -456,7 +458,8 @@ TEST_CASE( "230" )
 		REQUIRE( !h->text()->isEmpty() );
 		REQUIRE( h->text()->items().size() == 1 );
 		REQUIRE( h->text()->items().at( 0 )->type() == MD::ItemType::Text );
-		REQUIRE( h->delim() == MD::WithPosition{ 2, 1, 2, 1 } );
+		REQUIRE( h->delims().size() == 1 );
+		REQUIRE( h->delims().front() == MD::WithPosition{ 2, 1, 2, 1 } );
 	}
 
 	{
@@ -468,7 +471,8 @@ TEST_CASE( "230" )
 		REQUIRE( !h->text()->isEmpty() );
 		REQUIRE( h->text()->items().size() == 1 );
 		REQUIRE( h->text()->items().at( 0 )->type() == MD::ItemType::Text );
-		REQUIRE( h->delim() == MD::WithPosition{ 2, 4, 2, 4 } );
+		REQUIRE( h->delims().size() == 1 );
+		REQUIRE( h->delims().front() == MD::WithPosition{ 2, 4, 2, 4 } );
 	}
 }
 
@@ -942,7 +946,7 @@ TEST_CASE( "239" )
 /*
 www.google.com `code` www.google.com
 <!-- -->
-  www.google.com   `code`   www.google.com 
+  www.google.com   `code`   www.google.com
 
 
 */
@@ -959,7 +963,7 @@ TEST_CASE( "240" )
 		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 		REQUIRE( p->items().size() == 3 );
-		
+
 		{
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
 			auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
@@ -967,12 +971,12 @@ TEST_CASE( "240" )
 			REQUIRE( l->textPos() == MD::WithPosition{ 0, 0, 13, 0 } );
 			REQUIRE( l->urlPos() == l->textPos() );
 		}
-	
+
 		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Code );
 		auto c = static_cast< MD::Code< TRAIT >* > ( p->items().at( 1 ).get() );
 		REQUIRE( c->startDelim() == MD::WithPosition{ 15, 0, 15, 0 } );
 		REQUIRE( c->endDelim() == MD::WithPosition{ 20, 0, 20, 0 } );
-		
+
 		{
 			REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Link );
 			auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 2 ).get() );
@@ -981,14 +985,14 @@ TEST_CASE( "240" )
 			REQUIRE( l->urlPos() == l->textPos() );
 		}
 	}
-	
+
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::RawHtml );
-	
+
 	{
 		REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Paragraph );
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 3 ).get() );
 		REQUIRE( p->items().size() == 3 );
-		
+
 		{
 			REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
 			auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
@@ -996,12 +1000,12 @@ TEST_CASE( "240" )
 			REQUIRE( l->textPos() == MD::WithPosition{ 2, 2, 15, 2 } );
 			REQUIRE( l->urlPos() == l->textPos() );
 		}
-	
+
 		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Code );
 		auto c = static_cast< MD::Code< TRAIT >* > ( p->items().at( 1 ).get() );
 		REQUIRE( c->startDelim() == MD::WithPosition{ 19, 2, 19, 2 } );
 		REQUIRE( c->endDelim() == MD::WithPosition{ 24, 2, 24, 2 } );
-		
+
 		{
 			REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Link );
 			auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 2 ).get() );
@@ -1024,17 +1028,17 @@ TEST_CASE( "241" )
 
 	REQUIRE( doc->isEmpty() == false );
 	REQUIRE( doc->items().size() == 2 );
-	
+
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
-	
+
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
 	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( l->url() == u8"https://www.patreon.com/onqtam" );
 	REQUIRE( l->textPos() == MD::WithPosition{ 1, 0, 89, 0 } );
 	REQUIRE( l->urlPos() == MD::WithPosition{ 92, 0, 121, 0 } );
-	
+
 	REQUIRE( !l->p()->isEmpty() );
 	auto pp = l->p().get();
 	REQUIRE( pp->items().size() == 1 );
@@ -1053,11 +1057,11 @@ TEST_CASE( "242" )
 
 	REQUIRE( doc->isEmpty() == false );
 	REQUIRE( doc->items().size() == 2 );
-	
+
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
-	
+
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
 	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( l->url() == u8"https://github.com/igormironchik/md-pdf" );
@@ -1080,13 +1084,14 @@ TEST_CASE( "243" )
 
 	REQUIRE( doc->isEmpty() == false );
 	REQUIRE( doc->items().size() == 6 );
-	
+
 	REQUIRE( doc->items().at( 0 )->type() == MD::ItemType::Anchor );
-	
+
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Heading );
 	auto h = static_cast< MD::Heading< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( h->delim() == MD::WithPosition{ 0, 0, 0, 0 } );
-	
+	REQUIRE( h->delims().size() == 1 );
+	REQUIRE( h->delims().front() == MD::WithPosition{ 0, 0, 0, 0 } );
+
 	typename TRAIT::String wd =
 #ifdef MD4QT_QT_SUPPORT
 		QDir().absolutePath()
@@ -1103,9 +1108,9 @@ TEST_CASE( "243" )
 #endif
 
 	const typename TRAIT::String label = u8"#reference/" + wd + u8"243.md";
-		
+
 	REQUIRE( h->label() == label );
-	
+
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
 	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::PageBreak );
 	REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::Anchor );
@@ -1137,14 +1142,14 @@ TEST_CASE( "244" )
 	wd = icu::UnicodeString::fromUTF8( tmp );
 }
 #endif
-	
+
 	const typename TRAIT::String fn = wd + u8"/244.md";
 	const typename TRAIT::String ln = wd + u8"/244-1.md";
-	
+
 #ifdef MD4QT_QT_SUPPORT
 	const auto fnData = fn.toLocal8Bit();
 	const auto lnData = ln.toLocal8Bit();
-	
+
 	const char * fileName = fnData.data();
 	const char * link = lnData.data();
 #else
@@ -1153,15 +1158,15 @@ TEST_CASE( "244" )
 	std::vector< char > data1( len1 + 1, 0 );
 	fn.extract( 0, fn.length(), data1.data(), len1 );
 	const char * fileName = data1.data();
-	
+
 	const auto len2 = ln.extract( 0, ln.length(), &tmp, 1 );
 	std::vector< char > data2( len2 + 1, 0 );
 	ln.extract( 0, ln.length(), data2.data(), len2 );
 	const char * link = data2.data();
 #endif
-	
+
 	std::ofstream f( fileName, std::ios::out | std::ios::trunc );
-	
+
 	if( f.good() )
 	{
 		f << "[link](" << link << ")\n";
@@ -1169,20 +1174,20 @@ TEST_CASE( "244" )
 	}
 	else
 		REQUIRE( false );
-	
+
 	MD::Parser< TRAIT > parser;
 
 	auto doc = parser.parse( "tests/parser/data/244.md", true );
 
 	REQUIRE( doc->isEmpty() == false );
 	REQUIRE( doc->items().size() == 5 );
-	
+
 	REQUIRE( doc->items().at( 0 )->type() == MD::ItemType::Anchor );
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::PageBreak );
 	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Anchor );
 	REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::Paragraph );
-	
+
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 4 ).get() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
@@ -1208,15 +1213,15 @@ TEST_CASE( "244-ref" )
 	wd = icu::UnicodeString::fromUTF8( tmp );
 }
 #endif
-	
+
 	const typename TRAIT::String fn = wd + u8"/244-ref.md";
 	const typename TRAIT::String label = u8"#ref/" + wd + u8"/244-1.md";
 	const typename TRAIT::String ln = wd + u8"/244-1.md#ref";
-	
+
 #ifdef MD4QT_QT_SUPPORT
 	const auto fnData = fn.toLocal8Bit();
 	const auto lnData = ln.toLocal8Bit();
-	
+
 	const char * fileName = fnData.data();
 	const char * link = lnData.data();
 #else
@@ -1225,15 +1230,15 @@ TEST_CASE( "244-ref" )
 	std::vector< char > data1( len1 + 1, 0 );
 	fn.extract( 0, fn.length(), data1.data(), len1 );
 	const char * fileName = data1.data();
-	
+
 	const auto len2 = ln.extract( 0, ln.length(), &tmp, 1 );
 	std::vector< char > data2( len2 + 1, 0 );
 	ln.extract( 0, ln.length(), data2.data(), len2 );
 	const char * link = data2.data();
 #endif
-	
+
 	std::ofstream f( fileName, std::ios::out | std::ios::trunc );
-	
+
 	if( f.good() )
 	{
 		f << "[link](" << link << ")\n";
@@ -1241,17 +1246,17 @@ TEST_CASE( "244-ref" )
 	}
 	else
 		REQUIRE( false );
-	
+
 	MD::Parser< TRAIT > parser;
 
 	auto doc = parser.parse( "tests/parser/data/244-ref.md", true );
 
 	REQUIRE( doc->isEmpty() == false );
 	REQUIRE( doc->items().size() == 5 );
-	
+
 	REQUIRE( doc->items().at( 0 )->type() == MD::ItemType::Anchor );
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	
+
 	{
 		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 		REQUIRE( p->items().size() == 1 );
@@ -1259,11 +1264,11 @@ TEST_CASE( "244-ref" )
 		auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( l->url() == label );
 	}
-	
+
 	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::PageBreak );
 	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Anchor );
 	REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::Paragraph );
-	
+
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 4 ).get() );
 	REQUIRE( p->items().size() == 1 );
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
@@ -1283,11 +1288,11 @@ TEST_CASE( "245" )
 
 	REQUIRE( doc->isEmpty() == false );
 	REQUIRE( doc->items().size() == 2 );
-	
+
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
-	
+
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::StrikethroughText );
@@ -1310,11 +1315,11 @@ TEST_CASE( "246" )
 
 	REQUIRE( doc->isEmpty() == false );
 	REQUIRE( doc->items().size() == 2 );
-	
+
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
-	
+
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
@@ -1335,11 +1340,11 @@ TEST_CASE( "247" )
 
 	REQUIRE( doc->isEmpty() == false );
 	REQUIRE( doc->items().size() == 2 );
-	
+
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
-	
+
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::BoldText );
@@ -1364,11 +1369,11 @@ TEST_CASE( "248" )
 
 	REQUIRE( doc->isEmpty() == false );
 	REQUIRE( doc->items().size() == 2 );
-	
+
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( p->items().size() == 1 );
-	
+
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::RawHtml );
 	auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( h->opts() == MD::ItalicText );
