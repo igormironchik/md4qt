@@ -288,13 +288,7 @@ template< class Trait >
 inline bool
 isFootnote( const typename Trait::String & s )
 {
-	long long int p = 0;
-
-	for( ; p < s.size(); ++p )
-	{
-		if( !s[ p ].isSpace() )
-			break;
-	}
+	long long int p = skipSpaces< Trait > ( 0, s );
 
 	if( s.size() - p < 5 )
 		return false;
