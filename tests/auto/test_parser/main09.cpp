@@ -192,3 +192,29 @@ TEST_CASE( "254" )
 	REQUIRE( h->labelPos() == MD::WithPosition{ 0, 0, 4, 0 } );
 	REQUIRE( h->label().startsWith( typename TRAIT::String( "#id" ) ) );
 }
+
+/*
+www.google.com
+
+*/
+TEST_CASE( "231-1" )
+{
+	MD::Parser< TRAIT > parser;
+	parser.removeTextPlugin( MD::GitHubAutoLinkPluginID );
+
+	auto doc = parser.parse( "tests/parser/data/231.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->startColumn() == 0 );
+	REQUIRE( t->startLine() == 0 );
+	REQUIRE( t->endColumn() == 13 );
+	REQUIRE( t->endLine() == 0 );
+	REQUIRE( t->text() == u8"www.google.com" );
+}

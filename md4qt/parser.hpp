@@ -1372,6 +1372,14 @@ public:
 		m_textPlugins.insert( { id, { plugin, processInLinks, userData } } );
 	}
 
+	//! Remove text plugin.
+	void removeTextPlugin(
+		//! ID of plugin that should be removed.
+		int id )
+	{
+		m_textPlugins.erase( id );
+	}
+
 private:
 	void parseFile( const typename Trait::String & fileName, bool recursive,
 		std::shared_ptr< Document< Trait > > doc,
