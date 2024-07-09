@@ -5372,9 +5372,6 @@ Parser< Trait >::htmlTagRule( typename Delims::const_iterator it,
 
 	tag = tag.toLower();
 
-	if( tag.isEmpty() )
-		return -1;
-
 	static const typename Trait::String c_validHtmlTagLetters =
 		Trait::latin1ToString( "abcdefghijklmnopqrstuvwxyz0123456789-" );
 
@@ -5388,6 +5385,9 @@ Parser< Trait >::htmlTagRule( typename Delims::const_iterator it,
 
 	if( tag.endsWith( Trait::latin1ToString( "/" ) ) )
 		tag.remove( tag.size() - 1, 1 );
+
+	if( tag.isEmpty() )
+		return -1;
 
 	if( !tag.startsWith( Trait::latin1ToString( "!" ) ) &&
 		!tag.startsWith( Trait::latin1ToString( "?" ) ) &&
