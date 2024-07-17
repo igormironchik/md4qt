@@ -1798,6 +1798,9 @@ private:
 		const std::vector< std::pair< std::pair< long long int, bool >, int > > & s,
 		size_t idx );
 
+	std::vector< std::pair< std::pair< long long int, bool >, int > >
+	fixSequence( const std::vector< std::pair< std::pair< long long int, bool >, int > > & s );
+
 	std::vector< std::vector< std::pair< std::pair< long long int, bool >, int > > >
 	closedSequences( const std::vector< std::vector<
 			std::pair< std::pair< long long int, bool >, int > > > & vars,
@@ -7314,6 +7317,33 @@ Parser< Trait >::checkEmphasisSequence(
 }
 
 template< class Trait >
+inline std::vector< std::pair< std::pair< long long int, bool >, int > >
+Parser< Trait >::fixSequence( const std::vector< std::pair<
+	std::pair< long long int, bool >, int > > & s )
+{
+	std::vector< std::pair< std::pair< long long int, bool >, int > > tmp;
+	std::map< int, long long int > length;
+
+	for( const auto & p : s )
+	{
+		if( p.first.first < 0 && length[ p.second ] + p.first.first < 0 )
+		{
+			tmp.push_back( { { -length[ p.second ], p.first.second }, p.second } );
+
+			length[ p.second ] = 0;
+		}
+		else
+		{
+			tmp.push_back( p );
+
+			length[ p.second ] += p.first.first;
+		}
+	}
+
+	return tmp;
+}
+
+template< class Trait >
 inline std::vector< std::vector< std::pair< std::pair< long long int, bool >, int > > >
 Parser< Trait >::closedSequences( const std::vector< std::vector<
 		std::pair< std::pair< long long int, bool >, int > > > & vars,
@@ -7331,7 +7361,7 @@ Parser< Trait >::closedSequences( const std::vector< std::vector<
 			std::tie( closed, std::ignore ) = checkEmphasisSequence( v, idx );
 
 			if( closed )
-				tmp.push_back( v );
+				tmp.push_back( fixSequence( v ) );
 		}
 	}
 
