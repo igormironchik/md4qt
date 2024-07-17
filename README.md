@@ -78,7 +78,7 @@ int main()
 # Benchmark
 
 Approximate benchmark with [md4c](https://github.com/mity/md4c) and
-[cmark-gfm](https://github.com/github/cmark-gfm) says, that Qt6 version of `md4qt` is slower ~6-9 times.
+[cmark-gfm](https://github.com/github/cmark-gfm) says, that Qt6 version of `md4qt` is slower ~8-12 times.
 But you will get complete C++ tree structure of the Markdown document with all
 major extensions. Conclusion why it's slower you can read [here](tests/md_benchmark/README.md).
 
