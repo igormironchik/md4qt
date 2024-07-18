@@ -7073,26 +7073,31 @@ closeStyle( std::vector< std::pair< Style, long long int > > & styles, Style s )
 }
 
 inline void
-setStyle( int & opts, Style s, bool on )
+applyStyles( int & opts, const std::vector< std::pair< Style, long long int > > & styles )
 {
-	switch( s )
+	opts = 0;
+
+	for( const auto & s : styles )
 	{
-		case Style::Strikethrough :
-			( on ? opts |= StrikethroughText : opts &= ~StrikethroughText );
-			break;
+		switch( s.first )
+		{
+			case Style::Strikethrough :
+				opts |= StrikethroughText;
+				break;
 
-		case Style::Italic1 :
-		case Style::Italic2 :
-			( on ? opts |= ItalicText : opts &= ~ItalicText );
-			break;
+			case Style::Italic1 :
+			case Style::Italic2 :
+				opts |= ItalicText;
+				break;
 
-		case Style::Bold1 :
-		case Style::Bold2 :
-			( on ? opts |= BoldText : opts &= ~BoldText );
-			break;
+			case Style::Bold1 :
+			case Style::Bold2 :
+				opts |= BoldText;
+				break;
 
-		default :
-			break;
+			default :
+				break;
+		}
 	}
 }
 
@@ -7685,13 +7690,6 @@ Parser< Trait >::checkForStyle( typename Delims::const_iterator first,
 					appendCloseStyle( po, { StrikethroughText, pos, line, pos + len - 1, line } );
 					pos += len;
 				}
-
-				if( std::find_if( po.styles.cbegin(), po.styles.cend(),
-					[] ( const auto & p ) { return ( p.first == Style::Strikethrough ); } ) ==
-						po.styles.cend() )
-				{
-					setStyle( po.opts, Style::Strikethrough, false );
-				}
 			}
 			else
 			{
@@ -7703,10 +7701,6 @@ Parser< Trait >::checkForStyle( typename Delims::const_iterator first,
 					closeStyle( po.styles, st );
 					appendCloseStyle( po, { ItalicText, pos, line, pos, line } );
 					++pos;
-
-					if( std::find_if( po.styles.cbegin(), po.styles.cend(),
-						[&] ( const auto & p ) { return ( p.first == st ); } ) == po.styles.cend() )
-							setStyle( po.opts, st, false );
 				}
 
 				if( count >= 2 )
@@ -7720,12 +7714,10 @@ Parser< Trait >::checkForStyle( typename Delims::const_iterator first,
 						appendCloseStyle( po, { BoldText, pos, line, pos + 1, line } );
 						pos += 2;
 					}
-
-					if( std::find_if( po.styles.cbegin(), po.styles.cend(),
-						[&] ( const auto & p ) { return ( p.first == st ); } ) == po.styles.cend() )
-							setStyle( po.opts, st, false );
 				}
 			}
+
+			applyStyles( po.opts, po.styles );
 
 			const auto j = incrementIterator( it, last, count - 1 );
 
@@ -7764,8 +7756,6 @@ Parser< Trait >::checkForStyle( typename Delims::const_iterator first,
 
 					for( const auto & p : styles )
 					{
-						setStyle( po.opts, p.first, true );
-
 						po.styles.push_back( { p.first, p.second } );
 
 						if( !po.collectRefLinks )
@@ -7781,6 +7771,8 @@ Parser< Trait >::checkForStyle( typename Delims::const_iterator first,
 					po.isSpaceBefore = ( it->m_pos > 0 ?
 						po.fr.data[ it->m_line ].first[ it->m_pos - 1 ].isSpace() : true ) ||
 						po.isSpaceBefore;
+
+					applyStyles( po.opts, po.styles );
 				}
 				else if( !po.collectRefLinks )
 					makeText( it->m_line, it->m_pos + len, po );

@@ -294,3 +294,34 @@ TEST_CASE( "256" )
 		REQUIRE( t->endLine() == 0 );
 	}
 }
+
+/*
+**_some_* text*
+
+*/
+TEST_CASE( "257" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/257.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 1 );
+
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( t->text() == u8"some text" );
+	REQUIRE( t->opts() == MD::ItalicText );
+	REQUIRE( t->openStyles().size() == 3 );
+	REQUIRE( t->openStyles().at( 0 ) == MD::WithPosition{ 0, 0, 0, 0 } );
+	REQUIRE( t->openStyles().at( 1 ) == MD::WithPosition{ 1, 0, 1, 0 } );
+	REQUIRE( t->openStyles().at( 2 ) == MD::WithPosition{ 2, 0, 2, 0 } );
+	REQUIRE( t->closeStyles().size() == 3 );
+	REQUIRE( t->closeStyles().at( 0 ) == MD::WithPosition{ 7, 0, 7, 0 } );
+	REQUIRE( t->closeStyles().at( 1 ) == MD::WithPosition{ 8, 0, 8, 0 } );
+	REQUIRE( t->closeStyles().at( 2 ) == MD::WithPosition{ 14, 0, 14, 0 } );
+}
