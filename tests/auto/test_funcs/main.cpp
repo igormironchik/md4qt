@@ -20,10 +20,10 @@ namespace MD {
 
 struct PrivateAccess {
 	static std::pair< bool, size_t > checkEmphasisSequence( const data_t & s, size_t idx )
-	{	
+	{
 		return p.checkEmphasisSequence( s, idx );
 	}
-	
+
 	static Parser< TRAIT > p;
 };
 
@@ -300,7 +300,7 @@ TEST_CASE( "emphasis_sequence" )
 		REQUIRE( closed );
 		REQUIRE( idx == 2 );
 	}
-	
+
 	{
 		const data_t d = { { { 2, false }, 0 }, { { -2, false }, 0 } };
 
@@ -310,12 +310,12 @@ TEST_CASE( "emphasis_sequence" )
 
 		REQUIRE( closed );
 		REQUIRE( idx == 1 );
-		
+
 		std::tie( closed, idx ) = MD::PrivateAccess::checkEmphasisSequence( d, 1 );
 
 		REQUIRE( !closed );
 	}
-	
+
 	{
 		const data_t d = { { { 2, false }, 0 }, { { -2, false }, 1 } };
 
@@ -565,12 +565,12 @@ TEST_CASE( "optimize_paragraph" )
 		t->setSpaceBefore( false );
 		t->setSpaceAfter( false );
 		t->setOpts( opts );
-		
+
 		po.rawTextData.push_back( { "Text", 0, line, false, false } );
-		
+
 		p->appendItem( t );
 	};
-	
+
 	auto makeCode = [] ( MD::TextParsingOpts< TRAIT > & po, std::shared_ptr< MD::Paragraph< TRAIT > > p,
 		long long int line )
 	{
@@ -579,10 +579,10 @@ TEST_CASE( "optimize_paragraph" )
 		c->setStartLine( line );
 		c->setEndColumn( 0 );
 		c->setEndLine( line );
-		
+
 		p->appendItem( c );
 	};
-	
+
 	auto makeHtml = [] ( MD::TextParsingOpts< TRAIT > & po, std::shared_ptr< MD::Paragraph< TRAIT > > p,
 		long long int line, bool isFree )
 	{
@@ -592,16 +592,16 @@ TEST_CASE( "optimize_paragraph" )
 		h->setEndColumn( 0 );
 		h->setEndLine( line );
 		MD::UnprotectedDocsMethods< TRAIT >::setFreeTag( h, isFree );
-		
+
 		p->appendItem( h );
 	};
-	
+
 	auto checkP = [] ( const std::string & d, std::shared_ptr< MD::Paragraph< TRAIT > > p )
 	{
 		REQUIRE( d.length() == p->items().size() );
-		
+
 		long long int i = 0;
-		
+
 		for( const auto & c : d )
 		{
 			switch( c )
@@ -609,15 +609,15 @@ TEST_CASE( "optimize_paragraph" )
 				case 'c' :
 					REQUIRE( p->items().at( i )->type() == MD::ItemType::Code );
 					break;
-					
+
 				case 't' :
 					REQUIRE( p->items().at( i )->type() == MD::ItemType::Text );
 					break;
-					
+
 				case 'h' :
 					REQUIRE( p->items().at( i )->type() == MD::ItemType::RawHtml );
 					break;
-					
+
 				default :
 				{
 					INFO( "Unknown type. This is an error in test..." );
@@ -625,202 +625,174 @@ TEST_CASE( "optimize_paragraph" )
 				}
 					break;
 			}
-			
+
 			++i;
 		}
 	};
-	
-	auto checkT = [] ( const std::vector< int > & d, const MD::TextParsingOpts< TRAIT > & po )
-	{
-		REQUIRE( d.size() == po.rawTextData.size() );
-		
-		long long int i = 0;
-		
-		for( const auto & l : d )
-		{
-			REQUIRE( po.rawTextData.at( i ).str.length() == 4 * l );
-			
-			++i;
-		}
-	};
-	
+
 	{
 		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
-		
+
 		makeText( po, p, 0, MD::TextWithoutFormat );
-		
-		MD::optimizeParagraph( p, po );
-		
+
+		MD::optimizeParagraph( p );
+
 		checkP( "t", p  );
-		checkT( { 1 }, po );
 	}
-	
+
 	{
 		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
-		
+
 		makeCode( po, p, 0 );
-		
-		MD::optimizeParagraph( p, po );
-		
+
+		MD::optimizeParagraph( p );
+
 		checkP( "c", p );
-		checkT( {}, po );
 	}
-	
+
 	{
 		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
-		
+
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeCode( po, p, 0 );
 		makeText( po, p, 0, MD::TextWithoutFormat );
-		
-		MD::optimizeParagraph( p, po );
-		
+
+		MD::optimizeParagraph( p );
+
 		checkP( "tct", p );
-		checkT( { 1, 1 }, po );
 	}
-	
+
 	{
 		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
-		
+
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeCode( po, p, 0 );
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeText( po, p, 1, MD::TextWithoutFormat );
-		
-		MD::optimizeParagraph( p, po );
-		
+
+		MD::optimizeParagraph( p );
+
 		checkP( "tctt", p );
-		checkT( { 2, 2, 1 }, po );
 	}
-	
+
 	{
 		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
-		
+
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeText( po, p, 0, MD::ItalicText );
 		makeCode( po, p, 0 );
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeText( po, p, 0, MD::ItalicText );
 		makeText( po, p, 1, MD::TextWithoutFormat );
-		
-		MD::optimizeParagraph( p, po );
-		
+
+		MD::optimizeParagraph( p );
+
 		checkP( "ttcttt", p );
-		checkT( { 1, 1, 1, 1, 1 }, po );
 	}
-	
+
 	{
 		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
-		
+
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeText( po, p, 1, MD::TextWithoutFormat );
 		makeCode( po, p, 2 );
 		makeText( po, p, 3, MD::TextWithoutFormat );
 		makeText( po, p, 4, MD::TextWithoutFormat );
 		makeText( po, p, 5, MD::TextWithoutFormat );
-		
-		MD::optimizeParagraph( p, po );
-		
+
+		MD::optimizeParagraph( p );
+
 		checkP( "ttcttt", p );
-		checkT( { 1, 1, 1, 1, 1 }, po );
 	}
-	
+
 	{
 		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
-		
+
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeText( po, p, 1, MD::TextWithoutFormat );
 		makeHtml( po, p, 2, true );
 		makeText( po, p, 3, MD::TextWithoutFormat );
 		makeText( po, p, 4, MD::TextWithoutFormat );
 		makeText( po, p, 5, MD::TextWithoutFormat );
-		
-		MD::optimizeParagraph( p, po );
-		
+
+		MD::optimizeParagraph( p );
+
 		checkP( "tthttt", p );
-		checkT( { 1, 1, 1, 1, 1 }, po );
-		
+
 		p = MD::splitParagraphsAndFreeHtml( parent, p, po, false );
-		
+
 		REQUIRE( parent->items().size() == 2 );
 		REQUIRE( parent->items().at( 0 )->type() == MD::ItemType::Paragraph );
 		REQUIRE( parent->items().at( 1 )->type() == MD::ItemType::RawHtml );
-		
+
 		checkP( "ttt", p );
-		checkT( { 1, 1, 1 }, po );
 	}
-	
+
 	{
 		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
-		
+
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeText( po, p, 1, MD::TextWithoutFormat );
 		makeHtml( po, p, 2, false );
 		makeText( po, p, 3, MD::TextWithoutFormat );
 		makeText( po, p, 4, MD::TextWithoutFormat );
 		makeText( po, p, 5, MD::TextWithoutFormat );
-		
-		MD::optimizeParagraph( p, po );
-		
+
+		MD::optimizeParagraph( p );
+
 		checkP( "tthttt", p );
-		checkT( { 1, 1, 1, 1, 1 }, po );
-		
+
 		p = MD::splitParagraphsAndFreeHtml( parent, p, po, false );
-		
+
 		REQUIRE( parent->items().size() == 0 );
-		
+
 		checkP( "tthttt", p );
-		checkT( { 1, 1, 1, 1, 1 }, po );
 	}
-	
+
 	{
 		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
-		
+
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeHtml( po, p, 0, true );
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeText( po, p, 1, MD::TextWithoutFormat );
-		
-		MD::optimizeParagraph( p, po );
-		
+
+		MD::optimizeParagraph( p );
+
 		checkP( "thtt", p );
-		checkT( { 2, 2, 1 }, po );
-		
+
 		p = MD::splitParagraphsAndFreeHtml( parent, p, po, false );
-		
+
 		REQUIRE( parent->items().size() == 2 );
 		REQUIRE( parent->items().at( 0 )->type() == MD::ItemType::Paragraph );
 		REQUIRE( parent->items().at( 1 )->type() == MD::ItemType::RawHtml );
-		
+
 		checkP( "tt", p );
-		checkT( { 2, 1 }, po );
 	}
-	
+
 	{
 		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
-		
+
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeHtml( po, p, 0, false );
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeText( po, p, 1, MD::TextWithoutFormat );
-		
-		MD::optimizeParagraph( p, po );
-		
+
+		MD::optimizeParagraph( p );
+
 		checkP( "thtt", p );
-		checkT( { 2, 2, 1 }, po );
-		
+
 		p = MD::splitParagraphsAndFreeHtml( parent, p, po, false );
-		
+
 		REQUIRE( parent->items().size() == 0 );
-		
+
 		checkP( "thtt", p );
-		checkT( { 2, 2, 1 }, po );
 	}
 }
 
@@ -832,7 +804,7 @@ TEST_CASE( "virgin_substr" )
 	data.data.push_back( { typename TRAIT::String( "text" ), { 3 } } );
 	data.data.push_back( { typename TRAIT::String( "~~text~~" ), { 4 } } );
 	data.data.push_back( { typename TRAIT::String( "~text*" ), { 5 } } );
-	
+
 	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 0, 1, 0 } ).isEmpty() );
 	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 1, 1, 1 } ) == u8"**" );
 	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 1, 10, 1 } ) == u8"**text**" );
@@ -840,9 +812,9 @@ TEST_CASE( "virgin_substr" )
 	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 6, 1, 1, 2 } ) == u8"**\n__" );
 	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 3, 0, 10 } ) == u8"text\n~~text~~\n~text*" );
 	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 0, 100, 100 } ) == u8"**text**\n__text__\ntext\n~~text~~\n~text*" );
-	
+
 	data.data[ 1 ].first.remove( 0, 2 );
-	
+
 	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 1, 1, 1 } ) == u8"**" );
 	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 1, 10, 1 } ) == u8"**text**" );
 	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 2, 1, 2 } ).isEmpty() );
@@ -853,10 +825,10 @@ TEST_CASE( "virgin_substr" )
 	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 0, 10, 2 } ) == u8"**text**\ntext__" );
 	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 10, 0, 20 } ).isEmpty() );
 	REQUIRE( MD::virginSubstr< TRAIT > ( data, { 0, 3, 7, 4 } ) == u8"text\n~~text~~" );
-	
+
 	{
 		MD::MdBlock< TRAIT > dd;
-		
+
 		REQUIRE( MD::virginSubstr< TRAIT > ( dd, { 0, 3, 7, 4 } ).isEmpty() );
 	}
 }
@@ -867,32 +839,32 @@ TEST_CASE( "local_pos_from_virgin" )
 	data.data.push_back( { typename TRAIT::String( "**text**" ), { 1 } } );
 	data.data.push_back( { typename TRAIT::String( "**text**" ), { 2 } } );
 	data.data.push_back( { typename TRAIT::String( "**text**" ), { 3 } } );
-	
+
 	using pair = std::pair< long long int, long long int >;
-	
+
 	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 0, 0 ) == pair{ -1, -1 } );
 	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 8, 1 ) == pair{ -1, -1 } );
 	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 0, 2 ) == pair{ 0, 1 } );
 	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 1, 1 ) == pair{ 1, 0 } );
 	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 0, 4 ) == pair{ -1, -1 } );
-	
+
 	data.data[ 0 ].first.remove( 0, 2 );
-	
+
 	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 0, 1 ) == pair{ -1, -1 } );
 	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 2, 1 ) == pair{ 0, 0 } );
 	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 4, 1 ) == pair{ 2, 0 } );
-	
+
 	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 1, 2 ) == pair{ 1, 1 } );
 	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 2, 3 ) == pair{ 2, 2 } );
 	REQUIRE( MD::localPosFromVirgin< TRAIT > ( data, 100, 3 ) == pair{ -1, -1 } );
-	
+
 	{
 		MD::MdBlock< TRAIT > dd;
-		
+
 		REQUIRE( MD::localPosFromVirgin< TRAIT > ( dd, 0, 0 ) == pair{ -1, -1 } );
-		
+
 		dd.data.push_back( { typename TRAIT::String( "" ), { 1 } } );
-		
+
 		REQUIRE( MD::localPosFromVirgin< TRAIT > ( dd, 0, 1 ) == pair{ -1, -1 } );
 	}
 }
