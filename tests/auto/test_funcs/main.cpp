@@ -861,6 +861,20 @@ TEST_CASE( "semi_optimization" )
 		checkP( "ttct", p );
 		checkT( { 1, 1, 2 }, po );
 	}
+
+	{
+		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
+
+		makeText( po, p, 0, MD::ItalicText, true );
+		makeText( po, p, 0, MD::ItalicText, true, true );
+		makeText( po, p, 1, MD::ItalicText, true );
+		makeText( po, p, 2, MD::ItalicText, false, true );
+
+		MD::optimizeParagraph( p, po, MD::OptimizeParagraphType::Semi );
+
+		checkP( "tttt", p );
+		checkT( { 1, 1, 1, 1 }, po );
+	}
 }
 
 TEST_CASE( "virgin_substr" )

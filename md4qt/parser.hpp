@@ -7887,7 +7887,8 @@ optimizeParagraph( std::shared_ptr< Paragraph< Trait > > & p,
 			}
 			else
 			{
-				if( opts != t->opts() || t->startLine() != line || finished )
+				if( opts != t->opts() || t->startLine() != line || finished ||
+					( !t->openStyles().empty() && type == OptimizeParagraphType::Semi ) )
 				{
 					if( type != OptimizeParagraphType::FullWithoutRawData )
 					{
