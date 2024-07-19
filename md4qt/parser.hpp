@@ -866,6 +866,20 @@ struct TextParsingOpts {
 
 	std::vector< TextData > rawTextData = {};
 
+	inline void concatenateAuxText( long long int start, long long int end )
+	{
+		if( start < end && ( end - start > 1 ) )
+		{
+			TextData d = rawTextData[ start ];
+
+			for( auto i = start + 1; i < end; ++i )
+				d.str += rawTextData[ i ].str;
+
+			rawTextData.erase( rawTextData.cbegin() + start, rawTextData.cbegin() + end );
+			rawTextData.insert( rawTextData.cbegin() + start, d );
+		}
+	}
+
 	enum class Detected {
 		Nothing = 0,
 		Table = 1,
@@ -1192,21 +1206,9 @@ processGitHubAutolinkExtension( std::shared_ptr< Paragraph< Trait > > p,
 									p->items().at( ti ) )->openStyles();
 								closeStyles = std::static_pointer_cast< ItemWithOpts< Trait > >	(
 									p->items().at( ti ) )->closeStyles();
+								p->removeItemAt( ti );
 								po.rawTextData.erase( po.rawTextData.cbegin() + idx );
 								--ret;
-
-								if( ti > 0 && j > 0 )
-								{
-									auto item = p->items().at( ti - 1 );
-
-									if( item->type() == ItemType::Text &&
-										item->endLine() == p->items().at( ti )->startLine() )
-									{
-										item->setEndColumn( item->endColumn() + j );
-									}
-								}
-
-								p->removeItemAt( ti );
 							}
 							else
 							{
@@ -7841,9 +7843,22 @@ concatenateText( typename Block< Trait >::Items::const_iterator it,
 	return t;
 }
 
+//! Type of the paragraph's optimization.
+enum class OptimizeParagraphType {
+	//! Full optimization.
+	Full,
+	//! Semi optimization, optimization won't concatenate text
+	//! items if style delimiters will be in the middle.
+	Semi,
+	//! Full optimization, but raw text data won't be concatenated (will be untouched).
+	FullWithoutRawData
+};
+
 template< class Trait >
 inline std::shared_ptr< Paragraph< Trait > >
-optimizeParagraph( std::shared_ptr< Paragraph< Trait > > & p )
+optimizeParagraph( std::shared_ptr< Paragraph< Trait > > & p,
+	TextParsingOpts< Trait > & po,
+	OptimizeParagraphType type = OptimizeParagraphType::Full )
 {
 	std::shared_ptr< Paragraph< Trait > > np( new Paragraph< Trait > );
 	np->setStartColumn( p->startColumn() );
@@ -7854,6 +7869,8 @@ optimizeParagraph( std::shared_ptr< Paragraph< Trait > > & p )
 	int opts = TextWithoutFormat;
 	auto start = p->items().cend();
 	long long int line = -1;
+	long long int auxStart = 0, auxIt = 0;
+	bool finished = false;
 
 	for( auto it = p->items().cbegin(), last = p->items().cend(); it != last; ++it )
 	{
@@ -7866,19 +7883,44 @@ optimizeParagraph( std::shared_ptr< Paragraph< Trait > > & p )
 				start = it;
 				opts = t->opts();
 				line = t->endLine();
+				finished = ( type == OptimizeParagraphType::Semi && !t->closeStyles().empty() );
 			}
-			else if( opts != t->opts() || t->startLine() != line )
+			else
 			{
-				np->appendItem( concatenateText< Trait >( start, it ) );
-				start = it;
-				opts = t->opts();
-				line = t->endLine();
+				if( opts != t->opts() || t->startLine() != line || finished )
+				{
+					if( type != OptimizeParagraphType::FullWithoutRawData )
+					{
+						po.concatenateAuxText( auxStart, auxIt );
+						auxIt = auxIt - ( auxIt - auxStart ) + 1;
+						auxStart = auxIt;
+					}
+
+					np->appendItem( concatenateText< Trait >( start, it ) );
+					start = it;
+					opts = t->opts();
+					line = t->endLine();
+				}
+
+				finished = ( type == OptimizeParagraphType::Semi && !t->closeStyles().empty() );
 			}
+
+			if( type != OptimizeParagraphType::FullWithoutRawData )
+				++auxIt;
 		}
 		else
 		{
+			finished = false;
+
 			if( start != last )
 			{
+				if( type != OptimizeParagraphType::FullWithoutRawData )
+				{
+					po.concatenateAuxText( auxStart, auxIt );
+					auxIt = auxIt - ( auxIt - auxStart ) + 1;
+					auxStart = auxIt;
+				}
+
 				np->appendItem( concatenateText< Trait >( start, it ) );
 				start = last;
 				opts = TextWithoutFormat;
@@ -7890,7 +7932,12 @@ optimizeParagraph( std::shared_ptr< Paragraph< Trait > > & p )
 	}
 
 	if( start != p->items().cend() )
+	{
 		np->appendItem( concatenateText< Trait >( start, p->items().cend() ) );
+
+		if( type != OptimizeParagraphType::FullWithoutRawData )
+			po.concatenateAuxText( auxStart, po.rawTextData.size() );
+	}
 
 	p = np;
 
@@ -8078,7 +8125,8 @@ splitParagraphsAndFreeHtml( std::shared_ptr< Block< Trait > > parent,
 			{
 				if( !p->isEmpty() )
 					concatenateParagraphsIfNeededOrAppend( parent,
-						optimizeParagraph< Trait >( p ) );
+						optimizeParagraph< Trait >( p, po,
+							OptimizeParagraphType::FullWithoutRawData ) );
 
 				parent->appendItem( *it );
 			}
@@ -8417,6 +8465,9 @@ Parser< Trait >::parseFormattedTextLinksImages( MdBlock< Trait > & fr,
 
 						if( !p->isEmpty() )
 						{
+							optimizeParagraph< Trait >( p, po,
+								OptimizeParagraphType::Semi );
+
 							checkForTextPlugins< Trait >( p, po, m_textPlugins, inLink );
 
 							if( it->m_line - 1 >= 0 )
@@ -8441,7 +8492,7 @@ Parser< Trait >::parseFormattedTextLinksImages( MdBlock< Trait > & fr,
 									}
 									else
 									{
-										makeHeading( parent, doc, optimizeParagraph< Trait >( p ),
+										makeHeading( parent, doc, optimizeParagraph< Trait >( p, po ),
 											fr.data[ it->m_line ].first.virginPos(
 												it->m_pos + it->m_len - 1 ),
 											fr.data[ it->m_line ].second.lineNumber,
@@ -8500,6 +8551,9 @@ Parser< Trait >::parseFormattedTextLinksImages( MdBlock< Trait > & fr,
 						po.wasRefLink = false;
 						po.firstInParagraph = false;
 
+						optimizeParagraph< Trait >( p, po,
+							OptimizeParagraphType::Semi );
+
 						checkForTextPlugins< Trait >( p, po, m_textPlugins, inLink );
 
 						if( it->m_line - 1 >= 0 )
@@ -8514,7 +8568,7 @@ Parser< Trait >::parseFormattedTextLinksImages( MdBlock< Trait > & fr,
 						if( !p->isEmpty() && !( ( p->items().size() == 1 &&
 							p->items().front()->type() == ItemType::LineBreak ) ) )
 						{
-							makeHeading( parent, doc, optimizeParagraph< Trait >( p ),
+							makeHeading( parent, doc, optimizeParagraph< Trait >( p, po ),
 								fr.data[ it->m_line ].first.virginPos(
 									it->m_pos + it->m_len - 1 ),
 								fr.data[ it->m_line ].second.lineNumber,
@@ -8634,6 +8688,9 @@ Parser< Trait >::parseFormattedTextLinksImages( MdBlock< Trait > & fr,
 
 	if( !p->isEmpty() )
 	{
+		optimizeParagraph< Trait >( p, po,
+			OptimizeParagraphType::Semi );
+
 		checkForTextPlugins< Trait >( p, po, m_textPlugins, inLink );
 
 		p = splitParagraphsAndFreeHtml( parent, p, po, collectRefLinks );
@@ -8643,7 +8700,7 @@ Parser< Trait >::parseFormattedTextLinksImages( MdBlock< Trait > & fr,
 
 		if( !p->isEmpty() && !collectRefLinks )
 			concatenateParagraphsIfNeededOrAppend( parent,
-				optimizeParagraph< Trait >( p ) );
+				optimizeParagraph< Trait >( p, po ) );
 
 		po.rawTextData.clear();
 	}

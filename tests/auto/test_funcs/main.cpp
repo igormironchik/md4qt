@@ -551,93 +551,114 @@ TEST_CASE( "is_email" )
 	 \
 	auto p = std::make_shared< MD::Paragraph< TRAIT > > ();
 
+void makeText( MD::TextParsingOpts< TRAIT > & po, std::shared_ptr< MD::Paragraph< TRAIT > > p,
+	long long int line, int opts, bool startStyle = false, bool endStyle = false )
+{
+	auto t = std::make_shared< MD::Text< TRAIT > > ();
+	t->setText( "Text" );
+	t->setStartColumn( 0 );
+	t->setStartLine( line );
+	t->setEndColumn( 0 );
+	t->setEndLine( line );
+	t->setSpaceBefore( false );
+	t->setSpaceAfter( false );
+	t->setOpts( opts );
+
+	if( startStyle )
+		t->openStyles().push_back( { opts, 0, 0, 0, 0 } );
+
+	if( endStyle )
+		t->closeStyles().push_back( { opts, 0, 0, 0, 0 } );
+
+	po.rawTextData.push_back( { "Text", 0, line, false, false } );
+
+	p->appendItem( t );
+}
+
+void makeCode( MD::TextParsingOpts< TRAIT > & po, std::shared_ptr< MD::Paragraph< TRAIT > > p,
+	long long int line )
+{
+	auto c = std::make_shared< MD::Code< TRAIT > > ( "code", false, true );
+	c->setStartColumn( 0 );
+	c->setStartLine( line );
+	c->setEndColumn( 0 );
+	c->setEndLine( line );
+
+	p->appendItem( c );
+}
+
+void makeHtml( MD::TextParsingOpts< TRAIT > & po, std::shared_ptr< MD::Paragraph< TRAIT > > p,
+	long long int line, bool isFree )
+{
+	auto h = std::make_shared< MD::RawHtml< TRAIT > > ();
+	h->setStartColumn( 0 );
+	h->setStartLine( line );
+	h->setEndColumn( 0 );
+	h->setEndLine( line );
+	MD::UnprotectedDocsMethods< TRAIT >::setFreeTag( h, isFree );
+
+	p->appendItem( h );
+}
+
+void checkP( const std::string & d, std::shared_ptr< MD::Paragraph< TRAIT > > p )
+{
+	REQUIRE( d.length() == p->items().size() );
+
+	long long int i = 0;
+
+	for( const auto & c : d )
+	{
+		switch( c )
+		{
+			case 'c' :
+				REQUIRE( p->items().at( i )->type() == MD::ItemType::Code );
+				break;
+
+			case 't' :
+				REQUIRE( p->items().at( i )->type() == MD::ItemType::Text );
+				break;
+
+			case 'h' :
+				REQUIRE( p->items().at( i )->type() == MD::ItemType::RawHtml );
+				break;
+
+			default :
+			{
+				INFO( "Unknown type. This is an error in test..." );
+				REQUIRE( false );
+			}
+				break;
+		}
+
+		++i;
+	}
+}
+
+void checkT( const std::vector< int > & d, const MD::TextParsingOpts< TRAIT > & po )
+{
+	REQUIRE( d.size() == po.rawTextData.size() );
+
+	long long int i = 0;
+
+	for( const auto & l : d )
+	{
+		REQUIRE( po.rawTextData.at( i ).str.length() == 4 * l );
+
+		++i;
+	}
+}
+
 TEST_CASE( "optimize_paragraph" )
 {
-	auto makeText = [] ( MD::TextParsingOpts< TRAIT > & po, std::shared_ptr< MD::Paragraph< TRAIT > > p,
-		long long int line, int opts )
-	{
-		auto t = std::make_shared< MD::Text< TRAIT > > ();
-		t->setText( "Text" );
-		t->setStartColumn( 0 );
-		t->setStartLine( line );
-		t->setEndColumn( 0 );
-		t->setEndLine( line );
-		t->setSpaceBefore( false );
-		t->setSpaceAfter( false );
-		t->setOpts( opts );
-
-		po.rawTextData.push_back( { "Text", 0, line, false, false } );
-
-		p->appendItem( t );
-	};
-
-	auto makeCode = [] ( MD::TextParsingOpts< TRAIT > & po, std::shared_ptr< MD::Paragraph< TRAIT > > p,
-		long long int line )
-	{
-		auto c = std::make_shared< MD::Code< TRAIT > > ( "code", false, true );
-		c->setStartColumn( 0 );
-		c->setStartLine( line );
-		c->setEndColumn( 0 );
-		c->setEndLine( line );
-
-		p->appendItem( c );
-	};
-
-	auto makeHtml = [] ( MD::TextParsingOpts< TRAIT > & po, std::shared_ptr< MD::Paragraph< TRAIT > > p,
-		long long int line, bool isFree )
-	{
-		auto h = std::make_shared< MD::RawHtml< TRAIT > > ();
-		h->setStartColumn( 0 );
-		h->setStartLine( line );
-		h->setEndColumn( 0 );
-		h->setEndLine( line );
-		MD::UnprotectedDocsMethods< TRAIT >::setFreeTag( h, isFree );
-
-		p->appendItem( h );
-	};
-
-	auto checkP = [] ( const std::string & d, std::shared_ptr< MD::Paragraph< TRAIT > > p )
-	{
-		REQUIRE( d.length() == p->items().size() );
-
-		long long int i = 0;
-
-		for( const auto & c : d )
-		{
-			switch( c )
-			{
-				case 'c' :
-					REQUIRE( p->items().at( i )->type() == MD::ItemType::Code );
-					break;
-
-				case 't' :
-					REQUIRE( p->items().at( i )->type() == MD::ItemType::Text );
-					break;
-
-				case 'h' :
-					REQUIRE( p->items().at( i )->type() == MD::ItemType::RawHtml );
-					break;
-
-				default :
-				{
-					INFO( "Unknown type. This is an error in test..." );
-					REQUIRE( false );
-				}
-					break;
-			}
-
-			++i;
-		}
-	};
-
 	{
 		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
 
 		makeText( po, p, 0, MD::TextWithoutFormat );
 
-		MD::optimizeParagraph( p );
+		MD::optimizeParagraph( p, po );
 
 		checkP( "t", p  );
+		checkT( { 1 }, po );
 	}
 
 	{
@@ -645,9 +666,10 @@ TEST_CASE( "optimize_paragraph" )
 
 		makeCode( po, p, 0 );
 
-		MD::optimizeParagraph( p );
+		MD::optimizeParagraph( p, po );
 
 		checkP( "c", p );
+		checkT( {}, po );
 	}
 
 	{
@@ -657,9 +679,10 @@ TEST_CASE( "optimize_paragraph" )
 		makeCode( po, p, 0 );
 		makeText( po, p, 0, MD::TextWithoutFormat );
 
-		MD::optimizeParagraph( p );
+		MD::optimizeParagraph( p, po );
 
 		checkP( "tct", p );
+		checkT( { 1, 1 }, po );
 	}
 
 	{
@@ -672,9 +695,10 @@ TEST_CASE( "optimize_paragraph" )
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeText( po, p, 1, MD::TextWithoutFormat );
 
-		MD::optimizeParagraph( p );
+		MD::optimizeParagraph( p, po );
 
 		checkP( "tctt", p );
+		checkT( { 2, 2, 1 }, po );
 	}
 
 	{
@@ -687,9 +711,10 @@ TEST_CASE( "optimize_paragraph" )
 		makeText( po, p, 0, MD::ItalicText );
 		makeText( po, p, 1, MD::TextWithoutFormat );
 
-		MD::optimizeParagraph( p );
+		MD::optimizeParagraph( p, po );
 
 		checkP( "ttcttt", p );
+		checkT( { 1, 1, 1, 1, 1 }, po );
 	}
 
 	{
@@ -702,9 +727,10 @@ TEST_CASE( "optimize_paragraph" )
 		makeText( po, p, 4, MD::TextWithoutFormat );
 		makeText( po, p, 5, MD::TextWithoutFormat );
 
-		MD::optimizeParagraph( p );
+		MD::optimizeParagraph( p, po );
 
 		checkP( "ttcttt", p );
+		checkT( { 1, 1, 1, 1, 1 }, po );
 	}
 
 	{
@@ -717,9 +743,10 @@ TEST_CASE( "optimize_paragraph" )
 		makeText( po, p, 4, MD::TextWithoutFormat );
 		makeText( po, p, 5, MD::TextWithoutFormat );
 
-		MD::optimizeParagraph( p );
+		MD::optimizeParagraph( p, po );
 
 		checkP( "tthttt", p );
+		checkT( { 1, 1, 1, 1, 1 }, po );
 
 		p = MD::splitParagraphsAndFreeHtml( parent, p, po, false );
 
@@ -728,6 +755,7 @@ TEST_CASE( "optimize_paragraph" )
 		REQUIRE( parent->items().at( 1 )->type() == MD::ItemType::RawHtml );
 
 		checkP( "ttt", p );
+		checkT( { 1, 1, 1 }, po );
 	}
 
 	{
@@ -740,15 +768,17 @@ TEST_CASE( "optimize_paragraph" )
 		makeText( po, p, 4, MD::TextWithoutFormat );
 		makeText( po, p, 5, MD::TextWithoutFormat );
 
-		MD::optimizeParagraph( p );
+		MD::optimizeParagraph( p, po );
 
 		checkP( "tthttt", p );
+		checkT( { 1, 1, 1, 1, 1 }, po );
 
 		p = MD::splitParagraphsAndFreeHtml( parent, p, po, false );
 
 		REQUIRE( parent->items().size() == 0 );
 
 		checkP( "tthttt", p );
+		checkT( { 1, 1, 1, 1, 1 }, po );
 	}
 
 	{
@@ -761,9 +791,10 @@ TEST_CASE( "optimize_paragraph" )
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeText( po, p, 1, MD::TextWithoutFormat );
 
-		MD::optimizeParagraph( p );
+		MD::optimizeParagraph( p, po );
 
 		checkP( "thtt", p );
+		checkT( { 2, 2, 1 }, po );
 
 		p = MD::splitParagraphsAndFreeHtml( parent, p, po, false );
 
@@ -772,6 +803,7 @@ TEST_CASE( "optimize_paragraph" )
 		REQUIRE( parent->items().at( 1 )->type() == MD::ItemType::RawHtml );
 
 		checkP( "tt", p );
+		checkT( { 2, 1 }, po );
 	}
 
 	{
@@ -784,15 +816,50 @@ TEST_CASE( "optimize_paragraph" )
 		makeText( po, p, 0, MD::TextWithoutFormat );
 		makeText( po, p, 1, MD::TextWithoutFormat );
 
-		MD::optimizeParagraph( p );
+		MD::optimizeParagraph( p, po );
 
 		checkP( "thtt", p );
+		checkT( { 2, 2, 1 }, po );
 
 		p = MD::splitParagraphsAndFreeHtml( parent, p, po, false );
 
 		REQUIRE( parent->items().size() == 0 );
 
 		checkP( "thtt", p );
+		checkT( { 2, 2, 1 }, po );
+	}
+}
+
+TEST_CASE( "semi_optimization" )
+{
+	{
+		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
+
+		makeText( po, p, 0, MD::ItalicText, true, true );
+		makeText( po, p, 0, MD::ItalicText, false, true );
+		makeText( po, p, 1, MD::ItalicText, true );
+		makeText( po, p, 1, MD::ItalicText, false, true );
+		makeText( po, p, 1, MD::TextWithoutFormat );
+
+		MD::optimizeParagraph( p, po, MD::OptimizeParagraphType::Semi );
+
+		checkP( "tttt", p );
+		checkT( { 1, 1, 2, 1 }, po );
+	}
+
+	{
+		INIT_VARS_FOR_OPTIMIZE_PARAGRAPH
+
+		makeText( po, p, 0, MD::ItalicText, true, true );
+		makeText( po, p, 1, MD::ItalicText, false, true );
+		makeCode( po, p, 2 );
+		makeText( po, p, 3, MD::ItalicText, true );
+		makeText( po, p, 3, MD::ItalicText, false, true );
+
+		MD::optimizeParagraph( p, po, MD::OptimizeParagraphType::Semi );
+
+		checkP( "ttct", p );
+		checkT( { 1, 1, 2 }, po );
 	}
 }
 
