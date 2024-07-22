@@ -92,8 +92,11 @@ public:
 	~HtmlVisitor() override = default;
 
 	virtual typename Trait::String toHtml( std::shared_ptr< Document< Trait > > doc,
-		const typename Trait::String & hrefForRefBackImage )
+		const typename Trait::String & hrefForRefBackImage,
+		bool wrappedInArticle = true )
 	{
+		isWrappedInArticle = wrappedInArticle;
+
 		html.clear();
 		fns.clear();
 
@@ -107,40 +110,20 @@ public:
 protected:
 	virtual void openStyle( const typename ItemWithOpts< Trait >::Styles & styles )
 	{
-		int tmp = 0;
-
 		for( const auto & s : styles )
 		{
 			switch( s.style() )
 			{
 				case TextOption::BoldText :
-				{
-					if( !( tmp & TextOption::BoldText ) )
-					{
-						html.push_back( Trait::latin1ToString( "<strong>" ) );
-						tmp |= TextOption::BoldText;
-					}
-				}
+					html.push_back( Trait::latin1ToString( "<strong>" ) );
 					break;
 
 				case TextOption::ItalicText :
-				{
-					if( !( tmp & TextOption::ItalicText ) )
-					{
-						html.push_back( Trait::latin1ToString( "<em>" ) );
-						tmp |= TextOption::ItalicText;
-					}
-				}
+					html.push_back( Trait::latin1ToString( "<em>" ) );
 					break;
 
 				case TextOption::StrikethroughText :
-				{
-					if( !( tmp & TextOption::StrikethroughText ) )
-					{
-						html.push_back( Trait::latin1ToString( "<del>" ) );
-						tmp |= TextOption::StrikethroughText;
-					}
-				}
+					html.push_back( Trait::latin1ToString( "<del>" ) );
 					break;
 
 				default :
@@ -151,40 +134,20 @@ protected:
 
 	virtual void closeStyle( const typename ItemWithOpts< Trait >::Styles & styles )
 	{
-		int tmp = 0;
-
 		for( const auto & s : styles )
 		{
 			switch( s.style() )
 			{
 				case TextOption::BoldText :
-				{
-					if( !( tmp & TextOption::BoldText ) )
-					{
-						html.push_back( Trait::latin1ToString( "</strong>" ) );
-						tmp |= TextOption::BoldText;
-					}
-				}
+					html.push_back( Trait::latin1ToString( "</strong>" ) );
 					break;
 
 				case TextOption::ItalicText :
-				{
-					if( !( tmp & TextOption::ItalicText ) )
-					{
-						html.push_back( Trait::latin1ToString( "</em>" ) );
-						tmp |= TextOption::ItalicText;
-					}
-				}
+					html.push_back( Trait::latin1ToString( "</em>" ) );
 					break;
 
 				case TextOption::StrikethroughText :
-				{
-					if( !( tmp & TextOption::StrikethroughText ) )
-					{
-						html.push_back( Trait::latin1ToString( "</del>" ) );
-						tmp |= TextOption::StrikethroughText;
-					}
-				}
+					html.push_back( Trait::latin1ToString( "</del>" ) );
 					break;
 
 				default :
@@ -506,7 +469,7 @@ protected:
 		//! Anchor.
 		Anchor< Trait > * a ) override
 	{
-		if( !justCollectFootnoteRefs )
+		if( !justCollectFootnoteRefs && isWrappedInArticle )
 		{
 			html.push_back( Trait::latin1ToString( "\n<div id=\"" ) );
 			html.push_back( a->label() );
@@ -804,6 +767,8 @@ protected:
 	bool justCollectFootnoteRefs = false;
 	//! Just process footnote references and don't increment count number.
 	bool dontIncrementFootnoteCount = false;
+	//! Is this HTML wrapped in artcile tag?
+	bool isWrappedInArticle = true;
 
 	struct FootnoteRefStuff {
 		typename Trait::String id;
@@ -821,20 +786,23 @@ protected:
 template< class Trait >
 typename Trait::String
 toHtml( std::shared_ptr< Document< Trait > > doc, bool wrapInBodyTag = true,
-	const typename Trait::String & hrefForRefBackImage = {} )
+	const typename Trait::String & hrefForRefBackImage = {},
+	bool wrapInArticle = true )
 {
 	typename Trait::String html;
 
 	if( wrapInBodyTag )
 		html.push_back( Trait::latin1ToString( "<!DOCTYPE html>\n<html><head></head><body>\n" ) );
 
-	html.push_back( Trait::latin1ToString( "<article class=\"markdown-body\">" ) );
+	if( wrapInArticle )
+		html.push_back( Trait::latin1ToString( "<article class=\"markdown-body\">" ) );
 
 	details::HtmlVisitor< Trait > visitor;
 
-	html.push_back( visitor.toHtml( doc, hrefForRefBackImage ) );
+	html.push_back( visitor.toHtml( doc, hrefForRefBackImage, wrapInArticle ) );
 
-	html.push_back( Trait::latin1ToString( "</article>\n" ) );
+	if( wrapInArticle )
+		html.push_back( Trait::latin1ToString( "</article>\n" ) );
 
 	if( wrapInBodyTag )
 		html.push_back( Trait::latin1ToString( "</body></html>\n" ) );
