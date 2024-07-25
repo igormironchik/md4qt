@@ -21,9 +21,9 @@ namespace MD {
 //
 
 //! Enumeration of item types.
-enum class ItemType {
+enum class ItemType : int {
 	//! Heading.
-	Heading,
+	Heading = 0,
 	//! Text.
 	Text,
 	//! Paragraph.
@@ -63,7 +63,9 @@ enum class ItemType {
 	//! Raw HTML.
 	RawHtml,
 	//! Math expression.
-	Math
+	Math,
+	//! Start item for user-defined types.
+	UserDefined = 255
 }; // enum class ItemType
 
 
