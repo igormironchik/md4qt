@@ -42,6 +42,7 @@ This library parses Markdown into tree structure.
     * [How can I get a string of `StyleDelim`?](#how-can-i-get-a-string-of-styledelim)
   * [Is it possible to find `Markdown` item by its position?](#is-it-possible-to-find-markdown-item-by-its-position)
   * [How can I walk through the document and find all items of given type?](#how-can-i-walk-through-the-document-and-find-all-items-of-given-type)
+  * [How can I add and process a custom (user-defined) item in `MD::Document`?](#how-can-i-add-and-process-a-custom-user-defined-item-in-mddocument)
 
 # Example
 
@@ -458,3 +459,11 @@ nested first children by given position with `findFirstInCache()` method.
      //! 0 means infinity, 1 - only top level items...
      unsigned int maxNestingLevel = 0 );
    ```
+
+## How can I add and process a custom (user-defined) item in `MD::Document`?
+
+ * Since version `3.0.0` in `MD::ItemType` enum appeared `UserDefined` enumerator.
+So you can inherit from any `MD::Item` class and return from `type()` method
+value greater or equal `MD::ItemType::UserData`. To handle user-defined types of
+items in `MD::Visitor` class now exists method `void onUserDefined( Item< Trait > * item )`.
+So you can handle your custom items and do what you need.
