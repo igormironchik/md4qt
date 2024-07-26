@@ -1123,7 +1123,7 @@ private:
 
 //! Link.
 template< class Trait >
-class Link
+class Link final
 	:	public LinkBase< Trait >
 {
 public:
