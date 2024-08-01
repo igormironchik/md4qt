@@ -28,10 +28,10 @@ to_string( int i )
 
 void prepareTest( const typename TRAIT::String & fileName )
 {
-	
+
 	MD::Parser< TRAIT > p;
 	auto doc = p.parse( typename TRAIT::String( "tests/parser/data/" ) + fileName );
-	
+
 	g_cache.initialize( doc );
 }
 
@@ -57,7 +57,7 @@ TEST_CASE( "002" )
 }
 
 /*
-  
+
 Paragraph 1.
 
 Paragraph 2.
@@ -67,7 +67,7 @@ TEST_CASE( "003" )
 {
 	prepareTest( typename TRAIT::String( "003.md" ) );
 	REQUIRE( g_cache.findFirstInCache( { 0, 0, 0, 0 } ).empty() );
-	
+
 	for( int i = 0; i < 2; ++i )
 	{
 		auto items = g_cache.findFirstInCache( { 0, 1 + i * 2, 0, 1 + i * 2 } );
@@ -87,35 +87,35 @@ Code in the `text`.
 TEST_CASE( "012" )
 {
 	prepareTest( typename TRAIT::String( "012.md" ) );
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 0, 0, 0, 0 } );
 		REQUIRE( items.size() == 2 );
 		REQUIRE( items.at( 0 )->type() == MD::ItemType::Paragraph );
 		REQUIRE( items.at( 1 )->type() == MD::ItemType::Text );
 	}
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 12, 0, 12, 0 } );
 		REQUIRE( items.size() == 2 );
 		REQUIRE( items.at( 0 )->type() == MD::ItemType::Paragraph );
 		REQUIRE( items.at( 1 )->type() == MD::ItemType::Code );
 	}
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 13, 0, 13, 0 } );
 		REQUIRE( items.size() == 2 );
 		REQUIRE( items.at( 0 )->type() == MD::ItemType::Paragraph );
 		REQUIRE( items.at( 1 )->type() == MD::ItemType::Code );
 	}
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 0, 0, 17, 0 } );
 		REQUIRE( items.size() == 2 );
 		REQUIRE( items.at( 0 )->type() == MD::ItemType::Paragraph );
 		REQUIRE( items.at( 1 )->type() == MD::ItemType::Text );
 	}
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 18, 0, 18, 0 } );
 		REQUIRE( items.size() == 2 );
@@ -135,20 +135,20 @@ TEST_CASE( "012" )
 TEST_CASE( "017" )
 {
 	prepareTest( typename TRAIT::String( "017.md" ) );
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 0, 0, 0, 0 } );
 		REQUIRE( items.size() == 1 );
 		REQUIRE( items.at( 0 )->type() == MD::ItemType::Blockquote );
 	}
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 1, 4, 1, 4 } );
 		REQUIRE( items.size() == 2 );
 		REQUIRE( items.at( 0 )->type() == MD::ItemType::Blockquote );
 		REQUIRE( items.at( 1 )->type() == MD::ItemType::Blockquote );
 	}
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 2, 0, 2, 0 } );
 		REQUIRE( items.size() == 3 );
@@ -156,7 +156,7 @@ TEST_CASE( "017" )
 		REQUIRE( items.at( 1 )->type() == MD::ItemType::Paragraph );
 		REQUIRE( items.at( 2 )->type() == MD::ItemType::Text );
 	}
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 0, 0, 0, 1 } );
 		REQUIRE( items.size() == 3 );
@@ -164,7 +164,7 @@ TEST_CASE( "017" )
 		REQUIRE( items.at( 1 )->type() == MD::ItemType::Paragraph );
 		REQUIRE( items.at( 2 )->type() == MD::ItemType::Text );
 	}
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 3, 4, 3, 4 } );
 		REQUIRE( items.size() == 4 );
@@ -187,13 +187,13 @@ else
 TEST_CASE( "020" )
 {
 	prepareTest( typename TRAIT::String( "020.md" ) );
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 0, 0, 0, 0 } );
 		REQUIRE( items.size() == 1 );
 		REQUIRE( items.at( 0 )->type() == MD::ItemType::Code );
 	}
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 0, 1, 0, 1 } );
 		REQUIRE( items.size() == 1 );
@@ -210,7 +210,7 @@ TEST_CASE( "020" )
 TEST_CASE( "021" )
 {
 	prepareTest( typename TRAIT::String( "021.md" ) );
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 4, 0, 4, 0 } );
 		REQUIRE( items.size() == 1 );
@@ -227,7 +227,7 @@ TEST_CASE( "021" )
 TEST_CASE( "023" )
 {
 	prepareTest( typename TRAIT::String( "023.md" ) );
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 4, 0, 4, 0 } );
 		REQUIRE( items.size() == 4 );
@@ -236,7 +236,7 @@ TEST_CASE( "023" )
 		REQUIRE( items.at( 2 )->type() == MD::ItemType::Paragraph );
 		REQUIRE( items.at( 3 )->type() == MD::ItemType::Text );
 	}
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 0, 0, 0, 0 } );
 		REQUIRE( items.size() == 2 );
@@ -260,7 +260,7 @@ TEST_CASE( "023" )
 TEST_CASE( "024" )
 {
 	prepareTest( typename TRAIT::String( "024.md" ) );
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 4, 1, 4, 1 } );
 		REQUIRE( items.size() == 6 );
@@ -271,7 +271,7 @@ TEST_CASE( "024" )
 		REQUIRE( items.at( 4 )->type() == MD::ItemType::Paragraph );
 		REQUIRE( items.at( 5 )->type() == MD::ItemType::Text );
 	}
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 2, 1, 2, 1 } );
 		REQUIRE( items.size() == 4 );
@@ -299,7 +299,7 @@ TEST_CASE( "024" )
 TEST_CASE( "025" )
 {
 	prepareTest( typename TRAIT::String( "025.md" ) );
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 2, 2, 2, 2 } );
 		REQUIRE( items.size() == 4 );
@@ -317,7 +317,7 @@ Text ![Image 1](a.jpg) continue ![ Image 2 ](b.png) and ![ Image 3]( http://www.
 TEST_CASE( "030" )
 {
 	prepareTest( typename TRAIT::String( "030.md" ) );
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 5, 0, 5, 0 } );
 		REQUIRE( items.size() == 2 );
@@ -341,14 +341,14 @@ TEST_CASE( "030" )
 TEST_CASE( "031" )
 {
 	prepareTest( typename TRAIT::String( "031.md" ) );
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 22, 0, 22, 0 } );
 		REQUIRE( items.size() == 2 );
 		REQUIRE( items.at( 0 )->type() == MD::ItemType::Paragraph );
 		REQUIRE( items.at( 1 )->type() == MD::ItemType::Link );
 	}
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 80, 0, 80, 0 } );
 		REQUIRE( items.size() == 2 );
@@ -368,13 +368,13 @@ TEST_CASE( "031" )
 TEST_CASE( "045" )
 {
 	prepareTest( typename TRAIT::String( "045.md" ) );
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 1, 0, 1, 0 } );
 		REQUIRE( items.size() == 1 );
 		REQUIRE( items.at( 0 )->type() == MD::ItemType::Footnote );
 	}
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 4, 2, 4, 2 } );
 		REQUIRE( items.size() == 3 );
@@ -417,13 +417,13 @@ Paragraph 2
 TEST_CASE( "046" )
 {
 	prepareTest( typename TRAIT::String( "046.md" ) );
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 0, 1, 0, 1 } );
 		REQUIRE( items.size() == 1 );
 		REQUIRE( items.at( 0 )->type() == MD::ItemType::Heading );
 	}
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 0, 0, 0, 0 } );
 		REQUIRE( items.size() == 3 );
@@ -447,14 +447,14 @@ Cell 1   | Cell 2
 TEST_CASE( "047" )
 {
 	prepareTest( typename TRAIT::String( "047.md" ) );
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 0, 1, 0, 1 } );
 		REQUIRE( items.size() == 2 );
 		REQUIRE( items.at( 0 )->type() == MD::ItemType::Table );
 		REQUIRE( items.at( 1 )->type() == MD::ItemType::Text );
 	}
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 0, 2, 0, 2 } );
 		REQUIRE( items.size() == 1 );
@@ -470,7 +470,7 @@ $$ x = {-b \pm \sqrt{b^2-4ac} \over 2a} $$
 TEST_CASE( "065" )
 {
 	prepareTest( typename TRAIT::String( "065.md" ) );
-	
+
 	{
 		auto items = g_cache.findFirstInCache( { 5, 0, 5, 0 } );
 		REQUIRE( items.size() == 2 );
@@ -496,7 +496,7 @@ TEST_CASE( "168" )
 		REQUIRE( items.at( 1 )->type() == MD::ItemType::RawHtml );
 	}
 }
-	
+
 /*
 Text
 ***
@@ -513,5 +513,30 @@ TEST_CASE( "174" )
 		auto items = g_cache.findFirstInCache( { 0, 1, 0, 1 } );
 		REQUIRE( items.size() == 1 );
 		REQUIRE( items.at( 0 )->type() == MD::ItemType::HorizontalLine );
+	}
+}
+
+/*
+==
+
+==
+
+*/
+TEST_CASE( "258" )
+{
+	prepareTest( typename TRAIT::String( "258.md" ) );
+
+	{
+		auto items = g_cache.findFirstInCache( { 0, 0, 0, 0 } );
+		REQUIRE( items.size() == 2 );
+		REQUIRE( items.at( 0 )->type() == MD::ItemType::Paragraph );
+		REQUIRE( items.at( 1 )->type() == MD::ItemType::Text );
+	}
+
+	{
+		auto items = g_cache.findFirstInCache( { 0, 2, 0, 2 } );
+		REQUIRE( items.size() == 2 );
+		REQUIRE( items.at( 0 )->type() == MD::ItemType::Paragraph );
+		REQUIRE( items.at( 1 )->type() == MD::ItemType::Text );
 	}
 }

@@ -8601,6 +8601,12 @@ Parser< Trait >::parseFormattedTextLinksImages( MdBlock< Trait > & fr,
 							po.line = it->m_line;
 							po.pos = it->m_pos + it->m_len;
 						}
+						else if( p->startColumn() == -1 )
+						{
+							p->setStartColumn( fr.data.at( it->m_line ).first
+								.virginPos( it->m_pos ) );
+							p->setStartLine( fr.data.at( it->m_line ).second.lineNumber );
+						}
 
 						po.parent = p;
 					}

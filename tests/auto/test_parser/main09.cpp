@@ -325,3 +325,30 @@ TEST_CASE( "257" )
 	REQUIRE( t->closeStyles().at( 1 ) == MD::WithPosition{ 8, 0, 8, 0 } );
 	REQUIRE( t->closeStyles().at( 2 ) == MD::WithPosition{ 14, 0, 14, 0 } );
 }
+
+/*
+==
+
+==
+
+*/
+TEST_CASE( "258" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/258.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 3 );
+
+	for( int i = 1; i < 3; ++i )
+	{
+		REQUIRE( doc->items().at( i )->type() == MD::ItemType::Paragraph );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( i ).get() );
+		REQUIRE( p->items().size() == 1 );
+
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->text() == u8"==" );
+	}
+}
