@@ -26,13 +26,16 @@ to_string( int i )
 #endif
 }
 
-void prepareTest( const typename TRAIT::String & fileName )
+std::shared_ptr< MD::Document< TRAIT > >
+prepareTest( const typename TRAIT::String & fileName )
 {
 
 	MD::Parser< TRAIT > p;
 	auto doc = p.parse( typename TRAIT::String( "tests/parser/data/" ) + fileName );
 
 	g_cache.initialize( doc );
+
+	return doc;
 }
 
 TEST_CASE( "001" )
@@ -524,13 +527,14 @@ TEST_CASE( "174" )
 */
 TEST_CASE( "258" )
 {
-	prepareTest( typename TRAIT::String( "258.md" ) );
+	auto doc = prepareTest( typename TRAIT::String( "258.md" ) );
 
 	{
 		auto items = g_cache.findFirstInCache( { 0, 0, 0, 0 } );
 		REQUIRE( items.size() == 2 );
 		REQUIRE( items.at( 0 )->type() == MD::ItemType::Paragraph );
 		REQUIRE( items.at( 1 )->type() == MD::ItemType::Text );
+		REQUIRE( items.at( 0 ) == doc->items().at( 1 ).get() );
 	}
 
 	{
@@ -538,5 +542,6 @@ TEST_CASE( "258" )
 		REQUIRE( items.size() == 2 );
 		REQUIRE( items.at( 0 )->type() == MD::ItemType::Paragraph );
 		REQUIRE( items.at( 1 )->type() == MD::ItemType::Text );
+		REQUIRE( items.at( 0 ) == doc->items().at( 2 ).get() );
 	}
 }
