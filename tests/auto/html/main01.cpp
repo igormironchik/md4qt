@@ -69,3 +69,24 @@ TEST_CASE( "003" )
 	const auto required = u8"\n<h1 id=\"heading/" + fullPath( 3 ) + u8"\"> heading </h1>\n";
 	REQUIRE( html == required );
 }
+
+/*
+| heading1 | heading2 | heading3 |
+| :--- | :---: | ---: |
+| data1 | data2 | data3 |
+
+*/
+TEST_CASE( "004" )
+{
+	MD::Parser< TRAIT > p;
+	auto html = MD::toHtml( p.parse( "tests/html/data/004.md" ), false, {}, false );
+	const auto required = u8"\n<table><thead><tr>\n"
+		"<th align=\"left\">\n heading1 \n</th>\n"
+		"<th align=\"center\">\n heading2 \n</th>\n"
+		"<th align=\"right\">\n heading3 \n</th>\n"
+		"</tr></thead><tbody>\n<tr>\n\n"
+		"<td align=\"left\">\n data1 \n</td>\n\n"
+		"<td align=\"center\">\n data2 \n</td>\n\n"
+		"<td align=\"right\">\n data3 \n</td>\n\n</tr>\n</tbody></table>\n";
+	REQUIRE( html == required );
+}

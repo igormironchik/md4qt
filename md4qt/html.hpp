@@ -419,7 +419,7 @@ protected:
 			}
 
 			if( !justCollectFootnoteRefs )
-				html.push_back( Trait::latin1ToString( "</thead><tbody>\n" ) );
+				html.push_back( Trait::latin1ToString( "</tr></thead><tbody>\n" ) );
 
 			for( auto r = std::next( t->rows().cbegin() ), rlast = t->rows().cend(); r != rlast; ++r )
 			{
