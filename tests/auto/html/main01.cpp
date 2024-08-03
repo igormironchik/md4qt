@@ -190,3 +190,22 @@ TEST_CASE( "011" )
 		" list </li>\n</ol>\n";
 	REQUIRE( html == required );
 }
+
+/*
+text[^1]
+
+[^1]: footnote
+
+*/
+TEST_CASE( "012" )
+{
+	const auto path = fullPath( 12 );
+	MD::Parser< TRAIT > p;
+	auto html = MD::toHtml( p.parse( "tests/html/data/012.md" ), false, {}, false );
+	const auto required = u8"<p> text<sup><a href=\"##^1/" + path +
+		u8"\" id=\"ref-#^1/" + path +
+		u8"-1\">1</a></sup></p><section class=\"footnotes\">"
+		"<ol><li id=\"#^1/" + path +
+		"\"><p> footnote </p></li></ol></section>\n";
+	REQUIRE( html == required );
+}
