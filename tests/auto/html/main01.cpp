@@ -332,3 +332,52 @@ TEST_CASE( "017" )
 		"<div></div><hr /></li>\n</ul>\n";
 	REQUIRE( html == required );
 }
+
+/*
+| head |
+| ---- |
+| `code` [google](https://www.google.com)[^1] ![](https://www.google.com) $a /ne 0$ |
+
+[^1]: # heading
+
+        code
+
+    > quote
+
+    * list
+
+    | t |
+    | - |
+    | d |
+
+    <div></div>
+
+    ___
+
+
+*/
+TEST_CASE( "018" )
+{
+	const auto path = fullPath( 18 );
+	MD::Parser< TRAIT > p;
+	auto html = MD::toHtml( p.parse( "tests/html/data/018.md" ), false, {}, false );
+	const auto required = u8"\n<table><thead><tr>\n<th align=\"left\">\n head \n</th>\n</tr></thead>"
+		"<tbody>\n<tr>\n\n<td align=\"left\">\n"
+		"<code>code</code>"
+		"<a href=\"https://www.google.com\"> google </a>"
+		"<sup><a href=\"##^1/" + path + u8"\" id=\"ref-#^1/" + path +
+		u8"-1\">1</a></sup>"
+		"<img src=\"https://www.google.com\" alt=\"\" style=\"max-width:100%;\" />"
+		"$ a /ne 0 $\n</td>\n\n</tr>\n</tbody></table>\n"
+		"<section class=\"footnotes\"><ol><li id=\"#^1/" + path +
+		u8"\">\n"
+		"<h1 id=\"heading/" + path +
+		u8"\"> heading </h1>\n\n"
+		"<pre><code>code</code></pre>\n\n"
+		"<blockquote><p> quote </p></blockquote>\n\n"
+		"<ul>\n<li>\n list </li>\n</ul>\n\n"
+		"<table><thead><tr>\n<th align=\"left\">\n t \n</th>\n</tr></thead>"
+		"<tbody>\n<tr>\n\n<td align=\"left\">\n d \n</td>\n\n</tr>\n</tbody></table>\n"
+		"<div></div><hr /></li></ol></section>\n";
+	REQUIRE( html == required );
+}
