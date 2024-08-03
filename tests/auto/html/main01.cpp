@@ -298,3 +298,37 @@ TEST_CASE( "016" )
 		"</blockquote>\n";
 	REQUIRE( html == required );
 }
+
+/*
+* list
+
+  # Heading
+
+      code
+
+  > quote
+
+  | t |
+  | - |
+  | d |
+
+  <div></div>
+
+  ___
+
+
+*/
+TEST_CASE( "017" )
+{
+	const auto path = fullPath( 17 );
+	MD::Parser< TRAIT > p;
+	auto html = MD::toHtml( p.parse( "tests/html/data/017.md" ), false, {}, false );
+	const auto required = u8"\n<ul>\n<li>\n<p> list </p>\n"
+		"<h1 id=\"heading/" + path + u8"\"> Heading </h1>\n\n"
+		"<pre><code>code</code></pre>\n\n"
+		"<blockquote><p> quote </p></blockquote>\n\n"
+		"<table><thead><tr>\n<th align=\"left\">\n t \n</th>\n</tr></thead>"
+		"<tbody>\n<tr>\n\n<td align=\"left\">\n d \n</td>\n\n</tr>\n</tbody></table>\n"
+		"<div></div><hr /></li>\n</ul>\n";
+	REQUIRE( html == required );
+}
