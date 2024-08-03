@@ -152,3 +152,21 @@ TEST_CASE( "009" )
 	const auto required = u8"\n<blockquote><p> blockquote </p></blockquote>\n";
 	REQUIRE( html == required );
 }
+
+/*
+* list
+
+<!-- -->
+
+1. list
+
+
+*/
+TEST_CASE( "010" )
+{
+	MD::Parser< TRAIT > p;
+	auto html = MD::toHtml( p.parse( "tests/html/data/010.md" ), false, {}, false );
+	const auto required = u8"\n<ul>\n<li>\n list </li>\n</ul>\n"
+		"<!-- -->\n<ol>\n<li value=\"1\">\n list </li>\n</ol>\n";
+	REQUIRE( html == required );
+}
