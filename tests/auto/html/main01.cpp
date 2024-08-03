@@ -240,3 +240,22 @@ TEST_CASE( "014" )
 	const auto required = u8"<p> text <br />\n text \n text </p><hr />";
 	REQUIRE( html == required );
 }
+
+/*
+| h1 | h2 |
+| - | - |
+| d1 |
+
+
+*/
+TEST_CASE( "015" )
+{
+	MD::Parser< TRAIT > p;
+	auto html = MD::toHtml( p.parse( "tests/html/data/015.md" ), true, {}, false );
+	const auto required = u8"<!DOCTYPE html>\n<html><head></head><body>\n\n"
+		"<table><thead><tr>\n<th align=\"left\">\n h1 \n</th>\n"
+		"<th align=\"left\">\n h2 \n</th>\n</tr></thead><tbody>\n"
+		"<tr>\n\n<td align=\"left\">\n d1 \n</td>\n<td></td>\n</tr>\n"
+		"</tbody></table>\n</body></html>\n";
+	REQUIRE( html == required );
+}
