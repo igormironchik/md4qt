@@ -90,3 +90,15 @@ TEST_CASE( "004" )
 		"<td align=\"right\">\n data3 \n</td>\n\n</tr>\n</tbody></table>\n";
 	REQUIRE( html == required );
 }
+
+/*
+**bold** ~strike~
+
+*/
+TEST_CASE( "005" )
+{
+	MD::Parser< TRAIT > p;
+	auto html = MD::toHtml( p.parse( "tests/html/data/005.md" ), false, {}, false );
+	const auto required = u8"<p><strong> bold </strong><del> strike </del></p>";
+	REQUIRE( html == required );
+}
