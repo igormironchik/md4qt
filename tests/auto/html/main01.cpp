@@ -170,3 +170,23 @@ TEST_CASE( "010" )
 		"<!-- -->\n<ol>\n<li value=\"1\">\n list </li>\n</ol>\n";
 	REQUIRE( html == required );
 }
+
+/*
+* [ ] task
+1. list
+* list
+1. list
+
+
+*/
+TEST_CASE( "011" )
+{
+	MD::Parser< TRAIT > p;
+	auto html = MD::toHtml( p.parse( "tests/html/data/011.md" ), false, {}, false );
+	const auto required = u8"\n<ul class=\"contains-task-list\">\n"
+		"<li class=\"task-list-item\"><input type=\"checkbox\" id=\"\" "
+		"disabled=\"\" class=\"task-list-item-checkbox\">\n"
+		" task </li>\n</ul>\n\n<ol>\n<li value=\"1\">\n list </li>\n</ol>\n\n<ul>\n<li>\n"
+		" list </li>\n</ul>\n\n<ol>\n<li value=\"1\">\n list </li>\n</ol>\n";
+	REQUIRE( html == required );
+}
