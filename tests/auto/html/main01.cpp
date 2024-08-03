@@ -140,3 +140,15 @@ TEST_CASE( "008" )
 	const auto required = u8"<p><code>code</code></p>";
 	REQUIRE( html == required );
 }
+
+/*
+> blockquote
+
+*/
+TEST_CASE( "009" )
+{
+	MD::Parser< TRAIT > p;
+	auto html = MD::toHtml( p.parse( "tests/html/data/009.md" ), false, {}, false );
+	const auto required = u8"\n<blockquote><p> blockquote </p></blockquote>\n";
+	REQUIRE( html == required );
+}
