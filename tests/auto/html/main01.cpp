@@ -259,3 +259,42 @@ TEST_CASE( "015" )
 		"</tbody></table>\n</body></html>\n";
 	REQUIRE( html == required );
 }
+
+/*
+> # heading
+>
+>     code
+>
+> * list
+>
+> | h |
+> | - |
+> | d |
+>
+> ---
+>
+> <table></table>
+>
+> text <a></a>
+>
+> > nested quote
+
+*/
+TEST_CASE( "016" )
+{
+	const auto path = fullPath( 16 );
+	MD::Parser< TRAIT > p;
+	auto html = MD::toHtml( p.parse( "tests/html/data/016.md" ), false, {}, false );
+	const auto required = u8"\n<blockquote>\n"
+		"<h1 id=\"heading/" + path + u8"\"> heading </h1>\n\n"
+		"<pre><code>code</code></pre>\n\n"
+		"<ul>\n<li>\n list </li>\n</ul>\n\n"
+		"<table><thead><tr>\n<th align=\"left\">\n h \n</th>\n</tr></thead>"
+		"<tbody>\n<tr>\n\n<td align=\"left\">\n d \n</td>\n\n</tr>\n</tbody></table>\n"
+		"<hr />"
+		"<table></table>"
+		"<p> text <a></a></p>\n"
+		"<blockquote><p> nested quote </p></blockquote>\n"
+		"</blockquote>\n";
+	REQUIRE( html == required );
+}
