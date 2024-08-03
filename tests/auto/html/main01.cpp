@@ -114,3 +114,29 @@ TEST_CASE( "006" )
 	const auto required = u8"<p>$ a \\ne 0 $</p>";
 	REQUIRE( html == required );
 }
+
+/*
+```cpp
+int i = 0;
+```
+
+*/
+TEST_CASE( "007" )
+{
+	MD::Parser< TRAIT > p;
+	auto html = MD::toHtml( p.parse( "tests/html/data/007.md" ), false, {}, false );
+	const auto required = u8"\n<pre><code class=\"language-cpp\">int i = 0;</code></pre>\n";
+	REQUIRE( html == required );
+}
+
+/*
+`code`
+
+*/
+TEST_CASE( "008" )
+{
+	MD::Parser< TRAIT > p;
+	auto html = MD::toHtml( p.parse( "tests/html/data/008.md" ), false, {}, false );
+	const auto required = u8"<p><code>code</code></p>";
+	REQUIRE( html == required );
+}
