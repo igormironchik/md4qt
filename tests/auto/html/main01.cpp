@@ -224,3 +224,19 @@ TEST_CASE( "013" )
 		"<img src=\"https://www.google.com\" alt=\"\" style=\"max-width:100%;\" /></p></article>\n";
 	REQUIRE( html == required );
 }
+
+/*
+text<space><space>
+text
+text
+___
+
+
+*/
+TEST_CASE( "014" )
+{
+	MD::Parser< TRAIT > p;
+	auto html = MD::toHtml( p.parse( "tests/html/data/014.md" ), false, {}, false );
+	const auto required = u8"<p> text <br />\n text \n text </p><hr />";
+	REQUIRE( html == required );
+}
