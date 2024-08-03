@@ -352,21 +352,6 @@ protected:
 						}
 					}
 				}
-				else
-				{
-					if( item->listType() != type )
-					{
-						if( !justCollectFootnoteRefs )
-						{
-							if( type == ListItem< Trait >::Ordered )
-								html.push_back( Trait::latin1ToString( "</ol><ul>\n" ) );
-							else
-								html.push_back( Trait::latin1ToString( "</ul><ol>\n" ) );
-						}
-
-						type = item->listType();
-					}
-				}
 
 				onListItem( item, first );
 

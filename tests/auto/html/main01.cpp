@@ -173,10 +173,7 @@ TEST_CASE( "010" )
 
 /*
 * [ ] task
-1. list
-* list
-1. list
-
+1. [x] list
 
 */
 TEST_CASE( "011" )
@@ -186,7 +183,10 @@ TEST_CASE( "011" )
 	const auto required = u8"\n<ul class=\"contains-task-list\">\n"
 		"<li class=\"task-list-item\"><input type=\"checkbox\" id=\"\" "
 		"disabled=\"\" class=\"task-list-item-checkbox\">\n"
-		" task </li>\n</ul>\n\n<ol>\n<li value=\"1\">\n list </li>\n</ol>\n\n<ul>\n<li>\n"
-		" list </li>\n</ul>\n\n<ol>\n<li value=\"1\">\n list </li>\n</ol>\n";
+		" task </li>\n</ul>\n\n"
+		"<ol class=\"contains-task-list\">\n"
+		"<li class=\"task-list-item\"><input type=\"checkbox\" id=\"\" "
+		"disabled=\"\" class=\"task-list-item-checkbox\" checked=\"\" value=\"1\">\n"
+		" list </li>\n</ol>\n";
 	REQUIRE( html == required );
 }
