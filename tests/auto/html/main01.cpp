@@ -201,11 +201,26 @@ TEST_CASE( "012" )
 {
 	const auto path = fullPath( 12 );
 	MD::Parser< TRAIT > p;
-	auto html = MD::toHtml( p.parse( "tests/html/data/012.md" ), false, {}, false );
+	auto html = MD::toHtml( p.parse( "tests/html/data/012.md" ), false, u8"qrc://ref.png", false );
 	const auto required = u8"<p> text<sup><a href=\"##^1/" + path +
-		u8"\" id=\"ref-#^1/" + path +
-		u8"-1\">1</a></sup></p><section class=\"footnotes\">"
-		"<ol><li id=\"#^1/" + path +
-		"\"><p> footnote </p></li></ol></section>\n";
+		u8"\" id=\"ref-#^1/" + path + u8"-1\">1</a></sup></p>"
+		"<section class=\"footnotes\"><ol><li id=\"#^1/" + path +
+		u8"\"><p> footnote <a href=\"#ref-#^1/" + path +
+		u8"-1\"><img src=\"qrc://ref.png\" /></a></p></li></ol></section>\n";
+	REQUIRE( html == required );
+}
+
+/*
+![](https://www.google.com)
+
+*/
+TEST_CASE( "013" )
+{
+	const auto path = fullPath( 13 );
+	MD::Parser< TRAIT > p;
+	auto html = MD::toHtml( p.parse( "tests/html/data/013.md" ), false, {}, true );
+	const auto required = u8"<article class=\"markdown-body\">\n"
+		"<div id=\"" + path + u8"\"></div>\n<p>"
+		"<img src=\"https://www.google.com\" alt=\"\" style=\"max-width:100%;\" /></p></article>\n";
 	REQUIRE( html == required );
 }
