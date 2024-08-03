@@ -102,3 +102,15 @@ TEST_CASE( "005" )
 	const auto required = u8"<p><strong> bold </strong><del> strike </del></p>";
 	REQUIRE( html == required );
 }
+
+/*
+$a \ne 0$
+
+*/
+TEST_CASE( "006" )
+{
+	MD::Parser< TRAIT > p;
+	auto html = MD::toHtml( p.parse( "tests/html/data/006.md" ), false, {}, false );
+	const auto required = u8"<p>$ a \\ne 0 $</p>";
+	REQUIRE( html == required );
+}
