@@ -545,3 +545,68 @@ TEST_CASE( "258" )
 		REQUIRE( items.at( 0 ) == doc->items().at( 2 ).get() );
 	}
 }
+
+/*
+*$a \ne 0$*
+*`code`*
+*[google](https://www.google.com)*
+*![](https://www.google.com)*
+*[^1]*
+
+[^1]: foot
+
+
+*/
+TEST_CASE( "259" )
+{
+	auto doc = prepareTest( typename TRAIT::String( "259.md" ) );
+
+	REQUIRE( doc->items().size() == 2 );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+
+	{
+		auto items = g_cache.findFirstInCache( { 0, 0, 0, 0 } );
+		REQUIRE( items.size() == 2 );
+		REQUIRE( items.at( 0 )->type() == MD::ItemType::Paragraph );
+		REQUIRE( items.at( 1 )->type() == MD::ItemType::Math );
+		REQUIRE( items.at( 0 ) == p );
+		REQUIRE( items.at( 1 ) == p->items().at( 0 ).get() );
+	}
+
+	{
+		auto items = g_cache.findFirstInCache( { 0, 1, 0, 1 } );
+		REQUIRE( items.size() == 2 );
+		REQUIRE( items.at( 0 )->type() == MD::ItemType::Paragraph );
+		REQUIRE( items.at( 1 )->type() == MD::ItemType::Code );
+		REQUIRE( items.at( 0 ) == p );
+		REQUIRE( items.at( 1 ) == p->items().at( 1 ).get() );
+	}
+
+	{
+		auto items = g_cache.findFirstInCache( { 0, 2, 0, 2 } );
+		REQUIRE( items.size() == 2 );
+		REQUIRE( items.at( 0 )->type() == MD::ItemType::Paragraph );
+		REQUIRE( items.at( 1 )->type() == MD::ItemType::Link );
+		REQUIRE( items.at( 0 ) == p );
+		REQUIRE( items.at( 1 ) == p->items().at( 2 ).get() );
+	}
+
+	{
+		auto items = g_cache.findFirstInCache( { 0, 3, 0, 3 } );
+		REQUIRE( items.size() == 2 );
+		REQUIRE( items.at( 0 )->type() == MD::ItemType::Paragraph );
+		REQUIRE( items.at( 1 )->type() == MD::ItemType::Image );
+		REQUIRE( items.at( 0 ) == p );
+		REQUIRE( items.at( 1 ) == p->items().at( 3 ).get() );
+	}
+
+	{
+		auto items = g_cache.findFirstInCache( { 0, 4, 0, 4 } );
+		REQUIRE( items.size() == 2 );
+		REQUIRE( items.at( 0 )->type() == MD::ItemType::Paragraph );
+		REQUIRE( items.at( 1 )->type() == MD::ItemType::FootnoteRef );
+		REQUIRE( items.at( 0 ) == p );
+		REQUIRE( items.at( 1 ) == p->items().at( 4 ).get() );
+	}
+}

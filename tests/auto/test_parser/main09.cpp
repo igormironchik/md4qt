@@ -352,3 +352,67 @@ TEST_CASE( "258" )
 		REQUIRE( t->text() == u8"==" );
 	}
 }
+
+/*
+*$a \ne 0$*
+*`code`*
+*[google](https://www.google.com)*
+*![](https://www.google.com)*
+*[^1]*
+
+[^1]: foot
+
+
+*/
+TEST_CASE( "259" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/259.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+	REQUIRE( doc->footnotesMap().size() == 1 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 5 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Math );
+	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Code );
+	REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Link );
+	REQUIRE( p->items().at( 3 )->type() == MD::ItemType::Image );
+	REQUIRE( p->items().at( 4 )->type() == MD::ItemType::FootnoteRef );
+
+	for( int i = 0; i < 2; ++i )
+		REQUIRE( static_cast< MD::ItemWithOpts< TRAIT >* > (
+			p->items().at( i ).get() )->startColumn() == 2 );
+
+	for( int i = 2; i < 5; ++i )
+		REQUIRE( static_cast< MD::ItemWithOpts< TRAIT >* > (
+			p->items().at( i ).get() )->startColumn() == 1 );
+}
+
+/*
+*[^1]*
+
+*/
+TEST_CASE( "260" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/260.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 1 );
+	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::FootnoteRef );
+	auto f = static_cast< MD::FootnoteRef< TRAIT >* > ( p->items().at( 0 ).get() );
+	REQUIRE( f->startColumn() == 1 );
+	REQUIRE( f->endColumn() == 4 );
+	REQUIRE( f->openStyles().size() == 1 );
+	REQUIRE( f->openStyles().at( 0 ) == MD::StyleDelim{ MD::ItalicText, 0, 0, 0, 0 } );
+	REQUIRE( f->closeStyles().size() == 1 );
+	REQUIRE( f->closeStyles().at( 0 ) == MD::StyleDelim{ MD::ItalicText, 5, 0, 5, 0 } );
+}

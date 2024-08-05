@@ -6876,6 +6876,8 @@ Parser< Trait >::checkForLink( typename Delims::const_iterator it,
 					po.fr.data.at( it->m_line ).first[ it->m_pos + it->m_len ].isSpace() : true );
 
 				po.parent->appendItem( fnr );
+
+				initLastItemWithOpts< Trait >( po, fnr );
 			}
 
 			po.line = it->m_line;
