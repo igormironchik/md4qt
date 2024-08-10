@@ -416,3 +416,98 @@ TEST_CASE( "260" )
 	REQUIRE( f->closeStyles().size() == 1 );
 	REQUIRE( f->closeStyles().at( 0 ) == MD::StyleDelim{ MD::ItalicText, 5, 0, 5, 0 } );
 }
+
+void check257WithSemiOpt( std::shared_ptr< MD::Document< TRAIT > > doc )
+{
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( p->items().size() == 2 );
+
+	{
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->text() == u8"some" );
+		REQUIRE( t->opts() == MD::ItalicText );
+		REQUIRE( t->openStyles().size() == 3 );
+		REQUIRE( t->openStyles().at( 0 ) == MD::WithPosition{ 0, 0, 0, 0 } );
+		REQUIRE( t->openStyles().at( 1 ) == MD::WithPosition{ 1, 0, 1, 0 } );
+		REQUIRE( t->openStyles().at( 2 ) == MD::WithPosition{ 2, 0, 2, 0 } );
+		REQUIRE( t->closeStyles().size() == 2 );
+		REQUIRE( t->closeStyles().at( 0 ) == MD::WithPosition{ 7, 0, 7, 0 } );
+		REQUIRE( t->closeStyles().at( 1 ) == MD::WithPosition{ 8, 0, 8, 0 } );
+	}
+
+	{
+		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
+		REQUIRE( t->text() == u8"text" );
+		REQUIRE( t->opts() == MD::ItalicText );
+		REQUIRE( t->openStyles().empty() );
+		REQUIRE( t->closeStyles().size() == 1 );
+		REQUIRE( t->closeStyles().at( 0 ) == MD::WithPosition{ 14, 0, 14, 0 } );
+	}
+}
+
+/*
+**_some_* text*
+
+*/
+TEST_CASE( "257-1" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/257.md", false, { u8"md", u8"markdown" },
+		false );
+
+	check257WithSemiOpt( doc );
+}
+
+/*
+**_some_* text*
+
+*/
+TEST_CASE( "257-2" )
+{
+	const auto fileName = "tests/parser/data/257.md";
+
+#ifdef MD4QT_QT_SUPPORT
+	QFile file( fileName );
+
+	if( file.open( QIODeviceBase::ReadOnly ) )
+	{
+		QTextStream stream( file.readAll() );
+		file.close();
+
+		typename TRAIT::String wd = QDir().absolutePath();
+#else
+	std::ifstream stream( fileName, std::ios::in | std::ios::binary );
+
+	typename TRAIT::String wd = std::filesystem::canonical(
+		std::filesystem::current_path() ).u8string();
+
+	{
+		std::string tmp;
+		wd.toUTF8String( tmp );
+		std::replace( tmp.begin(), tmp.end(), '\\', '/' );
+		wd = icu::UnicodeString::fromUTF8( tmp );
+	}
+
+	if( stream.good() )
+	{
+#endif
+		MD::Parser< TRAIT > parser;
+
+		auto doc = parser.parse( stream, wd, fileName, false );
+
+#ifndef MD4QT_QT_SUPPORT
+		stream.close();
+#endif
+
+		check257WithSemiOpt( doc );
+	}
+	else
+		REQUIRE( false );
+}
