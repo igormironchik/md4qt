@@ -296,7 +296,7 @@ text plugins.
   ```
 
   `UserDefinedPluginID` value. Note that plugins will be invoked corresponding
-  to its `ID`from smallest to largest, so a developer can handle an order of text
+  to its `ID` from smallest to largest, so a developer can handle an order of text
   plugins.
 
 ### What is a `TextPluginFunc< Trait >`?
