@@ -483,6 +483,36 @@ TEST_CASE( "065" )
 }
 
 /*
+* list
+
+  ```
+  int i;
+  ```
+
+* list
+
+  ```
+  int i;
+
+```
+int i;
+```
+
+*/
+TEST_CASE( "155" )
+{
+	prepareTest( typename TRAIT::String( "155.md" ) );
+
+	{
+		auto items = g_cache.findFirstInCache( { 2, 9, 2, 9 } );
+		REQUIRE( items.size() == 3 );
+		REQUIRE( items.at( 0 )->type() == MD::ItemType::List );
+		REQUIRE( items.at( 1 )->type() == MD::ItemType::ListItem );
+		REQUIRE( items.at( 2 )->type() == MD::ItemType::Code );
+	}
+}
+
+/*
 | table |
 | ----- |
 | <img src="img/img.png"> |

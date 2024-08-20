@@ -242,8 +242,10 @@ protected:
 	{
 		auto startColumn = c->isFensedCode() ? c->startDelim().startColumn() : c->startColumn();
 		auto startLine = c->isFensedCode() ? c->startDelim().startLine() : c->startLine();
-		auto endColumn = c->isFensedCode() ? c->endDelim().endColumn() : c->endColumn();
-		auto endLine = c->isFensedCode() ? c->endDelim().endLine() : c->endLine();
+		auto endColumn = c->isFensedCode() && c->endDelim().endColumn() > -1 ?
+			c->endDelim().endColumn() : c->endColumn();
+		auto endLine = c->isFensedCode() && c->endDelim().endLine() > -1 ?
+			c->endDelim().endLine() : c->endLine();
 
 		details::PosRange< Trait > r{ startColumn, startLine, endColumn, endLine, c };
 
