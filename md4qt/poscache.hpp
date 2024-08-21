@@ -11,6 +11,7 @@
 // C++ include.
 #include <vector>
 #include <algorithm>
+#include <cassert>
 
 
 namespace MD {
@@ -29,6 +30,12 @@ struct PosRange {
 	long long int endLine = -1;
 	Item< Trait > * item = nullptr;
 	std::vector< PosRange< Trait > > children = {};
+
+	inline bool isValidPos() const
+	{
+		return startColumn > -1 && startLine > -1 &&
+			endColumn > -1 && endLine > -1;
+	}
 };
 
 // Look at this equality operator like on rectangles intersection.
@@ -144,6 +151,8 @@ protected:
 	{
 		if( !skipInCache )
 		{
+			assert( item.isValidPos() );
+
 			auto pos = findInCache( cache, item );
 
 			if( pos )
