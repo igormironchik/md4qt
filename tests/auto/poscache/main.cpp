@@ -640,3 +640,63 @@ TEST_CASE( "259" )
 		REQUIRE( items.at( 1 ) == p->items().at( 4 ).get() );
 	}
 }
+
+TEST_CASE( "user_defined" )
+{
+	class MyItem
+		:	public MD::Item< TRAIT >
+	{
+	public:
+		MyItem() = default;
+		~MyItem() override = default;
+
+		MD::ItemType type() const override
+		{
+			return MD::ItemType{ static_cast< int > ( MD::ItemType::UserDefined ) + 1 };
+		}
+
+		std::shared_ptr< Item< TRAIT > >
+		clone( MD::Document< TRAIT > * doc = nullptr ) const override
+		{
+			return std::make_shared< MyItem > ();
+		}
+	};
+
+	auto doc = std::make_shared< MD::Document< TRAIT > > ();
+	auto i = std::make_shared< MyItem > ();
+	i->setStartColumn( 0 );
+	i->setStartLine( 0 );
+	i->setEndColumn( 10 );
+	i->setEndLine( 0 );
+
+	auto p = std::make_shared< MD::Paragraph< TRAIT > > ();
+	p->setStartColumn( 0 );
+	p->setStartLine( 2 );
+	p->setEndColumn( 10 );
+	p->setEndLine( 2 );
+
+	auto in = std::make_shared< MyItem > ();
+	in->setStartColumn( 0 );
+	in->setStartLine( 2 );
+	in->setEndColumn( 10 );
+	in->setEndLine( 2 );
+	p->appendItem( in );
+
+	doc->appendItem( i );
+	doc->appendItem( p );
+
+	g_cache.initialize( doc );
+
+	{
+		auto items = g_cache.findFirstInCache( { 0, 0, 0, 0 } );
+		REQUIRE( items.size() == 1 );
+		REQUIRE( items.at( 0 )->type() == i->type() );
+	}
+
+	{
+		auto items = g_cache.findFirstInCache( { 1, 2, 1, 2 } );
+		REQUIRE( items.size() == 2 );
+		REQUIRE( items.at( 0 )->type() == MD::ItemType::Paragraph );
+		REQUIRE( items.at( 1 )->type() == i->type() );
+	}
+}

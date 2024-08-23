@@ -175,6 +175,14 @@ protected:
 	}
 
 protected:
+	void onUserDefined( Item< Trait > * i ) override
+	{
+		details::PosRange< Trait > r{ i->startColumn(), i->startLine(),
+			i->endColumn(), i->endLine(), i };
+
+		insertInCache( r );
+	}
+
 	virtual void onReferenceLink(
 		//! Link.
 		Link< Trait > * l )
