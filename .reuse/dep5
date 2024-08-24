@@ -7,7 +7,7 @@ Files: tests/auto/commonmark/0.30/spec.json tests/auto/commonmark/0.31.2/spec.js
 Copyright: John MacFarlane
 License: CC-BY-SA-4.0
 
-Files: tests/auto/commonmark/0.30/*.md tests/auto/commonmark/0.31.2/*.md
+Files: tests/auto/commonmark/0.30/*.md tests/auto/commonmark/0.31.2/*.md tests/auto/html/data/*.md
 Copyright: 2022-2024 Igor Mironchik <igor.mironchik@gmail.com>
 License: MIT
 
