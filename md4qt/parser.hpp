@@ -9174,14 +9174,26 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 
 				parseListItem( block, list, doc, linksToParse, workingPath, fileName,
 					collectRefLinks, html );
+				const auto lastColumn = listItem.back().first.virginPos(
+					listItem.back().first.length() ? listItem.back().first.length() - 1 : 0 );
+				const auto lastLine = listItem.back().second.lineNumber;
 				listItem.clear();
 
 				if( tmpMarker != marker )
 				{
 					if( !list->isEmpty() )
+					{
 						parent->appendItem( list );
+						list->setEndColumn( lastColumn );
+						list->setEndLine( lastLine );
+					}
 
 					list.reset( new List< Trait > );
+					list->setStartColumn( it->first.virginPos( 0 ) );
+					list->setStartLine( it->second.lineNumber );
+					list->setEndColumn( fr.data.back().first.virginPos(
+						fr.data.back().first.length() ? fr.data.back().first.length() - 1 : 0 ) );
+					list->setEndLine( fr.data.back().second.lineNumber );
 
 					marker = tmpMarker;
 				}

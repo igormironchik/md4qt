@@ -381,3 +381,28 @@ TEST_CASE( "018" )
 		"<div></div><hr /></li></ol></section>\n";
 	REQUIRE( html == required );
 }
+
+/*
++ Create a list by starting a line with `+`, `-`, or `*`
++ Sub-lists are made by indenting 2 spaces:
+  - Marker character change forces new list start:
+    * Ac tristique libero volutpat at
+    + Facilisis in pretium nisl aliquet
+    - Nulla volutpat aliquam velit
++ Very easy!
+
+*/
+TEST_CASE( "019" )
+{
+	MD::Parser< TRAIT > p;
+	auto html = MD::toHtml( p.parse( "tests/html/data/019.md" ), false, {}, false );
+	const auto required = u8"\n<ul>\n<li>\n Create a list by starting a line with "
+		"<code>+</code>, <code>-</code>, or <code>*</code></li>\n"
+		"<li>\n Sub-lists are made by indenting 2 spaces: \n"
+		"<ul>\n<li>\n Marker character change forces new list start: \n"
+		"<ul>\n<li>\n Ac tristique libero volutpat at </li>\n</ul>\n\n"
+		"<ul>\n<li>\n Facilisis in pretium nisl aliquet </li>\n</ul>\n\n"
+		"<ul>\n<li>\n Nulla volutpat aliquam velit </li>\n</ul>\n"
+		"</li>\n</ul>\n</li>\n<li>\n Very easy! </li>\n</ul>\n";
+	REQUIRE( html == required );
+}

@@ -511,3 +511,108 @@ TEST_CASE( "257-2" )
 	else
 		REQUIRE( false );
 }
+
+/*
++ Create a list by starting a line with `+`, `-`, or `*`
++ Sub-lists are made by indenting 2 spaces:
+  - Marker character change forces new list start:
+    * Ac tristique libero volutpat at
+    + Facilisis in pretium nisl aliquet
+    - Nulla volutpat aliquam velit
++ Very easy!
+
+*/
+TEST_CASE( "261" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/261.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->items().size() == 3 );
+	REQUIRE( l->startColumn() == 0 );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endColumn() == 11 );
+	REQUIRE( l->endLine() == 6 );
+
+	{
+		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+		REQUIRE( li->startColumn() == 0 );
+		REQUIRE( li->startLine() == 0 );
+		REQUIRE( li->endColumn() == 55 );
+		REQUIRE( li->endLine() == 0 );
+		REQUIRE( li->items().size() == 1 );
+	}
+
+	{
+		REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).get() );
+		REQUIRE( li->startColumn() == 0 );
+		REQUIRE( li->startLine() == 1 );
+		REQUIRE( li->endColumn() == 33 );
+		REQUIRE( li->endLine() == 5 );
+		REQUIRE( li->items().size() == 2 );
+
+		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
+		REQUIRE( li->items().at( 1 )->type() == MD::ItemType::List );
+		auto l = static_cast< MD::List< TRAIT >* > ( li->items().at( 1 ).get() );
+		REQUIRE( l->startColumn() == 2 );
+		REQUIRE( l->startLine() == 2 );
+		REQUIRE( l->endColumn() == 33 );
+		REQUIRE( l->endLine() == 5 );
+
+		{
+			REQUIRE( l->items().size() == 1 );
+			REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+			REQUIRE( li->startColumn() == 2 );
+			REQUIRE( li->startLine() == 2 );
+			REQUIRE( li->endColumn() == 33 );
+			REQUIRE( li->endLine() == 5 );
+			REQUIRE( li->items().size() == 4 );
+			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
+
+			{
+				REQUIRE( li->items().at( 1 )->type() == MD::ItemType::List );
+				auto l = static_cast< MD::List< TRAIT >* > ( li->items().at( 1 ).get() );
+				REQUIRE( l->startColumn() == 4 );
+				REQUIRE( l->startLine() == 3 );
+				REQUIRE( l->endColumn() == 36 );
+				REQUIRE( l->endLine() == 3 );
+			}
+
+			{
+				REQUIRE( li->items().at( 2 )->type() == MD::ItemType::List );
+				auto l = static_cast< MD::List< TRAIT >* > ( li->items().at( 2 ).get() );
+				REQUIRE( l->startColumn() == 4 );
+				REQUIRE( l->startLine() == 4 );
+				REQUIRE( l->endColumn() == 38 );
+				REQUIRE( l->endLine() == 4 );
+			}
+
+			{
+				REQUIRE( li->items().at( 3 )->type() == MD::ItemType::List );
+				auto l = static_cast< MD::List< TRAIT >* > ( li->items().at( 3 ).get() );
+				REQUIRE( l->startColumn() == 4 );
+				REQUIRE( l->startLine() == 5 );
+				REQUIRE( l->endColumn() == 33 );
+				REQUIRE( l->endLine() == 5 );
+			}
+		}
+	}
+
+	{
+		REQUIRE( l->items().at( 2 )->type() == MD::ItemType::ListItem );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 2 ).get() );
+		REQUIRE( li->startColumn() == 0 );
+		REQUIRE( li->startLine() == 6 );
+		REQUIRE( li->endColumn() == 11 );
+		REQUIRE( li->endLine() == 6 );
+		REQUIRE( li->items().size() == 1 );
+	}
+}
