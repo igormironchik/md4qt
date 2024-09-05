@@ -9523,7 +9523,7 @@ Parser< Trait >::parseCode( MdBlock< Trait > & fr,
 					if( !first )
 						math.push_back( Trait::latin1ToChar( '\n' ) );
 
-					math.push_back( l.first.asString() );
+					math.push_back( l.first.virginString() );
 
 					first = false;
 				}
@@ -9596,10 +9596,9 @@ Parser< Trait >::parseCodeIndentedBySpaces( MdBlock< Trait > & fr,
 			if( first ) startPos = ns;
 			first = false;
 
-			code.push_back( ( indent > 0 ? l.first.asString().right( l.first.length() -
-					( ns < indent ? ns : indent ) ) +
+			code.push_back( ( indent > 0 ? l.first.virginString( ns < indent ? ns : indent ) +
 					typename Trait::String( Trait::latin1ToChar( '\n' ) ) :
-				typename Trait::String( l.first.asString() ) +
+				typename Trait::String( l.first.virginString() ) +
 					typename Trait::String( Trait::latin1ToChar( '\n' ) ) ) );
 		}
 

@@ -16,8 +16,6 @@
 
 TEST_CASE( "001" )
 {
-	MESSAGE( "This test is not strict to CommonMark 0.30." );
-
 	const auto doc = load_test( 1 );
 
 	REQUIRE( doc->isEmpty() == false );
@@ -27,13 +25,11 @@ TEST_CASE( "001" )
 	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( c->isInline() == false );
 	REQUIRE( c->syntax().isEmpty() );
-	REQUIRE( c->text() == u8"foo baz     bim" );
+	REQUIRE( c->text() == u8"foo\tbaz\t\tbim" );
 }
 
 TEST_CASE( "002" )
 {
-	MESSAGE( "This test is not strict to CommonMark 0.30." );
-
 	const auto doc = load_test( 2 );
 
 	REQUIRE( doc->isEmpty() == false );
@@ -43,13 +39,11 @@ TEST_CASE( "002" )
 	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( c->isInline() == false );
 	REQUIRE( c->syntax().isEmpty() );
-	REQUIRE( c->text() == u8"foo baz     bim" );
+	REQUIRE( c->text() == u8"foo\tbaz\t\tbim" );
 }
 
 TEST_CASE( "003" )
 {
-	MESSAGE( "This test is not strict to CommonMark 0.30." );
-
 	const auto doc = load_test( 3 );
 
 	REQUIRE( doc->isEmpty() == false );
@@ -59,7 +53,7 @@ TEST_CASE( "003" )
 	auto c = static_cast< MD::Code< TRAIT >* > ( doc->items().at( 1 ).get() );
 	REQUIRE( c->isInline() == false );
 	REQUIRE( c->syntax().isEmpty() );
-	REQUIRE( c->text() == TRAIT::String( (const char *) u8"a   a\nὐ   a" ) );
+	REQUIRE( c->text() == TRAIT::String( (const char *) u8"a\ta\nὐ\ta" ) );
 }
 
 TEST_CASE( "004" )

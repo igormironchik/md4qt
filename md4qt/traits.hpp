@@ -56,10 +56,68 @@ public:
 	InternalStringT() {}
 	InternalStringT( const String & s )
 		:	str( s )
+		,	virginStr( s )
 	{}
 
 	String & asString() { return str; }
 	const String & asString() const { return str; }
+
+	String virginString( long long int pos = 0, long long int len = -1 ) const
+	{
+		if( pos < 0 )
+			pos = 0;
+
+		if( pos + len > str.length() || len < 0 )
+			len = str.length() - pos;
+
+		if( len == 0 )
+			return ( str.isEmpty() ? virginStr : String() );
+
+		auto virginStartPos = virginPos( pos );
+		String startStr, endStr;
+
+		if( virginStr[ virginStartPos ] == Latin1Char( '\t' ) )
+		{
+			const auto spaces = countOfSpacesForTab( virginStartPos );
+
+			for( long long int i = 1; i < spaces; ++i )
+			{
+				if( virginPos( pos + i ) != virginStartPos )
+				{
+					startStr = String( i, Latin1Char( ' ' ) );
+					++virginStartPos;
+					break;
+				}
+			}
+		}
+
+		if( len > 1 )
+		{
+			auto virginEndPos = virginPos( pos + len - 1 );
+
+			if( virginStr[ virginEndPos ] == Latin1Char( '\t' ) )
+			{
+				const auto spaces = countOfSpacesForTab( virginEndPos );
+
+				for( long long int i = 1; i < spaces; ++i )
+				{
+					if( virginPos( pos + len - 1 - i ) != virginEndPos )
+					{
+						endStr = String( i, Latin1Char( ' ' ) );
+						--virginEndPos;
+						break;
+					}
+				}
+			}
+
+			return startStr +
+				virginStr.sliced( virginStartPos, virginEndPos - virginStartPos + 1 ) +
+				endStr;
+		}
+		else
+			return ( startStr.isEmpty() ? String( 1, virginStr[ virginStartPos ] ) :
+				String( 1, Latin1Char( ' ' ) ) );
+	}
 
 	long long int virginPos( long long int pos ) const
 	{
@@ -298,6 +356,7 @@ public:
 
 private:
 	String str;
+	String virginStr;
 
 	struct ChangedPos {
 		long long int pos = -1;
@@ -330,7 +389,11 @@ private:
 						p -= ( pos + p + changed.first.firstPos - changed.first.length +
 								( pos >= changed.first.length - p + ( c.len - c.oldLen ) ? 0 : 1 ) );
 					else
-						p -= c.len - c.oldLen;
+					{
+						const auto tmp = c.len - c.oldLen;
+
+						p -= tmp - ( pos >= c.pos && pos < c.pos + tmp ? ( tmp - pos + c.pos ) : 0 );
+					}
 				}
 				else
 					p += ( c.oldLen - c.len );
@@ -340,6 +403,29 @@ private:
 		}
 
 		return pos + p + changed.first.firstPos;
+	}
+
+	long long int countOfSpacesForTab( long long int virginPos ) const
+	{
+		long long int p = 0;
+
+		for( const auto & v : std::as_const( changedPos ) )
+		{
+			p += v.first.firstPos;
+
+			if( virginPos < p )
+				break;
+
+			for( const auto & c : std::as_const( v.second ) )
+			{
+				if( c.pos + p == virginPos )
+					return c.len;
+
+				virginPos += ( virginPos > c.pos ? c.len - c.oldLen : 0 );
+			}
+		}
+
+		return -1;
 	}
 }; // class InternalString
 
@@ -820,13 +906,13 @@ struct UnicodeStringTrait {
 	{
 		return UnicodeString( u16 );
 	}
-	
+
 	//! Convert Latin1 into trait's string.
 	static String latin1ToString( const char * latin1 )
 	{
 		return UnicodeString( latin1 );
 	}
-	
+
 	//! Convert Latin1 char into trait's char.
 	static Char latin1ToChar( char latin1 )
 	{
@@ -928,13 +1014,13 @@ struct QStringTrait {
 	{
 		return QString::fromUtf16( u16 );
 	}
-	
+
 	//! Convert Latin1 into trait's string.
 	static String latin1ToString( const char * latin1 )
 	{
 		return QLatin1String( latin1 );
 	}
-	
+
 	//! Convert Latin1 char into trait's char.
 	static Char latin1ToChar( char latin1 )
 	{

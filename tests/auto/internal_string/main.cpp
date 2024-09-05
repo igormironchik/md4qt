@@ -5,6 +5,7 @@
 */
 
 #include <md4qt/traits.hpp>
+#include <md4qt/parser.hpp>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 // doctest include.
@@ -400,4 +401,125 @@ TEST_CASE( "double_remove" )
 	REQUIRE( s.virginPos( 0 ) == 0 );
 	REQUIRE( s.virginPos( 1 ) == 1 );
 	REQUIRE( s.virginPos( 2 ) == 6 );
+}
+
+TEST_CASE( "virgin_string" )
+{
+	{
+		TRAIT::InternalString s( "\tcode" );
+
+		MD::replaceTabs< TRAIT > ( s );
+
+		REQUIRE( s.virginString() == u8"\tcode" );
+	}
+
+	{
+		TRAIT::InternalString s( "\tcode" );
+
+		MD::replaceTabs< TRAIT > ( s );
+
+		s.remove( 0, 2 );
+
+		REQUIRE( s.virginString() == u8"  code" );
+	}
+
+	{
+		TRAIT::InternalString s( "\t\tcode" );
+
+		MD::replaceTabs< TRAIT > ( s );
+
+		s.remove( 0, 2 );
+
+		REQUIRE( s.virginString() == u8"  \tcode" );
+	}
+
+	{
+		TRAIT::InternalString s( "\tcode\t" );
+
+		MD::replaceTabs< TRAIT > ( s );
+
+		REQUIRE( s.virginString() == u8"\tcode\t" );
+	}
+
+	{
+		TRAIT::InternalString s( "\tcode\t" );
+
+		MD::replaceTabs< TRAIT > ( s );
+
+		s.remove( 0, 2 );
+
+		REQUIRE( s.virginString() == u8"  code\t" );
+	}
+
+	{
+		TRAIT::InternalString s( "\t\tcode\t\t" );
+
+		MD::replaceTabs< TRAIT > ( s );
+
+		s.remove( 0, 2 );
+		s.remove( s.length() - 2, 2 );
+
+		REQUIRE( s.virginString() == u8"  \tcode\t  " );
+	}
+
+	{
+		TRAIT::InternalString s( "\t\tcode\t\t" );
+
+		s.remove( 3, 2 );
+
+		MD::replaceTabs< TRAIT > ( s );
+
+		REQUIRE( s.virginString() == u8"\t\tcode\t\t" );
+	}
+
+	{
+		TRAIT::InternalString s( "\t\tcode\t\t" );
+
+		MD::replaceTabs< TRAIT > ( s );
+
+		s.remove( 0, s.length() );
+
+		REQUIRE( s.virginString() == u8"\t\tcode\t\t" );
+	}
+
+	{
+		TRAIT::InternalString s( "\t\tcode\t\t" );
+
+		MD::replaceTabs< TRAIT > ( s );
+
+		s.remove( 0, s.length() );
+
+		REQUIRE( s.virginString( -1, s.length() + 1 ) == u8"\t\tcode\t\t" );
+	}
+
+	{
+		TRAIT::InternalString s( "text" );
+
+		s.remove( 0, 2 );
+		s.remove( s.length() - 1, 1 );
+
+		REQUIRE( s.virginString() == u8"x" );
+	}
+
+	{
+		TRAIT::InternalString s( "text" );
+
+		REQUIRE( s.virginString( 1, 1 ) == u8"e" );
+	}
+
+	{
+		TRAIT::InternalString s( "\t\tcode\t\t" );
+
+		MD::replaceTabs< TRAIT > ( s );
+
+		REQUIRE( s.virginString( 0, 12 ) == u8"\t\tcode" );
+	}
+
+	{
+		TRAIT::InternalString s( "\ta\t\tb" );
+
+		MD::replaceTabs< TRAIT > ( s );
+
+		REQUIRE( s.virginString( 4 ) == u8"a\t\tb" );
+	}
 }
