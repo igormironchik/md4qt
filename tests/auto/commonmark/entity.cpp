@@ -60,7 +60,6 @@ TEST_CASE( "26" )
 	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	const auto tt = t->text();
 	REQUIRE( t->text() == TRAIT::utf16ToString( u"\x0023\x0020\x04D2\x0020\x03E0\x0020\xFFFD" ) );
 }
 
