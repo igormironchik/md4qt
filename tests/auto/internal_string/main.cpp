@@ -158,7 +158,7 @@ TEST_CASE( "replace_remove_5" )
 	REQUIRE( s.virginPos( 5 ) == 5 );
 }
 
-TEST_CASE( "replace_rmove_6" )
+TEST_CASE( "replace_remove_6" )
 {
 	TRAIT::InternalString s( "\tParagraph\t" );
 
@@ -401,6 +401,79 @@ TEST_CASE( "double_remove" )
 	REQUIRE( s.virginPos( 0 ) == 0 );
 	REQUIRE( s.virginPos( 1 ) == 1 );
 	REQUIRE( s.virginPos( 2 ) == 6 );
+}
+
+TEST_CASE( "replace_tabs" )
+{
+	{
+		TRAIT::InternalString s( "\tcode\t" );
+
+		MD::replaceTabs< TRAIT > ( s );
+
+		REQUIRE( s.virginPos( 0 ) == 0 );
+		REQUIRE( s.virginPos( 1 ) == 0 );
+		REQUIRE( s.virginPos( 2 ) == 0 );
+		REQUIRE( s.virginPos( 3 ) == 0 );
+		REQUIRE( s.virginPos( 4 ) == 1 );
+		REQUIRE( s.virginPos( 5 ) == 2 );
+		REQUIRE( s.virginPos( 6 ) == 3 );
+		REQUIRE( s.virginPos( 7 ) == 4 );
+		REQUIRE( s.virginPos( 8 ) == 5 );
+		REQUIRE( s.virginPos( 9 ) == 5 );
+		REQUIRE( s.virginPos( 10 ) == 5 );
+		REQUIRE( s.virginPos( 11 ) == 5 );
+	}
+
+	{
+		TRAIT::InternalString s( "\tcode\t" );
+
+		MD::replaceTabs< TRAIT > ( s );
+
+		s.remove( 0, 2 );
+
+		REQUIRE( s.virginPos( 0 ) == 0 );
+		REQUIRE( s.virginPos( 1 ) == 0 );
+		REQUIRE( s.virginPos( 2 ) == 1 );
+		REQUIRE( s.virginPos( 3 ) == 2 );
+		REQUIRE( s.virginPos( 4 ) == 3 );
+		REQUIRE( s.virginPos( 5 ) == 4 );
+		REQUIRE( s.virginPos( 6 ) == 5 );
+		REQUIRE( s.virginPos( 7 ) == 5 );
+		REQUIRE( s.virginPos( 8 ) == 5 );
+		REQUIRE( s.virginPos( 9 ) == 5 );
+	}
+
+	{
+		TRAIT::InternalString s( "\tcode\t" );
+
+		MD::replaceTabs< TRAIT > ( s );
+
+		s.remove( 0, 2 );
+		s.remove( 8, 2 );
+
+		REQUIRE( s.virginPos( 0 ) == 0 );
+		REQUIRE( s.virginPos( 1 ) == 0 );
+		REQUIRE( s.virginPos( 2 ) == 1 );
+		REQUIRE( s.virginPos( 3 ) == 2 );
+		REQUIRE( s.virginPos( 4 ) == 3 );
+		REQUIRE( s.virginPos( 5 ) == 4 );
+		REQUIRE( s.virginPos( 6 ) == 5 );
+		REQUIRE( s.virginPos( 7 ) == 5 );
+	}
+}
+
+TEST_CASE( "replace_spaces" )
+{
+	TRAIT::InternalString s( "    code    c" );
+
+	s.remove( 0, 4 );
+	s.remove( 4, 4 );
+
+	REQUIRE( s.virginPos( 0 ) == 4 );
+	REQUIRE( s.virginPos( 1 ) == 5 );
+	REQUIRE( s.virginPos( 2 ) == 6 );
+	REQUIRE( s.virginPos( 3 ) == 7 );
+	REQUIRE( s.virginPos( 4 ) == 12 );
 }
 
 TEST_CASE( "virgin_string" )
