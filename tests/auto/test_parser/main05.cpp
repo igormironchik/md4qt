@@ -1391,7 +1391,7 @@ TEST_CASE( "138" )
 	REQUIRE( l->endColumn() == 1 );
 	REQUIRE( l->endLine() == 8 );
 
-	REQUIRE( l->items().size() == 1 );
+	REQUIRE( l->items().size() == 2 );
 
 	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
 
@@ -1514,6 +1514,11 @@ TEST_CASE( "138" )
 		REQUIRE( t->endColumn() == 8 );
 		REQUIRE( t->endLine() == 11 );
 	}
+
+	REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
+
+	auto i2 = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).get() );
+	REQUIRE( i2->isEmpty() );
 }
 
 /*

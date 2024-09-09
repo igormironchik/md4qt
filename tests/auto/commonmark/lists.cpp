@@ -696,12 +696,11 @@ TEST_CASE( "315" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
 	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( l->items().size() == 2 );
+	REQUIRE( l->items().size() == 3 );
 
-	for( int i = 0; i < 2; ++i )
 	{
-		REQUIRE( l->items().at( i )->type() == MD::ItemType::ListItem );
-		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( i ).get() );
+		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
 		REQUIRE( li->items().size() == 1 );
 		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
 		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
@@ -710,9 +709,27 @@ TEST_CASE( "315" )
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
 		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		const char16_t ch = 97 + i + ( i % 2 > 0 ? 1 : 0 );
-		char16_t str[ 2 ] = { ch, 0 };
-		REQUIRE( t->text() == TRAIT::utf16ToString( &str[ 0 ] ) );
+		REQUIRE( t->text() == u8"a" );
+	}
+
+	{
+		REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).get() );
+		REQUIRE( li->isEmpty() );
+	}
+
+	{
+		REQUIRE( l->items().at( 2 )->type() == MD::ItemType::ListItem );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 2 ).get() );
+		REQUIRE( li->items().size() == 1 );
+		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
+		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).get() );
+		REQUIRE( p->items().size() == 1 );
+		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+		REQUIRE( t->opts() == MD::TextWithoutFormat );
+		REQUIRE( t->text() == u8"c" );
 	}
 }
 

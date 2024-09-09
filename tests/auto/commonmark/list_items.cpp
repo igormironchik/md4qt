@@ -948,13 +948,20 @@ TEST_CASE( "280" )
 {
 	const auto doc = load_test( 280 );
 
-	REQUIRE( doc->items().size() == 2 );
-
-	// I don't add empty list.
+	REQUIRE( doc->items().size() == 3 );
 
 	{
-		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+		auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( l->items().size() == 1 );
+		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+		REQUIRE( li->isEmpty() );
+	}
+
+	{
+		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
+		auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
 		REQUIRE( p->items().size() == 1 );
 		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
 		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
@@ -970,7 +977,7 @@ TEST_CASE( "281" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
 	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( l->items().size() == 2 );
+	REQUIRE( l->items().size() == 3 );
 
 	{
 		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
@@ -989,11 +996,15 @@ TEST_CASE( "281" )
 		}
 	}
 
-	// I don't add empty list item.
-
 	{
 		REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
 		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).get() );
+		REQUIRE( li->isEmpty() );
+	}
+
+	{
+		REQUIRE( l->items().at( 2 )->type() == MD::ItemType::ListItem );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 2 ).get() );
 
 		REQUIRE( li->items().size() == 1 );
 		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
@@ -1017,7 +1028,7 @@ TEST_CASE( "282" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
 	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( l->items().size() == 2 );
+	REQUIRE( l->items().size() == 3 );
 
 	{
 		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
@@ -1036,11 +1047,15 @@ TEST_CASE( "282" )
 		}
 	}
 
-	// I don't add empty list item.
-
 	{
 		REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
 		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).get() );
+		REQUIRE( li->isEmpty() );
+	}
+
+	{
+		REQUIRE( l->items().at( 2 )->type() == MD::ItemType::ListItem );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 2 ).get() );
 
 		REQUIRE( li->items().size() == 1 );
 		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Unordered );
@@ -1064,7 +1079,7 @@ TEST_CASE( "283" )
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
 	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( l->items().size() == 2 );
+	REQUIRE( l->items().size() == 3 );
 
 	{
 		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
@@ -1084,11 +1099,15 @@ TEST_CASE( "283" )
 		}
 	}
 
-	// I don't add empty list item.
-
 	{
 		REQUIRE( l->items().at( 1 )->type() == MD::ItemType::ListItem );
 		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 1 ).get() );
+		REQUIRE( li->isEmpty() );
+	}
+
+	{
+		REQUIRE( l->items().at( 2 )->type() == MD::ItemType::ListItem );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 2 ).get() );
 
 		REQUIRE( li->items().size() == 1 );
 		REQUIRE( li->listType() == MD::ListItem< TRAIT >::Ordered );
@@ -1109,9 +1128,16 @@ TEST_CASE( "284" )
 {
 	const auto doc = load_test( 284 );
 
-	REQUIRE( doc->items().size() == 1 );
+	REQUIRE( doc->items().size() == 2 );
 
-	// I don't add  empty list.
+	{
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+		auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( l->items().size() == 1 );
+		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+		REQUIRE( li->isEmpty() );
+	}
 }
 
 TEST_CASE( "285" )
