@@ -789,3 +789,32 @@ TEST_CASE( "266" )
 	REQUIRE( h->startLine() == 3 );
 	REQUIRE( h->endLine() == 3 );
 }
+
+/*
+- <!--
+-->
+- list
+
+*/
+TEST_CASE( "267" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/267.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endLine() == 2 );
+	REQUIRE( l->items().size() == 2 );
+
+	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+	auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( li->startLine() == 0 );
+	REQUIRE( li->endLine() == 1 );
+	REQUIRE( li->items().size() == 1 );
+	REQUIRE( li->items().at( 0 )->type() == MD::ItemType::RawHtml );
+}
