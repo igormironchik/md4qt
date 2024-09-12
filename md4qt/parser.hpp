@@ -2246,7 +2246,8 @@ Parser< Trait >::parseFragment( typename Parser< Trait >::ParserContext & ctx,
 			{
 				if( ctx.html.html )
 				{
-					ctx.html.parent->appendItem( ctx.html.html );
+					if( !collectRefLinks )
+						ctx.html.parent->appendItem( ctx.html.html );
 
 					resetHtmlTag< Trait >( ctx.html );
 				}
@@ -8494,6 +8495,19 @@ checkForTextPlugins( std::shared_ptr< Paragraph< Trait > > p,
 
 template< class Trait >
 inline void
+makeHorLine( const typename MdBlock< Trait >::Line & line,
+	std::shared_ptr< Block< Trait > > parent )
+{
+	std::shared_ptr< Item< Trait > > hr( new HorizontalLine< Trait > );
+	hr->setStartColumn( line.first.virginPos( skipSpaces< Trait > ( 0, line.first.asString() ) ) );
+	hr->setStartLine( line.second.lineNumber );
+	hr->setEndColumn( line.first.virginPos( line.first.length() - 1 ) );
+	hr->setEndLine( line.second.lineNumber );
+	parent->appendItem( hr );
+}
+
+template< class Trait >
+inline void
 Parser< Trait >::parseFormattedTextLinksImages( MdBlock< Trait > & fr,
 	std::shared_ptr< Block< Trait > > parent,
 	std::shared_ptr< Document< Trait > > doc,
@@ -8698,16 +8712,7 @@ Parser< Trait >::parseFormattedTextLinksImages( MdBlock< Trait > & fr,
 						po.pos = it->m_pos + it->m_len;
 
 						if( !h2 && !collectRefLinks )
-						{
-							std::shared_ptr< Item< Trait > > hr( new HorizontalLine< Trait > );
-							hr->setStartColumn( fr.data.at( it->m_line ).first.virginPos(
-								it->m_pos ) );
-							hr->setStartLine( fr.data.at( it->m_line ).second.lineNumber );
-							hr->setEndColumn( fr.data.at( it->m_line ).first.virginPos(
-								it->m_pos + it->m_len - 1 ) );
-							hr->setEndLine( fr.data.at( it->m_line ).second.lineNumber );
-							parent->appendItem( hr );
-						}
+							makeHorLine< Trait >( fr.data[ it->m_line ], parent );
 					}
 						break;
 
@@ -9284,6 +9289,43 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 			}
 		};
 
+		auto processLastHtml = [&] ( std::shared_ptr< ListItem< Trait > > resItem )
+		{
+			if( html.html && resItem )
+			{
+				auto htmlParent = ( resItem->startLine() == html.html->startLine() ||
+						html.html->startColumn() >= resItem->startColumn() + indent ? resItem :
+					html.findParent( html.html->startColumn() ) );
+
+				if( !htmlParent )
+					htmlParent = html.topParent;
+
+				if( htmlParent == html.topParent )
+					addListMakeNew();
+
+				if( !collectRefLinks )
+				{
+					htmlParent->appendItem( html.html );
+					updateLastPosInList< Trait >( html );
+				}
+
+				resetHtmlTag< Trait >( html );
+			}
+		};
+
+		auto processListItem = [&] ()
+		{
+			MdBlock< Trait > block = { listItem, 0 };
+
+			std::shared_ptr< ListItem< Trait > > resItem;
+
+			line = parseListItem( block, list, doc, linksToParse, workingPath,
+				fileName, collectRefLinks, html, &resItem );
+			listItem.clear();
+
+			processLastHtml( resItem );
+		};
+
 		for( auto last = fr.data.end(); it != last; ++it )
 		{
 			if( updateIndent )
@@ -9311,47 +9353,13 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 			{
 				updateIndent = true;
 
-				MdBlock< Trait > block = { listItem, 0 };
+				processListItem();
 
-				line = parseListItem( block, list, doc, linksToParse, workingPath,
-					fileName, collectRefLinks, html );
-				listItem.clear();
-
-				addListMakeNew();
-
-				bool doBreak = false;
-
-				if( html.html.get() )
-				{
-					html.parent = html.findParent( html.html->startColumn() );
-
-					if( !html.parent )
-						html.parent = html.topParent;
-
-					if( html.continueHtml )
-					{
-						MdBlock< Trait > tmp;
-						tmp.emptyLineAfter = fr.emptyLineAfter;
-						std::copy( it, last, std::back_inserter( tmp.data ) );
-
-						parseText( tmp, html.parent, doc, linksToParse,
-							workingPath, fileName, collectRefLinks, html );
-
-						doBreak = true;
-					}
-					else
-					{
-						html.parent->appendItem( html.html );
-						updateLastPosInList< Trait >( html );
-						resetHtmlTag< Trait > ( html );
-					}
-				}
-
-				if( doBreak || line >= 0 )
-					break;
+				if( !list->isEmpty() )
+					addListMakeNew();
 
 				if( !collectRefLinks )
-					parent->appendItem( std::shared_ptr< Item< Trait > > ( new HorizontalLine< Trait > ) );
+					makeHorLine< Trait > ( *it, parent );
 
 				continue;
 			}
@@ -9361,41 +9369,19 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 				std::tie( std::ignore, indent, tmpMarker, std::ignore ) =
 					listItemData< Trait >( it->first.asString(), false );
 
-				MdBlock< Trait > block = { listItem, 0 };
-
-				std::shared_ptr< ListItem< Trait > > resItem;
-
-				line = parseListItem( block, list, doc, linksToParse, workingPath,
-					fileName, collectRefLinks, html, &resItem );
-				listItem.clear();
+				processListItem();
 
 				if( tmpMarker != marker )
 				{
-					addListMakeNew();
+					if( !list->isEmpty() )
+						addListMakeNew();
 
 					marker = tmpMarker;
 				}
-
-				if( html.html.get() && !collectRefLinks && resItem )
-				{
-					auto htmlParent = ( resItem->startLine() == html.html->startLine() ||
-							html.html->startColumn() >= resItem->startColumn() + indent ? resItem :
-						html.findParent( html.html->startColumn() ) );
-
-					if( !htmlParent )
-						htmlParent = html.topParent;
-
-					if( htmlParent == html.topParent )
-						addListMakeNew();
-
-					htmlParent->appendItem( html.html );
-					updateLastPosInList< Trait >( html );
-					resetHtmlTag< Trait >( html );
-				}
-
-				if( line >= 0 )
-					break;
 			}
+
+			if( line > 0 )
+				break;
 
 			listItem.push_back( *it );
 
@@ -9418,7 +9404,7 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 				collectRefLinks, html );
 		}
 
-		if( !list->isEmpty() )
+		if( !list->isEmpty() && !collectRefLinks )
 			parent->appendItem( list );
 
 		if( !collectRefLinks )
