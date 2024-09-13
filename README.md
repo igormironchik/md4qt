@@ -31,7 +31,6 @@ This library parses Markdown into tree structure.
   * [How can I obtain positions of blocks/elements in `Markdown` file?](#how-can-i-obtain-positions-of-blockselements-in-markdown-file)
   * [How can I easily traverse through the `MD::Document`?](#how-can-i-easily-traverse-through-the-mddocument)
   * [Why don't you have an implementation for pure `STL` with `std::string`?](#why-dont-you-have-an-implementation-for-pure-stl-with-stdstring)
-  * [Where are empty list items and blockquotes?](#where-are-empty-list-items-and-blockquotes)
   * [Is it possible to write custom text plugin for this parser?](#is-it-possible-to-write-custom-text-plugin-for-this-parser)
     * [What is a `ID` of a plugin?](#what-is-a-id-of-a-plugin)
     * [What is a `TextPluginFunc< Trait >`?](#what-is-a-textpluginfunc-trait-)
@@ -258,12 +257,6 @@ virtual methods to handle that or another element in the document, like:
 was an `std::string` with some small third-party library to handle `UTF8`, and
 benchmark said that the performance was like with `Qt6` `QString`, so I decided
 to not support third trait. Maybe because I so lazy?
-
-## Where are empty list items and blockquotes?
-
-* I don't add empty (withouth any data in it) list items in the list. Parser do everything right,
-I just decided to not add empty list items into `MD::Document`. For this reason you can even
-not find whole list if it will contain only empty list items. The same is and for blockquotes.
 
 ## Is it possible to write custom text plugin for this parser?
 
