@@ -9263,11 +9263,10 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 		std::tie( std::ignore, indent, marker, std::ignore ) =
 			listItemData< Trait >( listItem.front().first.asString(), false );
 
+		html.blocks.push_back( { list, list->startColumn() + indent } );
+
 		if( !collectRefLinks )
-		{
-			html.blocks.push_back( { list, list->startColumn() + indent } );
 			html.toAdjustLastPos.insert( { list, html.blocks } );
-		}
 
 		bool updateIndent = false;
 
@@ -9276,17 +9275,14 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 			if( !list->isEmpty() && !collectRefLinks )
 				parent->appendItem( list );
 
-			if( !collectRefLinks )
-				html.blocks.pop_back();
+			html.blocks.pop_back();
 
 			list.reset( new List< Trait > );
 
-			if( !collectRefLinks )
-			{
-				html.blocks.push_back( { list, indent } );
+			html.blocks.push_back( { list, indent } );
 
+			if( !collectRefLinks )
 				html.toAdjustLastPos.insert( { list, html.blocks } );
-			}
 		};
 
 		auto processLastHtml = [&] ( std::shared_ptr< ListItem< Trait > > resItem )
@@ -9300,7 +9296,7 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 				if( !htmlParent )
 					htmlParent = html.topParent;
 
-				if( htmlParent == html.topParent )
+				if( htmlParent != resItem )
 					addListMakeNew();
 
 				if( !collectRefLinks )
@@ -9407,8 +9403,7 @@ Parser< Trait >::parseList( MdBlock< Trait > & fr,
 		if( !list->isEmpty() && !collectRefLinks )
 			parent->appendItem( list );
 
-		if( !collectRefLinks )
-			html.blocks.pop_back();
+		html.blocks.pop_back();
 	}
 
 	if( resetTopParent )
@@ -9476,12 +9471,10 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 	std::tie( std::ignore, indent, std::ignore, wasText ) =
 		listItemData< Trait >( fr.data.front().first.asString(), wasText );
 
-	if( !collectRefLinks )
-	{
-		html.blocks.push_back( { item, item->startColumn() + indent } );
+	html.blocks.push_back( { item, item->startColumn() + indent } );
 
+	if( !collectRefLinks )
 		html.toAdjustLastPos.insert( { item, html.blocks } );
-	}
 
 	const auto firstNonSpacePos = calculateIndent< Trait >(
 		fr.data.front().first.asString(), indent ).second;
@@ -9544,7 +9537,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 	typename Trait::String startOfCode;
 	bool wasEmptyLine = false;
 
-	std::vector< RawHtmlBlock< Trait > > htmlToAdd;
+	std::vector< std::pair< RawHtmlBlock< Trait >, long long int > > htmlToAdd;
 	long long int line = -1;
 
 	for( auto last = fr.data.end(); it != last; ++it, ++pos )
@@ -9606,13 +9599,13 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 						break;
 					}
 
-					htmlToAdd.push_back( html );
-					htmlToAdd.back().blocks = html.blocks;
+					htmlToAdd.push_back( { html, html.parent->items().size() } );
+					htmlToAdd.back().first.blocks = html.blocks;
 					updateLastPosInList< Trait >( html );
 					resetHtmlTag< Trait > ( html );
 				}
 
-				if( !htmlToAdd.empty() && htmlToAdd.back().parent == html.topParent )
+				if( !htmlToAdd.empty() && htmlToAdd.back().first.parent == html.topParent )
 				{
 					line = it->second.lineNumber;
 
@@ -9716,17 +9709,21 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 	{
 		parent->appendItem( item );
 
+		long long int i = 0;
+
 		for( auto & h : htmlToAdd )
 		{
-			if( h.parent != h.topParent )
+			if( h.first.parent != h.first.topParent )
 			{
-				h.parent->appendItem( h.html );
+				h.first.parent->insertItem( h.second + i, h.first.html );
 
-				updateLastPosInList( h );
+				++i;
+
+				updateLastPosInList( h.first );
 			}
 			else
 			{
-				html = h;
+				html = h.first;
 
 				break;
 			}
@@ -9763,8 +9760,7 @@ Parser< Trait >::parseListItem( MdBlock< Trait > & fr,
 	if( resItem )
 		*resItem = item;
 
-	if( !collectRefLinks )
-		html.blocks.pop_back();
+	html.blocks.pop_back();
 
 	return line;
 }
