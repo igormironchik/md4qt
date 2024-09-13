@@ -392,18 +392,20 @@ TEST_CASE( "239" )
 {
 	const auto doc = load_test( 239 );
 
-	REQUIRE( doc->items().size() == 1 );
-
-	// I dont add empty blockquote...
+	REQUIRE( doc->items().size() == 2 );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Blockquote );
+	auto b = static_cast< MD::Blockquote< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( b->isEmpty() );
 }
 
 TEST_CASE( "240" )
 {
 	const auto doc = load_test( 240 );
 
-	REQUIRE( doc->items().size() == 1 );
-
-	// I dont add empty blockquote...
+	REQUIRE( doc->items().size() == 2 );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Blockquote );
+	auto b = static_cast< MD::Blockquote< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( b->isEmpty() );
 }
 
 TEST_CASE( "241" )

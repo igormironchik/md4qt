@@ -9095,7 +9095,7 @@ Parser< Trait >::parseBlockquote( MdBlock< Trait > & fr,
 
 		parse( stream, bq, doc, linksToParse, workingPath, fileName, collectRefLinks );
 
-		if( !bq->isEmpty() && !collectRefLinks )
+		if( !collectRefLinks )
 			parent->appendItem( bq );
 
 		if( i < (long long int) fr.data.size() )

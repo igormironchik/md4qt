@@ -649,7 +649,7 @@ TEST_CASE( "218" )
 	const auto doc = load_test( 218 );
 
 	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+	REQUIRE( doc->items().size() == 3 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
@@ -661,5 +661,7 @@ TEST_CASE( "218" )
 	REQUIRE( lit != doc->labeledLinks().cend() );
 	REQUIRE( lit->second->url() == u8"/url" );
 
-	// I don't add empty blockquote to the document...
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Blockquote );
+	auto b = static_cast< MD::Blockquote< TRAIT >* > ( doc->items().at( 2 ).get() );
+	REQUIRE( b->isEmpty() );
 }
