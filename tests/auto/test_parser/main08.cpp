@@ -244,7 +244,7 @@ TEST_CASE( "224" )
 	auto doc = parser.parse( "tests/parser/data/224.md" );
 
 	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+	REQUIRE( doc->items().size() == 3 );
 
 	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Blockquote );
 	auto b = static_cast< MD::Blockquote< TRAIT >* > ( doc->items().at( 1 ).get() );
@@ -253,6 +253,13 @@ TEST_CASE( "224" )
 	REQUIRE( b->items().at( 0 )->type() == MD::ItemType::Paragraph );
 	auto p = static_cast< MD::Paragraph< TRAIT >* > ( b->items().at( 0 ).get() );
 	REQUIRE( p->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 2 ).get() );
+	REQUIRE( l->items().size() == 1 );
+	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+	auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( li->isEmpty() );
 }
 
 /*
@@ -420,10 +427,17 @@ TEST_CASE( "229" )
 	auto doc = parser.parse( "tests/parser/data/229.md" );
 
 	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+	REQUIRE( doc->items().size() == 3 );
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->items().size() == 1 );
+	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+	auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( li->isEmpty() );
+
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 2 ).get() );
 	REQUIRE( p->items().size() == 1 );
 }
 

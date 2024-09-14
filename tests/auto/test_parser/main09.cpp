@@ -616,3 +616,436 @@ TEST_CASE( "261" )
 		REQUIRE( li->items().size() == 1 );
 	}
 }
+
+/*
+- list item
+- list item
+<div class="some-class">
+
+Content
+
+</div>
+- list item
+
+*/
+TEST_CASE( "262" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/262.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 5 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endLine() == 1 );
+
+	{
+		REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 2 ).get() );
+		REQUIRE( h->startLine() == 2 );
+		REQUIRE( h->endLine() == 2 );
+	}
+
+	REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::Paragraph );
+
+	{
+		REQUIRE( doc->items().at( 4 )->type() == MD::ItemType::RawHtml );
+		auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 4 ).get() );
+		REQUIRE( h->startLine() == 6 );
+		REQUIRE( h->endLine() == 7 );
+	}
+}
+
+/*
+- list
+<div>
+  - list
+
+*/
+TEST_CASE( "263" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/263.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 3 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endLine() == 0 );
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 2 ).get() );
+	REQUIRE( h->startLine() == 1 );
+	REQUIRE( h->endLine() == 2 );
+}
+
+/*
+- list
+  <div>
+  - list
+
+*/
+TEST_CASE( "264" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/264.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endLine() == 2 );
+	REQUIRE( l->items().size() == 1 );
+	auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( li->items().size() == 2 );
+	REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
+	auto p = static_cast< MD::Paragraph< TRAIT >* > ( li->items().at( 0 ).get() );
+	REQUIRE( p->startLine() == 0 );
+	REQUIRE( p->endLine() == 0 );
+	REQUIRE( li->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml< TRAIT >* > ( li->items().at( 1 ).get() );
+	REQUIRE( h->startLine() == 1 );
+	REQUIRE( h->endLine() == 2 );
+}
+
+/*
+- list
+<div>
+
+  - list
+
+*/
+TEST_CASE( "265" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/265.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 4 );
+
+	{
+		REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+		auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+		REQUIRE( l->startLine() == 0 );
+		REQUIRE( l->endLine() == 0 );
+		REQUIRE( l->items().size() == 1 );
+	}
+
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml< TRAIT >* > ( doc->items().at( 2 ).get() );
+	REQUIRE( h->startLine() == 1 );
+	REQUIRE( h->endLine() == 1 );
+
+	{
+		REQUIRE( doc->items().at( 3 )->type() == MD::ItemType::List );
+		auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 3 ).get() );
+		REQUIRE( l->startLine() == 3 );
+		REQUIRE( l->endLine() == 3 );
+		REQUIRE( l->items().size() == 1 );
+	}
+}
+
+/*
+- list
+  - list
+    - list
+  <div>
+- list
+
+*/
+TEST_CASE( "266" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/266.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endLine() == 4 );
+	REQUIRE( l->items().size() == 2 );
+
+	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+	auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( li->startLine() == 0 );
+	REQUIRE( li->endLine() == 3 );
+	REQUIRE( li->items().size() == 3 );
+	REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
+	REQUIRE( li->items().at( 1 )->type() == MD::ItemType::List );
+	REQUIRE( li->items().at( 2 )->type() == MD::ItemType::RawHtml );
+	auto h = static_cast< MD::RawHtml< TRAIT >* > ( li->items().at( 2 ).get() );
+	REQUIRE( h->startLine() == 3 );
+	REQUIRE( h->endLine() == 3 );
+}
+
+/*
+- <!--
+-->
+- list
+
+*/
+TEST_CASE( "267" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/267.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endLine() == 2 );
+	REQUIRE( l->items().size() == 2 );
+
+	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+	auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( li->startLine() == 0 );
+	REQUIRE( li->endLine() == 1 );
+	REQUIRE( li->items().size() == 1 );
+	REQUIRE( li->items().at( 0 )->type() == MD::ItemType::RawHtml );
+}
+
+/*
+- list
+  <div>
+  ---
+
+*/
+TEST_CASE( "268" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/268.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endLine() == 2 );
+	REQUIRE( l->items().size() == 1 );
+
+	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+	auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( li->startLine() == 0 );
+	REQUIRE( li->endLine() == 2 );
+	REQUIRE( li->items().size() == 2 );
+	REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
+	REQUIRE( li->items().at( 1 )->type() == MD::ItemType::RawHtml );
+}
+
+/*
+- list
+  <div>
+
+  ---
+
+*/
+TEST_CASE( "269" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/269.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endLine() == 3 );
+	REQUIRE( l->items().size() == 1 );
+
+	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+	auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( li->startLine() == 0 );
+	REQUIRE( li->endLine() == 3 );
+	REQUIRE( li->items().size() == 3 );
+	REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
+	REQUIRE( li->items().at( 1 )->type() == MD::ItemType::RawHtml );
+	REQUIRE( li->items().at( 2 )->type() == MD::ItemType::HorizontalLine );
+}
+
+/*
+- list
+  <div>
+---
+
+*/
+TEST_CASE( "270" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/270.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 3 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endLine() == 1 );
+	REQUIRE( l->items().size() == 1 );
+
+	REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+	auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+	REQUIRE( li->startLine() == 0 );
+	REQUIRE( li->endLine() == 1 );
+	REQUIRE( li->items().size() == 2 );
+	REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
+	REQUIRE( li->items().at( 1 )->type() == MD::ItemType::RawHtml );
+
+	REQUIRE( doc->items().at( 2 )->type() == MD::ItemType::HorizontalLine );
+}
+
+/*
+- list
+  - list
+
+    <div>
+
+    text
+  <div>
+<div>
+
+*/
+TEST_CASE( "271" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/271.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endLine() == 7 );
+	REQUIRE( l->items().size() == 1 );
+
+	{
+		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+		REQUIRE( li->startLine() == 0 );
+		REQUIRE( li->endLine() == 7 );
+		REQUIRE( li->items().size() == 3 );
+		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
+		REQUIRE( li->items().at( 1 )->type() == MD::ItemType::List );
+		REQUIRE( li->items().at( 2 )->type() == MD::ItemType::RawHtml );
+
+		{
+			auto l = static_cast< MD::List< TRAIT >* > ( li->items().at( 1 ).get() );
+			REQUIRE( l->startLine() == 1 );
+			REQUIRE( l->endLine() == 5 );
+			REQUIRE( l->items().size() == 1 );
+			REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+			REQUIRE( li->items().size() == 3 );
+			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
+			REQUIRE( li->items().at( 1 )->type() == MD::ItemType::RawHtml );
+			REQUIRE( li->items().at( 2 )->type() == MD::ItemType::Paragraph );
+		}
+	}
+}
+
+/*
+- list
+  <div>
+
+  - list
+
+*/
+TEST_CASE( "272" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/272.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endLine() == 3 );
+	REQUIRE( l->items().size() == 1 );
+
+	{
+		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+		REQUIRE( li->startLine() == 0 );
+		REQUIRE( li->endLine() == 3 );
+		REQUIRE( li->items().size() == 3 );
+		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
+		REQUIRE( li->items().at( 1 )->type() == MD::ItemType::RawHtml );
+		REQUIRE( li->items().at( 2 )->type() == MD::ItemType::List );
+
+		{
+			auto l = static_cast< MD::List< TRAIT >* > ( li->items().at( 2 ).get() );
+			REQUIRE( l->startLine() == 3 );
+			REQUIRE( l->endLine() == 3 );
+			REQUIRE( l->items().size() == 1 );
+			REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+			auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+			REQUIRE( li->items().size() == 1 );
+			REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
+		}
+	}
+}
+
+/*
+- list
+  <div>
+
+  - list
+  <div>
+
+  - list
+  <div>
+
+*/
+TEST_CASE( "273" )
+{
+	MD::Parser< TRAIT > parser;
+
+	auto doc = parser.parse( "tests/parser/data/273.md" );
+
+	REQUIRE( doc->isEmpty() == false );
+	REQUIRE( doc->items().size() == 2 );
+
+	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::List );
+	auto l = static_cast< MD::List< TRAIT >* > ( doc->items().at( 1 ).get() );
+	REQUIRE( l->startLine() == 0 );
+	REQUIRE( l->endLine() == 7 );
+	REQUIRE( l->items().size() == 1 );
+
+	{
+		REQUIRE( l->items().at( 0 )->type() == MD::ItemType::ListItem );
+		auto li = static_cast< MD::ListItem< TRAIT >* > ( l->items().at( 0 ).get() );
+		REQUIRE( li->startLine() == 0 );
+		REQUIRE( li->endLine() == 7 );
+		REQUIRE( li->items().size() == 6 );
+		REQUIRE( li->items().at( 0 )->type() == MD::ItemType::Paragraph );
+		REQUIRE( li->items().at( 1 )->type() == MD::ItemType::RawHtml );
+		REQUIRE( li->items().at( 2 )->type() == MD::ItemType::List );
+		REQUIRE( li->items().at( 3 )->type() == MD::ItemType::RawHtml );
+		REQUIRE( li->items().at( 4 )->type() == MD::ItemType::List );
+		REQUIRE( li->items().at( 5 )->type() == MD::ItemType::RawHtml );
+	}
+}
