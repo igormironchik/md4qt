@@ -21,7 +21,7 @@ This library parses Markdown into tree structure.
 > [!WARNING]
 >
 > In `md4qt` version `3.0.0` was introduced performance regression, that you can get
-> when in your `Markdown` document have a lot of lists. It's already fixed in
+> when in your `Markdown` document are a lot of lists. It's already fixed in
 > https://invent.kde.org/imironchik/md4qt
 
 > [!NOTE]
