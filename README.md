@@ -14,6 +14,22 @@ tables, footnotes, tasks lists, strikethroughs, LaTeX Math injections, GitHub's 
 
 This library parses Markdown into tree structure.
 
+> [!IMPORTANT]
+>
+> Development of `md4qt` moved into https://invent.kde.org/imironchik/md4qt
+
+> [!WARNING]
+>
+> In `md4qt` version `3.0.0` was introduced performance regression, that you can get
+> when in your `Markdown` document are a lot of lists. It's already fixed in
+> https://invent.kde.org/imironchik/md4qt
+
+> [!NOTE]
+>
+> `md4qt` in https://invent.kde.org/imironchik/md4qt is not fully API compatible with
+> previous versions, some things (like protected data members) was renamed, extension
+> of header files is `*.h`. `md4qt` there is planning to be version `4.0.0`.
+
 * [Example](#example)
 * [Benchmark](#benchmark)
 * [Playground](#playground)
