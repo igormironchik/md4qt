@@ -16,17 +16,17 @@ This library parses Markdown into tree structure.
 
 > [!IMPORTANT]
 >
-> Development of `md4qt` moved into https://invent.kde.org/imironchik/md4qt
+> Development of `md4qt` moved to https://invent.kde.org/libraries/md4qt
 
 > [!WARNING]
 >
 > In `md4qt` version `3.0.0` was introduced performance regression, that you can get
 > when in your `Markdown` document are a lot of lists. It's already fixed in
-> https://invent.kde.org/imironchik/md4qt
+> https://invent.kde.org/libraries/md4qt
 
 > [!NOTE]
 >
-> `md4qt` in https://invent.kde.org/imironchik/md4qt is not fully API compatible with
+> `md4qt` in https://invent.kde.org/libraries/md4qt is not fully API compatible with
 > previous versions, some things (like protected data members) was renamed, extension
 > of header files is `*.h`. `md4qt` there is planning to be version `4.0.0`.
 
