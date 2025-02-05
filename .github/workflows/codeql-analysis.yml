@@ -39,26 +39,8 @@ jobs:
     - name: Install dependencies with Conan
       run: conan install .
 
-    - name: Download ECM
-      uses: suisei-cn/actions-download-file@v1
-      with:
-        url: 'https://github.com/KDE/extra-cmake-modules/archive/refs/tags/v6.9.0.zip'
-        target: ./
-
-    - name: Unzip ECM
-      run: unzip v6.9.0.zip
-
-    - name: Configure ECM
-      run: cmake -S extra-cmake-modules-6.9.0 -B build-extra-cmake-modules -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBUILD_HTML_DOCS=OFF -DBUILD_MAN_DOCS=OFF -DCMAKE_INSTALL_PREFIX=./KDE
-
-    - name: Build ECM
-      run: cmake --build build-extra-cmake-modules --config Release
-
-    - name: Install ECM
-      run: cmake --install build-extra-cmake-modules --prefix ./KDE
-
     - name: Generate Makefiles
-      run: cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_MD4QT_STL_TESTS=ON -DBUILD_MD2HTML_APP=ON -DECM_DIR=./KDE/share/ECM/cmake .
+      run: cmake --preset conan-debug -DENABLE_COVERAGE=ON -DBUILD_MD4QT_STL_TESTS=ON
 
     - name: Build
       run: make

@@ -45,28 +45,8 @@ jobs:
     - name: Install dependencies with Conan
       run: conan install . -s build_type=Debug -of . --build=missing
 
-    - name: Download ECM
-      uses: suisei-cn/actions-download-file@v1
-      with:
-        url: 'https://github.com/KDE/extra-cmake-modules/archive/refs/tags/v6.9.0.zip'
-        target: ./
-
-    - name: Unzip ECM
-      run: unzip v6.9.0.zip
-
-    - run: ls
-
-    - name: Configure ECM
-      run: cmake -S extra-cmake-modules-6.9.0 -B build-extra-cmake-modules -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBUILD_HTML_DOCS=OFF -DBUILD_MAN_DOCS=OFF -DCMAKE_INSTALL_PREFIX=./KDE
-
-    - name: Build ECM
-      run: cmake --build build-extra-cmake-modules --config Release
-
-    - name: Install ECM
-      run: cmake --install build-extra-cmake-modules --prefix ./KDE
-
     - name: Generate Makefiles
-      run: cmake -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_MD4QT_STL_TESTS=ON -DECM_DIR=./KDE/share/ECM/cmake .
+      run: cmake --preset conan-debug -DENABLE_COVERAGE=ON -DBUILD_MD4QT_STL_TESTS=ON -S . -B .
 
     - name: Build
       run: make
@@ -90,7 +70,7 @@ jobs:
 
   windows:
     name: windows
-    runs-on: windows-latest
+    runs-on: windows-2019
 
     strategy:
       fail-fast: true
@@ -116,26 +96,8 @@ jobs:
     - name: Install dependencies with Conan
       run: conan install . -s build_type=Debug -of . --build=missing
 
-    - name: Download ECM
-      uses: suisei-cn/actions-download-file@v1
-      with:
-        url: 'https://github.com/KDE/extra-cmake-modules/archive/refs/tags/v6.9.0.zip'
-        target: ./
-
-    - name: Unzip ECM
-      run: unzip v6.9.0.zip
-
-    - name: Configure ECM
-      run: cmake -S extra-cmake-modules-6.9.0 -B build-extra-cmake-modules -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBUILD_HTML_DOCS=OFF -DBUILD_MAN_DOCS=OFF -DCMAKE_INSTALL_PREFIX=./KDE
-
-    - name: Build ECM
-      run: cmake --build build-extra-cmake-modules --config Release
-
-    - name: Install ECM
-      run: cmake --install build-extra-cmake-modules --prefix ./KDE
-
     - name: Generate Makefiles
-      run: cmake -S . -B . -DCMAKE_BUILD_TYPE=Debug -DBUILD_MD4QT_STL_TESTS=ON -DECM_DIR="KDE/share/ECM/cmake"
+      run: cmake --preset conan-default -DBUILD_MD4QT_STL_TESTS=ON -S . -B .
 
     - name: Build
       run: cmake --build . --config Debug
@@ -145,7 +107,7 @@ jobs:
 
   macos:
     name: macos
-    runs-on: macos-latest
+    runs-on: macos-13
 
     strategy:
       fail-fast: true
@@ -171,26 +133,8 @@ jobs:
     - name: Install dependencies with Conan
       run: conan install . -s build_type=Debug --build=missing -of .
 
-    - name: Download ECM
-      uses: suisei-cn/actions-download-file@v1
-      with:
-        url: 'https://github.com/KDE/extra-cmake-modules/archive/refs/tags/v6.9.0.zip'
-        target: ./
-
-    - name: Unzip ECM
-      run: unzip v6.9.0.zip
-
-    - name: Configure ECM
-      run: cmake -S extra-cmake-modules-6.9.0 -B build-extra-cmake-modules -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBUILD_HTML_DOCS=OFF -DBUILD_MAN_DOCS=OFF -DCMAKE_INSTALL_PREFIX=./KDE
-
-    - name: Build ECM
-      run: cmake --build build-extra-cmake-modules --config Release
-
-    - name: Install ECM
-      run: cmake --install build-extra-cmake-modules --prefix ./KDE
-
     - name: Generate Makefiles
-      run: cmake -DBUILD_MD4QT_STL_TESTS=ON -DCMAKE_BUILD_TYPE=Debug -DECM_DIR=./KDE/share/ECM/cmake .
+      run: cmake --preset conan-debug -DBUILD_MD4QT_STL_TESTS=ON -S . -B .
 
     - name: Build
       run: make
