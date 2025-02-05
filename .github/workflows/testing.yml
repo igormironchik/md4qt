@@ -51,6 +51,8 @@ jobs:
         url: 'https://github.com/KDE/extra-cmake-modules/archive/refs/tags/v6.9.0.zip'
         target: ./
 
+    - run: ls
+
     - name: Unzip ECM
       run: unzip extra-cmake-modules-6.9.0.zip
 
