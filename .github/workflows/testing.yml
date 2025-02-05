@@ -97,7 +97,7 @@ jobs:
       run: conan install . -s build_type=Debug -of . --build=missing
 
     - name: Generate Makefiles
-      run: cmake --preset conan-debug -DCMAKE_BUILD_TYPE=Debug -DBUILD_MD4QT_STL_TESTS=ON -S . -B .
+      run: cmake --preset conan-default -DCMAKE_BUILD_TYPE=Debug -DBUILD_MD4QT_STL_TESTS=ON -S . -B .
 
     - name: Build
       run: cmake --build . --config Debug
