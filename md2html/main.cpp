@@ -1,92 +1,79 @@
 
 /*
-	SPDX-FileCopyrightText: 2022-2024 Igor Mironchik <igor.mironchik@gmail.com>
-	SPDX-License-Identifier: MIT
+    SPDX-FileCopyrightText: 2022-2025 Igor Mironchik <igor.mironchik@gmail.com>
+    SPDX-License-Identifier: MIT
 */
-
-// args-parser include.
-#include <args-parser/all.hpp>
 
 // md4qt include.
 #define MD4QT_QT_SUPPORT
-#include <md4qt/traits.hpp>
-#include <md4qt/parser.hpp>
-#include <md4qt/html.hpp>
+#include <md4qt/html.h>
+#include <md4qt/parser.h>
 
 // Qt include.
+#include <QCommandLineOption>
+#include <QCommandLineParser>
+#include <QCoreApplication>
 #include <QFile>
 #include <QFileInfo>
+#include <QTextStream>
 
-
-using namespace Args;
-using namespace MD;
-
-int main( int argc, char ** argv )
+int main(int argc, char **argv)
 {
-	try {
-		CmdLine cmd( argc, argv );
+    QCoreApplication app(argc, argv);
 
-		cmd.addArgWithFlagAndName( 'm', "markdown", true, true, "Markdown file to convert to HTML." )
-			.addArgWithFlagAndName( 'o', "html", true, true, "Output HTML file name." )
-			.addArgWithFlagAndName( 'r', "recursive", false, false, "Read all linked Markdown files?" )
-			.addHelp( true, argv[ 0 ], "Converter of Markdown to HTML." );
+    QCommandLineParser argParser;
+    argParser.setApplicationDescription(QStringLiteral("Converter of Markdown to HTML."));
+    argParser.addHelpOption();
+    QCommandLineOption markdownArg(QStringList() << QStringLiteral("m") << QStringLiteral("markdown"),
+                                   QStringLiteral("Markdown file to convert to HTML."),
+                                   QStringLiteral("md"));
+    QCommandLineOption htmlArg(QStringList() << QStringLiteral("o") << QStringLiteral("html"),
+                               QStringLiteral("Output HTML file name."),
+                               QStringLiteral("html"));
+    QCommandLineOption recursiveArg(QStringList() << QStringLiteral("r") << QStringLiteral("recursive"), QStringLiteral("Read all linked Markdown files?"));
+    argParser.addOption(markdownArg);
+    argParser.addOption(htmlArg);
+    argParser.addOption(recursiveArg);
 
-		cmd.parse();
+    argParser.process(app);
 
-		const auto markdownFileName = cmd.value( "-m" );
-		const auto htmlFileName = cmd.value( "-o" );
-		const auto recursive = cmd.isDefined( "-r" );
+    const QString markdownFileName = argParser.value(QStringLiteral("m"));
+    const QString htmlFileName = argParser.value(QStringLiteral("o"));
+    const bool recursive = argParser.isSet(QStringLiteral("r"));
 
-		QFileInfo mdFileInfo( markdownFileName );
+    QTextStream outStream(stdout);
 
-		if( mdFileInfo.exists() )
-		{
-			if( mdFileInfo.suffix() == "md" || mdFileInfo.suffix() == "markdown" )
-			{
-				Parser< QStringTrait > parser;
+    QFileInfo mdFileInfo(markdownFileName);
 
-				const auto doc = parser.parse( markdownFileName, recursive );
+    if (mdFileInfo.exists()) {
+        if (mdFileInfo.suffix() == QStringLiteral("md") || mdFileInfo.suffix() == QStringLiteral("markdown")) {
+            MD::Parser<MD::QStringTrait> parser;
 
-				QFile html( htmlFileName );
+            const auto doc = parser.parse(markdownFileName, recursive);
 
-				if( html.open( QIODevice::WriteOnly ) )
-				{
-					const auto content = toHtml( doc );
+            QFile html(htmlFileName);
 
-					html.write( content.toUtf8() );
+            if (html.open(QIODevice::WriteOnly)) {
+                const auto content = MD::toHtml(doc);
 
-					html.close();
-				}
-				else
-				{
-					outStream() << "Unable to write output HTML file.\n";
+                html.write(content.toUtf8());
 
-					return 1;
-				}
-			}
-			else
-			{
-				outStream() << "Wrong file suffix of Markdown file (supported *.md, *.markdown).\n";
+                html.close();
+            } else {
+                outStream << "Unable to write output HTML file.\n";
 
-				return 1;
-			}
-		}
-		else
-		{
-			outStream() << "Input Markdown file is not exist.\n";
+                return 1;
+            }
+        } else {
+            outStream << "Wrong file suffix of Markdown file (supported *.md, *.markdown).\n";
 
-			return 1;
-		}
-	}
-	catch( const HelpHasBeenPrintedException & )
-	{
-	}
-	catch( const BaseException & x )
-	{
-		outStream() << x.desc() << "\n";
+            return 1;
+        }
+    } else {
+        outStream << "Input Markdown file is not exist.\n";
 
-		return 1;
-	}
+        return 1;
+    }
 
-  return 0;
+    return 0;
 }

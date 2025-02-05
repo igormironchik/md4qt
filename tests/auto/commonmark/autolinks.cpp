@@ -1,7 +1,7 @@
 
 /*
-	SPDX-FileCopyrightText: 2022-2024 Igor Mironchik <igor.mironchik@gmail.com>
-	SPDX-License-Identifier: MIT
+    SPDX-FileCopyrightText: 2022-2025 Igor Mironchik <igor.mironchik@gmail.com>
+    SPDX-License-Identifier: MIT
 */
 
 // doctest include.
@@ -10,294 +10,294 @@
 
 // 6.5 Autolinks
 
-TEST_CASE( "593" )
+TEST_CASE("593")
 {
-	const auto doc = load_test( 593 );
+    const auto doc = load_test(593);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
-	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( l->img()->isEmpty() );
-	REQUIRE( l->opts() == MD::TextWithoutFormat );
-	REQUIRE( l->text().size() == 0 );
-	REQUIRE( l->url() == u8"http://foo.bar.baz" );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
+    auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(l->img()->isEmpty());
+    REQUIRE(l->opts() == MD::TextWithoutFormat);
+    REQUIRE(l->text().size() == 0);
+    REQUIRE(l->url() == TRAIT::latin1ToString("http://foo.bar.baz"));
 }
 
-TEST_CASE( "594" )
+TEST_CASE("594")
 {
-	const auto doc = load_test( 594 );
+    const auto doc = load_test(594);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
-	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( l->img()->isEmpty() );
-	REQUIRE( l->opts() == MD::TextWithoutFormat );
-	REQUIRE( l->text().size() == 0 );
-	REQUIRE( l->url() == u8"http://foo.bar.baz/test?q=hello&id=22&boolean" );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
+    auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(l->img()->isEmpty());
+    REQUIRE(l->opts() == MD::TextWithoutFormat);
+    REQUIRE(l->text().size() == 0);
+    REQUIRE(l->url() == TRAIT::latin1ToString("http://foo.bar.baz/test?q=hello&id=22&boolean"));
 }
 
-TEST_CASE( "595" )
+TEST_CASE("595")
 {
-	const auto doc = load_test( 595 );
+    const auto doc = load_test(595);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
-	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( l->img()->isEmpty() );
-	REQUIRE( l->opts() == MD::TextWithoutFormat );
-	REQUIRE( l->text().size() == 0 );
-	REQUIRE( l->url() == u8"irc://foo.bar:2233/baz" );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
+    auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(l->img()->isEmpty());
+    REQUIRE(l->opts() == MD::TextWithoutFormat);
+    REQUIRE(l->text().size() == 0);
+    REQUIRE(l->url() == TRAIT::latin1ToString("irc://foo.bar:2233/baz"));
 }
 
-TEST_CASE( "596" )
+TEST_CASE("596")
 {
-	const auto doc = load_test( 596 );
+    const auto doc = load_test(596);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
-	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( l->img()->isEmpty() );
-	REQUIRE( l->opts() == MD::TextWithoutFormat );
-	REQUIRE( l->text().size() == 0 );
-	REQUIRE( l->url() == u8"MAILTO:FOO@BAR.BAZ" );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
+    auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(l->img()->isEmpty());
+    REQUIRE(l->opts() == MD::TextWithoutFormat);
+    REQUIRE(l->text().size() == 0);
+    REQUIRE(l->url() == TRAIT::latin1ToString("MAILTO:FOO@BAR.BAZ"));
 }
 
-TEST_CASE( "597" )
+TEST_CASE("597")
 {
-	const auto doc = load_test( 597 );
+    const auto doc = load_test(597);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
-	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( l->img()->isEmpty() );
-	REQUIRE( l->opts() == MD::TextWithoutFormat );
-	REQUIRE( l->text().size() == 0 );
-	REQUIRE( l->url() == u8"a+b+c:d" );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
+    auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(l->img()->isEmpty());
+    REQUIRE(l->opts() == MD::TextWithoutFormat);
+    REQUIRE(l->text().size() == 0);
+    REQUIRE(l->url() == TRAIT::latin1ToString("a+b+c:d"));
 }
 
-TEST_CASE( "598" )
+TEST_CASE("598")
 {
-	MESSAGE( "This test is not strict to CommonMark 0.30." );
-	MESSAGE( "Skip for now." );
+    MESSAGE("This test is not strict to CommonMark 0.30.");
+    MESSAGE("Skip for now.");
 }
 
-TEST_CASE( "599" )
+TEST_CASE("599")
 {
-	MESSAGE( "This test is not strict to CommonMark 0.30." );
-	MESSAGE( "Skip for now." );
+    MESSAGE("This test is not strict to CommonMark 0.30.");
+    MESSAGE("Skip for now.");
 }
 
-TEST_CASE( "600" )
+TEST_CASE("600")
 {
-	const auto doc = load_test( 600 );
+    const auto doc = load_test(600);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
-	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( l->img()->isEmpty() );
-	REQUIRE( l->opts() == MD::TextWithoutFormat );
-	REQUIRE( l->text().size() == 0 );
-	REQUIRE( l->url() == u8"localhost:5001/foo" );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
+    auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(l->img()->isEmpty());
+    REQUIRE(l->opts() == MD::TextWithoutFormat);
+    REQUIRE(l->text().size() == 0);
+    REQUIRE(l->url() == TRAIT::latin1ToString("localhost:5001/foo"));
 }
 
-TEST_CASE( "601" )
+TEST_CASE("601")
 {
-	MESSAGE( "This test is not strict to CommonMark due to GitHub's autolinks extension." );
-	MESSAGE( "Skip for now." );
+    MESSAGE("This test is not strict to CommonMark due to GitHub's autolinks extension.");
+    MESSAGE("Skip for now.");
 
-	// const auto doc = load_test( 601 );
+    // const auto doc = load_test( 601 );
 
-	// REQUIRE( doc->isEmpty() == false );
-	// REQUIRE( doc->items().size() == 2 );
+    // REQUIRE( doc->isEmpty() == false );
+    // REQUIRE( doc->items().size() == 2 );
 
-	// REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	// auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	// REQUIRE( p->items().size() == 1 );
-	// REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	// auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	// REQUIRE( t->opts() == MD::TextWithoutFormat );
-	// REQUIRE( t->text() == u8"<http://foo.bar/baz bim>" );
+    // REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+    // auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+    // REQUIRE( p->items().size() == 1 );
+    // REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+    // auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+    // REQUIRE( t->opts() == MD::TextWithoutFormat );
+    // REQUIRE( t->text() == u8"<http://foo.bar/baz bim>" );
 }
 
-TEST_CASE( "602" )
+TEST_CASE("602")
 {
-	MESSAGE( "This test is not strict to CommonMark 0.30." );
-	MESSAGE( "Skip for now." );
+    MESSAGE("This test is not strict to CommonMark 0.30.");
+    MESSAGE("Skip for now.");
 }
 
-TEST_CASE( "603" )
+TEST_CASE("603")
 {
-	const auto doc = load_test( 603 );
+    const auto doc = load_test(603);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
-	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( l->img()->isEmpty() );
-	REQUIRE( l->opts() == MD::TextWithoutFormat );
-	REQUIRE( l->text().size() == 0 );
-	REQUIRE( l->url() == u8"foo@bar.example.com" );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
+    auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(l->img()->isEmpty());
+    REQUIRE(l->opts() == MD::TextWithoutFormat);
+    REQUIRE(l->text().size() == 0);
+    REQUIRE(l->url() == TRAIT::latin1ToString("foo@bar.example.com"));
 }
 
-TEST_CASE( "604" )
+TEST_CASE("604")
 {
-	const auto doc = load_test( 604 );
+    const auto doc = load_test(604);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Link );
-	auto l = static_cast< MD::Link< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( l->img()->isEmpty() );
-	REQUIRE( l->opts() == MD::TextWithoutFormat );
-	REQUIRE( l->text().size() == 0 );
-	REQUIRE( l->url() == u8"foo+special@Bar.baz-bar0.com" );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
+    auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(l->img()->isEmpty());
+    REQUIRE(l->opts() == MD::TextWithoutFormat);
+    REQUIRE(l->text().size() == 0);
+    REQUIRE(l->url() == TRAIT::latin1ToString("foo+special@Bar.baz-bar0.com"));
 }
 
-TEST_CASE( "605" )
+TEST_CASE("605")
 {
-	const auto doc = load_test( 605 );
+    const auto doc = load_test(605);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"<foo+@bar.example.com>" );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(t->opts() == MD::TextWithoutFormat);
+    REQUIRE(t->text() == TRAIT::latin1ToString("<foo+@bar.example.com>"));
 }
 
-TEST_CASE( "606" )
+TEST_CASE("606")
 {
-	const auto doc = load_test( 606 );
+    const auto doc = load_test(606);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"<>" );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(t->opts() == MD::TextWithoutFormat);
+    REQUIRE(t->text() == TRAIT::latin1ToString("<>"));
 }
 
-TEST_CASE( "607" )
+TEST_CASE("607")
 {
-	MESSAGE( "This test is not strict to CommonMark due to GitHub's autolink extension." );
-	MESSAGE( "Skip for now." );
+    MESSAGE("This test is not strict to CommonMark due to GitHub's autolink extension.");
+    MESSAGE("Skip for now.");
 
-	// const auto doc = load_test( 607 );
+    // const auto doc = load_test( 607 );
 
-	// REQUIRE( doc->isEmpty() == false );
-	// REQUIRE( doc->items().size() == 2 );
+    // REQUIRE( doc->isEmpty() == false );
+    // REQUIRE( doc->items().size() == 2 );
 
-	// REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	// auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	// REQUIRE( p->items().size() == 1 );
-	// REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	// auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	// REQUIRE( t->opts() == MD::TextWithoutFormat );
-	// REQUIRE( t->text() == u8"< http://foo.bar >" );
+    // REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+    // auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+    // REQUIRE( p->items().size() == 1 );
+    // REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+    // auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+    // REQUIRE( t->opts() == MD::TextWithoutFormat );
+    // REQUIRE( t->text() == u8"< http://foo.bar >" );
 }
 
-TEST_CASE( "608" )
+TEST_CASE("608")
 {
-	MESSAGE( "This test is not strict to CommonMark 0.30." );
-	MESSAGE( "Skip for now." );
+    MESSAGE("This test is not strict to CommonMark 0.30.");
+    MESSAGE("Skip for now.");
 }
 
-TEST_CASE( "609" )
+TEST_CASE("609")
 {
-	const auto doc = load_test( 609 );
+    const auto doc = load_test(609);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"<foo.bar.baz>" );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(t->opts() == MD::TextWithoutFormat);
+    REQUIRE(t->text() == TRAIT::latin1ToString("<foo.bar.baz>"));
 }
 
-TEST_CASE( "610" )
+TEST_CASE("610")
 {
-	MESSAGE( "This test is not strict to CommonMark due to GitHub's autolink extension." );
-	MESSAGE( "Skip for now." );
+    MESSAGE("This test is not strict to CommonMark due to GitHub's autolink extension.");
+    MESSAGE("Skip for now.");
 
-	// const auto doc = load_test( 610 );
+    // const auto doc = load_test( 610 );
 
-	// REQUIRE( doc->isEmpty() == false );
-	// REQUIRE( doc->items().size() == 2 );
+    // REQUIRE( doc->isEmpty() == false );
+    // REQUIRE( doc->items().size() == 2 );
 
-	// REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	// auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	// REQUIRE( p->items().size() == 1 );
-	// REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	// auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	// REQUIRE( t->opts() == MD::TextWithoutFormat );
-	// REQUIRE( t->text() == u8"http://example.com" );
+    // REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+    // auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+    // REQUIRE( p->items().size() == 1 );
+    // REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+    // auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+    // REQUIRE( t->opts() == MD::TextWithoutFormat );
+    // REQUIRE( t->text() == u8"http://example.com" );
 }
 
-TEST_CASE( "611" )
+TEST_CASE("611")
 {
-	MESSAGE( "This test is not strict to CommonMark due to GitHub's autolink extension." );
-	MESSAGE( "Skip for now." );
+    MESSAGE("This test is not strict to CommonMark due to GitHub's autolink extension.");
+    MESSAGE("Skip for now.");
 
-	// const auto doc = load_test( 611 );
+    // const auto doc = load_test( 611 );
 
-	// REQUIRE( doc->isEmpty() == false );
-	// REQUIRE( doc->items().size() == 2 );
+    // REQUIRE( doc->isEmpty() == false );
+    // REQUIRE( doc->items().size() == 2 );
 
-	// REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	// auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	// REQUIRE( p->items().size() == 1 );
-	// REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	// auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	// REQUIRE( t->opts() == MD::TextWithoutFormat );
-	// REQUIRE( t->text() == u8"foo@bar.example.com" );
+    // REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
+    // auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+    // REQUIRE( p->items().size() == 1 );
+    // REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
+    // auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
+    // REQUIRE( t->opts() == MD::TextWithoutFormat );
+    // REQUIRE( t->text() == u8"foo@bar.example.com" );
 }

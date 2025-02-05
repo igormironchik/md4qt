@@ -1,6 +1,7 @@
 [requires]
 icu/71.1
 uriparser/0.9.7
+extra-cmake-modules/6.2.0
 
 [generators]
 CMakeDeps

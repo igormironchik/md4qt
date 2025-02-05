@@ -1,7 +1,7 @@
 
 /*
-	SPDX-FileCopyrightText: 2022-2024 Igor Mironchik <igor.mironchik@gmail.com>
-	SPDX-License-Identifier: MIT
+    SPDX-FileCopyrightText: 2022-2025 Igor Mironchik <igor.mironchik@gmail.com>
+    SPDX-License-Identifier: MIT
 */
 
 // doctest include.
@@ -10,428 +10,429 @@
 
 // 6.6 Raw HTML
 
-TEST_CASE( "612" )
+TEST_CASE("612")
 {
-	const auto doc = load_test( 612 );
+    const auto doc = load_test(612);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
 
-	REQUIRE( p->items().size() == 3 );
+    REQUIRE(p->items().size() == 3);
 
-	{
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::RawHtml );
-		auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( h->text() == u8"<a>" );
-	}
+    {
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::RawHtml);
+        auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(0).get());
+        REQUIRE(h->text() == TRAIT::latin1ToString("<a>"));
+    }
 
-	{
-		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
-		auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 1 ).get() );
-		REQUIRE( h->text() == u8"<bab>" );
-	}
+    {
+        REQUIRE(p->items().at(1)->type() == MD::ItemType::RawHtml);
+        auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(1).get());
+        REQUIRE(h->text() == TRAIT::latin1ToString("<bab>"));
+    }
 
-	{
-		REQUIRE( p->items().at( 2 )->type() == MD::ItemType::RawHtml );
-		auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 2 ).get() );
-		REQUIRE( h->text() == u8"<c2c>" );
-	}
+    {
+        REQUIRE(p->items().at(2)->type() == MD::ItemType::RawHtml);
+        auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(2).get());
+        REQUIRE(h->text() == TRAIT::latin1ToString("<c2c>"));
+    }
 }
 
-TEST_CASE( "613" )
+TEST_CASE("613")
 {
-	const auto doc = load_test( 613 );
+    const auto doc = load_test(613);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
 
-	REQUIRE( p->items().size() == 2 );
+    REQUIRE(p->items().size() == 2);
 
-	{
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::RawHtml );
-		auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( h->text() == u8"<a/>" );
-	}
+    {
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::RawHtml);
+        auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(0).get());
+        REQUIRE(h->text() == TRAIT::latin1ToString("<a/>"));
+    }
 
-	{
-		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
-		auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 1 ).get() );
-		REQUIRE( h->text() == u8"<b2/>" );
-	}
+    {
+        REQUIRE(p->items().at(1)->type() == MD::ItemType::RawHtml);
+        auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(1).get());
+        REQUIRE(h->text() == TRAIT::latin1ToString("<b2/>"));
+    }
 }
 
-TEST_CASE( "614" )
+TEST_CASE("614")
 {
-	const auto doc = load_test( 614 );
+    const auto doc = load_test(614);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
 
-	REQUIRE( p->items().size() == 2 );
+    REQUIRE(p->items().size() == 2);
 
-	{
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::RawHtml );
-		auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( h->text() == u8"<a  />" );
-	}
+    {
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::RawHtml);
+        auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(0).get());
+        REQUIRE(h->text() == TRAIT::latin1ToString("<a  />"));
+    }
 
-	{
-		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
-		auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 1 ).get() );
-		REQUIRE( h->text() == u8"<b2\ndata=\"foo\" >" );
-	}
+    {
+        REQUIRE(p->items().at(1)->type() == MD::ItemType::RawHtml);
+        auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(1).get());
+        REQUIRE(h->text() == TRAIT::latin1ToString("<b2\ndata=\"foo\" >"));
+    }
 }
 
-TEST_CASE( "615" )
+TEST_CASE("615")
 {
-	const auto doc = load_test( 615 );
+    const auto doc = load_test(615);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
 
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::RawHtml );
-	auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( h->text() == u8"<a foo=\"bar\" bam = 'baz <em>\"</em>'\n"
-										  "_boolean zoop:33=zoop:33 />" );
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::RawHtml);
+    auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(h->text()
+            == TRAIT::latin1ToString("<a foo=\"bar\" bam = 'baz <em>\"</em>'\n"
+                                     "_boolean zoop:33=zoop:33 />"));
 }
 
-TEST_CASE( "616" )
+TEST_CASE("616")
 {
-	const auto doc = load_test( 616 );
+    const auto doc = load_test(616);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 2 );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 2);
 
-	{
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == u8"Foo" );
-	}
+    {
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        REQUIRE(t->opts() == MD::TextWithoutFormat);
+        REQUIRE(t->text() == TRAIT::latin1ToString("Foo "));
+    }
 
-	{
-		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
-		auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 1 ).get() );
-		REQUIRE( h->text() == u8"<responsive-image src=\"foo.jpg\" />" );
-	}
+    {
+        REQUIRE(p->items().at(1)->type() == MD::ItemType::RawHtml);
+        auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(1).get());
+        REQUIRE(h->text() == TRAIT::latin1ToString("<responsive-image src=\"foo.jpg\" />"));
+    }
 }
 
-TEST_CASE( "617" )
+TEST_CASE("617")
 {
-	const auto doc = load_test( 617 );
+    const auto doc = load_test(617);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
 
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"<33> <__>" );
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(t->opts() == MD::TextWithoutFormat);
+    REQUIRE(t->text() == TRAIT::latin1ToString("<33> <__>"));
 }
 
-TEST_CASE( "618" )
+TEST_CASE("618")
 {
-	const auto doc = load_test( 618 );
+    const auto doc = load_test(618);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
 
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"<a h*#ref=\"hi\">" );
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(t->opts() == MD::TextWithoutFormat);
+    REQUIRE(t->text() == TRAIT::latin1ToString("<a h*#ref=\"hi\">"));
 }
 
-TEST_CASE( "619" )
+TEST_CASE("619")
 {
-	const auto doc = load_test( 619 );
+    const auto doc = load_test(619);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
 
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"<a href=\"hi'> <a href=hi'>" );
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(t->opts() == MD::TextWithoutFormat);
+    REQUIRE(t->text() == TRAIT::latin1ToString("<a href=\"hi'> <a href=hi'>"));
 }
 
-TEST_CASE( "620" )
+TEST_CASE("620")
 {
-	const auto doc = load_test( 620 );
+    const auto doc = load_test(620);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 4 );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 4);
 
-	{
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == u8"< a><" );
-	}
+    {
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        REQUIRE(t->opts() == MD::TextWithoutFormat);
+        REQUIRE(t->text() == TRAIT::latin1ToString("< a><"));
+    }
 
-	{
-		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 1 ).get() );
-		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == u8"foo><bar/ >" );
-	}
+    {
+        REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
+        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(1).get());
+        REQUIRE(t->opts() == MD::TextWithoutFormat);
+        REQUIRE(t->text() == TRAIT::latin1ToString("foo><bar/ >"));
+    }
 
-	{
-		REQUIRE( p->items().at( 2 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 2 ).get() );
-		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == u8"<foo bar=baz" );
-	}
+    {
+        REQUIRE(p->items().at(2)->type() == MD::ItemType::Text);
+        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(2).get());
+        REQUIRE(t->opts() == MD::TextWithoutFormat);
+        REQUIRE(t->text() == TRAIT::latin1ToString("<foo bar=baz"));
+    }
 
-	{
-		REQUIRE( p->items().at( 3 )->type() == MD::ItemType::Text );
-		auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 3 ).get() );
-		REQUIRE( t->opts() == MD::TextWithoutFormat );
-		REQUIRE( t->text() == u8"bim!bop />" );
-	}
+    {
+        REQUIRE(p->items().at(3)->type() == MD::ItemType::Text);
+        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(3).get());
+        REQUIRE(t->opts() == MD::TextWithoutFormat);
+        REQUIRE(t->text() == TRAIT::latin1ToString("bim!bop />"));
+    }
 }
 
-TEST_CASE( "621" )
+TEST_CASE("621")
 {
-	const auto doc = load_test( 621 );
+    const auto doc = load_test(621);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
 
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"<a href='bar'title=title>" );
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(t->opts() == MD::TextWithoutFormat);
+    REQUIRE(t->text() == TRAIT::latin1ToString("<a href='bar'title=title>"));
 }
 
-TEST_CASE( "622" )
+TEST_CASE("622")
 {
-	const auto doc = load_test( 622 );
+    const auto doc = load_test(622);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
 
-	REQUIRE( p->items().size() == 2 );
+    REQUIRE(p->items().size() == 2);
 
-	{
-		REQUIRE( p->items().at( 0 )->type() == MD::ItemType::RawHtml );
-		auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 0 ).get() );
-		REQUIRE( h->text() == u8"</a>" );
-	}
+    {
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::RawHtml);
+        auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(0).get());
+        REQUIRE(h->text() == TRAIT::latin1ToString("</a>"));
+    }
 
-	{
-		REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
-		auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 1 ).get() );
-		REQUIRE( h->text() == u8"</foo >" );
-	}
+    {
+        REQUIRE(p->items().at(1)->type() == MD::ItemType::RawHtml);
+        auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(1).get());
+        REQUIRE(h->text() == TRAIT::latin1ToString("</foo >"));
+    }
 }
 
-TEST_CASE( "623" )
+TEST_CASE("623")
 {
-	const auto doc = load_test( 623 );
+    const auto doc = load_test(623);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
 
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"</a href=\"foo\">" );
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(t->opts() == MD::TextWithoutFormat);
+    REQUIRE(t->text() == TRAIT::latin1ToString("</a href=\"foo\">"));
 }
 
-TEST_CASE( "624" )
+TEST_CASE("624")
 {
-	const auto doc = load_test( 624 );
+    const auto doc = load_test(624);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 2 );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 2);
 
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"foo" );
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(t->opts() == MD::TextWithoutFormat);
+    REQUIRE(t->text() == TRAIT::latin1ToString("foo "));
 
-	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
-	auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 1 ).get() );
-	REQUIRE( h->text() == u8"<!-- this is a\ncomment - with hyphen -->" );
+    REQUIRE(p->items().at(1)->type() == MD::ItemType::RawHtml);
+    auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(1).get());
+    REQUIRE(h->text() == TRAIT::latin1ToString("<!-- this is a\ncomment - with hyphen -->"));
 }
 
-TEST_CASE( "625" )
+TEST_CASE("625")
 {
-	MESSAGE( "Outdated. Changed in CommonMark 0.31.2" );
+    MESSAGE("Outdated. Changed in CommonMark 0.31.2");
 }
 
-TEST_CASE( "626" )
+TEST_CASE("626")
 {
-	MESSAGE( "Outdated. Changed in CommonMark 0.31.2" );
+    MESSAGE("Outdated. Changed in CommonMark 0.31.2");
 }
 
-TEST_CASE( "627" )
+TEST_CASE("627")
 {
-	const auto doc = load_test( 627 );
+    const auto doc = load_test(627);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 2 );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 2);
 
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"foo" );
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(t->opts() == MD::TextWithoutFormat);
+    REQUIRE(t->text() == TRAIT::latin1ToString("foo "));
 
-	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
-	auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 1 ).get() );
-	REQUIRE( h->text() == u8"<?php echo $a; ?>" );
+    REQUIRE(p->items().at(1)->type() == MD::ItemType::RawHtml);
+    auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(1).get());
+    REQUIRE(h->text() == TRAIT::latin1ToString("<?php echo $a; ?>"));
 }
 
-TEST_CASE( "628" )
+TEST_CASE("628")
 {
-	const auto doc = load_test( 628 );
+    const auto doc = load_test(628);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 2 );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 2);
 
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"foo" );
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(t->opts() == MD::TextWithoutFormat);
+    REQUIRE(t->text() == TRAIT::latin1ToString("foo "));
 
-	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
-	auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 1 ).get() );
-	REQUIRE( h->text() == u8"<!ELEMENT br EMPTY>" );
+    REQUIRE(p->items().at(1)->type() == MD::ItemType::RawHtml);
+    auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(1).get());
+    REQUIRE(h->text() == TRAIT::latin1ToString("<!ELEMENT br EMPTY>"));
 }
 
-TEST_CASE( "629" )
+TEST_CASE("629")
 {
-	const auto doc = load_test( 629 );
+    const auto doc = load_test(629);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 2 );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 2);
 
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"foo" );
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(t->opts() == MD::TextWithoutFormat);
+    REQUIRE(t->text() == TRAIT::latin1ToString("foo "));
 
-	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
-	auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 1 ).get() );
-	REQUIRE( h->text() == u8"<![CDATA[>&<]]>" );
+    REQUIRE(p->items().at(1)->type() == MD::ItemType::RawHtml);
+    auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(1).get());
+    REQUIRE(h->text() == TRAIT::latin1ToString("<![CDATA[>&<]]>"));
 }
 
-TEST_CASE( "630" )
+TEST_CASE("630")
 {
-	const auto doc = load_test( 630 );
+    const auto doc = load_test(630);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 2 );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 2);
 
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"foo" );
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(t->opts() == MD::TextWithoutFormat);
+    REQUIRE(t->text() == TRAIT::latin1ToString("foo "));
 
-	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
-	auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 1 ).get() );
-	REQUIRE( h->text() == u8"<a href=\"&ouml;\">" );
+    REQUIRE(p->items().at(1)->type() == MD::ItemType::RawHtml);
+    auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(1).get());
+    REQUIRE(h->text() == TRAIT::latin1ToString("<a href=\"&ouml;\">"));
 }
 
-TEST_CASE( "631" )
+TEST_CASE("631")
 {
-	const auto doc = load_test( 631 );
+    const auto doc = load_test(631);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 2 );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 2);
 
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"foo" );
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(t->opts() == MD::TextWithoutFormat);
+    REQUIRE(t->text() == TRAIT::latin1ToString("foo "));
 
-	REQUIRE( p->items().at( 1 )->type() == MD::ItemType::RawHtml );
-	auto h = static_cast< MD::RawHtml< TRAIT >* > ( p->items().at( 1 ).get() );
-	REQUIRE( h->text() == u8"<a href=\"\\*\">" );
+    REQUIRE(p->items().at(1)->type() == MD::ItemType::RawHtml);
+    auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(1).get());
+    REQUIRE(h->text() == TRAIT::latin1ToString("<a href=\"\\*\">"));
 }
 
-TEST_CASE( "632" )
+TEST_CASE("632")
 {
-	const auto doc = load_test( 632 );
+    const auto doc = load_test(632);
 
-	REQUIRE( doc->isEmpty() == false );
-	REQUIRE( doc->items().size() == 2 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-	REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-	auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-	REQUIRE( p->items().size() == 1 );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
 
-	REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-	auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-	REQUIRE( t->opts() == MD::TextWithoutFormat );
-	REQUIRE( t->text() == u8"<a href=\"\"\">" );
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    REQUIRE(t->opts() == MD::TextWithoutFormat);
+    REQUIRE(t->text() == TRAIT::latin1ToString("<a href=\"\"\">"));
 }
