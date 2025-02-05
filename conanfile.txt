@@ -1,7 +1,8 @@
 [requires]
-icu/71.1
-uriparser/0.9.7
+icu/76.1
+uriparser/0.9.8
 extra-cmake-modules/6.2.0
 
 [generators]
 CMakeDeps
+CMakeToolchain
