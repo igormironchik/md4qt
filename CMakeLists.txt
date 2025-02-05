@@ -30,6 +30,9 @@ include(KDECMakeSettings)
 include(KDECompilerSettings NO_POLICY_SCOPE)
 include(ECMSetupVersion)
 
+set(CMAKE_WIN32_EXECUTABLE FALSE)
+set(CMAKE_MACOSX_BUNDLE FALSE)
+
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release"
          CACHE STRING "Choose the type of build."
