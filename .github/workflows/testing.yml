@@ -135,7 +135,7 @@ jobs:
       run: cmake --install build-extra-cmake-modules --prefix ./KDE
 
     - name: Generate Makefiles
-      run: cmake -S . -B . -DCMAKE_BUILD_TYPE=Debug -DBUILD_MD4QT_STL_TESTS=ON -DECM_DIR=./KDE/share/ECM/cmake
+      run: cmake -S . -B . -DCMAKE_BUILD_TYPE=Debug -DBUILD_MD4QT_STL_TESTS=ON -DECM_DIR="KDE/share/ECM/cmake"
 
     - name: Build
       run: cmake --build . --config Debug
