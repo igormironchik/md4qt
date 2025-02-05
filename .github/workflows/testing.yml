@@ -51,10 +51,10 @@ jobs:
         url: 'https://github.com/KDE/extra-cmake-modules/archive/refs/tags/v6.9.0.zip'
         target: ./
 
-    - run: ls
-
     - name: Unzip ECM
-      run: unzip extra-cmake-modules-6.9.0.zip
+      run: unzip v6.9.0.zip
+
+    - run: ls
 
     - name: Configure ECM
       run: cmake -S extra-cmake-modules-6.9.0 -B build-extra-cmake-modules -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBUILD_HTML_DOCS=OFF -DBUILD_MAN_DOCS=OFF -DCMAKE_INSTALL_PREFIX=./KDE
@@ -123,7 +123,7 @@ jobs:
         target: ./
 
     - name: Unzip ECM
-      run: unzip extra-cmake-modules-6.9.0.zip
+      run: unzip v6.9.0.zip
 
     - name: Configure ECM
       run: cmake -S extra-cmake-modules-6.9.0 -B build-extra-cmake-modules -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBUILD_HTML_DOCS=OFF -DBUILD_MAN_DOCS=OFF -DCMAKE_INSTALL_PREFIX=./KDE
@@ -178,7 +178,7 @@ jobs:
         target: ./
 
     - name: Unzip ECM
-      run: unzip extra-cmake-modules-6.9.0.zip
+      run: unzip v6.9.0.zip
 
     - name: Configure ECM
       run: cmake -S extra-cmake-modules-6.9.0 -B build-extra-cmake-modules -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBUILD_HTML_DOCS=OFF -DBUILD_MAN_DOCS=OFF -DCMAKE_INSTALL_PREFIX=./KDE
