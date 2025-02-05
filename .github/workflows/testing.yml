@@ -46,7 +46,7 @@ jobs:
       run: conan install . -s build_type=Debug -of . --build=missing
 
     - name: Generate Makefiles
-      run: cmake --preset conan-debug -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_MD4QT_STL_TESTS=ON .
+      run: cmake -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_MD4QT_STL_TESTS=ON -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake .
 
     - name: Build
       run: make
@@ -97,7 +97,7 @@ jobs:
       run: conan install . -s build_type=Debug -of . --build=missing
 
     - name: Generate Makefiles
-      run: cmake --preset conan-default -DCMAKE_BUILD_TYPE=Debug -DBUILD_MD4QT_STL_TESTS=ON -S . -B .
+      run: cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_MD4QT_STL_TESTS=ON -S . -B . -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
 
     - name: Build
       run: cmake --build . --config Debug
@@ -134,7 +134,7 @@ jobs:
       run: conan install . -s build_type=Debug --build=missing -of .
 
     - name: Generate Makefiles
-      run: cmake --preset conan-debug -DBUILD_MD4QT_STL_TESTS=ON -DCMAKE_BUILD_TYPE=Debug .
+      run: cmake -DBUILD_MD4QT_STL_TESTS=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake .
 
     - name: Build
       run: make
