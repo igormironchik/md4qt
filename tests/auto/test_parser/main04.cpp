@@ -1585,24 +1585,14 @@ TEST_CASE("119")
     auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/119.md"));
 
     REQUIRE(doc->isEmpty() == false);
-    REQUIRE(doc->items().size() == 3);
+    REQUIRE(doc->items().size() == 2);
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
         auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<a href=\"www.google.com\">\nGoogle\n</a>"));
+        REQUIRE(h->text() == TRAIT::latin1ToString("<a href=\"www.google.com\">\nGoogle\n</a>\n<pre>\n</pre>"));
         REQUIRE(h->startColumn() == 0);
         REQUIRE(h->startLine() == 0);
-        REQUIRE(h->endColumn() == 3);
-        REQUIRE(h->endLine() == 2);
-    }
-
-    {
-        REQUIRE(doc->items().at(2)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(2).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<pre>\n</pre>"));
-        REQUIRE(h->startColumn() == 0);
-        REQUIRE(h->startLine() == 3);
         REQUIRE(h->endColumn() == 5);
         REQUIRE(h->endLine() == 4);
     }

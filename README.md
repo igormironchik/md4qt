@@ -5,10 +5,6 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-> [!IMPORTANT]
->
-> Development of `md4qt` moved to https://invent.kde.org/libraries/md4qt
-
 <img src="https://kde.org/stuff/clipart/logo/kde-logo-blue-transparent-source.svg" width="20%" align="right">
 
 `md4qt` is a header-only C++ library for parsing Markdown.
@@ -93,8 +89,8 @@ major extensions and sugar and cherry on the cake.
 | --- | --- |
 | [cmark-gfm](https://github.com/github/cmark-gfm) | 0.23 ms |
 | [markdown-it (Rust)](https://github.com/markdown-it-rust/markdown-it) | 2.24 ms |
-| `md4qt` with `Qt6` | 2.9 ms |
-| `md4qt` with `Qt6` without `GitHub` auto-links extension | 2.5 ms |
+| `md4qt` with `Qt6` | 3.1 ms |
+| `md4qt` with `Qt6` without `GitHub` auto-links extension | 2.6 ms |
 
 > *This measurement done with test file in [markdown-it (Rust)](https://github.com/markdown-it-rust/markdown-it)*
 >

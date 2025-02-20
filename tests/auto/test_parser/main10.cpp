@@ -307,3 +307,201 @@ TEST_CASE("288")
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
     REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
 }
+
+/*
+<!--
+```
+``` -->
+
+# Head
+
+*/
+TEST_CASE("289")
+{
+    MD::Parser<TRAIT> parser;
+
+    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/289.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 3);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
+    REQUIRE(doc->items().at(2)->type() == MD::ItemType::Heading);
+}
+
+/*
+<pre>
+
+```
+```
+
+</pre>
+
+# Heading
+
+*/
+TEST_CASE("290")
+{
+    MD::Parser<TRAIT> parser;
+
+    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/290.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 3);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
+    REQUIRE(doc->items().at(2)->type() == MD::ItemType::Heading);
+}
+
+/*
+<?
+
+```
+```
+
+?>
+
+# Heading
+
+*/
+TEST_CASE("291")
+{
+    MD::Parser<TRAIT> parser;
+
+    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/291.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 3);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
+    REQUIRE(doc->items().at(2)->type() == MD::ItemType::Heading);
+}
+
+/*
+<!a
+
+```
+```
+
+>
+
+# Heading
+
+*/
+TEST_CASE("292")
+{
+    MD::Parser<TRAIT> parser;
+
+    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/292.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 3);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
+    REQUIRE(doc->items().at(2)->type() == MD::ItemType::Heading);
+}
+
+/*
+<![CDATA[
+
+```
+```
+
+]]>
+
+# Heading
+
+*/
+TEST_CASE("293")
+{
+    MD::Parser<TRAIT> parser;
+
+    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/293.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 3);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
+    REQUIRE(doc->items().at(2)->type() == MD::ItemType::Heading);
+}
+
+/*
+<div>
+```
+```
+
+# Heading
+
+*/
+TEST_CASE("294")
+{
+    MD::Parser<TRAIT> parser;
+
+    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/294.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 3);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
+    REQUIRE(doc->items().at(2)->type() == MD::ItemType::Heading);
+}
+
+/*
+<a>
+```
+```
+
+# Heading
+
+*/
+TEST_CASE("295")
+{
+    MD::Parser<TRAIT> parser;
+
+    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/295.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 3);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
+    REQUIRE(doc->items().at(2)->type() == MD::ItemType::Heading);
+}
+
+/*
+> <div>
+> ```
+
+# Heading
+
+*/
+TEST_CASE("296")
+{
+    MD::Parser<TRAIT> parser;
+
+    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/296.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 3);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Blockquote);
+    auto b = static_cast<MD::Blockquote<TRAIT>*>(doc->items().at(1).get());
+    REQUIRE(b->items().size() == 1);
+    REQUIRE(b->items().at(0)->type() == MD::ItemType::RawHtml);
+    REQUIRE(doc->items().at(2)->type() == MD::ItemType::Heading);
+}
+
+/*
+> <div>
+```
+code
+```
+# Heading
+
+*/
+TEST_CASE("297")
+{
+    MD::Parser<TRAIT> parser;
+
+    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/297.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 4);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Blockquote);
+    auto b = static_cast<MD::Blockquote<TRAIT>*>(doc->items().at(1).get());
+    REQUIRE(b->items().size() == 1);
+    REQUIRE(b->items().at(0)->type() == MD::ItemType::RawHtml);
+    REQUIRE(doc->items().at(2)->type() == MD::ItemType::Code);
+    REQUIRE(doc->items().at(3)->type() == MD::ItemType::Heading);
+}
