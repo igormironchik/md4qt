@@ -1474,6 +1474,28 @@ public:
         //! style delimiters, but one closing delimiter is in the middle.
         bool fullyOptimizeParagraphs = true);
 
+    //! \return Parsed Markdown document.
+    std::shared_ptr<Document<Trait>>
+    parse(
+        //! File name of the Markdown document (full path).
+        const typename Trait::String &fileName,
+        //! Absolute path to the working directory for the document.
+        //! This path will be used to resolve local links.
+        //! \warning This path should be in \p fileName path.
+        const typename Trait::String &workingDirectory,
+        //! Should parsing be recursive? If recursive all links to existing Markdown
+        //! files will be parsed and presented in the returned document.
+        bool recursive = true,
+        //! Allowed extensions for Markdonw document files. If Markdown file doesn't
+        //! have given extension it will be ignored.
+        const typename Trait::StringList &ext = {Trait::latin1ToString("md"), Trait::latin1ToString("markdown")},
+        //! Make full optimization, or just semi one. In full optimization
+        //! text items with one style but with some closing delimiters
+        //! in the middle will be concatenated in one, like in **text* text*,
+        //! here in full optimization will be "text text" with 2 open/close
+        //! style delimiters, but one closing delimiter is in the middle.
+        bool fullyOptimizeParagraphs = true);
+
     //! Add text plugin.
     void
     addTextPlugin(
@@ -1504,7 +1526,8 @@ private:
               bool recursive,
               std::shared_ptr<Document<Trait>> doc,
               const typename Trait::StringList &ext,
-              typename Trait::StringList *parentLinks = nullptr);
+              typename Trait::StringList *parentLinks = nullptr,
+              const typename Trait::String &workingDirectory = {});
 
     void
     parseStream(typename Trait::TextStream &stream,
@@ -1513,7 +1536,8 @@ private:
                 bool recursive,
                 std::shared_ptr<Document<Trait>> doc,
                 const typename Trait::StringList &ext,
-                typename Trait::StringList *parentLinks = nullptr);
+                typename Trait::StringList *parentLinks = nullptr,
+                const typename Trait::String &workingDirectory = {});
 
     void
     clearCache();
@@ -2150,6 +2174,43 @@ Parser<Trait>::parse(typename Trait::TextStream &stream,
     std::shared_ptr<Document<Trait>> doc(new Document<Trait>);
 
     parseStream(stream, path, fileName, false, doc, typename Trait::StringList());
+
+    clearCache();
+
+    return doc;
+}
+
+template<class Trait>
+inline std::shared_ptr<Document<Trait>>
+Parser<Trait>::parse(const typename Trait::String &fileName,
+                     const typename Trait::String &workingDirectory,
+                     bool recursive,
+                     const typename Trait::StringList &ext,
+                     bool fullyOptimizeParagraphs)
+{
+    m_fullyOptimizeParagraphs = fullyOptimizeParagraphs;
+
+    std::shared_ptr<Document<Trait>> doc(new Document<Trait>);
+
+    typename Trait::String wd;
+    auto i = workingDirectory.length() - 1;
+
+    while (i > 0) {
+        if (workingDirectory[i] != Trait::latin1ToChar('\\') &&
+            workingDirectory[i] != Trait::latin1ToChar('/')) {
+            break;
+        } else {
+            --i;
+        }
+    }
+
+    if (i == 0 && workingDirectory[i] == Trait::latin1ToChar('/')) {
+        wd = Trait::latin1ToString("/");
+    } else if (i > 0) {
+        wd = workingDirectory.sliced(0, i + 1);
+    }
+
+    parseFile(fileName, recursive, doc, ext, nullptr, wd);
 
     clearCache();
 
@@ -3159,7 +3220,8 @@ Parser<QStringTrait>::parseFile(const QString &fileName,
                                 bool recursive,
                                 std::shared_ptr<Document<QStringTrait>> doc,
                                 const QStringList &ext,
-                                QStringList *parentLinks)
+                                QStringList *parentLinks,
+                                const QString &workingDirectory)
 {
     QFileInfo fi(fileName);
 
@@ -3170,7 +3232,22 @@ Parser<QStringTrait>::parseFile(const QString &fileName,
             QTextStream s(f.readAll());
             f.close();
 
-            parseStream(s, fi.absolutePath(), fi.fileName(), recursive, doc, ext, parentLinks);
+            auto wd = fi.absolutePath();
+            auto fn = fi.fileName();
+
+            if (!workingDirectory.isEmpty() && wd.contains(workingDirectory)) {
+                QFileInfo folder(workingDirectory);
+
+                if (folder.exists() && folder.isDir()) {
+                    wd = folder.absoluteFilePath();
+
+                    auto tmp = fi.absoluteFilePath();
+                    fn = tmp.remove(wd);
+                    fn.removeAt(0);
+                }
+            }
+
+            parseStream(s, wd, fn, recursive, doc, ext, parentLinks, workingDirectory);
         }
     }
 }
@@ -3185,7 +3262,8 @@ Parser<UnicodeStringTrait>::parseFile(const UnicodeString &fileName,
                                       bool recursive,
                                       std::shared_ptr<Document<UnicodeStringTrait>> doc,
                                       const std::vector<UnicodeString> &ext,
-                                      std::vector<UnicodeString> *parentLinks)
+                                      std::vector<UnicodeString> *parentLinks,
+                                      const UnicodeString &workingDirectory)
 {
     if (UnicodeStringTrait::fileExists(fileName)) {
         std::string fn;
@@ -3204,16 +3282,34 @@ Parser<UnicodeStringTrait>::parseFile(const UnicodeString &fileName,
 
                 if (file.good()) {
                     const auto fileNameS = path.filename().u8string();
-                    auto workingDirectory = path.remove_filename().u8string();
+                    auto wd = path.remove_filename().u8string();
+                    auto ufn = UnicodeString::fromUTF8(fileNameS);
 
-                    if (!workingDirectory.empty()) {
-                        workingDirectory.erase(workingDirectory.size() - 1, 1);
+                    if (!wd.empty()) {
+                        wd.erase(wd.size() - 1, 1);
                     }
 
-                    std::replace(workingDirectory.begin(), workingDirectory.end(), '\\', '/');
+                    if (!workingDirectory.isEmpty() &&
+                        UnicodeStringTrait::String(UnicodeString::fromUTF8(wd)).contains(workingDirectory)) {
+                        std::string folderPath;
+                        workingDirectory.toUTF8String(folderPath);
+                        auto folder = std::filesystem::directory_entry(folderPath);
 
-                    parseStream(file, UnicodeString::fromUTF8(workingDirectory),
-                        UnicodeString::fromUTF8(fileNameS), recursive, doc, ext, parentLinks);
+                        if (folder.exists() && folder.is_directory()) {
+                            auto tmp = UnicodeString::fromUTF8(
+                                        std::filesystem::canonical(std::filesystem::u8path(fn)).u8string());
+                            path = std::filesystem::canonical(folder.path());
+                            wd = path.u8string();
+
+                            ufn = tmp.findAndReplace(UnicodeString::fromUTF8(wd), {});
+                            ufn.remove(0, 1);
+                        }
+                    }
+
+                    std::replace(wd.begin(), wd.end(), '\\', '/');
+
+                    parseStream(file, UnicodeString::fromUTF8(wd), ufn,
+                                recursive, doc, ext, parentLinks, workingDirectory);
 
                     file.close();
                 }
@@ -3258,7 +3354,8 @@ Parser<Trait>::parseStream(typename Trait::TextStream &s,
                            bool recursive,
                            std::shared_ptr<Document<Trait>> doc,
                            const typename Trait::StringList &ext,
-                           typename Trait::StringList *parentLinks)
+                           typename Trait::StringList *parentLinks,
+                           const typename Trait::String &workingDirectory)
 {
     typename Trait::StringList linksToParse;
 
@@ -3315,7 +3412,7 @@ Parser<Trait>::parseStream(typename Trait::TextStream &s,
                     doc->appendItem(std::shared_ptr<PageBreak<Trait>>(new PageBreak<Trait>));
                 }
 
-                parseFile(nextFileName, recursive, doc, ext, &linksToParse);
+                parseFile(nextFileName, recursive, doc, ext, &linksToParse, workingDirectory);
             }
         }
 
@@ -3700,7 +3797,7 @@ stringToLabel(const typename Trait::String &s)
 
         if (c.isLetter() || c.isDigit() || c == Trait::latin1ToChar('-') ||
             c == Trait::latin1ToChar('_')) {
-            res.push_back(c.toLower());
+            res.push_back(c);
         } else if (c.isSpace()) {
             res.push_back(Trait::latin1ToString("-"));
         }
@@ -3900,17 +3997,24 @@ Parser<Trait>::parseHeading(MdBlock<Trait> &fr,
 
         if (h->isLabeled()) {
             doc->insertLabeledHeading(h->label(), h);
+            h->labelVariants().push_back(h->label());
         } else {
             typename Trait::String label = Trait::latin1ToString("#") +
                 paragraphToLabel(h->text().get());
 
-            label += Trait::latin1ToString("/") +
+            const auto path = Trait::latin1ToString("/") +
                 (!workingPath.isEmpty() ? workingPath + Trait::latin1ToString("/") :
                     Trait::latin1ToString("")) + fileName;
 
-            h->setLabel(label);
+            h->setLabel(label + path);
+            h->labelVariants().push_back(h->label());
 
-            doc->insertLabeledHeading(label, h);
+            doc->insertLabeledHeading(label + path, h);
+
+            if (label != label.toLower()) {
+                doc->insertLabeledHeading(label.toLower() + path, h);
+                h->labelVariants().push_back(label.toLower() + path);
+            }
         }
 
         parent->appendItem(h);
@@ -5683,8 +5787,10 @@ Parser<Trait>::finishRule6HtmlTag(typename Delims::iterator it,
                                   typename Delims::iterator last,
                                   TextParsingOpts<Trait> &po)
 {
-    po.m_html.m_onLine = (it != last ?
-        it->m_pos == skipSpaces<Trait>(0, po.m_fr.m_data[it->m_line].first.asString()) : true);
+    if (!po.m_html.m_onLine) {
+        po.m_html.m_onLine = (it != last ?
+            it->m_pos == skipSpaces<Trait>(0, po.m_fr.m_data[it->m_line].first.asString()) : true);
+    }
 
     if (po.m_html.m_onLine) {
         eatRawHtmlTillEmptyLine(it, last, po.m_line, po.m_pos, po, 6, true, true);
@@ -6207,43 +6313,35 @@ Parser<Trait>::readTextBetweenSquareBrackets(typename Delims::iterator start,
             return {{{po.m_fr.m_data.at(start->m_line).first.sliced(p, n),
                     {po.m_fr.m_data.at(start->m_line).second.m_lineNumber}}}, it};
         } else {
-            if (it->m_line - start->m_line < 3) {
-                typename MdBlock<Trait>::Data res;
-                res.push_back({po.m_fr.m_data.at(start->m_line).first.sliced(
-                    start->m_pos + start->m_len), po.m_fr.m_data.at(start->m_line).second});
+            typename MdBlock<Trait>::Data res;
+            res.push_back({po.m_fr.m_data.at(start->m_line).first.sliced(
+                start->m_pos + start->m_len), po.m_fr.m_data.at(start->m_line).second});
 
-                long long int i = start->m_line + 1;
+            long long int i = start->m_line + 1;
 
-                for (; i <= it->m_line; ++i) {
-                    if (i == it->m_line) {
-                        res.push_back({po.m_fr.m_data.at(i).first.sliced(0, it->m_pos),
-                            po.m_fr.m_data.at(i).second});
-                    } else {
-                        res.push_back({po.m_fr.m_data.at(i).first, po.m_fr.m_data.at(i).second});
-                    }
+            for (; i <= it->m_line; ++i) {
+                if (i == it->m_line) {
+                    res.push_back({po.m_fr.m_data.at(i).first.sliced(0, it->m_pos),
+                        po.m_fr.m_data.at(i).second});
+                } else {
+                    res.push_back({po.m_fr.m_data.at(i).first, po.m_fr.m_data.at(i).second});
                 }
-
-                if (pos) {
-                    long long int startPos, startLine, endPos, endLine;
-                    std::tie(startPos, startLine) = nextPosition(po.m_fr,
-                                                                 po.m_fr.m_data[start->m_line].first.virginPos(
-                                                                    start->m_pos + start->m_len - 1),
-                                                                 po.m_fr.m_data[start->m_line].second.m_lineNumber);
-                    std::tie(endPos, endLine) =
-                        prevPosition(po.m_fr, po.m_fr.m_data[it->m_line].first.virginPos(it->m_pos),
-                            po.m_fr.m_data[it->m_line].second.m_lineNumber);
-
-                    *pos = {startPos, startLine, endPos, endLine};
-                }
-
-                return {res, it};
-            } else {
-                if (!doNotCreateTextOnFail) {
-                    makeText(start->m_line, start->m_pos + start->m_len, po);
-                }
-
-                return {{}, start};
             }
+
+            if (pos) {
+                long long int startPos, startLine, endPos, endLine;
+                std::tie(startPos, startLine) = nextPosition(po.m_fr,
+                                                             po.m_fr.m_data[start->m_line].first.virginPos(
+                                                                start->m_pos + start->m_len - 1),
+                                                             po.m_fr.m_data[start->m_line].second.m_lineNumber);
+                std::tie(endPos, endLine) =
+                    prevPosition(po.m_fr, po.m_fr.m_data[it->m_line].first.virginPos(it->m_pos),
+                        po.m_fr.m_data[it->m_line].second.m_lineNumber);
+
+                *pos = {startPos, startLine, endPos, endLine};
+            }
+
+            return {res, it};
         }
     } else {
         if (!doNotCreateTextOnFail) {
@@ -6485,7 +6583,7 @@ Parser<Trait>::makeLink(const typename Trait::String &url,
         link->p()->appendItem(html.m_html);
     }
 
-    link->setText(toSingleLine(text));
+    link->setText(toSingleLine(removeBackslashes<Trait>(text)));
     link->setStartColumn(po.m_fr.m_data.at(startLine).first.virginPos(startPos));
     link->setStartLine(po.m_fr.m_data.at(startLine).second.m_lineNumber);
     link->setEndColumn(po.m_fr.m_data.at(lastLine).first.virginPos(lastPos - 1));
@@ -6525,7 +6623,7 @@ Parser<Trait>::createShortcutLink(const typename MdBlock<Trait>::Data &text,
             const auto isLinkTextEmpty = toSingleLine(linkText).isEmpty();
 
             const auto link = makeLink(u,
-                                       removeBackslashes<Trait>(isLinkTextEmpty ? text : linkText),
+                                       (isLinkTextEmpty ? text : linkText),
                                        po,
                                        doNotCreateTextOnFail,
                                        startLine,
@@ -7215,7 +7313,7 @@ Parser<Trait>::checkForLink(typename Delims::iterator it,
 
                 if (ok) {
                     const auto link = makeLink(url,
-                                               removeBackslashes<Trait>(text),
+                                               text,
                                                po,
                                                false,
                                                start->m_line,
@@ -8436,12 +8534,18 @@ makeHeading(std::shared_ptr<Block<Trait>> parent,
         }
 
         if (!label.first.isEmpty()) {
-            label.first += Trait::latin1ToString("/") + (!workingPath.isEmpty() ?
+            const auto path = Trait::latin1ToString("/") + (!workingPath.isEmpty() ?
                 workingPath + Trait::latin1ToString("/") : typename Trait::String()) + fileName;
 
-            h->setLabel(label.first);
+            h->setLabel(label.first + path);
 
-            doc->insertLabeledHeading(label.first, h);
+            doc->insertLabeledHeading(label.first + path, h);
+            h->labelVariants().push_back(h->label());
+
+            if (label.first != label.first.toLower()) {
+                doc->insertLabeledHeading(label.first.toLower() + path, h);
+                h->labelVariants().push_back(label.first.toLower() + path);
+            }
         }
 
         parent->appendItem(h);
@@ -9437,7 +9541,7 @@ Parser<Trait>::parseListItem(MdBlock<Trait> &fr,
         item->setChecked(checked);
     }
 
-    bool fensedCode = false;
+    bool fencedCode = false;
     typename Trait::String startOfCode;
     bool wasEmptyLine = false;
 
@@ -9501,23 +9605,23 @@ Parser<Trait>::parseListItem(MdBlock<Trait> &fr,
 
     if (processHtml(std::prev(it)) == -2) {
         for (auto last = fr.m_data.end(); it != last; ++it, ++pos) {
-            if (!fensedCode) {
-                fensedCode = isCodeFences<Trait>(it->first.asString().startsWith(
+            if (!fencedCode) {
+                fencedCode = isCodeFences<Trait>(it->first.asString().startsWith(
                     typename Trait::String(indent, Trait::latin1ToChar(' '))) ?
                         it->first.asString().sliced(indent) : it->first.asString());
 
-                if (fensedCode) {
+                if (fencedCode) {
                     startOfCode = startSequence<Trait>(it->first.asString());
                 }
-            } else if (fensedCode &&
+            } else if (fencedCode &&
                        isCodeFences<Trait>(it->first.asString().startsWith(
                             typename Trait::String(indent, Trait::latin1ToChar(' '))) ?
                                 it->first.asString().sliced(indent) : it->first.asString(),
                             true) && startSequence<Trait>(it->first.asString()).contains(startOfCode)) {
-                fensedCode = false;
+                fencedCode = false;
             }
 
-            if (!fensedCode) {
+            if (!fencedCode) {
                 long long int newIndent = 0;
                 bool ok = false;
 
@@ -9573,7 +9677,26 @@ Parser<Trait>::parseListItem(MdBlock<Trait> &fr,
                                 wasEmptyLine = false;
                             }
 
-                            if (ok || ns >= indent + newIndent || ns == it->first.length() || !wasEmptyLine) {
+                            auto currentStr = it->first.asString().startsWith(
+                                typename Trait::String(indent, Trait::latin1ToChar(' '))) ?
+                                    it->first.sliced(indent) : it->first;
+
+                            const auto type = whatIsTheLine(currentStr);
+
+                            bool mayBreak = false;
+
+                            switch (type) {
+                            case BlockType::Code:
+                            case BlockType::Blockquote:
+                            case BlockType::Heading:
+                                mayBreak = true;
+                                break;
+
+                            default:
+                                break;
+                            }
+
+                            if (ok || ns >= indent + newIndent || ns == it->first.length() || (!wasEmptyLine && !mayBreak)) {
                                 nestedList.push_back(*it);
                             } else {
                                 break;

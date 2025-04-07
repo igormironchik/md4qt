@@ -94,7 +94,7 @@ TEST_CASE("paragraph_to_label")
         t->setEndLine(0);
         p.appendItem(t);
 
-        REQUIRE(MD::paragraphToLabel(&p) == TRAIT::latin1ToString("icu"));
+        REQUIRE(MD::paragraphToLabel(&p) == TRAIT::latin1ToString("ICU"));
     }
 
     {
@@ -124,7 +124,7 @@ TEST_CASE("paragraph_to_label")
         t->setEndLine(1);
         p.appendItem(t);
 
-        REQUIRE(MD::paragraphToLabel(&p) == TRAIT::latin1ToString("icutext"));
+        REQUIRE(MD::paragraphToLabel(&p) == TRAIT::latin1ToString("ICUtext"));
     }
 
     {

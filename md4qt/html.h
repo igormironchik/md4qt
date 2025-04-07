@@ -439,13 +439,18 @@ protected:
 
         if (std::find(this->m_anchors.cbegin(), this->m_anchors.cend(), url) != this->m_anchors.cend()) {
             url = Trait::latin1ToString("#") + url;
-        } else if (url.startsWith(Trait::latin1ToString("#")) &&
-                   this->m_doc->labeledHeadings().find(url) == this->m_doc->labeledHeadings().cend()) {
-            auto path = static_cast<Anchor<Trait> *>(this->m_doc->items().at(0).get())->label();
-            const auto sp = path.lastIndexOf(Trait::latin1ToString("/"));
-            path.remove(sp, path.length() - sp);
-            const auto p = url.indexOf(path) - 1;
-            url.remove(p, url.length() - p);
+        } else if (url.startsWith(Trait::latin1ToString("#"))) {
+            const auto it = this->m_doc->labeledHeadings().find(url);
+
+            if (it == this->m_doc->labeledHeadings().cend()) {
+                auto path = static_cast<Anchor<Trait> *>(this->m_doc->items().at(0).get())->label();
+                const auto sp = path.lastIndexOf(Trait::latin1ToString("/"));
+                path.remove(sp, path.length() - sp);
+                const auto p = url.indexOf(path) - 1;
+                url.remove(p, url.length() - p);
+            } else {
+                url = it->second->label();
+            }
         }
 
         if (!m_justCollectFootnoteRefs) {

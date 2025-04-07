@@ -337,7 +337,7 @@ TEST_CASE("017")
     auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/017.md")), false, {}, false);
     const TRAIT::String required = TRAIT::latin1ToString(
                               "\n<ul dir=\"auto\">\n<li>\n<p dir=\"auto\">list</p>\n"
-                              "<h1 id=\"heading/")
+                              "<h1 id=\"Heading/")
         + path
         + TRAIT::latin1ToString(
                               "\" dir=\"auto\">Heading</h1>\n\n"

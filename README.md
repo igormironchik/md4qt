@@ -1,5 +1,5 @@
 <!--
-	SPDX-FileCopyrightText: 2022-2024 Igor Mironchik <igor.mironchik@gmail.com>
+	SPDX-FileCopyrightText: 2022-2025 Igor Mironchik <igor.mironchik@gmail.com>
 	SPDX-License-Identifier: MIT
 -->
 
@@ -106,40 +106,9 @@ Markdown, so keep it in mind.
 
 # Known issues
 
-* In contrast to CommonMark, `md4qt` has one difference. If in list item first element is HTML
-CommonMark doesn't apply rule to lazy continuation lines as this is not a paragraph,
-whereas `md4qt` does so. For example.
-
-  ```md
-  * <!--
-  -->
-  ```
-
-  In CommonMark will be.
-
-  ```html
-  <ul>
-  <li>
-  <!--
-  </li>
-  </ul>
-  <p>--&gt;</p>
-  ```
-
-  And in `md4qt` it will be.
-
-  ```html
-  <ul>
-  <li>
-  <!--
-  -->
-  </li>
-  </ul>
-  ```
-
-  I know about this difference. And I decided to keep it. But if somebody
-  will provide compelling reasons to do exactly as in CommonMark in this case, I will
-  work with this question.
+You can find a list of know issues [here](./known_issues.md). These issues are controversial
+a little, so at this time they exists as is in `md4qt`. But if you'd like to see any of them
+resolved, welcome to discussion.
 
 # Q/A
 

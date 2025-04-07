@@ -11,6 +11,7 @@
 
 // C++ include.
 #include <memory>
+#include <utility>
 
 namespace MD
 {
@@ -729,9 +730,12 @@ public:
         h->setLabel(m_label);
         h->setDelims(m_delims);
         h->setLabelPos(m_labelPos);
+        h->setLabelVariants(m_labelVariants);
 
         if (doc && isLabeled())
-            doc->insertLabeledHeading(m_label, h);
+            for (const auto &label : std::as_const(m_labelVariants)) {
+                doc->insertLabeledHeading(label, h);
+            }
 
         return h;
     }
@@ -811,6 +815,27 @@ public:
         m_labelPos = p;
     }
 
+    //! Type of a vector of labels.
+    using LabelsVector = typename Trait::template Vector<typename Trait::String>;
+
+    //! \return Label variants.
+    const LabelsVector &labelVariants() const
+    {
+        return m_labelVariants;
+    }
+
+    //! \return Label variants.
+    LabelsVector &labelVariants()
+    {
+        return m_labelVariants;
+    }
+
+    //! Set label variants.
+    void setLabelVariants(const LabelsVector &vars)
+    {
+        m_labelVariants = vars;
+    }
+
 private:
     //! Content of the heading.
     ParagraphSharedPointer m_text;
@@ -822,6 +847,8 @@ private:
     Delims m_delims;
     //! Position of the label.
     WithPosition m_labelPos;
+    //! Label variants.
+    LabelsVector m_labelVariants;
 
     MD_DISABLE_COPY(Heading)
 }; // class Heading

@@ -252,7 +252,7 @@ TEST_CASE("010")
     REQUIRE(p->items().size() == 1);
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
     auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
-    REQUIRE(h->label() == TRAIT::latin1ToString("#") + t->text().toLower() + fn);
+    REQUIRE(h->label() == TRAIT::latin1ToString("#") + t->text() + fn);
     REQUIRE(h->level() == 1);
     REQUIRE(t->text() == TRAIT::latin1ToString("Foo"));
 }

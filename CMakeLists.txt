@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.19)
 
-project(md4qt VERSION "4.1.0")
+project(md4qt VERSION "4.1.3")
 
 set(MD4QT_VERSION ${PROJECT_VERSION})
 
@@ -13,6 +13,7 @@ option(BUILD_MD4QT_BENCHMARK "Build benchmark? Default OFF." OFF)
 option(BUILD_MD4QT_QT_TESTS "Build tests with Qt support? Default ON." ON)
 option(BUILD_MD4QT_STL_TESTS "Build tests with STL support? Default OFF." OFF)
 option(BUILD_MD2HTML_APP "Build md2html utility? Default OFF." OFF)
+option(BUILD_MD2QDOC_APP "Build md2qdoc utility? Default OFF." OFF)
 option(BUILD_TEST_BENCH "Build test benchmark? Default ON." ON)
 
 set(QT_MIN_VERSION "6.0")
@@ -114,9 +115,23 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
 
         find_package(Qt6Core REQUIRED)
 
-        add_executable(md2html md2html/main.cpp)
+        add_executable(md2html utils/md2html/main.cpp)
 
         target_link_libraries(md2html Qt6::Core)
+
+        install(TARGETS md2html RUNTIME DESTINATION ${KDE_INSTALL_BINDIR})
+    endif()
+
+    if(BUILD_MD2QDOC_APP)
+        include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+        find_package(Qt6Core REQUIRED)
+
+        add_executable(md2qdoc utils/md2qdoc/main.cpp)
+
+        target_link_libraries(md2qdoc Qt6::Core)
+
+        install(TARGETS md2qdoc RUNTIME DESTINATION ${KDE_INSTALL_BINDIR})
     endif()
 
 else()
