@@ -1527,7 +1527,7 @@ private:
               std::shared_ptr<Document<Trait>> doc,
               const typename Trait::StringList &ext,
               typename Trait::StringList *parentLinks = nullptr,
-              const typename Trait::String &workingDirectory = {});
+              typename Trait::String workingDirectory = {});
 
     void
     parseStream(typename Trait::TextStream &stream,
@@ -3221,7 +3221,7 @@ Parser<QStringTrait>::parseFile(const QString &fileName,
                                 std::shared_ptr<Document<QStringTrait>> doc,
                                 const QStringList &ext,
                                 QStringList *parentLinks,
-                                const QString &workingDirectory)
+                                QString workingDirectory)
 {
     QFileInfo fi(fileName);
 
@@ -3234,6 +3234,8 @@ Parser<QStringTrait>::parseFile(const QString &fileName,
 
             auto wd = fi.absolutePath();
             auto fn = fi.fileName();
+
+            workingDirectory.replace(QLatin1Char('\\'), QLatin1Char('/'));
 
             if (!workingDirectory.isEmpty() && wd.contains(workingDirectory)) {
                 QFileInfo folder(workingDirectory);
@@ -3263,7 +3265,7 @@ Parser<UnicodeStringTrait>::parseFile(const UnicodeString &fileName,
                                       std::shared_ptr<Document<UnicodeStringTrait>> doc,
                                       const std::vector<UnicodeString> &ext,
                                       std::vector<UnicodeString> *parentLinks,
-                                      const UnicodeString &workingDirectory)
+                                      UnicodeString workingDirectory)
 {
     if (UnicodeStringTrait::fileExists(fileName)) {
         std::string fn;
@@ -3289,6 +3291,10 @@ Parser<UnicodeStringTrait>::parseFile(const UnicodeString &fileName,
                         wd.erase(wd.size() - 1, 1);
                     }
 
+                    std::replace(wd.begin(), wd.end(), '\\', '/');
+                    workingDirectory.findAndReplace(UnicodeStringTrait::latin1ToString("\\"),
+                                                    UnicodeStringTrait::latin1ToString("/"));
+
                     if (!workingDirectory.isEmpty() &&
                         UnicodeStringTrait::String(UnicodeString::fromUTF8(wd)).contains(workingDirectory)) {
                         std::string folderPath;
@@ -3301,12 +3307,14 @@ Parser<UnicodeStringTrait>::parseFile(const UnicodeString &fileName,
                             path = std::filesystem::canonical(folder.path());
                             wd = path.u8string();
 
+                            std::replace(wd.begin(), wd.end(), '\\', '/');
+                            tmp.findAndReplace(UnicodeStringTrait::latin1ToString("\\"),
+                                               UnicodeStringTrait::latin1ToString("/"));
+
                             ufn = tmp.findAndReplace(UnicodeString::fromUTF8(wd), {});
                             ufn.remove(0, 1);
                         }
                     }
-
-                    std::replace(wd.begin(), wd.end(), '\\', '/');
 
                     parseStream(file, UnicodeString::fromUTF8(wd), ufn,
                                 recursive, doc, ext, parentLinks, workingDirectory);
