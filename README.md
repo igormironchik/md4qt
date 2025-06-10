@@ -7,6 +7,15 @@
 
 <img src="https://kde.org/stuff/clipart/logo/kde-logo-blue-transparent-source.svg" width="20%" align="right">
 
+> [!IMPORTANT]
+>
+> Development of this library is moved to https://invent.kde.org/libraries/md4qt,
+> This repository had some commits since moved to `KDE` just to create releases
+> and publish them in https://conan.io/. Since version `4.2.0` of this library
+> no more releases will be made on GitHub and Conan. For fresh changes, please,
+> take the code from `KDE` repository. There were made a lot of nice things.
+> To contact me, please, email to igor.mironchik@gmail.com.
+
 `md4qt` is a header-only C++ library for parsing Markdown.
 
 `md4qt` supports CommonMark 0.31.2 Spec, and some GitHub extensions, such as
