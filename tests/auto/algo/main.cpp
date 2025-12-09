@@ -1,6 +1,5 @@
-
 /*
-    SPDX-FileCopyrightText: 2022-2025 Igor Mironchik <igor.mironchik@gmail.com>
+    SPDX-FileCopyrightText: 2025 Igor Mironchik <igor.mironchik@gmail.com>
     SPDX-License-Identifier: MIT
 */
 
@@ -9,31 +8,30 @@
 #include <doctest/doctest.h>
 
 // md4qt include.
-#include <md4qt/algo.h>
-#include <md4qt/parser.h>
-#include <md4qt/utils.h>
+#include "algo.h"
+#include "parser.h"
 
 int g_count = 0;
 
-void onItem(MD::Item<TRAIT> *)
+void onItem(MD::Item *)
 {
     ++g_count;
 }
 
 TEST_CASE("001")
 {
-    MD::Parser<TRAIT> p;
-    auto doc = p.parse(TRAIT::latin1ToString("tests/parser/data/001.md"));
+    MD::Parser p;
+    auto doc = p.parse(QStringLiteral("tests/parser/data/001.md"));
 
-    MD::forEach<TRAIT>({}, doc, onItem);
+    MD::forEach({}, doc, onItem);
     REQUIRE(g_count == 0);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::Anchor}, doc, onItem);
+    MD::forEach({MD::ItemType::Anchor}, doc, onItem);
     REQUIRE(g_count == 1);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::Paragraph}, doc, onItem);
+    MD::forEach({MD::ItemType::Paragraph}, doc, onItem);
     REQUIRE(g_count == 0);
     g_count = 0;
 }
@@ -44,14 +42,14 @@ This is just a text!
 */
 TEST_CASE("002")
 {
-    MD::Parser<TRAIT> p;
-    auto doc = p.parse(TRAIT::latin1ToString("tests/parser/data/002.md"));
+    MD::Parser p;
+    auto doc = p.parse(QStringLiteral("tests/parser/data/002.md"));
 
-    MD::forEach<TRAIT>({MD::ItemType::Paragraph}, doc, onItem);
+    MD::forEach({MD::ItemType::Paragraph}, doc, onItem);
     REQUIRE(g_count == 1);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::Text}, doc, onItem);
+    MD::forEach({MD::ItemType::Text}, doc, onItem);
     REQUIRE(g_count == 1);
     g_count = 0;
 }
@@ -65,15 +63,15 @@ Paragraph 2.
 */
 TEST_CASE("003")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/003.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/003.md"));
 
-    MD::forEach<TRAIT>({MD::ItemType::Paragraph}, doc, onItem);
+    MD::forEach({MD::ItemType::Paragraph}, doc, onItem);
     REQUIRE(g_count == 2);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::Text}, doc, onItem);
+    MD::forEach({MD::ItemType::Text}, doc, onItem);
     REQUIRE(g_count == 2);
     g_count = 0;
 }
@@ -86,11 +84,11 @@ Line 3...
 */
 TEST_CASE("005")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/005.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/005.md"));
 
-    MD::forEach<TRAIT>({MD::ItemType::LineBreak}, doc, onItem);
+    MD::forEach({MD::ItemType::LineBreak}, doc, onItem);
     REQUIRE(g_count == 1);
     g_count = 0;
 }
@@ -101,15 +99,15 @@ TEST_CASE("005")
 */
 TEST_CASE("011")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/011.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/011.md"));
 
-    MD::forEach<TRAIT>({MD::ItemType::Paragraph}, doc, onItem);
+    MD::forEach({MD::ItemType::Paragraph}, doc, onItem);
     REQUIRE(g_count == 1);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::Code}, doc, onItem);
+    MD::forEach({MD::ItemType::Code}, doc, onItem);
     REQUIRE(g_count == 1);
     g_count = 0;
 }
@@ -120,19 +118,19 @@ Code in the `text`.
 */
 TEST_CASE("012")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/012.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/012.md"));
 
-    MD::forEach<TRAIT>({MD::ItemType::Paragraph}, doc, onItem);
+    MD::forEach({MD::ItemType::Paragraph}, doc, onItem);
     REQUIRE(g_count == 1);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::Text}, doc, onItem);
+    MD::forEach({MD::ItemType::Text}, doc, onItem);
     REQUIRE(g_count == 2);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::Code}, doc, onItem);
+    MD::forEach({MD::ItemType::Code}, doc, onItem);
     REQUIRE(g_count == 1);
     g_count = 0;
 }
@@ -147,23 +145,23 @@ TEST_CASE("012")
 */
 TEST_CASE("017")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/017.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/017.md"));
 
-    MD::forEach<TRAIT>({MD::ItemType::Blockquote}, doc, onItem);
+    MD::forEach({MD::ItemType::Blockquote}, doc, onItem);
     REQUIRE(g_count == 2);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::Paragraph}, doc, onItem);
+    MD::forEach({MD::ItemType::Paragraph}, doc, onItem);
     REQUIRE(g_count == 3);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::Paragraph}, doc, onItem, 2);
+    MD::forEach({MD::ItemType::Paragraph}, doc, onItem, 2);
     REQUIRE(g_count == 2);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::Blockquote, MD::ItemType::Paragraph}, doc, onItem);
+    MD::forEach({MD::ItemType::Blockquote, MD::ItemType::Paragraph}, doc, onItem);
     REQUIRE(g_count == 5);
     g_count = 0;
 }
@@ -176,11 +174,11 @@ TEST_CASE("017")
 */
 TEST_CASE("021")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/021.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/021.md"));
 
-    MD::forEach<TRAIT>({MD::ItemType::Code}, doc, onItem);
+    MD::forEach({MD::ItemType::Code}, doc, onItem);
     REQUIRE(g_count == 1);
     g_count = 0;
 }
@@ -215,31 +213,31 @@ Standalone paragraph
 */
 TEST_CASE("029")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/029.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/029.md"));
 
-    MD::forEach<TRAIT>({MD::ItemType::List}, doc, onItem);
+    MD::forEach({MD::ItemType::List}, doc, onItem);
     REQUIRE(g_count == 4);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::List}, doc, onItem, 1);
+    MD::forEach({MD::ItemType::List}, doc, onItem, 1);
     REQUIRE(g_count == 1);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::ListItem}, doc, onItem);
+    MD::forEach({MD::ItemType::ListItem}, doc, onItem);
     REQUIRE(g_count == 6);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::ListItem}, doc, onItem, 2);
+    MD::forEach({MD::ItemType::ListItem}, doc, onItem, 2);
     REQUIRE(g_count == 3);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::Paragraph}, doc, onItem);
+    MD::forEach({MD::ItemType::Paragraph}, doc, onItem);
     REQUIRE(g_count == 13);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::Paragraph}, doc, onItem, 3);
+    MD::forEach({MD::ItemType::Paragraph}, doc, onItem, 3);
     REQUIRE(g_count == 7);
     g_count = 0;
 }
@@ -250,10 +248,10 @@ Text ![Image 1](a.jpg) continue ![ Image 2 ](b.png) and ![ Image 3]( http://www.
 */
 TEST_CASE("030")
 {
-    MD::Parser<TRAIT> parser;
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/030.md"));
+    MD::Parser parser;
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/030.md"));
 
-    MD::forEach<TRAIT>({MD::ItemType::Image}, doc, onItem);
+    MD::forEach({MD::ItemType::Image}, doc, onItem);
     REQUIRE(g_count == 3);
     g_count = 0;
 }
@@ -272,19 +270,19 @@ TEST_CASE("030")
 */
 TEST_CASE("031")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/031.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/031.md"));
 
-    MD::forEach<TRAIT>({MD::ItemType::Link}, doc, onItem);
+    MD::forEach({MD::ItemType::Link}, doc, onItem);
     REQUIRE(g_count == 4);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::FootnoteRef}, doc, onItem);
-    REQUIRE(g_count == 2);
+    MD::forEach({MD::ItemType::FootnoteRef}, doc, onItem);
+    REQUIRE(g_count == 0);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::Image}, doc, onItem);
+    MD::forEach({MD::ItemType::Image}, doc, onItem);
     REQUIRE(g_count == 1);
     g_count = 0;
 }
@@ -321,11 +319,11 @@ Paragraph 2
 */
 TEST_CASE("046")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/046.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/046.md"));
 
-    MD::forEach<TRAIT>({MD::ItemType::Heading}, doc, onItem);
+    MD::forEach({MD::ItemType::Heading}, doc, onItem);
     REQUIRE(g_count == 7);
     g_count = 0;
 }
@@ -337,11 +335,11 @@ $$ x = {-b \pm \sqrt{b^2-4ac} \over 2a} $$
 */
 TEST_CASE("065")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/065.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/065.md"));
 
-    MD::forEach<TRAIT>({MD::ItemType::Math}, doc, onItem);
+    MD::forEach({MD::ItemType::Math}, doc, onItem);
     REQUIRE(g_count == 3);
     g_count = 0;
 }
@@ -354,15 +352,15 @@ TEST_CASE("065")
 */
 TEST_CASE("168")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/168.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/168.md"));
 
-    MD::forEach<TRAIT>({MD::ItemType::Table}, doc, onItem);
+    MD::forEach({MD::ItemType::Table}, doc, onItem);
     REQUIRE(g_count == 1);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::RawHtml}, doc, onItem);
+    MD::forEach({MD::ItemType::RawHtml}, doc, onItem);
     REQUIRE(g_count == 1);
     g_count = 0;
 }
@@ -377,23 +375,23 @@ Text
 */
 TEST_CASE("174")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/174.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/174.md"));
 
-    MD::forEach<TRAIT>({MD::ItemType::HorizontalLine}, doc, onItem);
+    MD::forEach({MD::ItemType::HorizontalLine}, doc, onItem);
     REQUIRE(g_count == 1);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::Table}, doc, onItem);
+    MD::forEach({MD::ItemType::Table}, doc, onItem);
     REQUIRE(g_count == 1);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::Paragraph}, doc, onItem);
+    MD::forEach({MD::ItemType::Paragraph}, doc, onItem);
     REQUIRE(g_count == 1);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::Text}, doc, onItem);
+    MD::forEach({MD::ItemType::Text}, doc, onItem);
     REQUIRE(g_count == 3);
     g_count = 0;
 }
@@ -412,30 +410,30 @@ Text.
 */
 TEST_CASE("191")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/191.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/191.md"));
 
-    MD::forEach<TRAIT>({MD::ItemType::Footnote}, doc, onItem);
+    MD::forEach({MD::ItemType::Footnote}, doc, onItem);
     REQUIRE(g_count == 1);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::FootnoteRef}, doc, onItem);
+    MD::forEach({MD::ItemType::FootnoteRef}, doc, onItem);
     REQUIRE(g_count == 1);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::Code}, doc, onItem);
+    MD::forEach({MD::ItemType::Code}, doc, onItem);
     REQUIRE(g_count == 1);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType::Paragraph}, doc, onItem);
+    MD::forEach({MD::ItemType::Paragraph}, doc, onItem);
     REQUIRE(g_count == 3);
     g_count = 0;
 }
 
 TEST_CASE("user_defined")
 {
-    class MyItem : public MD::Item<TRAIT>
+    class MyItem : public MD::Item
     {
     public:
         MyItem() = default;
@@ -446,29 +444,29 @@ TEST_CASE("user_defined")
             return MD::ItemType{static_cast<int>(MD::ItemType::UserDefined) + 1};
         }
 
-        std::shared_ptr<Item<TRAIT>> clone(MD::Document<TRAIT> *doc = nullptr) const override
+        QSharedPointer<Item> clone(MD::Document *doc = nullptr) const override
         {
-            MD_UNUSED(doc)
+            Q_UNUSED(doc)
 
-            return std::make_shared<MyItem>();
+            return QSharedPointer<MyItem>::create();
         }
     };
 
-    auto doc = std::make_shared<MD::Document<TRAIT>>();
-    auto i = std::make_shared<MyItem>();
+    auto doc = QSharedPointer<MD::Document>::create();
+    auto i = QSharedPointer<MyItem>::create();
 
-    auto p = std::make_shared<MD::Paragraph<TRAIT>>();
-    auto in = std::make_shared<MyItem>();
+    auto p = QSharedPointer<MD::Paragraph>::create();
+    auto in = QSharedPointer<MyItem>::create();
     p->appendItem(in);
 
     doc->appendItem(i);
     doc->appendItem(p);
 
-    MD::forEach<TRAIT>({MD::ItemType{static_cast<int>(MD::ItemType::UserDefined) + 1}}, doc, onItem);
+    MD::forEach({MD::ItemType{static_cast<int>(MD::ItemType::UserDefined) + 1}}, doc, onItem);
     REQUIRE(g_count == 2);
     g_count = 0;
 
-    MD::forEach<TRAIT>({MD::ItemType{static_cast<int>(MD::ItemType::UserDefined) + 1}}, doc, onItem, 1);
+    MD::forEach({MD::ItemType{static_cast<int>(MD::ItemType::UserDefined) + 1}}, doc, onItem, 1);
     REQUIRE(g_count == 1);
     g_count = 0;
 }

@@ -1,0 +1,15 @@
+\target #1-Autolinks//home/igor/Work/Projects/next/known_issues.md
+\section1 1. Autolinks
+
+In this library autolinks are checked by \c {QUrl} for validity. CommonMark is not so strict,
+his rules are much more simpler for it. As example.
+
+\code /
+<made-up-scheme:\1\1foo,bar>
+\endcode
+
+In CommonMark will be a valid autolink, whereas in \c {md4qt} won't be.
+
+\b{Interested in this question may start a discussion with me \l {https://invent.kde.org/libraries/md4qt/-/issues/7} {here}.}
+
+

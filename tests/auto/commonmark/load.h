@@ -1,20 +1,21 @@
-
 /*
-    SPDX-FileCopyrightText: 2022-2025 Igor Mironchik <igor.mironchik@gmail.com>
+    SPDX-FileCopyrightText: 2025 Igor Mironchik <igor.mironchik@gmail.com>
     SPDX-License-Identifier: MIT
 */
 
 #pragma once
 
-#include <md4qt/parser.h>
+// md4qt include.
+#include "parser.h"
 
+// C++ include.
 #include <string>
 
-#ifdef MD4QT_QT_SUPPORT
+// Qt include.
 #include <QString>
-#endif
 
-inline std::shared_ptr<MD::Document<TRAIT>> load_test(int n, const std::string &folder = "0.30")
+inline QSharedPointer<MD::Document> load_test(int n,
+                                              const std::string &folder = "0.30")
 {
     auto fileName = std::to_string(n);
 
@@ -28,13 +29,9 @@ inline std::shared_ptr<MD::Document<TRAIT>> load_test(int n, const std::string &
     path.append(fileName);
     path.append(".md");
 
-    MD::Parser<TRAIT> p;
+    MD::Parser p;
+    p.setBlockParsers(MD::Parser::makeCommonMarkBlockParsersPipeline(&p));
+    p.setInlineParsers(MD::Parser::makeCommonMarkInlineParsersPipeline());
 
-    return p.parse(
-#ifdef MD4QT_QT_SUPPORT
-        QString::fromStdString(path),
-#else
-        path,
-#endif
-        false);
+    return p.parse(QString::fromStdString(path), false);
 }

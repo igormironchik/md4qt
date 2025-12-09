@@ -17,8 +17,10 @@ There are three options to this tool
 | Option | Description |
 | --- | --- |
 |`-r, --recursive` | tells to load all linked Markdown files inside the given and make corresponding QDoc files for each processed Markdown file. |
-| `-o, --out <dir>` | tells where to store generated QDoc files |
+| `-o, --out <dir>` | tells where to store generated QDoc files. |
 | `--offset <int>` | offset used for nested blocks |
+| `--prefx <str>` | prefix used to create top-level targets. |
+| `-i, --gen-includes` | tells to generate QDoc includes only, i.e. without `/*! */` comment. |
 
 # TODO
 

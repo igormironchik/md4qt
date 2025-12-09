@@ -1,12 +1,13 @@
-
 /*
-    SPDX-FileCopyrightText: 2022-2025 Igor Mironchik <igor.mironchik@gmail.com>
+    SPDX-FileCopyrightText: 2025 Igor Mironchik <igor.mironchik@gmail.com>
     SPDX-License-Identifier: MIT
 */
 
 // doctest include.
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
+
+#include "load.h"
 
 // 4.8 Paragraphs
 
@@ -18,22 +19,22 @@ TEST_CASE("219")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
         REQUIRE(p->items().size() == 1);
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->opts() == MD::TextWithoutFormat);
-        REQUIRE(t->text() == TRAIT::latin1ToString("aaa"));
+        REQUIRE(t->text() == QStringLiteral("aaa"));
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
         REQUIRE(p->items().size() == 1);
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->opts() == MD::TextWithoutFormat);
-        REQUIRE(t->text() == TRAIT::latin1ToString("bbb"));
+        REQUIRE(t->text() == QStringLiteral("bbb"));
     }
 }
 
@@ -45,41 +46,41 @@ TEST_CASE("220")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
         REQUIRE(p->items().size() == 2);
 
         {
             REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-            auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+            auto t = static_cast<MD::Text *>(p->items().at(0).get());
             REQUIRE(t->opts() == MD::TextWithoutFormat);
-            REQUIRE(t->text() == TRAIT::latin1ToString("aaa"));
+            REQUIRE(t->text() == QStringLiteral("aaa"));
         }
 
         {
             REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
-            auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(1).get());
+            auto t = static_cast<MD::Text *>(p->items().at(1).get());
             REQUIRE(t->opts() == MD::TextWithoutFormat);
-            REQUIRE(t->text() == TRAIT::latin1ToString("bbb"));
+            REQUIRE(t->text() == QStringLiteral("bbb"));
         }
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
         REQUIRE(p->items().size() == 2);
 
         {
             REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-            auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+            auto t = static_cast<MD::Text *>(p->items().at(0).get());
             REQUIRE(t->opts() == MD::TextWithoutFormat);
-            REQUIRE(t->text() == TRAIT::latin1ToString("ccc"));
+            REQUIRE(t->text() == QStringLiteral("ccc"));
         }
 
         {
             REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
-            auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(1).get());
+            auto t = static_cast<MD::Text *>(p->items().at(1).get());
             REQUIRE(t->opts() == MD::TextWithoutFormat);
-            REQUIRE(t->text() == TRAIT::latin1ToString("ddd"));
+            REQUIRE(t->text() == QStringLiteral("ddd"));
         }
     }
 }
@@ -92,22 +93,22 @@ TEST_CASE("221")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
         REQUIRE(p->items().size() == 1);
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->opts() == MD::TextWithoutFormat);
-        REQUIRE(t->text() == TRAIT::latin1ToString("aaa"));
+        REQUIRE(t->text() == QStringLiteral("aaa"));
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
         REQUIRE(p->items().size() == 1);
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->opts() == MD::TextWithoutFormat);
-        REQUIRE(t->text() == TRAIT::latin1ToString("bbb"));
+        REQUIRE(t->text() == QStringLiteral("bbb"));
     }
 }
 
@@ -119,21 +120,21 @@ TEST_CASE("222")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
         REQUIRE(p->items().size() == 2);
 
         {
             REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-            auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+            auto t = static_cast<MD::Text *>(p->items().at(0).get());
             REQUIRE(t->opts() == MD::TextWithoutFormat);
-            REQUIRE(t->text() == TRAIT::latin1ToString("aaa"));
+            REQUIRE(t->text() == QStringLiteral("aaa"));
         }
 
         {
             REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
-            auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(1).get());
+            auto t = static_cast<MD::Text *>(p->items().at(1).get());
             REQUIRE(t->opts() == MD::TextWithoutFormat);
-            REQUIRE(t->text() == TRAIT::latin1ToString("bbb"));
+            REQUIRE(t->text() == QStringLiteral("bbb"));
         }
     }
 }
@@ -146,28 +147,28 @@ TEST_CASE("223")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
         REQUIRE(p->items().size() == 3);
 
         {
             REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-            auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+            auto t = static_cast<MD::Text *>(p->items().at(0).get());
             REQUIRE(t->opts() == MD::TextWithoutFormat);
-            REQUIRE(t->text() == TRAIT::latin1ToString("aaa"));
+            REQUIRE(t->text() == QStringLiteral("aaa"));
         }
 
         {
             REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
-            auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(1).get());
+            auto t = static_cast<MD::Text *>(p->items().at(1).get());
             REQUIRE(t->opts() == MD::TextWithoutFormat);
-            REQUIRE(t->text() == TRAIT::latin1ToString("bbb"));
+            REQUIRE(t->text() == QStringLiteral("bbb"));
         }
 
         {
             REQUIRE(p->items().at(2)->type() == MD::ItemType::Text);
-            auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(2).get());
+            auto t = static_cast<MD::Text *>(p->items().at(2).get());
             REQUIRE(t->opts() == MD::TextWithoutFormat);
-            REQUIRE(t->text() == TRAIT::latin1ToString("ccc"));
+            REQUIRE(t->text() == QStringLiteral("ccc"));
         }
     }
 }
@@ -180,21 +181,21 @@ TEST_CASE("224")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
         REQUIRE(p->items().size() == 2);
 
         {
             REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-            auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+            auto t = static_cast<MD::Text *>(p->items().at(0).get());
             REQUIRE(t->opts() == MD::TextWithoutFormat);
-            REQUIRE(t->text() == TRAIT::latin1ToString("aaa"));
+            REQUIRE(t->text() == QStringLiteral("aaa"));
         }
 
         {
             REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
-            auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(1).get());
+            auto t = static_cast<MD::Text *>(p->items().at(1).get());
             REQUIRE(t->opts() == MD::TextWithoutFormat);
-            REQUIRE(t->text() == TRAIT::latin1ToString("bbb"));
+            REQUIRE(t->text() == QStringLiteral("bbb"));
         }
     }
 }
@@ -207,18 +208,18 @@ TEST_CASE("225")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::Code);
-        auto c = static_cast<MD::Code<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(c->text() == TRAIT::latin1ToString("aaa"));
+        auto c = static_cast<MD::Code *>(doc->items().at(1).get());
+        REQUIRE(c->text() == QStringLiteral("aaa"));
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
         REQUIRE(p->items().size() == 1);
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->opts() == MD::TextWithoutFormat);
-        REQUIRE(t->text() == TRAIT::latin1ToString("bbb"));
+        REQUIRE(t->text() == QStringLiteral("bbb"));
     }
 }
 
@@ -230,23 +231,23 @@ TEST_CASE("226")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
         REQUIRE(p->items().size() == 3);
 
         {
             REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-            auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+            auto t = static_cast<MD::Text *>(p->items().at(0).get());
             REQUIRE(t->opts() == MD::TextWithoutFormat);
-            REQUIRE(t->text() == TRAIT::latin1ToString("aaa"));
+            REQUIRE(t->text() == QStringLiteral("aaa"));
         }
 
         REQUIRE(p->items().at(1)->type() == MD::ItemType::LineBreak);
 
         {
             REQUIRE(p->items().at(2)->type() == MD::ItemType::Text);
-            auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(2).get());
+            auto t = static_cast<MD::Text *>(p->items().at(2).get());
             REQUIRE(t->opts() == MD::TextWithoutFormat);
-            REQUIRE(t->text() == TRAIT::latin1ToString("bbb"));
+            REQUIRE(t->text() == QStringLiteral("bbb"));
         }
     }
 }
@@ -261,23 +262,23 @@ TEST_CASE("227")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
         REQUIRE(p->items().size() == 1);
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->opts() == MD::TextWithoutFormat);
-        REQUIRE(t->text() == TRAIT::latin1ToString("aaa"));
+        REQUIRE(t->text() == QStringLiteral("aaa"));
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::Heading);
-        auto h = static_cast<MD::Heading<TRAIT> *>(doc->items().at(2).get());
+        auto h = static_cast<MD::Heading *>(doc->items().at(2).get());
         REQUIRE(h->text().get());
         auto p = h->text().get();
         REQUIRE(p->items().size() == 1);
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(h->level() == 1);
-        REQUIRE(t->text() == TRAIT::latin1ToString("aaa"));
+        REQUIRE(t->text() == QStringLiteral("aaa"));
     }
 }

@@ -1,12 +1,13 @@
-
 /*
-    SPDX-FileCopyrightText: 2022-2025 Igor Mironchik <igor.mironchik@gmail.com>
+    SPDX-FileCopyrightText: 2025 Igor Mironchik <igor.mironchik@gmail.com>
     SPDX-License-Identifier: MIT
 */
 
 // doctest include.
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
+
+#include "load.h"
 
 // 4.6 HTML blocks
 
@@ -19,38 +20,38 @@ TEST_CASE("148")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<table><tr><td>\n<pre>\n**Hello**,"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("<table><tr><td>\n<pre>\n**Hello**,"));
     }
 
     REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
     REQUIRE(p->items().size() == 3);
 
     {
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->opts() == MD::ItalicText);
-        REQUIRE(t->text() == TRAIT::latin1ToString("world"));
+        REQUIRE(t->text() == QStringLiteral("world"));
     }
 
     {
         REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(1).get());
+        auto t = static_cast<MD::Text *>(p->items().at(1).get());
         REQUIRE(t->opts() == MD::TextWithoutFormat);
-        REQUIRE(t->text() == TRAIT::latin1ToString("."));
+        REQUIRE(t->text() == QStringLiteral("."));
     }
 
     {
         REQUIRE(p->items().at(2)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(2).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("</pre>"));
+        auto h = static_cast<MD::RawHtml *>(p->items().at(2).get());
+        REQUIRE(h->text() == QStringLiteral("</pre>"));
     }
 
     {
         REQUIRE(doc->items().at(3)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(3).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("</td></tr></table>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(3).get());
+        REQUIRE(h->text() == QStringLiteral("</td></tr></table>"));
     }
 }
 
@@ -63,20 +64,20 @@ TEST_CASE("149")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
         REQUIRE(h->text()
-                == TRAIT::latin1ToString("<table>\n  <tr>\n    <td>\n"
-                                         "           hi\n    </td>\n  </tr>\n</table>"));
+                == QStringLiteral("<table>\n  <tr>\n    <td>\n"
+                                  "           hi\n    </td>\n  </tr>\n</table>"));
     }
 
     REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
     REQUIRE(p->items().size() == 1);
 
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    auto t = static_cast<MD::Text *>(p->items().at(0).get());
     REQUIRE(t->opts() == MD::TextWithoutFormat);
-    REQUIRE(t->text() == TRAIT::latin1ToString("okay."));
+    REQUIRE(t->text() == QStringLiteral("okay."));
 }
 
 TEST_CASE("150")
@@ -88,8 +89,8 @@ TEST_CASE("150")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString(" <div>\n  *hello*\n         <foo><a>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral(" <div>\n  *hello*\n         <foo><a>"));
     }
 }
 
@@ -102,8 +103,8 @@ TEST_CASE("151")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("</div>\n*foo*"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("</div>\n*foo*"));
     }
 }
 
@@ -116,23 +117,23 @@ TEST_CASE("152")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<DIV CLASS=\"foo\">"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("<DIV CLASS=\"foo\">"));
     }
 
     REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
     REQUIRE(p->items().size() == 1);
 
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    auto t = static_cast<MD::Text *>(p->items().at(0).get());
     REQUIRE(t->opts() == MD::ItalicText);
-    REQUIRE(t->text() == TRAIT::latin1ToString("Markdown"));
+    REQUIRE(t->text() == QStringLiteral("Markdown"));
 
     {
         REQUIRE(doc->items().at(3)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(3).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("</DIV>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(3).get());
+        REQUIRE(h->text() == QStringLiteral("</DIV>"));
     }
 }
 
@@ -145,8 +146,8 @@ TEST_CASE("153")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<div id=\"foo\"\n  class=\"bar\">\n</div>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("<div id=\"foo\"\n  class=\"bar\">\n</div>"));
     }
 }
 
@@ -159,8 +160,8 @@ TEST_CASE("154")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<div id=\"foo\" class=\"bar\n  baz\">\n</div>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("<div id=\"foo\" class=\"bar\n  baz\">\n</div>"));
     }
 }
 
@@ -173,18 +174,18 @@ TEST_CASE("155")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<div>\n*foo*"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("<div>\n*foo*"));
     }
 
     REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
     REQUIRE(p->items().size() == 1);
 
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    auto t = static_cast<MD::Text *>(p->items().at(0).get());
     REQUIRE(t->opts() == MD::ItalicText);
-    REQUIRE(t->text() == TRAIT::latin1ToString("bar"));
+    REQUIRE(t->text() == QStringLiteral("bar"));
 }
 
 TEST_CASE("156")
@@ -196,8 +197,8 @@ TEST_CASE("156")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<div id=\"foo\"\n*hi*"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("<div id=\"foo\"\n*hi*"));
     }
 }
 
@@ -210,8 +211,8 @@ TEST_CASE("157")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<div class\nfoo"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("<div class\nfoo"));
     }
 }
 
@@ -224,8 +225,8 @@ TEST_CASE("158")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<div *?\?\?-&&&-<---\n*foo*"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("<div *?\?\?-&&&-<---\n*foo*"));
     }
 }
 
@@ -238,8 +239,8 @@ TEST_CASE("159")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<div><a href=\"bar\">*foo*</a></div>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("<div><a href=\"bar\">*foo*</a></div>"));
     }
 }
 
@@ -252,8 +253,8 @@ TEST_CASE("160")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<table><tr><td>\nfoo\n</td></tr></table>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("<table><tr><td>\nfoo\n</td></tr></table>"));
     }
 }
 
@@ -266,8 +267,8 @@ TEST_CASE("161")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<div></div>\n``` c\nint x = 33;\n```"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("<div></div>\n``` c\nint x = 33;\n```"));
     }
 }
 
@@ -279,8 +280,8 @@ TEST_CASE("162")
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-    auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-    REQUIRE(h->text() == TRAIT::latin1ToString("<a href=\"foo\">\n*bar*\n</a>"));
+    auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+    REQUIRE(h->text() == QStringLiteral("<a href=\"foo\">\n*bar*\n</a>"));
 }
 
 TEST_CASE("163")
@@ -291,8 +292,8 @@ TEST_CASE("163")
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-    auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-    REQUIRE(h->text() == TRAIT::latin1ToString("<Warning>\n*bar*\n</Warning>"));
+    auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+    REQUIRE(h->text() == QStringLiteral("<Warning>\n*bar*\n</Warning>"));
 }
 
 TEST_CASE("164")
@@ -303,8 +304,8 @@ TEST_CASE("164")
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-    auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-    REQUIRE(h->text() == TRAIT::latin1ToString("<i class=\"foo\">\n*bar*\n</i>"));
+    auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+    REQUIRE(h->text() == QStringLiteral("<i class=\"foo\">\n*bar*\n</i>"));
 }
 
 TEST_CASE("165")
@@ -315,8 +316,8 @@ TEST_CASE("165")
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-    auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-    REQUIRE(h->text() == TRAIT::latin1ToString("</ins>\n*bar*"));
+    auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+    REQUIRE(h->text() == QStringLiteral("</ins>\n*bar*"));
 }
 
 TEST_CASE("166")
@@ -327,8 +328,8 @@ TEST_CASE("166")
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-    auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-    REQUIRE(h->text() == TRAIT::latin1ToString("<del>\n*foo*\n</del>"));
+    auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+    REQUIRE(h->text() == QStringLiteral("<del>\n*foo*\n</del>"));
 }
 
 TEST_CASE("167")
@@ -340,25 +341,25 @@ TEST_CASE("167")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<del>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("<del>"));
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
         REQUIRE(p->items().size() == 1);
 
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->opts() == MD::ItalicText);
-        REQUIRE(t->text() == TRAIT::latin1ToString("foo"));
+        REQUIRE(t->text() == QStringLiteral("foo"));
     }
 
     {
         REQUIRE(doc->items().at(3)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(3).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("</del>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(3).get());
+        REQUIRE(h->text() == QStringLiteral("</del>"));
     }
 }
 
@@ -371,24 +372,24 @@ TEST_CASE("168")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
         REQUIRE(p->items().size() == 3);
 
         {
             REQUIRE(p->items().at(0)->type() == MD::ItemType::RawHtml);
-            auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(0).get());
-            REQUIRE(h->text() == TRAIT::latin1ToString("<del>"));
+            auto h = static_cast<MD::RawHtml *>(p->items().at(0).get());
+            REQUIRE(h->text() == QStringLiteral("<del>"));
         }
 
         REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(1).get());
+        auto t = static_cast<MD::Text *>(p->items().at(1).get());
         REQUIRE(t->opts() == MD::ItalicText);
-        REQUIRE(t->text() == TRAIT::latin1ToString("foo"));
+        REQUIRE(t->text() == QStringLiteral("foo"));
 
         {
             REQUIRE(p->items().at(2)->type() == MD::ItemType::RawHtml);
-            auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(2).get());
-            REQUIRE(h->text() == TRAIT::latin1ToString("</del>"));
+            auto h = static_cast<MD::RawHtml *>(p->items().at(2).get());
+            REQUIRE(h->text() == QStringLiteral("</del>"));
         }
     }
 }
@@ -402,24 +403,24 @@ TEST_CASE("169")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
         REQUIRE(h->text()
-                == TRAIT::latin1ToString("<pre language=\"haskell\"><code>\n"
-                                         "import Text.HTML.TagSoup\n\n"
-                                         "main :: IO ()\n"
-                                         "main = print $ parseTags tags\n"
-                                         "</code></pre>"));
+                == QStringLiteral("<pre language=\"haskell\"><code>\n"
+                                  "import Text.HTML.TagSoup\n\n"
+                                  "main :: IO ()\n"
+                                  "main = print $ parseTags tags\n"
+                                  "</code></pre>"));
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
         REQUIRE(p->items().size() == 1);
 
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->opts() == MD::TextWithoutFormat);
-        REQUIRE(t->text() == TRAIT::latin1ToString("okay"));
+        REQUIRE(t->text() == QStringLiteral("okay"));
     }
 }
 
@@ -432,23 +433,23 @@ TEST_CASE("170")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
         REQUIRE(h->text()
-                == TRAIT::latin1ToString("<script type=\"text/javascript\">\n"
-                                         "// JavaScript example\n\n"
-                                         "document.getElementById(\"demo\").innerHTML = \"Hello JavaScript!\";\n"
-                                         "</script>"));
+                == QStringLiteral("<script type=\"text/javascript\">\n"
+                                  "// JavaScript example\n\n"
+                                  "document.getElementById(\"demo\").innerHTML = \"Hello JavaScript!\";\n"
+                                  "</script>"));
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
         REQUIRE(p->items().size() == 1);
 
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->opts() == MD::TextWithoutFormat);
-        REQUIRE(t->text() == TRAIT::latin1ToString("okay"));
+        REQUIRE(t->text() == QStringLiteral("okay"));
     }
 }
 
@@ -460,12 +461,12 @@ TEST_CASE("171")
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-    auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
+    auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
     REQUIRE(h->text()
-            == TRAIT::latin1ToString("<textarea>\n\n"
-                                     "*foo*\n\n"
-                                     "_bar_\n\n"
-                                     "</textarea>"));
+            == QStringLiteral("<textarea>\n\n"
+                              "*foo*\n\n"
+                              "_bar_\n\n"
+                              "</textarea>"));
 }
 
 TEST_CASE("172")
@@ -477,24 +478,24 @@ TEST_CASE("172")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
         REQUIRE(h->text()
-                == TRAIT::latin1ToString("<style\n"
-                                         "  type=\"text/css\">\n"
-                                         "h1 {color:red;}\n\n"
-                                         "p {color:blue;}\n"
-                                         "</style>"));
+                == QStringLiteral("<style\n"
+                                  "  type=\"text/css\">\n"
+                                  "h1 {color:red;}\n\n"
+                                  "p {color:blue;}\n"
+                                  "</style>"));
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
         REQUIRE(p->items().size() == 1);
 
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->opts() == MD::TextWithoutFormat);
-        REQUIRE(t->text() == TRAIT::latin1ToString("okay"));
+        REQUIRE(t->text() == QStringLiteral("okay"));
     }
 }
 
@@ -506,11 +507,11 @@ TEST_CASE("173")
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-    auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
+    auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
     REQUIRE(h->text()
-            == TRAIT::latin1ToString("<style\n"
-                                     "  type=\"text/css\">\n\n"
-                                     "foo"));
+            == QStringLiteral("<style\n"
+                              "  type=\"text/css\">\n\n"
+                              "foo\n"));
 }
 
 TEST_CASE("174")
@@ -521,20 +522,20 @@ TEST_CASE("174")
     REQUIRE(doc->items().size() == 3);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Blockquote);
-    auto b = static_cast<MD::Blockquote<TRAIT> *>(doc->items().at(1).get());
+    auto b = static_cast<MD::Blockquote *>(doc->items().at(1).get());
     REQUIRE(b->items().size() == 1);
 
     REQUIRE(b->items().at(0)->type() == MD::ItemType::RawHtml);
-    auto h = static_cast<MD::RawHtml<TRAIT> *>(b->items().at(0).get());
-    REQUIRE(h->text() == TRAIT::latin1ToString("<div>\nfoo"));
+    auto h = static_cast<MD::RawHtml *>(b->items().at(0).get());
+    REQUIRE(h->text() == QStringLiteral("<div>\nfoo"));
 
     REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
     REQUIRE(p->items().size() == 1);
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    auto t = static_cast<MD::Text *>(p->items().at(0).get());
     REQUIRE(t->opts() == MD::TextWithoutFormat);
-    REQUIRE(t->text() == TRAIT::latin1ToString("bar"));
+    REQUIRE(t->text() == QStringLiteral("bar"));
 }
 
 TEST_CASE("175")
@@ -545,31 +546,31 @@ TEST_CASE("175")
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
-    auto l = static_cast<MD::List<TRAIT> *>(doc->items().at(1).get());
+    auto l = static_cast<MD::List *>(doc->items().at(1).get());
 
     REQUIRE(l->items().size() == 2);
 
     {
         REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
-        auto li = static_cast<MD::ListItem<TRAIT> *>(l->items().at(0).get());
+        auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
 
         REQUIRE(li->items().at(0)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(li->items().at(0).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<div>"));
+        auto h = static_cast<MD::RawHtml *>(li->items().at(0).get());
+        REQUIRE(h->text() == QStringLiteral("<div>"));
     }
 
     {
         REQUIRE(l->items().at(1)->type() == MD::ItemType::ListItem);
-        auto li = static_cast<MD::ListItem<TRAIT> *>(l->items().at(1).get());
+        auto li = static_cast<MD::ListItem *>(l->items().at(1).get());
 
         REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(li->items().at(0).get());
+        auto p = static_cast<MD::Paragraph *>(li->items().at(0).get());
 
         REQUIRE(p->items().size() == 1);
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->opts() == MD::TextWithoutFormat);
-        REQUIRE(t->text() == TRAIT::latin1ToString("foo"));
+        REQUIRE(t->text() == QStringLiteral("foo"));
     }
 }
 
@@ -582,19 +583,19 @@ TEST_CASE("176")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<style>p{color:red;}</style>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("<style>p{color:red;}</style>"));
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
         REQUIRE(p->items().size() == 1);
 
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->opts() == MD::ItalicText);
-        REQUIRE(t->text() == TRAIT::latin1ToString("foo"));
+        REQUIRE(t->text() == QStringLiteral("foo"));
     }
 }
 
@@ -607,19 +608,19 @@ TEST_CASE("177")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<!-- foo -->*bar*"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("<!-- foo -->*bar*"));
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
         REQUIRE(p->items().size() == 1);
 
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->opts() == MD::ItalicText);
-        REQUIRE(t->text() == TRAIT::latin1ToString("baz"));
+        REQUIRE(t->text() == QStringLiteral("baz"));
     }
 }
 
@@ -631,8 +632,8 @@ TEST_CASE("178")
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-    auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-    REQUIRE(h->text() == TRAIT::latin1ToString("<script>\nfoo\n</script>1. *bar*"));
+    auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+    REQUIRE(h->text() == QStringLiteral("<script>\nfoo\n</script>1. *bar*"));
 }
 
 TEST_CASE("179")
@@ -644,19 +645,19 @@ TEST_CASE("179")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<!-- Foo\n\nbar\n   baz -->"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("<!-- Foo\n\nbar\n   baz -->"));
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
         REQUIRE(p->items().size() == 1);
 
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->opts() == MD::TextWithoutFormat);
-        REQUIRE(t->text() == TRAIT::latin1ToString("okay"));
+        REQUIRE(t->text() == QStringLiteral("okay"));
     }
 }
 
@@ -669,19 +670,19 @@ TEST_CASE("180")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<?php\n\n  echo '>';\n\n?>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("<?php\n\n  echo '>';\n\n?>"));
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
         REQUIRE(p->items().size() == 1);
 
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->opts() == MD::TextWithoutFormat);
-        REQUIRE(t->text() == TRAIT::latin1ToString("okay"));
+        REQUIRE(t->text() == QStringLiteral("okay"));
     }
 }
 
@@ -693,8 +694,8 @@ TEST_CASE("181")
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-    auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-    REQUIRE(h->text() == TRAIT::latin1ToString("<!DOCTYPE html>"));
+    auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+    REQUIRE(h->text() == QStringLiteral("<!DOCTYPE html>"));
 }
 
 TEST_CASE("182")
@@ -706,29 +707,29 @@ TEST_CASE("182")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
         REQUIRE(h->text()
-                == TRAIT::latin1ToString("<![CDATA[\n"
-                                         "function matchwo(a,b)\n"
-                                         "{\n"
-                                         "  if (a < b && a < 0) then {\n"
-                                         "    return 1;\n\n"
-                                         "  } else {\n\n"
-                                         "    return 0;\n"
-                                         "  }\n"
-                                         "}\n"
-                                         "]]>"));
+                == QStringLiteral("<![CDATA[\n"
+                                  "function matchwo(a,b)\n"
+                                  "{\n"
+                                  "  if (a < b && a < 0) then {\n"
+                                  "    return 1;\n\n"
+                                  "  } else {\n\n"
+                                  "    return 0;\n"
+                                  "  }\n"
+                                  "}\n"
+                                  "]]>"));
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
         REQUIRE(p->items().size() == 1);
 
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->opts() == MD::TextWithoutFormat);
-        REQUIRE(t->text() == TRAIT::latin1ToString("okay"));
+        REQUIRE(t->text() == QStringLiteral("okay"));
     }
 }
 
@@ -741,14 +742,14 @@ TEST_CASE("183")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("  <!-- foo -->"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("  <!-- foo -->"));
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::Code);
-        auto c = static_cast<MD::Code<TRAIT> *>(doc->items().at(2).get());
-        REQUIRE(c->text() == TRAIT::latin1ToString("<!-- foo -->"));
+        auto c = static_cast<MD::Code *>(doc->items().at(2).get());
+        REQUIRE(c->text() == QStringLiteral("<!-- foo -->"));
     }
 }
 
@@ -761,14 +762,14 @@ TEST_CASE("184")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("  <div>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("  <div>"));
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::Code);
-        auto c = static_cast<MD::Code<TRAIT> *>(doc->items().at(2).get());
-        REQUIRE(c->text() == TRAIT::latin1ToString("<div>"));
+        auto c = static_cast<MD::Code *>(doc->items().at(2).get());
+        REQUIRE(c->text() == QStringLiteral("<div>"));
     }
 }
 
@@ -781,19 +782,19 @@ TEST_CASE("185")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
         REQUIRE(p->items().size() == 1);
 
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->opts() == MD::TextWithoutFormat);
-        REQUIRE(t->text() == TRAIT::latin1ToString("Foo"));
+        REQUIRE(t->text() == QStringLiteral("Foo"));
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(2).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<div>\nbar\n</div>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(2).get());
+        REQUIRE(h->text() == QStringLiteral("<div>\nbar\n</div>"));
     }
 }
 
@@ -805,8 +806,8 @@ TEST_CASE("186")
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-    auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-    REQUIRE(h->text() == TRAIT::latin1ToString("<div>\nbar\n</div>\n*foo*"));
+    auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+    REQUIRE(h->text() == QStringLiteral("<div>\nbar\n</div>\n*foo*"));
 }
 
 TEST_CASE("187")
@@ -817,25 +818,25 @@ TEST_CASE("187")
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
     REQUIRE(p->items().size() == 3);
 
     {
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->opts() == MD::TextWithoutFormat);
-        REQUIRE(t->text() == TRAIT::latin1ToString("Foo"));
+        REQUIRE(t->text() == QStringLiteral("Foo"));
     }
 
     REQUIRE(p->items().at(1)->type() == MD::ItemType::RawHtml);
-    auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(1).get());
-    REQUIRE(h->text() == TRAIT::latin1ToString("<a href=\"bar\">"));
+    auto h = static_cast<MD::RawHtml *>(p->items().at(1).get());
+    REQUIRE(h->text() == QStringLiteral("<a href=\"bar\">"));
 
     {
         REQUIRE(p->items().at(2)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(2).get());
+        auto t = static_cast<MD::Text *>(p->items().at(2).get());
         REQUIRE(t->opts() == MD::TextWithoutFormat);
-        REQUIRE(t->text() == TRAIT::latin1ToString("baz"));
+        REQUIRE(t->text() == QStringLiteral("baz"));
     }
 }
 
@@ -848,34 +849,34 @@ TEST_CASE("188")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<div>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("<div>"));
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
         REQUIRE(p->items().size() == 2);
 
         {
             REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-            auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+            auto t = static_cast<MD::Text *>(p->items().at(0).get());
             REQUIRE(t->opts() == MD::ItalicText);
-            REQUIRE(t->text() == TRAIT::latin1ToString("Emphasized"));
+            REQUIRE(t->text() == QStringLiteral("Emphasized"));
         }
 
         {
             REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
-            auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(1).get());
+            auto t = static_cast<MD::Text *>(p->items().at(1).get());
             REQUIRE(t->opts() == MD::TextWithoutFormat);
-            REQUIRE(t->text() == TRAIT::latin1ToString(" text."));
+            REQUIRE(t->text() == QStringLiteral(" text."));
         }
     }
 
     {
         REQUIRE(doc->items().at(3)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(3).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("</div>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(3).get());
+        REQUIRE(h->text() == QStringLiteral("</div>"));
     }
 }
 
@@ -887,8 +888,8 @@ TEST_CASE("189")
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-    auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-    REQUIRE(h->text() == TRAIT::latin1ToString("<div>\n*Emphasized* text.\n</div>"));
+    auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+    REQUIRE(h->text() == QStringLiteral("<div>\n*Emphasized* text.\n</div>"));
 }
 
 TEST_CASE("190")
@@ -900,32 +901,32 @@ TEST_CASE("190")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<table>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("<table>"));
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(2).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<tr>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(2).get());
+        REQUIRE(h->text() == QStringLiteral("<tr>"));
     }
 
     {
         REQUIRE(doc->items().at(3)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(3).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<td>\nHi\n</td>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(3).get());
+        REQUIRE(h->text() == QStringLiteral("<td>\nHi\n</td>"));
     }
 
     {
         REQUIRE(doc->items().at(4)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(4).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("</tr>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(4).get());
+        REQUIRE(h->text() == QStringLiteral("</tr>"));
     }
 
     {
         REQUIRE(doc->items().at(5)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(5).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("</table>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(5).get());
+        REQUIRE(h->text() == QStringLiteral("</table>"));
     }
 }
 
@@ -938,31 +939,31 @@ TEST_CASE("191")
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(1).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("<table>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("<table>"));
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(2).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("  <tr>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(2).get());
+        REQUIRE(h->text() == QStringLiteral("  <tr>"));
     }
 
     {
         REQUIRE(doc->items().at(3)->type() == MD::ItemType::Code);
-        auto c = static_cast<MD::Code<TRAIT> *>(doc->items().at(3).get());
-        REQUIRE(c->text() == TRAIT::latin1ToString("<td>\n  Hi\n</td>"));
+        auto c = static_cast<MD::Code *>(doc->items().at(3).get());
+        REQUIRE(c->text() == QStringLiteral("<td>\n  Hi\n</td>"));
     }
 
     {
         REQUIRE(doc->items().at(4)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(4).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("  </tr>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(4).get());
+        REQUIRE(h->text() == QStringLiteral("  </tr>"));
     }
 
     {
         REQUIRE(doc->items().at(5)->type() == MD::ItemType::RawHtml);
-        auto h = static_cast<MD::RawHtml<TRAIT> *>(doc->items().at(5).get());
-        REQUIRE(h->text() == TRAIT::latin1ToString("</table>"));
+        auto h = static_cast<MD::RawHtml *>(doc->items().at(5).get());
+        REQUIRE(h->text() == QStringLiteral("</table>"));
     }
 }

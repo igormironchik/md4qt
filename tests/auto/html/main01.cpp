@@ -1,6 +1,5 @@
-
 /*
-    SPDX-FileCopyrightText: 2022-2025 Igor Mironchik <igor.mironchik@gmail.com>
+    SPDX-FileCopyrightText: 2025 Igor Mironchik <igor.mironchik@gmail.com>
     SPDX-License-Identifier: MIT
 */
 
@@ -8,27 +7,21 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-typename TRAIT::String fullPath(int num)
+// md4qt include.
+#include "html.h"
+#include "parser.h"
+
+// Qt include.
+#include <QDir>
+
+QString fullPath(int num)
 {
-    typename TRAIT::String wd =
-#ifdef MD4QT_QT_SUPPORT
-        QDir().absolutePath()
-#else
-        typename TRAIT::String(std::filesystem::canonical(std::filesystem::current_path()).u8string())
-#endif
-        + TRAIT::latin1ToString("/tests/html/data/");
+    QString wd = QDir().absolutePath() + QStringLiteral("/tests/html/data/");
 
     auto numStr = std::to_string(num);
     numStr = std::string(3 - numStr.size(), '0') + numStr;
 
-    wd += TRAIT::latin1ToString(numStr.c_str()) + TRAIT::latin1ToString(".md");
-
-#ifndef MD4QT_QT_SUPPORT
-    std::string tmp;
-    wd.toUTF8String(tmp);
-    std::replace(tmp.begin(), tmp.end(), '\\', '/');
-    wd = icu::UnicodeString::fromUTF8(tmp);
-#endif
+    wd.append(QString::fromStdString(numStr) + QStringLiteral(".md"));
 
     return wd;
 }
@@ -39,11 +32,11 @@ typename TRAIT::String fullPath(int num)
 */
 TEST_CASE("001")
 {
-    MD::Parser<TRAIT> p;
-    auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/001.md")), false, {}, false);
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/001.md")), false, {}, false);
     REQUIRE(html
-            == TRAIT::latin1ToString("<p dir=\"auto\"><em><em><a href=\"www.google.com\">google</a>"
-                                     "</em> text</em></p>"));
+            == QStringLiteral("<p dir=\"auto\"><em><em><a href=\"www.google.com\">google</a>"
+                              "</em> text</em></p>"));
 }
 
 /*
@@ -52,9 +45,9 @@ TEST_CASE("001")
 */
 TEST_CASE("002")
 {
-    MD::Parser<TRAIT> p;
-    auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/002.md")), false, {}, false);
-    REQUIRE(html == TRAIT::latin1ToString("<p dir=\"auto\"><em><em>text text</em></em></p>"));
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/002.md")), false, {}, false);
+    REQUIRE(html == QStringLiteral("<p dir=\"auto\"><em><em>text</em> text</em></p>"));
 }
 
 /*
@@ -63,9 +56,10 @@ TEST_CASE("002")
 */
 TEST_CASE("003")
 {
-    MD::Parser<TRAIT> p;
-    auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/003.md")), false, {}, false);
-    const TRAIT::String required = TRAIT::latin1ToString("\n<h1 id=\"heading/") + fullPath(3) + TRAIT::latin1ToString("\" dir=\"auto\">heading</h1>\n");
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/003.md")), false, {}, false);
+    const QString required =
+        QStringLiteral("\n<h1 id=\"heading/") + fullPath(3) + QStringLiteral("\" dir=\"auto\">heading</h1>\n");
     REQUIRE(html == required);
 }
 
@@ -77,9 +71,9 @@ TEST_CASE("003")
 */
 TEST_CASE("004")
 {
-    MD::Parser<TRAIT> p;
-    auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/004.md")), false, {}, false);
-    const TRAIT::String required = TRAIT::latin1ToString(
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/004.md")), false, {}, false);
+    const QString required = QStringLiteral(
         "\n<table><thead><tr>\n"
         "<th align=\"left\" dir=\"auto\">\nheading1\n</th>\n"
         "<th align=\"center\" dir=\"auto\">\nheading2\n</th>\n"
@@ -97,9 +91,9 @@ TEST_CASE("004")
 */
 TEST_CASE("005")
 {
-    MD::Parser<TRAIT> p;
-    auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/005.md")), false, {}, false);
-    const TRAIT::String required = TRAIT::latin1ToString("<p dir=\"auto\"><strong>bold</strong> <del>strike</del></p>");
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/005.md")), false, {}, false);
+    const QString required = QStringLiteral("<p dir=\"auto\"><strong>bold</strong> <del>strike</del></p>");
     REQUIRE(html == required);
 }
 
@@ -109,9 +103,9 @@ $a \ne 0$
 */
 TEST_CASE("006")
 {
-    MD::Parser<TRAIT> p;
-    auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/006.md")), false, {}, false);
-    const TRAIT::String required = TRAIT::latin1ToString("<p dir=\"auto\">$a \\ne 0$</p>");
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/006.md")), false, {}, false);
+    const QString required = QStringLiteral("<p dir=\"auto\">$a \\ne 0$</p>");
     REQUIRE(html == required);
 }
 
@@ -123,9 +117,9 @@ int i = 0;
 */
 TEST_CASE("007")
 {
-    MD::Parser<TRAIT> p;
-    auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/007.md")), false, {}, false);
-    const TRAIT::String required = TRAIT::latin1ToString("\n<pre><code class=\"language-cpp\">int i = 0;</code></pre>\n");
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/007.md")), false, {}, false);
+    const QString required = QStringLiteral("\n<pre><code class=\"language-cpp\">int i = 0;</code></pre>\n");
     REQUIRE(html == required);
 }
 
@@ -135,9 +129,9 @@ TEST_CASE("007")
 */
 TEST_CASE("008")
 {
-    MD::Parser<TRAIT> p;
-    auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/008.md")), false, {}, false);
-    const TRAIT::String required = TRAIT::latin1ToString("<p dir=\"auto\"><code>code</code></p>");
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/008.md")), false, {}, false);
+    const QString required = QStringLiteral("<p dir=\"auto\"><code>code</code></p>");
     REQUIRE(html == required);
 }
 
@@ -147,9 +141,9 @@ TEST_CASE("008")
 */
 TEST_CASE("009")
 {
-    MD::Parser<TRAIT> p;
-    auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/009.md")), false, {}, false);
-    const TRAIT::String required = TRAIT::latin1ToString("\n<blockquote><p dir=\"auto\">blockquote</p></blockquote>\n");
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/009.md")), false, {}, false);
+    const QString required = QStringLiteral("\n<blockquote><p dir=\"auto\">blockquote</p></blockquote>\n");
     REQUIRE(html == required);
 }
 
@@ -164,9 +158,9 @@ TEST_CASE("009")
 */
 TEST_CASE("010")
 {
-    MD::Parser<TRAIT> p;
-    auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/010.md")), false, {}, false);
-    const TRAIT::String required = TRAIT::latin1ToString(
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/010.md")), false, {}, false);
+    const QString required = QStringLiteral(
         "\n<ul dir=\"auto\">\n<li>\nlist</li>\n</ul>\n"
         "<!-- -->\n<ol dir=\"auto\">\n<li value=\"1\">\nlist</li>\n</ol>\n");
     REQUIRE(html == required);
@@ -179,9 +173,9 @@ TEST_CASE("010")
 */
 TEST_CASE("011")
 {
-    MD::Parser<TRAIT> p;
-    auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/011.md")), false, {}, false);
-    const TRAIT::String required = TRAIT::latin1ToString(
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/011.md")), false, {}, false);
+    const QString required = QStringLiteral(
         "\n<ul class=\"contains-task-list\" dir=\"auto\">\n"
         "<li class=\"task-list-item\"><input type=\"checkbox\" id=\"\" "
         "disabled=\"\" class=\"task-list-item-checkbox\">\n"
@@ -202,14 +196,21 @@ text[^1]
 TEST_CASE("012")
 {
     const auto path = fullPath(12);
-    MD::Parser<TRAIT> p;
-    auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/012.md")), false, TRAIT::latin1ToString("qrc://ref.png"), false);
-    const TRAIT::String required = TRAIT::latin1ToString("<p dir=\"auto\">text<sup><a href=\"##^1/") + path + TRAIT::latin1ToString("\" id=\"ref-#^1/") + path
-        + TRAIT::latin1ToString(
-                              "-1\">1</a></sup></p>"
-                              "<section class=\"footnotes\"><ol dir=\"auto\"><li id=\"#^1/")
-        + path + TRAIT::latin1ToString("\"><p dir=\"auto\">footnote<a href=\"#ref-#^1/") + path
-        + TRAIT::latin1ToString("-1\"><img src=\"qrc://ref.png\" /></a></p></li></ol></section>\n");
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/012.md")),
+                           false,
+                           QStringLiteral("<img src=\"qrc://ref.png\" />"),
+                           false);
+    const QString required = QStringLiteral("<p dir=\"auto\">text<sup><a href=\"##^1/")
+        + path
+        + QStringLiteral("\" id=\"ref-#^1/")
+        + path
+        + QStringLiteral("-1\">1</a></sup></p>"
+                         "<section class=\"footnotes\"><ol dir=\"auto\"><li id=\"#^1/")
+        + path
+        + QStringLiteral("\"><p dir=\"auto\">footnote<a href=\"#ref-#^1/")
+        + path
+        + QStringLiteral("-1\"><img src=\"qrc://ref.png\" /></a></p></li></ol></section>\n");
     REQUIRE(html == required);
 }
 
@@ -220,15 +221,14 @@ TEST_CASE("012")
 TEST_CASE("013")
 {
     const auto path = fullPath(13);
-    MD::Parser<TRAIT> p;
-    auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/013.md")), false, {}, true);
-    const TRAIT::String required = TRAIT::latin1ToString(
-                              "<article class=\"markdown-body\">\n"
-                              "<div id=\"")
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/013.md")), false, {}, true);
+    const QString required = QStringLiteral(
+                                 "<article class=\"markdown-body\">\n"
+                                 "<div id=\"")
         + path
-        + TRAIT::latin1ToString(
-                              "\"></div>\n<p dir=\"auto\">"
-                              "<img src=\"https://www.google.com\" alt=\"\" style=\"max-width:100%;\" /></p></article>\n");
+        + QStringLiteral("\"></div>\n<p dir=\"auto\">"
+                         "<img src=\"https://www.google.com\" alt=\"\" style=\"max-width:100%;\" /></p></article>\n");
     REQUIRE(html == required);
 }
 
@@ -242,9 +242,9 @@ ___
 */
 TEST_CASE("014")
 {
-    MD::Parser<TRAIT> p;
-    auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/014.md")), false, {}, false);
-    const TRAIT::String required = TRAIT::latin1ToString("<p dir=\"auto\">text<br />\ntext\ntext</p><hr />");
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/014.md")), false, {}, false);
+    const QString required = QStringLiteral("<p dir=\"auto\">text<br />\ntext\ntext</p><hr />");
     REQUIRE(html == required);
 }
 
@@ -257,9 +257,9 @@ TEST_CASE("014")
 */
 TEST_CASE("015")
 {
-    MD::Parser<TRAIT> p;
-    auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/015.md")), true, {}, false);
-    const TRAIT::String required = TRAIT::latin1ToString(
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/015.md")), true, {}, false);
+    const QString required = QStringLiteral(
         "<!DOCTYPE html>\n<html><head></head><body>\n\n"
         "<table><thead><tr>\n<th align=\"left\" dir=\"auto\">\nh1\n</th>\n"
         "<th align=\"left\" dir=\"auto\">\nh2\n</th>\n</tr></thead><tbody>\n"
@@ -291,23 +291,22 @@ TEST_CASE("015")
 TEST_CASE("016")
 {
     const auto path = fullPath(16);
-    MD::Parser<TRAIT> p;
-    auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/016.md")), false, {}, false);
-    const TRAIT::String required = TRAIT::latin1ToString(
-                              "\n<blockquote>\n"
-                              "<h1 id=\"heading/")
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/016.md")), false, {}, false);
+    const QString required = QStringLiteral(
+                                 "\n<blockquote>\n"
+                                 "<h1 id=\"heading/")
         + path
-        + TRAIT::latin1ToString(
-                              "\" dir=\"auto\">heading</h1>\n\n"
-                              "<pre><code>code</code></pre>\n\n"
-                              "<ul dir=\"auto\">\n<li>\nlist</li>\n</ul>\n\n"
-                              "<table><thead><tr>\n<th align=\"left\" dir=\"auto\">\nh\n</th>\n</tr></thead>"
-                              "<tbody>\n<tr>\n\n<td align=\"left\" dir=\"auto\">\nd\n</td>\n\n</tr>\n</tbody></table>\n"
-                              "<hr />"
-                              "<table></table>"
-                              "<p dir=\"auto\">text <a></a></p>\n"
-                              "<blockquote><p dir=\"auto\">nested quote</p></blockquote>\n"
-                              "</blockquote>\n");
+        + QStringLiteral("\" dir=\"auto\">heading</h1>\n\n"
+                         "<pre><code>code</code></pre>\n\n"
+                         "<ul dir=\"auto\">\n<li>\nlist</li>\n</ul>\n\n"
+                         "<table><thead><tr>\n<th align=\"left\" dir=\"auto\">\nh\n</th>\n</tr></thead>"
+                         "<tbody>\n<tr>\n\n<td align=\"left\" dir=\"auto\">\nd\n</td>\n\n</tr>\n</tbody></table>\n"
+                         "<hr />"
+                         "<table></table>"
+                         "<p dir=\"auto\">text <a></a></p>\n"
+                         "<blockquote><p dir=\"auto\">nested quote</p></blockquote>\n"
+                         "</blockquote>\n");
     REQUIRE(html == required);
 }
 
@@ -333,19 +332,18 @@ TEST_CASE("016")
 TEST_CASE("017")
 {
     const auto path = fullPath(17);
-    MD::Parser<TRAIT> p;
-    auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/017.md")), false, {}, false);
-    const TRAIT::String required = TRAIT::latin1ToString(
-                              "\n<ul dir=\"auto\">\n<li>\n<p dir=\"auto\">list</p>\n"
-                              "<h1 id=\"Heading/")
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/017.md")), false, {}, false);
+    const QString required = QStringLiteral(
+                                 "\n<ul dir=\"auto\">\n<li>\n<p dir=\"auto\">list</p>\n"
+                                 "<h1 id=\"Heading/")
         + path
-        + TRAIT::latin1ToString(
-                              "\" dir=\"auto\">Heading</h1>\n\n"
-                              "<pre><code>code</code></pre>\n\n"
-                              "<blockquote><p dir=\"auto\">quote</p></blockquote>\n\n"
-                              "<table><thead><tr>\n<th align=\"left\" dir=\"auto\">\nt\n</th>\n</tr></thead>"
-                              "<tbody>\n<tr>\n\n<td align=\"left\" dir=\"auto\">\nd\n</td>\n\n</tr>\n</tbody></table>\n"
-                              "<div></div><hr /></li>\n</ul>\n");
+        + QStringLiteral("\" dir=\"auto\">Heading</h1>\n\n"
+                         "<pre><code>code</code></pre>\n\n"
+                         "<blockquote><p dir=\"auto\">quote</p></blockquote>\n\n"
+                         "<table><thead><tr>\n<th align=\"left\" dir=\"auto\">\nt\n</th>\n</tr></thead>"
+                         "<tbody>\n<tr>\n\n<td align=\"left\" dir=\"auto\">\nd\n</td>\n\n</tr>\n</tbody></table>\n"
+                         "<div></div><hr /></li>\n</ul>\n");
     REQUIRE(html == required);
 }
 
@@ -375,33 +373,33 @@ TEST_CASE("017")
 TEST_CASE("018")
 {
     const auto path = fullPath(18);
-    MD::Parser<TRAIT> p;
-    auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/018.md")), false, {}, false);
-    const TRAIT::String required = TRAIT::latin1ToString(
-                              "\n<table><thead><tr>\n<th align=\"left\" dir=\"auto\">\nhead\n</th>\n</tr></thead>"
-                              "<tbody>\n<tr>\n\n<td align=\"left\" dir=\"auto\">\n"
-                              "<code>code</code> "
-                              "<a href=\"https://www.google.com\">google</a>"
-                              "<sup><a href=\"##^1/")
-        + path + TRAIT::latin1ToString("\" id=\"ref-#^1/") + path
-        + TRAIT::latin1ToString(
-                              "-1\">1</a></sup> "
-                              "<img src=\"https://www.google.com\" alt=\"\" style=\"max-width:100%;\" /> "
-                              "$a /ne 0$\n</td>\n\n</tr>\n</tbody></table>\n"
-                              "<section class=\"footnotes\"><ol dir=\"auto\"><li id=\"#^1/")
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/018.md")), false, {}, false);
+    const QString required = QStringLiteral(
+                                 "\n<table><thead><tr>\n<th align=\"left\" dir=\"auto\">\nhead\n</th>\n</tr></thead>"
+                                 "<tbody>\n<tr>\n\n<td align=\"left\" dir=\"auto\">\n"
+                                 "<code>code</code> "
+                                 "<a href=\"https://www.google.com\">google</a>"
+                                 "<sup><a href=\"##^1/")
         + path
-        + TRAIT::latin1ToString(
-                              "\">\n"
-                              "<h1 id=\"heading/")
+        + QStringLiteral("\" id=\"ref-#^1/")
         + path
-        + TRAIT::latin1ToString(
-                              "\" dir=\"auto\">heading</h1>\n\n"
-                              "<pre><code>code</code></pre>\n\n"
-                              "<blockquote><p dir=\"auto\">quote</p></blockquote>\n\n"
-                              "<ul dir=\"auto\">\n<li>\nlist</li>\n</ul>\n\n"
-                              "<table><thead><tr>\n<th align=\"left\" dir=\"auto\">\nt\n</th>\n</tr></thead>"
-                              "<tbody>\n<tr>\n\n<td align=\"left\" dir=\"auto\">\nd\n</td>\n\n</tr>\n</tbody></table>\n"
-                              "<div></div><hr /></li></ol></section>\n");
+        + QStringLiteral("-1\">1</a></sup> "
+                         "<img src=\"https://www.google.com\" alt=\"\" style=\"max-width:100%;\" /> "
+                         "$a /ne 0$\n</td>\n\n</tr>\n</tbody></table>\n"
+                         "<section class=\"footnotes\"><ol dir=\"auto\"><li id=\"#^1/")
+        + path
+        + QStringLiteral("\">\n"
+                         "<h1 id=\"heading/")
+        + path
+        + QStringLiteral("\" dir=\"auto\">heading</h1>\n\n"
+                         "<pre><code>code</code></pre>\n\n"
+                         "<blockquote><p dir=\"auto\">quote</p></blockquote>\n\n"
+                         "<ul dir=\"auto\">\n<li>\nlist</li>\n</ul>\n\n"
+                         "<table><thead><tr>\n<th align=\"left\" dir=\"auto\">\nt\n</th>\n</tr></thead>"
+                         "<tbody>\n<tr>\n\n<td align=\"left\" dir=\"auto\">\nd\n</td>\n\n</tr>\n</tbody></table>\n"
+                         "<div></div><hr /></li></ol></section>\n");
+
     REQUIRE(html == required);
 }
 
@@ -417,9 +415,9 @@ TEST_CASE("018")
 */
 TEST_CASE("019")
 {
-    MD::Parser<TRAIT> p;
-    auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/019.md")), false, {}, false);
-    const TRAIT::String required = TRAIT::latin1ToString(
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/019.md")), false, {}, false);
+    const QString required = QStringLiteral(
         "\n<ul dir=\"auto\">\n<li>\nCreate a list by starting a line with "
         "<code>+</code>, <code>-</code>, or <code>*</code></li>\n"
         "<li>\nSub-lists are made by indenting 2 spaces:\n"
@@ -428,6 +426,7 @@ TEST_CASE("019")
         "<ul dir=\"auto\">\n<li>\nFacilisis in pretium nisl aliquet</li>\n</ul>\n\n"
         "<ul dir=\"auto\">\n<li>\nNulla volutpat aliquam velit</li>\n</ul>\n"
         "</li>\n</ul>\n</li>\n<li>\nVery easy!</li>\n</ul>\n");
+
     REQUIRE(html == required);
 }
 
@@ -439,9 +438,9 @@ What is a [Google]?
 */
 TEST_CASE("020")
 {
-    MD::Parser<TRAIT> p;
-    auto html = MD::toHtml(p.parse(TRAIT::latin1ToString("tests/html/data/020.md")), false, {}, false);
-    const TRAIT::String required = TRAIT::latin1ToString(
-                "<p dir=\"auto\">What is a <a href=\"https://www.google.com\">Google</a>?</p>");
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/020.md")), false, {}, false);
+    const QString required =
+        QStringLiteral("<p dir=\"auto\">What is a <a href=\"https://www.google.com\">Google</a>?</p>");
     REQUIRE(html == required);
 }

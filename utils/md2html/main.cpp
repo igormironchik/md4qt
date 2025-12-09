@@ -4,9 +4,8 @@
 */
 
 // md4qt include.
-#define MD4QT_QT_SUPPORT
-#include <md4qt/html.h>
-#include <md4qt/parser.h>
+#include "html.h"
+#include "parser.h"
 
 // Qt include.
 #include <QCommandLineOption>
@@ -16,7 +15,8 @@
 #include <QFileInfo>
 #include <QTextStream>
 
-int main(int argc, char **argv)
+int main(int argc,
+         char **argv)
 {
     QCoreApplication app(argc, argv);
 
@@ -29,7 +29,8 @@ int main(int argc, char **argv)
     QCommandLineOption htmlArg(QStringList() << QStringLiteral("o") << QStringLiteral("html"),
                                QStringLiteral("Output HTML file name."),
                                QStringLiteral("html"));
-    QCommandLineOption recursiveArg(QStringList() << QStringLiteral("r") << QStringLiteral("recursive"), QStringLiteral("Read all linked Markdown files?"));
+    QCommandLineOption recursiveArg(QStringList() << QStringLiteral("r") << QStringLiteral("recursive"),
+                                    QStringLiteral("Read all linked Markdown files?"));
     argParser.addOption(markdownArg);
     argParser.addOption(htmlArg);
     argParser.addOption(recursiveArg);
@@ -46,7 +47,7 @@ int main(int argc, char **argv)
 
     if (mdFileInfo.exists()) {
         if (mdFileInfo.suffix() == QStringLiteral("md") || mdFileInfo.suffix() == QStringLiteral("markdown")) {
-            MD::Parser<MD::QStringTrait> parser;
+            MD::Parser parser;
 
             const auto doc = parser.parse(markdownFileName, recursive);
 

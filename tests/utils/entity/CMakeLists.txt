@@ -1,15 +1,17 @@
 # SPDX-FileCopyrightText: 2022-2025 Igor Mironchik <igor.mironchik@gmail.com>
 # SPDX-License-Identifier: MIT
 
-project( entity )
+cmake_minimum_required(VERSION 3.19)
 
-set( CMAKE_CXX_STANDARD 17 )
+project(entity)
 
-set( CMAKE_CXX_STANDARD_REQUIRED ON )
+set(CMAKE_CXX_STANDARD 17)
 
-set( SRC main.cpp )
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/entities.json
-	DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
+set(SRC main.cpp)
 
-add_executable( entity ${SRC} )
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/entities.json
+    DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+add_executable(entity ${SRC})

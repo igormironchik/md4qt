@@ -1,5 +1,5 @@
 /*
-    SPDX-FileCopyrightText: 2022-2025 Igor Mironchik <igor.mironchik@gmail.com>
+    SPDX-FileCopyrightText: 2025 Igor Mironchik <igor.mironchik@gmail.com>
     SPDX-License-Identifier: MIT
 */
 
@@ -8,25 +8,20 @@
 #include <doctest/doctest.h>
 
 // md4qt include.
-#include <md4qt/parser.h>
-#include <md4qt/poscache.h>
-#include <md4qt/utils.h>
+#include "parser.h"
+#include "poscache.h"
 
-MD::PosCache<TRAIT> g_cache;
+MD::PosCache g_cache;
 
-inline typename TRAIT::String to_string(int i)
+inline QString to_string(int i)
 {
-#ifdef MD4QT_QT_SUPPORT
     return QString::number(i);
-#else
-    return std::to_string(i);
-#endif
 }
 
-std::shared_ptr<MD::Document<TRAIT>> prepareTest(const typename TRAIT::String &fileName)
+QSharedPointer<MD::Document> prepareTest(const QString &fileName)
 {
-    MD::Parser<TRAIT> p;
-    auto doc = p.parse(TRAIT::latin1ToString("tests/parser/data/") + fileName);
+    MD::Parser p;
+    auto doc = p.parse(QStringLiteral("tests/parser/data/") + fileName);
 
     g_cache.initialize(doc);
 
@@ -35,7 +30,7 @@ std::shared_ptr<MD::Document<TRAIT>> prepareTest(const typename TRAIT::String &f
 
 TEST_CASE("001")
 {
-    prepareTest(TRAIT::latin1ToString("001.md"));
+    prepareTest(QStringLiteral("001.md"));
     REQUIRE(g_cache.findFirstInCache({0, 0, 0, 0}).empty());
     REQUIRE(g_cache.findFirstInCache({1, 1, 1, 1}).empty());
 }
@@ -46,7 +41,7 @@ This is just a text!
 */
 TEST_CASE("002")
 {
-    prepareTest(TRAIT::latin1ToString("002.md"));
+    prepareTest(QStringLiteral("002.md"));
     auto items = g_cache.findFirstInCache({0, 0, 0, 0});
     REQUIRE(items.size() == 2);
     REQUIRE(items.at(0)->type() == MD::ItemType::Paragraph);
@@ -63,7 +58,7 @@ Paragraph 2.
 */
 TEST_CASE("003")
 {
-    prepareTest(TRAIT::latin1ToString("003.md"));
+    prepareTest(QStringLiteral("003.md"));
     REQUIRE(g_cache.findFirstInCache({0, 0, 0, 0}).empty());
 
     for (int i = 0; i < 2; ++i) {
@@ -71,8 +66,8 @@ TEST_CASE("003")
         REQUIRE(items.size() == 2);
         REQUIRE(items.at(0)->type() == MD::ItemType::Paragraph);
         REQUIRE(items.at(1)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(items.at(1));
-        REQUIRE(t->text() == TRAIT::latin1ToString("Paragraph ") + to_string(i + 1) + TRAIT::latin1ToString("."));
+        auto t = static_cast<MD::Text *>(items.at(1));
+        REQUIRE(t->text() == QStringLiteral("Paragraph ") + to_string(i + 1) + QStringLiteral("."));
     }
 }
 
@@ -82,7 +77,7 @@ Code in the `text`.
 */
 TEST_CASE("012")
 {
-    prepareTest(TRAIT::latin1ToString("012.md"));
+    prepareTest(QStringLiteral("012.md"));
 
     {
         auto items = g_cache.findFirstInCache({0, 0, 0, 0});
@@ -130,7 +125,7 @@ TEST_CASE("012")
 */
 TEST_CASE("017")
 {
-    prepareTest(TRAIT::latin1ToString("017.md"));
+    prepareTest(QStringLiteral("017.md"));
 
     {
         auto items = g_cache.findFirstInCache({0, 0, 0, 0});
@@ -182,7 +177,7 @@ else
 */
 TEST_CASE("020")
 {
-    prepareTest(TRAIT::latin1ToString("020.md"));
+    prepareTest(QStringLiteral("020.md"));
 
     {
         auto items = g_cache.findFirstInCache({0, 0, 0, 0});
@@ -205,7 +200,7 @@ TEST_CASE("020")
 */
 TEST_CASE("021")
 {
-    prepareTest(TRAIT::latin1ToString("021.md"));
+    prepareTest(QStringLiteral("021.md"));
 
     {
         auto items = g_cache.findFirstInCache({4, 0, 4, 0});
@@ -222,7 +217,7 @@ TEST_CASE("021")
 */
 TEST_CASE("023")
 {
-    prepareTest(TRAIT::latin1ToString("023.md"));
+    prepareTest(QStringLiteral("023.md"));
 
     {
         auto items = g_cache.findFirstInCache({4, 0, 4, 0});
@@ -255,7 +250,7 @@ TEST_CASE("023")
 */
 TEST_CASE("024")
 {
-    prepareTest(TRAIT::latin1ToString("024.md"));
+    prepareTest(QStringLiteral("024.md"));
 
     {
         auto items = g_cache.findFirstInCache({4, 1, 4, 1});
@@ -294,7 +289,7 @@ TEST_CASE("024")
 */
 TEST_CASE("025")
 {
-    prepareTest(TRAIT::latin1ToString("025.md"));
+    prepareTest(QStringLiteral("025.md"));
 
     {
         auto items = g_cache.findFirstInCache({2, 2, 2, 2});
@@ -312,7 +307,7 @@ Text ![Image 1](a.jpg) continue ![ Image 2 ](b.png) and ![ Image 3]( http://www.
 */
 TEST_CASE("030")
 {
-    prepareTest(TRAIT::latin1ToString("030.md"));
+    prepareTest(QStringLiteral("030.md"));
 
     {
         auto items = g_cache.findFirstInCache({5, 0, 5, 0});
@@ -336,7 +331,7 @@ TEST_CASE("030")
 */
 TEST_CASE("031")
 {
-    prepareTest(TRAIT::latin1ToString("031.md"));
+    prepareTest(QStringLiteral("031.md"));
 
     {
         auto items = g_cache.findFirstInCache({22, 0, 22, 0});
@@ -349,7 +344,7 @@ TEST_CASE("031")
         auto items = g_cache.findFirstInCache({80, 0, 80, 0});
         REQUIRE(items.size() == 2);
         REQUIRE(items.at(0)->type() == MD::ItemType::Paragraph);
-        REQUIRE(items.at(1)->type() == MD::ItemType::FootnoteRef);
+        REQUIRE(items.at(1)->type() == MD::ItemType::Text);
     }
 }
 
@@ -363,7 +358,7 @@ TEST_CASE("031")
 */
 TEST_CASE("045")
 {
-    prepareTest(TRAIT::latin1ToString("045.md"));
+    prepareTest(QStringLiteral("045.md"));
 
     {
         auto items = g_cache.findFirstInCache({1, 0, 1, 0});
@@ -412,7 +407,7 @@ Paragraph 2
 */
 TEST_CASE("046")
 {
-    prepareTest(TRAIT::latin1ToString("046.md"));
+    prepareTest(QStringLiteral("046.md"));
 
     {
         auto items = g_cache.findFirstInCache({0, 1, 0, 1});
@@ -442,7 +437,7 @@ Cell 1   | Cell 2
 */
 TEST_CASE("047")
 {
-    prepareTest(TRAIT::latin1ToString("047.md"));
+    prepareTest(QStringLiteral("047.md"));
 
     {
         auto items = g_cache.findFirstInCache({0, 1, 0, 1});
@@ -465,7 +460,7 @@ $$ x = {-b \pm \sqrt{b^2-4ac} \over 2a} $$
 */
 TEST_CASE("065")
 {
-    prepareTest(TRAIT::latin1ToString("065.md"));
+    prepareTest(QStringLiteral("065.md"));
 
     {
         auto items = g_cache.findFirstInCache({5, 0, 5, 0});
@@ -494,7 +489,7 @@ int i;
 */
 TEST_CASE("155")
 {
-    prepareTest(TRAIT::latin1ToString("155.md"));
+    prepareTest(QStringLiteral("155.md"));
 
     {
         auto items = g_cache.findFirstInCache({2, 9, 2, 9});
@@ -513,7 +508,7 @@ TEST_CASE("155")
 */
 TEST_CASE("168")
 {
-    prepareTest(TRAIT::latin1ToString("168.md"));
+    prepareTest(QStringLiteral("168.md"));
 
     {
         auto items = g_cache.findFirstInCache({2, 2, 2, 2});
@@ -533,7 +528,7 @@ Text
 */
 TEST_CASE("174")
 {
-    prepareTest(TRAIT::latin1ToString("174.md"));
+    prepareTest(QStringLiteral("174.md"));
 
     {
         auto items = g_cache.findFirstInCache({0, 1, 0, 1});
@@ -550,7 +545,7 @@ TEST_CASE("174")
 */
 TEST_CASE("258")
 {
-    auto doc = prepareTest(TRAIT::latin1ToString("258.md"));
+    auto doc = prepareTest(QStringLiteral("258.md"));
 
     {
         auto items = g_cache.findFirstInCache({0, 0, 0, 0});
@@ -582,11 +577,11 @@ TEST_CASE("258")
 */
 TEST_CASE("259")
 {
-    auto doc = prepareTest(TRAIT::latin1ToString("259.md"));
+    auto doc = prepareTest(QStringLiteral("259.md"));
 
     REQUIRE(doc->items().size() == 2);
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
 
     {
         auto items = g_cache.findFirstInCache({0, 0, 0, 0});
@@ -636,7 +631,7 @@ TEST_CASE("259")
 
 TEST_CASE("user_defined")
 {
-    class MyItem : public MD::Item<TRAIT>
+    class MyItem : public MD::Item
     {
     public:
         MyItem() = default;
@@ -647,28 +642,28 @@ TEST_CASE("user_defined")
             return MD::ItemType{static_cast<int>(MD::ItemType::UserDefined) + 1};
         }
 
-        std::shared_ptr<Item<TRAIT>> clone(MD::Document<TRAIT> *doc = nullptr) const override
+        QSharedPointer<Item> clone(MD::Document *doc = nullptr) const override
         {
-            MD_UNUSED(doc)
+            Q_UNUSED(doc)
 
-            return std::make_shared<MyItem>();
+            return QSharedPointer<MyItem>::create();
         }
     };
 
-    auto doc = std::make_shared<MD::Document<TRAIT>>();
-    auto i = std::make_shared<MyItem>();
+    auto doc = QSharedPointer<MD::Document>::create();
+    auto i = QSharedPointer<MyItem>::create();
     i->setStartColumn(0);
     i->setStartLine(0);
     i->setEndColumn(10);
     i->setEndLine(0);
 
-    auto p = std::make_shared<MD::Paragraph<TRAIT>>();
+    auto p = QSharedPointer<MD::Paragraph>::create();
     p->setStartColumn(0);
     p->setStartLine(2);
     p->setEndColumn(10);
     p->setEndLine(2);
 
-    auto in = std::make_shared<MyItem>();
+    auto in = QSharedPointer<MyItem>::create();
     in->setStartColumn(0);
     in->setStartLine(2);
     in->setEndColumn(10);

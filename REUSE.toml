@@ -10,9 +10,9 @@ SPDX-FileCopyrightText = "John MacFarlane"
 SPDX-License-Identifier = "CC-BY-SA-4.0"
 
 [[annotations]]
-path = ["tests/auto/commonmark/0.30/**.md", "tests/auto/commonmark/0.31.2/**.md", "tests/auto/html/data/**.md"]
+path = ["tests/auto/commonmark/0.30/**.md", "tests/auto/commonmark/0.31.2/**.md", "tests/auto/html/data/**.md", "apply-clang-format.sh"]
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2022-2024 Igor Mironchik <igor.mironchik@gmail.com>"
+SPDX-FileCopyrightText = "2025 Igor Mironchik <igor.mironchik@gmail.com>"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
@@ -34,9 +34,9 @@ SPDX-FileCopyrightText = "2016-2021 Viktor Kirilov"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
-path = ["tests/auto/test_parser/data/**", "docs/**"]
+path = ["tests/auto/test_parser/data/**", "docs/**", "tests/auto/plugins/emphasis/data/**.md", "tests/auto/plugins/yaml/data/**.md"]
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2022-2024 Igor Mironchik <igor.mironchik@gmail.com>"
+SPDX-FileCopyrightText = "2025 Igor Mironchik <igor.mironchik@gmail.com>"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
@@ -52,7 +52,7 @@ SPDX-FileCopyrightText = "none"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
-path = [".gitignore", ".kde-ci.yml", "conanfile.txt", "REUSE.toml", "metainfo.yaml", ".github/workflows/codeql-analysis.yml", ".github/workflows/testing.yml", "codecov.yml"]
+path = [".gitignore", ".kde-ci.yml", "conanfile.txt", "REUSE.toml", "metainfo.yaml"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "none"
 SPDX-License-Identifier = "CC0-1.0"
@@ -66,5 +66,5 @@ SPDX-License-Identifier = "CC-BY-4.0"
 [[annotations]]
 path = "tests/utils/entity/main.cpp"
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2022-2024 Igor Mironchik <igor.mironchik@gmail.com>"
+SPDX-FileCopyrightText = "2025 Igor Mironchik <igor.mironchik@gmail.com>"
 SPDX-License-Identifier = "MIT"

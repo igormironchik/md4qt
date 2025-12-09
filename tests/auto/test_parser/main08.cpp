@@ -1,12 +1,17 @@
-
 /*
-    SPDX-FileCopyrightText: 2022-2025 Igor Mironchik <igor.mironchik@gmail.com>
+    SPDX-FileCopyrightText: 2025 Igor Mironchik <igor.mironchik@gmail.com>
     SPDX-License-Identifier: MIT
 */
 
 // doctest include.
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
+
+// md4qt include.
+#include "parser.h"
+
+// Qt include.
+#include <QDir>
 
 // C++ include.
 #include <fstream>
@@ -17,22 +22,22 @@ This sentence uses $\` and \`$ delimiters to show math inline:  $`\sqrt{3x-1}+(1
 */
 TEST_CASE("218")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/218.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/218.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
     REQUIRE(p->items().size() == 4);
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
     REQUIRE(p->items().at(1)->type() == MD::ItemType::Math);
 
     {
-        auto m = static_cast<MD::Math<TRAIT> *>(p->items().at(1).get());
-        REQUIRE(m->expr() == TRAIT::latin1ToString("\\` and \\`"));
+        auto m = static_cast<MD::Math *>(p->items().at(1).get());
+        REQUIRE(m->expr() == QStringLiteral("\\` and \\`"));
         REQUIRE(m->startDelim() == MD::WithPosition{19, 0, 19, 0});
         REQUIRE(m->endDelim() == MD::WithPosition{29, 0, 29, 0});
     }
@@ -41,8 +46,8 @@ TEST_CASE("218")
     REQUIRE(p->items().at(3)->type() == MD::ItemType::Math);
 
     {
-        auto m = static_cast<MD::Math<TRAIT> *>(p->items().at(3).get());
-        REQUIRE(m->expr() == TRAIT::latin1ToString("\\sqrt{3x-1}+(1+x)^2"));
+        auto m = static_cast<MD::Math *>(p->items().at(3).get());
+        REQUIRE(m->expr() == QStringLiteral("\\sqrt{3x-1}+(1+x)^2"));
         REQUIRE(m->startDelim() == MD::WithPosition{64, 0, 64, 0});
         REQUIRE(m->endDelim() == MD::WithPosition{86, 0, 86, 0});
     }
@@ -59,33 +64,30 @@ TEST_CASE("218")
 */
 TEST_CASE("219")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/219.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/219.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 4);
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
         REQUIRE(p->items().size() == 1);
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
     }
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
         REQUIRE(p->items().size() == 1);
-        REQUIRE(p->items().at(0)->type() == MD::ItemType::FootnoteRef);
-        auto fr = static_cast<MD::FootnoteRef<TRAIT> *>(p->items().at(0).get());
-        REQUIRE(fr->text() == TRAIT::latin1ToString("[^1]"));
-        REQUIRE(fr->idPos() == MD::WithPosition{1, 2, 2, 2});
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
     }
 
     {
         REQUIRE(doc->items().at(3)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(3).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(3).get());
         REQUIRE(p->items().size() == 2);
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
         REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
@@ -100,43 +102,43 @@ foo <!--
 */
 TEST_CASE("220")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/220.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/220.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 3);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
     REQUIRE(p->items().size() == 1);
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
-    REQUIRE(t->text() == TRAIT::latin1ToString("foo <!--"));
+    auto t = static_cast<MD::Text *>(p->items().at(0).get());
+    REQUIRE(t->text() == QStringLiteral("foo <!--"));
 
     REQUIRE(doc->items().at(2)->type() == MD::ItemType::List);
-    auto l = static_cast<MD::List<TRAIT> *>(doc->items().at(2).get());
+    auto l = static_cast<MD::List *>(doc->items().at(2).get());
     REQUIRE(l->items().size() == 1);
     REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
-    auto li = static_cast<MD::ListItem<TRAIT> *>(l->items().at(0).get());
+    auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
     REQUIRE(li->delim() == MD::WithPosition{0, 1, 0, 1});
     REQUIRE(li->items().size() == 1);
     REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
 
     {
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(li->items().at(0).get());
+        auto p = static_cast<MD::Paragraph *>(li->items().at(0).get());
         REQUIRE(p->items().size() == 2);
 
         {
             REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-            auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
-            REQUIRE(t->text() == TRAIT::latin1ToString("not list"));
+            auto t = static_cast<MD::Text *>(p->items().at(0).get());
+            REQUIRE(t->text() == QStringLiteral("not list"));
         }
 
         {
             REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
-            auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(1).get());
-            REQUIRE(t->text() == TRAIT::latin1ToString("-->"));
+            auto t = static_cast<MD::Text *>(p->items().at(1).get());
+            REQUIRE(t->text() == QStringLiteral("-->"));
         }
     }
 }
@@ -151,21 +153,21 @@ TEST_CASE("220")
 */
 TEST_CASE("221")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/221.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/221.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Table);
-    auto t = static_cast<MD::Table<TRAIT> *>(doc->items().at(1).get());
+    auto t = static_cast<MD::Table *>(doc->items().at(1).get());
     REQUIRE(t->columnsCount() == 4);
     REQUIRE(t->rows().size() == 4);
-    auto c = static_cast<MD::TableCell<TRAIT> *>(t->rows()[1]->cells()[0].get());
+    auto c = static_cast<MD::TableCell *>(t->rows()[1]->cells()[0].get());
     REQUIRE(c->items().size() == 3);
     REQUIRE(c->items().at(0)->type() == MD::ItemType::Math);
-    auto m = static_cast<MD::Math<TRAIT> *>(c->items().at(0).get());
+    auto m = static_cast<MD::Math *>(c->items().at(0).get());
     REQUIRE(m->startDelim() == MD::WithPosition{1, 2, 1, 2});
     REQUIRE(m->endDelim() == MD::WithPosition{14, 2, 14, 2});
     REQUIRE(c->items().at(1)->type() == MD::ItemType::Text);
@@ -177,30 +179,31 @@ TEST_CASE("221")
 |:--------------|:----------------------------------------|:-----
 |$x_n$ `x_n` |$\stackrel{!}{=}$ `\stackrel{!}{=}`| $a \atop b$ `a \atop b`
 |$e^x$ `e^x` |$\overset{!}{=}$ `\overset{!}{=}`  | $a\raisebox{0.25em}{$b$}c$ `a\raisebox{0.25em}{$b$}c`
-|$_u^o $ `_u^o `| $\underset{!}{=}$ `\underset{!}{=}` | $a+\left(\vcenter{\frac{\frac a b}c}\right)$ `a+\left(\vcenter{\hbox{$\frac{\frac a b}c$}}\right)`
+|$_u^o $ `_u^o `| $\underset{!}{=}$ `\underset{!}{=}` | $a+\left(\vcenter{\frac{\frac a b}c}\right)$
+`a+\left(\vcenter{\hbox{$\frac{\frac a b}c$}}\right)`
 ||| $$\sum_{\substack{0<i<m\\0<j<n}}$$ `\sum_{\substack{0<i<m\\0<j<n}}`
 
 */
 TEST_CASE("222")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/222.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/222.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Table);
-    auto t = static_cast<MD::Table<TRAIT> *>(doc->items().at(1).get());
+    auto t = static_cast<MD::Table *>(doc->items().at(1).get());
     REQUIRE(t->columnsCount() == 3);
     REQUIRE(t->rows().size() == 5);
     REQUIRE(t->rows()[4]->cells().size() == 3);
-    auto c = static_cast<MD::TableCell<TRAIT> *>(t->rows()[4]->cells()[2].get());
+    auto c = static_cast<MD::TableCell *>(t->rows()[4]->cells()[2].get());
     REQUIRE(c->items().size() == 3);
     REQUIRE(c->items().at(0)->type() == MD::ItemType::Math);
     REQUIRE(c->items().at(1)->type() == MD::ItemType::Text);
     REQUIRE(c->items().at(2)->type() == MD::ItemType::Code);
-    auto ic = static_cast<MD::Code<TRAIT> *>(c->items().at(2).get());
+    auto ic = static_cast<MD::Code *>(c->items().at(2).get());
     REQUIRE(ic->startDelim() == MD::WithPosition{39, 5, 39, 5});
     REQUIRE(ic->endDelim() == MD::WithPosition{70, 5, 70, 5});
 }
@@ -213,21 +216,21 @@ text
 */
 TEST_CASE("223")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/223.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/223.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
-    auto l = static_cast<MD::List<TRAIT> *>(doc->items().at(1).get());
+    auto l = static_cast<MD::List *>(doc->items().at(1).get());
     REQUIRE(l->items().size() == 1);
-    auto li = static_cast<MD::ListItem<TRAIT> *>(l->items().at(0).get());
+    auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
     REQUIRE(li->delim() == MD::WithPosition{0, 0, 0, 0});
     REQUIRE(li->items().size() == 1);
     REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(li->items().at(0).get());
+    auto p = static_cast<MD::Paragraph *>(li->items().at(0).get());
     REQUIRE(p->items().size() == 3);
 }
 
@@ -239,26 +242,26 @@ text
 */
 TEST_CASE("224")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/224.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/224.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 3);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Blockquote);
-    auto b = static_cast<MD::Blockquote<TRAIT> *>(doc->items().at(1).get());
+    auto b = static_cast<MD::Blockquote *>(doc->items().at(1).get());
     REQUIRE(b->items().size() == 1);
-    REQUIRE(b->delims() == MD::Blockquote<TRAIT>::Delims{{0, 0, 0, 0}});
+    REQUIRE(b->delims() == MD::Blockquote::Delims{{0, 0, 0, 0}});
     REQUIRE(b->items().at(0)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(b->items().at(0).get());
+    auto p = static_cast<MD::Paragraph *>(b->items().at(0).get());
     REQUIRE(p->items().size() == 2);
 
     REQUIRE(doc->items().at(2)->type() == MD::ItemType::List);
-    auto l = static_cast<MD::List<TRAIT> *>(doc->items().at(2).get());
+    auto l = static_cast<MD::List *>(doc->items().at(2).get());
     REQUIRE(l->items().size() == 1);
     REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
-    auto li = static_cast<MD::ListItem<TRAIT> *>(l->items().at(0).get());
+    auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
     REQUIRE(li->isEmpty());
 }
 
@@ -270,19 +273,19 @@ text
 */
 TEST_CASE("225")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/225.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/225.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Blockquote);
-    auto b = static_cast<MD::Blockquote<TRAIT> *>(doc->items().at(1).get());
-    REQUIRE(b->delims() == MD::Blockquote<TRAIT>::Delims{{0, 0, 0, 0}});
+    auto b = static_cast<MD::Blockquote *>(doc->items().at(1).get());
+    REQUIRE(b->delims() == MD::Blockquote::Delims{{0, 0, 0, 0}});
     REQUIRE(b->items().size() == 1);
     REQUIRE(b->items().at(0)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(b->items().at(0).get());
+    auto p = static_cast<MD::Paragraph *>(b->items().at(0).get());
     REQUIRE(p->items().size() == 3);
 }
 
@@ -294,21 +297,21 @@ TEST_CASE("225")
 */
 TEST_CASE("226")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/226.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/226.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
-    auto l = static_cast<MD::List<TRAIT> *>(doc->items().at(1).get());
+    auto l = static_cast<MD::List *>(doc->items().at(1).get());
     REQUIRE(l->items().size() == 1);
-    auto li = static_cast<MD::ListItem<TRAIT> *>(l->items().at(0).get());
+    auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
     REQUIRE(li->delim() == MD::WithPosition{0, 0, 0, 0});
     REQUIRE(li->items().size() == 2);
     REQUIRE(li->items().at(0)->type() == MD::ItemType::Heading);
-    auto h = static_cast<MD::Heading<TRAIT> *>(li->items().at(0).get());
+    auto h = static_cast<MD::Heading *>(li->items().at(0).get());
     REQUIRE(!h->text()->isEmpty());
     REQUIRE(h->text()->items().size() == 1);
     REQUIRE(h->text()->items().at(0)->type() == MD::ItemType::Text);
@@ -316,7 +319,7 @@ TEST_CASE("226")
     REQUIRE(h->delims().front() == MD::WithPosition{2, 1, 2, 1});
 
     REQUIRE(li->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(li->items().at(1).get());
+    auto p = static_cast<MD::Paragraph *>(li->items().at(1).get());
     REQUIRE(p->items().size() == 1);
 }
 
@@ -326,9 +329,9 @@ TEST_CASE("226")
 */
 TEST_CASE("227")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/227.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/227.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
@@ -336,31 +339,31 @@ TEST_CASE("227")
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
 
     {
-        auto l = static_cast<MD::List<TRAIT> *>(doc->items().at(1).get());
+        auto l = static_cast<MD::List *>(doc->items().at(1).get());
         REQUIRE(l->items().size() == 1);
 
         {
-            auto li = static_cast<MD::ListItem<TRAIT> *>(l->items().at(0).get());
+            auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
             REQUIRE(li->delim() == MD::WithPosition{0, 0, 0, 0});
             REQUIRE(li->items().size() == 1);
             REQUIRE(li->items().at(0)->type() == MD::ItemType::List);
-            auto l = static_cast<MD::List<TRAIT> *>(li->items().at(0).get());
+            auto l = static_cast<MD::List *>(li->items().at(0).get());
             REQUIRE(l->items().size() == 1);
 
             {
-                auto li = static_cast<MD::ListItem<TRAIT> *>(l->items().at(0).get());
+                auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
                 REQUIRE(li->delim() == MD::WithPosition{2, 0, 2, 0});
                 REQUIRE(li->items().size() == 1);
                 REQUIRE(li->items().at(0)->type() == MD::ItemType::List);
-                auto l = static_cast<MD::List<TRAIT> *>(li->items().at(0).get());
+                auto l = static_cast<MD::List *>(li->items().at(0).get());
                 REQUIRE(l->items().size() == 1);
 
                 {
-                    auto li = static_cast<MD::ListItem<TRAIT> *>(l->items().at(0).get());
+                    auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
                     REQUIRE(li->delim() == MD::WithPosition{4, 0, 4, 0});
                     REQUIRE(li->items().size() == 1);
                     REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
-                    auto p = static_cast<MD::Paragraph<TRAIT> *>(li->items().at(0).get());
+                    auto p = static_cast<MD::Paragraph *>(li->items().at(0).get());
                     REQUIRE(p->items().size() == 1);
                 }
             }
@@ -377,9 +380,9 @@ TEST_CASE("227")
 */
 TEST_CASE("228")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/228.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/228.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
@@ -387,23 +390,23 @@ TEST_CASE("228")
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
 
     {
-        auto l = static_cast<MD::List<TRAIT> *>(doc->items().at(1).get());
+        auto l = static_cast<MD::List *>(doc->items().at(1).get());
         REQUIRE(l->items().size() == 1);
 
         {
-            auto li = static_cast<MD::ListItem<TRAIT> *>(l->items().at(0).get());
+            auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
             REQUIRE(li->delim() == MD::WithPosition{0, 0, 0, 0});
             REQUIRE(li->items().size() == 1);
             REQUIRE(li->items().at(0)->type() == MD::ItemType::List);
-            auto l = static_cast<MD::List<TRAIT> *>(li->items().at(0).get());
+            auto l = static_cast<MD::List *>(li->items().at(0).get());
             REQUIRE(l->items().size() == 1);
 
             {
-                auto li = static_cast<MD::ListItem<TRAIT> *>(l->items().at(0).get());
+                auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
                 REQUIRE(li->delim() == MD::WithPosition{2, 1, 2, 1});
                 REQUIRE(li->items().size() == 1);
                 REQUIRE(li->items().at(0)->type() == MD::ItemType::Heading);
-                auto h = static_cast<MD::Heading<TRAIT> *>(li->items().at(0).get());
+                auto h = static_cast<MD::Heading *>(li->items().at(0).get());
                 REQUIRE(h->delims().size() == 1);
                 REQUIRE(h->delims().front() == MD::WithPosition{4, 3, 4, 3});
                 REQUIRE(!h->text()->isEmpty());
@@ -422,22 +425,22 @@ TEST_CASE("228")
 */
 TEST_CASE("229")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/229.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/229.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 3);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
-    auto l = static_cast<MD::List<TRAIT> *>(doc->items().at(1).get());
+    auto l = static_cast<MD::List *>(doc->items().at(1).get());
     REQUIRE(l->items().size() == 1);
     REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
-    auto li = static_cast<MD::ListItem<TRAIT> *>(l->items().at(0).get());
+    auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
     REQUIRE(li->isEmpty());
 
     REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(2).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
     REQUIRE(p->items().size() == 1);
 }
 
@@ -451,24 +454,24 @@ TEST_CASE("229")
 */
 TEST_CASE("230")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/230.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/230.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
 
-    auto l = static_cast<MD::List<TRAIT> *>(doc->items().at(1).get());
+    auto l = static_cast<MD::List *>(doc->items().at(1).get());
     REQUIRE(l->items().size() == 2);
 
     {
-        auto li = static_cast<MD::ListItem<TRAIT> *>(l->items().at(0).get());
+        auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
         REQUIRE(li->delim() == MD::WithPosition{0, 0, 0, 0});
         REQUIRE(li->items().size() == 1);
         REQUIRE(li->items().at(0)->type() == MD::ItemType::Heading);
-        auto h = static_cast<MD::Heading<TRAIT> *>(li->items().at(0).get());
+        auto h = static_cast<MD::Heading *>(li->items().at(0).get());
         REQUIRE(!h->text()->isEmpty());
         REQUIRE(h->text()->items().size() == 1);
         REQUIRE(h->text()->items().at(0)->type() == MD::ItemType::Text);
@@ -477,11 +480,11 @@ TEST_CASE("230")
     }
 
     {
-        auto li = static_cast<MD::ListItem<TRAIT> *>(l->items().at(1).get());
+        auto li = static_cast<MD::ListItem *>(l->items().at(1).get());
         REQUIRE(li->delim() == MD::WithPosition{0, 3, 0, 3});
         REQUIRE(li->items().size() == 1);
         REQUIRE(li->items().at(0)->type() == MD::ItemType::Heading);
-        auto h = static_cast<MD::Heading<TRAIT> *>(li->items().at(0).get());
+        auto h = static_cast<MD::Heading *>(li->items().at(0).get());
         REQUIRE(!h->text()->isEmpty());
         REQUIRE(h->text()->items().size() == 1);
         REQUIRE(h->text()->items().at(0)->type() == MD::ItemType::Text);
@@ -496,23 +499,23 @@ www.google.com
 */
 TEST_CASE("231")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/231.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/231.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
     REQUIRE(p->items().size() == 1);
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
-    auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(0).get());
+    auto l = static_cast<MD::Link *>(p->items().at(0).get());
     REQUIRE(l->startColumn() == 0);
     REQUIRE(l->startLine() == 0);
     REQUIRE(l->endColumn() == 13);
     REQUIRE(l->endLine() == 0);
-    REQUIRE(l->url() == TRAIT::latin1ToString("http://www.google.com"));
+    REQUIRE(l->url() == QStringLiteral("http://www.google.com"));
     REQUIRE(l->textPos() == MD::WithPosition{0, 0, 13, 0});
     REQUIRE(l->urlPos() == MD::WithPosition{0, 0, 13, 0});
 }
@@ -523,41 +526,41 @@ www.google.com   www.google.com
 */
 TEST_CASE("232")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/232.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/232.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
     REQUIRE(p->items().size() == 3);
 
     {
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
-        auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(0).get());
+        auto l = static_cast<MD::Link *>(p->items().at(0).get());
         REQUIRE(l->startColumn() == 0);
         REQUIRE(l->startLine() == 0);
         REQUIRE(l->endColumn() == 13);
         REQUIRE(l->endLine() == 0);
-        REQUIRE(l->url() == TRAIT::latin1ToString("http://www.google.com"));
+        REQUIRE(l->url() == QStringLiteral("http://www.google.com"));
         REQUIRE(l->textPos() == MD::WithPosition{0, 0, 13, 0});
         REQUIRE(l->urlPos() == MD::WithPosition{0, 0, 13, 0});
     }
 
     REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
-    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(1).get());
-    REQUIRE(t->text() == TRAIT::latin1ToString("   "));
+    auto t = static_cast<MD::Text *>(p->items().at(1).get());
+    REQUIRE(t->text() == QStringLiteral("   "));
 
     {
         REQUIRE(p->items().at(2)->type() == MD::ItemType::Link);
-        auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(2).get());
+        auto l = static_cast<MD::Link *>(p->items().at(2).get());
         REQUIRE(l->startColumn() == 17);
         REQUIRE(l->startLine() == 0);
         REQUIRE(l->endColumn() == 30);
         REQUIRE(l->endLine() == 0);
-        REQUIRE(l->url() == TRAIT::latin1ToString("http://www.google.com"));
+        REQUIRE(l->url() == QStringLiteral("http://www.google.com"));
         REQUIRE(l->textPos() == MD::WithPosition{17, 0, 30, 0});
         REQUIRE(l->urlPos() == MD::WithPosition{17, 0, 30, 0});
     }
@@ -569,47 +572,47 @@ TEST_CASE("232")
 */
 TEST_CASE("233")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/233.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/233.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
     REQUIRE(p->items().size() == 3);
 
     {
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->startColumn() == 0);
         REQUIRE(t->startLine() == 0);
         REQUIRE(t->endColumn() == 0);
         REQUIRE(t->endLine() == 0);
-        REQUIRE(t->text() == TRAIT::latin1ToString("("));
+        REQUIRE(t->text() == QStringLiteral("("));
     }
 
     {
         REQUIRE(p->items().at(1)->type() == MD::ItemType::Link);
-        auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(1).get());
+        auto l = static_cast<MD::Link *>(p->items().at(1).get());
         REQUIRE(l->startColumn() == 1);
         REQUIRE(l->startLine() == 0);
         REQUIRE(l->endColumn() == 14);
         REQUIRE(l->endLine() == 0);
-        REQUIRE(l->url() == TRAIT::latin1ToString("http://www.google.com"));
+        REQUIRE(l->url() == QStringLiteral("http://www.google.com"));
         REQUIRE(l->textPos() == MD::WithPosition{1, 0, 14, 0});
         REQUIRE(l->urlPos() == l->textPos());
     }
 
     {
         REQUIRE(p->items().at(2)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(2).get());
+        auto t = static_cast<MD::Text *>(p->items().at(2).get());
         REQUIRE(t->startColumn() == 15);
         REQUIRE(t->startLine() == 0);
         REQUIRE(t->endColumn() == 15);
         REQUIRE(t->endLine() == 0);
-        REQUIRE(t->text() == TRAIT::latin1ToString(")"));
+        REQUIRE(t->text() == QStringLiteral(")"));
     }
 }
 
@@ -619,69 +622,69 @@ TEST_CASE("233")
 */
 TEST_CASE("234")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/234.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/234.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
     REQUIRE(p->items().size() == 5);
 
     {
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->startColumn() == 0);
         REQUIRE(t->startLine() == 0);
         REQUIRE(t->endColumn() == 0);
         REQUIRE(t->endLine() == 0);
-        REQUIRE(t->text() == TRAIT::latin1ToString("("));
+        REQUIRE(t->text() == QStringLiteral("("));
     }
 
     {
         REQUIRE(p->items().at(1)->type() == MD::ItemType::Link);
-        auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(1).get());
+        auto l = static_cast<MD::Link *>(p->items().at(1).get());
         REQUIRE(l->startColumn() == 1);
         REQUIRE(l->startLine() == 0);
         REQUIRE(l->endColumn() == 14);
         REQUIRE(l->endLine() == 0);
-        REQUIRE(l->url() == TRAIT::latin1ToString("http://www.google.com"));
+        REQUIRE(l->url() == QStringLiteral("http://www.google.com"));
         REQUIRE(l->textPos() == MD::WithPosition{1, 0, 14, 0});
         REQUIRE(l->urlPos() == l->textPos());
     }
 
     {
         REQUIRE(p->items().at(2)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(2).get());
+        auto t = static_cast<MD::Text *>(p->items().at(2).get());
         REQUIRE(t->startColumn() == 15);
         REQUIRE(t->startLine() == 0);
         REQUIRE(t->endColumn() == 19);
         REQUIRE(t->endLine() == 0);
-        REQUIRE(t->text() == TRAIT::latin1ToString(")   ("));
+        REQUIRE(t->text() == QStringLiteral(")   ("));
     }
 
     {
         REQUIRE(p->items().at(3)->type() == MD::ItemType::Link);
-        auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(3).get());
+        auto l = static_cast<MD::Link *>(p->items().at(3).get());
         REQUIRE(l->startColumn() == 20);
         REQUIRE(l->startLine() == 0);
         REQUIRE(l->endColumn() == 41);
         REQUIRE(l->endLine() == 0);
-        REQUIRE(l->url() == TRAIT::latin1ToString("https://www.google.com"));
+        REQUIRE(l->url() == QStringLiteral("https://www.google.com"));
         REQUIRE(l->textPos() == MD::WithPosition{20, 0, 41, 0});
         REQUIRE(l->urlPos() == l->textPos());
     }
 
     {
         REQUIRE(p->items().at(4)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(4).get());
+        auto t = static_cast<MD::Text *>(p->items().at(4).get());
         REQUIRE(t->startColumn() == 42);
         REQUIRE(t->startLine() == 0);
         REQUIRE(t->endColumn() == 42);
         REQUIRE(t->endLine() == 0);
-        REQUIRE(t->text() == TRAIT::latin1ToString(")"));
+        REQUIRE(t->text() == QStringLiteral(")"));
     }
 }
 
@@ -692,37 +695,37 @@ www.google.com
 */
 TEST_CASE("235")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/235.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/235.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
     REQUIRE(p->items().size() == 2);
 
     {
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
-        auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(0).get());
+        auto l = static_cast<MD::Link *>(p->items().at(0).get());
         REQUIRE(l->startColumn() == 0);
         REQUIRE(l->startLine() == 0);
         REQUIRE(l->endColumn() == 13);
         REQUIRE(l->endLine() == 0);
-        REQUIRE(l->url() == TRAIT::latin1ToString("http://www.google.com"));
+        REQUIRE(l->url() == QStringLiteral("http://www.google.com"));
         REQUIRE(l->textPos() == MD::WithPosition{0, 0, 13, 0});
         REQUIRE(l->urlPos() == l->textPos());
     }
 
     {
         REQUIRE(p->items().at(1)->type() == MD::ItemType::Link);
-        auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(1).get());
+        auto l = static_cast<MD::Link *>(p->items().at(1).get());
         REQUIRE(l->startColumn() == 0);
         REQUIRE(l->startLine() == 1);
         REQUIRE(l->endColumn() == 13);
         REQUIRE(l->endLine() == 1);
-        REQUIRE(l->url() == TRAIT::latin1ToString("http://www.google.com"));
+        REQUIRE(l->url() == QStringLiteral("http://www.google.com"));
         REQUIRE(l->textPos() == MD::WithPosition{0, 1, 13, 1});
         REQUIRE(l->urlPos() == l->textPos());
     }
@@ -736,68 +739,68 @@ text
 */
 TEST_CASE("236")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/236.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/236.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
     REQUIRE(p->items().size() == 5);
 
     {
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->startColumn() == 0);
         REQUIRE(t->startLine() == 0);
         REQUIRE(t->endColumn() == 3);
         REQUIRE(t->endLine() == 0);
-        REQUIRE(t->text() == TRAIT::latin1ToString("text"));
+        REQUIRE(t->text() == QStringLiteral("text"));
     }
 
     {
         REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(1).get());
+        auto t = static_cast<MD::Text *>(p->items().at(1).get());
         REQUIRE(t->startColumn() == 0);
         REQUIRE(t->startLine() == 1);
         REQUIRE(t->endColumn() == 4);
         REQUIRE(t->endLine() == 1);
 
-        REQUIRE(t->text() == TRAIT::latin1ToString("text "));
+        REQUIRE(t->text() == QStringLiteral("text "));
     }
 
     {
         REQUIRE(p->items().at(2)->type() == MD::ItemType::Link);
-        auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(2).get());
+        auto l = static_cast<MD::Link *>(p->items().at(2).get());
         REQUIRE(l->startColumn() == 5);
         REQUIRE(l->startLine() == 1);
         REQUIRE(l->endColumn() == 18);
         REQUIRE(l->endLine() == 1);
-        REQUIRE(l->url() == TRAIT::latin1ToString("http://www.google.com"));
+        REQUIRE(l->url() == QStringLiteral("http://www.google.com"));
         REQUIRE(l->textPos() == MD::WithPosition{5, 1, 18, 1});
         REQUIRE(l->urlPos() == l->textPos());
     }
 
     {
         REQUIRE(p->items().at(3)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(3).get());
+        auto t = static_cast<MD::Text *>(p->items().at(3).get());
         REQUIRE(t->startColumn() == 19);
         REQUIRE(t->startLine() == 1);
         REQUIRE(t->endColumn() == 23);
         REQUIRE(t->endLine() == 1);
-        REQUIRE(t->text() == TRAIT::latin1ToString(" text"));
+        REQUIRE(t->text() == QStringLiteral(" text"));
     }
 
     {
         REQUIRE(p->items().at(4)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(4).get());
+        auto t = static_cast<MD::Text *>(p->items().at(4).get());
         REQUIRE(t->startColumn() == 0);
         REQUIRE(t->startLine() == 2);
         REQUIRE(t->endColumn() == 3);
         REQUIRE(t->endLine() == 2);
-        REQUIRE(t->text() == TRAIT::latin1ToString("text"));
+        REQUIRE(t->text() == QStringLiteral("text"));
     }
 }
 
@@ -809,57 +812,57 @@ text
 */
 TEST_CASE("237")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/237.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/237.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
     REQUIRE(p->items().size() == 4);
 
     {
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->startColumn() == 0);
         REQUIRE(t->startLine() == 0);
         REQUIRE(t->endColumn() == 3);
         REQUIRE(t->endLine() == 0);
-        REQUIRE(t->text() == TRAIT::latin1ToString("text"));
+        REQUIRE(t->text() == QStringLiteral("text"));
     }
 
     {
         REQUIRE(p->items().at(1)->type() == MD::ItemType::Link);
-        auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(1).get());
+        auto l = static_cast<MD::Link *>(p->items().at(1).get());
         REQUIRE(l->startColumn() == 0);
         REQUIRE(l->startLine() == 1);
         REQUIRE(l->endColumn() == 13);
         REQUIRE(l->endLine() == 1);
-        REQUIRE(l->url() == TRAIT::latin1ToString("http://www.google.com"));
+        REQUIRE(l->url() == QStringLiteral("http://www.google.com"));
         REQUIRE(l->textPos() == MD::WithPosition{0, 1, 13, 1});
         REQUIRE(l->urlPos() == l->textPos());
     }
 
     {
         REQUIRE(p->items().at(2)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(2).get());
+        auto t = static_cast<MD::Text *>(p->items().at(2).get());
         REQUIRE(t->startColumn() == 14);
         REQUIRE(t->startLine() == 1);
         REQUIRE(t->endColumn() == 18);
         REQUIRE(t->endLine() == 1);
-        REQUIRE(t->text() == TRAIT::latin1ToString(" text"));
+        REQUIRE(t->text() == QStringLiteral(" text"));
     }
 
     {
         REQUIRE(p->items().at(3)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(3).get());
+        auto t = static_cast<MD::Text *>(p->items().at(3).get());
         REQUIRE(t->startColumn() == 0);
         REQUIRE(t->startLine() == 2);
         REQUIRE(t->endColumn() == 3);
         REQUIRE(t->endLine() == 2);
-        REQUIRE(t->text() == TRAIT::latin1ToString("text"));
+        REQUIRE(t->text() == QStringLiteral("text"));
     }
 }
 
@@ -871,47 +874,47 @@ text
 */
 TEST_CASE("238")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/238.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/238.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
     REQUIRE(p->items().size() == 3);
 
     {
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
         REQUIRE(t->startColumn() == 0);
         REQUIRE(t->startLine() == 0);
         REQUIRE(t->endColumn() == 3);
         REQUIRE(t->endLine() == 0);
-        REQUIRE(t->text() == TRAIT::latin1ToString("text"));
+        REQUIRE(t->text() == QStringLiteral("text"));
     }
 
     {
         REQUIRE(p->items().at(1)->type() == MD::ItemType::Link);
-        auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(1).get());
+        auto l = static_cast<MD::Link *>(p->items().at(1).get());
         REQUIRE(l->startColumn() == 0);
         REQUIRE(l->startLine() == 1);
         REQUIRE(l->endColumn() == 13);
         REQUIRE(l->endLine() == 1);
-        REQUIRE(l->url() == TRAIT::latin1ToString("http://www.google.com"));
+        REQUIRE(l->url() == QStringLiteral("http://www.google.com"));
         REQUIRE(l->textPos() == MD::WithPosition{0, 1, 13, 1});
         REQUIRE(l->urlPos() == l->textPos());
     }
 
     {
         REQUIRE(p->items().at(2)->type() == MD::ItemType::Text);
-        auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(2).get());
+        auto t = static_cast<MD::Text *>(p->items().at(2).get());
         REQUIRE(t->startColumn() == 0);
         REQUIRE(t->startLine() == 2);
         REQUIRE(t->endColumn() == 3);
         REQUIRE(t->endLine() == 2);
-        REQUIRE(t->text() == TRAIT::latin1ToString("text"));
+        REQUIRE(t->text() == QStringLiteral("text"));
     }
 }
 
@@ -922,37 +925,37 @@ mailto:igor@gmail.com
 */
 TEST_CASE("239")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/239.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/239.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
     REQUIRE(p->items().size() == 2);
 
     {
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
-        auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(0).get());
+        auto l = static_cast<MD::Link *>(p->items().at(0).get());
         REQUIRE(l->startColumn() == 0);
         REQUIRE(l->startLine() == 0);
         REQUIRE(l->endColumn() == 13);
         REQUIRE(l->endLine() == 0);
-        REQUIRE(l->url() == TRAIT::latin1ToString("mailto:igor@gmail.com"));
+        REQUIRE(l->url() == QStringLiteral("mailto:igor@gmail.com"));
         REQUIRE(l->textPos() == MD::WithPosition{0, 0, 13, 0});
         REQUIRE(l->urlPos() == l->textPos());
     }
 
     {
         REQUIRE(p->items().at(1)->type() == MD::ItemType::Link);
-        auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(1).get());
+        auto l = static_cast<MD::Link *>(p->items().at(1).get());
         REQUIRE(l->startColumn() == 0);
         REQUIRE(l->startLine() == 1);
         REQUIRE(l->endColumn() == 20);
         REQUIRE(l->endLine() == 1);
-        REQUIRE(l->url() == TRAIT::latin1ToString("mailto:igor@gmail.com"));
+        REQUIRE(l->url() == QStringLiteral("mailto:igor@gmail.com"));
         REQUIRE(l->textPos() == MD::WithPosition{0, 1, 20, 1});
         REQUIRE(l->urlPos() == l->textPos());
     }
@@ -967,22 +970,22 @@ www.google.com `code` www.google.com
 */
 TEST_CASE("240")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/240.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/240.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 4);
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
         REQUIRE(p->items().size() == 5);
 
         {
             REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
-            auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(0).get());
-            REQUIRE(l->url() == TRAIT::latin1ToString("http://www.google.com"));
+            auto l = static_cast<MD::Link *>(p->items().at(0).get());
+            REQUIRE(l->url() == QStringLiteral("http://www.google.com"));
             REQUIRE(l->textPos() == MD::WithPosition{0, 0, 13, 0});
             REQUIRE(l->urlPos() == l->textPos());
         }
@@ -990,7 +993,7 @@ TEST_CASE("240")
         REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
 
         REQUIRE(p->items().at(2)->type() == MD::ItemType::Code);
-        auto c = static_cast<MD::Code<TRAIT> *>(p->items().at(2).get());
+        auto c = static_cast<MD::Code *>(p->items().at(2).get());
         REQUIRE(c->startDelim() == MD::WithPosition{15, 0, 15, 0});
         REQUIRE(c->endDelim() == MD::WithPosition{20, 0, 20, 0});
 
@@ -998,8 +1001,8 @@ TEST_CASE("240")
 
         {
             REQUIRE(p->items().at(4)->type() == MD::ItemType::Link);
-            auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(4).get());
-            REQUIRE(l->url() == TRAIT::latin1ToString("http://www.google.com"));
+            auto l = static_cast<MD::Link *>(p->items().at(4).get());
+            REQUIRE(l->url() == QStringLiteral("http://www.google.com"));
             REQUIRE(l->textPos() == MD::WithPosition{22, 0, 35, 0});
             REQUIRE(l->urlPos() == l->textPos());
         }
@@ -1009,32 +1012,30 @@ TEST_CASE("240")
 
     {
         REQUIRE(doc->items().at(3)->type() == MD::ItemType::Paragraph);
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(3).get());
-        REQUIRE(p->items().size() == 6);
-
-        REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(3).get());
+        REQUIRE(p->items().size() == 5);
 
         {
-            REQUIRE(p->items().at(1)->type() == MD::ItemType::Link);
-            auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(1).get());
-            REQUIRE(l->url() == TRAIT::latin1ToString("http://www.google.com"));
+            REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
+            auto l = static_cast<MD::Link *>(p->items().at(0).get());
+            REQUIRE(l->url() == QStringLiteral("http://www.google.com"));
             REQUIRE(l->textPos() == MD::WithPosition{2, 2, 15, 2});
             REQUIRE(l->urlPos() == l->textPos());
         }
 
-        REQUIRE(p->items().at(2)->type() == MD::ItemType::Text);
+        REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
 
-        REQUIRE(p->items().at(3)->type() == MD::ItemType::Code);
-        auto c = static_cast<MD::Code<TRAIT> *>(p->items().at(3).get());
+        REQUIRE(p->items().at(2)->type() == MD::ItemType::Code);
+        auto c = static_cast<MD::Code *>(p->items().at(2).get());
         REQUIRE(c->startDelim() == MD::WithPosition{19, 2, 19, 2});
         REQUIRE(c->endDelim() == MD::WithPosition{24, 2, 24, 2});
 
-        REQUIRE(p->items().at(4)->type() == MD::ItemType::Text);
+        REQUIRE(p->items().at(3)->type() == MD::ItemType::Text);
 
         {
-            REQUIRE(p->items().at(5)->type() == MD::ItemType::Link);
-            auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(5).get());
-            REQUIRE(l->url() == TRAIT::latin1ToString("http://www.google.com"));
+            REQUIRE(p->items().at(4)->type() == MD::ItemType::Link);
+            auto l = static_cast<MD::Link *>(p->items().at(4).get());
+            REQUIRE(l->url() == QStringLiteral("http://www.google.com"));
             REQUIRE(l->textPos() == MD::WithPosition{28, 2, 41, 2});
             REQUIRE(l->urlPos() == l->textPos());
         }
@@ -1042,25 +1043,26 @@ TEST_CASE("240")
 }
 
 /*
-[<img src="https://c5.patreon.com/external/logo/become_a_patron_button.png" align="right">](https://www.patreon.com/onqtam)
+[<img src="https://c5.patreon.com/external/logo/become_a_patron_button.png"
+align="right">](https://www.patreon.com/onqtam)
 
 */
 TEST_CASE("241")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/241.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/241.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
     REQUIRE(p->items().size() == 1);
 
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
-    auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(0).get());
-    REQUIRE(l->url() == TRAIT::latin1ToString("https://www.patreon.com/onqtam"));
+    auto l = static_cast<MD::Link *>(p->items().at(0).get());
+    REQUIRE(l->url() == QStringLiteral("https://www.patreon.com/onqtam"));
     REQUIRE(l->textPos() == MD::WithPosition{1, 0, 89, 0});
     REQUIRE(l->urlPos() == MD::WithPosition{92, 0, 121, 0});
 
@@ -1076,23 +1078,23 @@ TEST_CASE("241")
 */
 TEST_CASE("242")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/242.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/242.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
     REQUIRE(p->items().size() == 1);
 
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
-    auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(0).get());
-    REQUIRE(l->url() == TRAIT::latin1ToString("https://github.com/igormironchik/md-pdf"));
+    auto l = static_cast<MD::Link *>(p->items().at(0).get());
+    REQUIRE(l->url() == QStringLiteral("https://github.com/igormironchik/md-pdf"));
     REQUIRE(l->textPos() == MD::WithPosition{1, 0, 39, 0});
     REQUIRE(l->urlPos() == MD::WithPosition{42, 0, 80, 0});
-    REQUIRE(l->text() == TRAIT::latin1ToString("https://github.com/igormironchik/md-pdf"));
+    REQUIRE(l->text() == QStringLiteral("https://github.com/igormironchik/md-pdf"));
 }
 
 /*
@@ -1103,9 +1105,9 @@ TEST_CASE("242")
 */
 TEST_CASE("243")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/243.md"), true);
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/243.md"), true);
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 6);
@@ -1113,26 +1115,13 @@ TEST_CASE("243")
     REQUIRE(doc->items().at(0)->type() == MD::ItemType::Anchor);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Heading);
-    auto h = static_cast<MD::Heading<TRAIT> *>(doc->items().at(1).get());
+    auto h = static_cast<MD::Heading *>(doc->items().at(1).get());
     REQUIRE(h->delims().size() == 1);
     REQUIRE(h->delims().front() == MD::WithPosition{0, 0, 0, 0});
 
-    typename TRAIT::String wd =
-#ifdef MD4QT_QT_SUPPORT
-        QDir().absolutePath()
-#else
-        typename TRAIT::String(std::filesystem::canonical(std::filesystem::current_path()).u8string())
-#endif
-        + TRAIT::latin1ToString("/tests/parser/data/");
+    const auto wd = QDir().absolutePath() + QStringLiteral("/tests/parser/data/");
 
-#ifndef MD4QT_QT_SUPPORT
-    std::string tmp;
-    wd.toUTF8String(tmp);
-    std::replace(tmp.begin(), tmp.end(), '\\', '/');
-    wd = icu::UnicodeString::fromUTF8(tmp);
-#endif
-
-    const typename TRAIT::String label = TRAIT::latin1ToString("#reference/") + wd + TRAIT::latin1ToString("243.md");
+    const QString label = QStringLiteral("#reference/") + wd + QStringLiteral("243.md");
 
     REQUIRE(h->label() == label);
 
@@ -1140,10 +1129,10 @@ TEST_CASE("243")
     REQUIRE(doc->items().at(3)->type() == MD::ItemType::PageBreak);
     REQUIRE(doc->items().at(4)->type() == MD::ItemType::Anchor);
     REQUIRE(doc->items().at(5)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(5).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(5).get());
     REQUIRE(p->items().size() == 1);
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
-    auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(0).get());
+    auto l = static_cast<MD::Link *>(p->items().at(0).get());
     REQUIRE(l->url() == label);
     REQUIRE(l->textPos() == MD::WithPosition{1, 0, 4, 0});
     REQUIRE(l->urlPos() == MD::WithPosition{7, 0, 22, 0});
@@ -1151,44 +1140,16 @@ TEST_CASE("243")
 
 TEST_CASE("244")
 {
-    typename TRAIT::String wd =
-#ifdef MD4QT_QT_SUPPORT
-        QDir().absolutePath()
-#else
-        typename TRAIT::String(std::filesystem::canonical(std::filesystem::current_path()).u8string())
-#endif
-        + TRAIT::latin1ToString("/tests/parser/data");
+    const auto wd = QDir().absolutePath() + QStringLiteral("/tests/parser/data");
 
-#ifndef MD4QT_QT_SUPPORT
-    {
-        std::string tmp;
-        wd.toUTF8String(tmp);
-        std::replace(tmp.begin(), tmp.end(), '\\', '/');
-        wd = icu::UnicodeString::fromUTF8(tmp);
-    }
-#endif
+    const auto fn = wd + QStringLiteral("/244.md");
+    const auto ln = wd + QStringLiteral("/244-1.md");
 
-    const typename TRAIT::String fn = wd + TRAIT::latin1ToString("/244.md");
-    const typename TRAIT::String ln = wd + TRAIT::latin1ToString("/244-1.md");
-
-#ifdef MD4QT_QT_SUPPORT
     const auto fnData = fn.toLocal8Bit();
     const auto lnData = ln.toLocal8Bit();
 
     const char *fileName = fnData.data();
     const char *link = lnData.data();
-#else
-    char tmp;
-    const auto len1 = fn.extract(0, fn.length(), &tmp, 1);
-    std::vector<char> data1(len1 + 1, 0);
-    fn.extract(0, fn.length(), data1.data(), len1);
-    const char *fileName = data1.data();
-
-    const auto len2 = ln.extract(0, ln.length(), &tmp, 1);
-    std::vector<char> data2(len2 + 1, 0);
-    ln.extract(0, ln.length(), data2.data(), len2);
-    const char *link = data2.data();
-#endif
 
     std::ofstream f(fileName, std::ios::out | std::ios::trunc);
 
@@ -1198,9 +1159,9 @@ TEST_CASE("244")
     } else
         REQUIRE(false);
 
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/244.md"), true);
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/244.md"), true);
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 5);
@@ -1211,54 +1172,26 @@ TEST_CASE("244")
     REQUIRE(doc->items().at(3)->type() == MD::ItemType::Anchor);
     REQUIRE(doc->items().at(4)->type() == MD::ItemType::Paragraph);
 
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(4).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(4).get());
     REQUIRE(p->items().size() == 1);
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
-    REQUIRE(t->text() == TRAIT::latin1ToString("secret"));
+    auto t = static_cast<MD::Text *>(p->items().at(0).get());
+    REQUIRE(t->text() == QStringLiteral("secret"));
 }
 
 TEST_CASE("244-ref")
 {
-    typename TRAIT::String wd =
-#ifdef MD4QT_QT_SUPPORT
-        QDir().absolutePath()
-#else
-        typename TRAIT::String(std::filesystem::canonical(std::filesystem::current_path()).u8string())
-#endif
-        + TRAIT::latin1ToString("/tests/parser/data");
+    const auto wd = QDir().absolutePath() + QStringLiteral("/tests/parser/data");
 
-#ifndef MD4QT_QT_SUPPORT
-    {
-        std::string tmp;
-        wd.toUTF8String(tmp);
-        std::replace(tmp.begin(), tmp.end(), '\\', '/');
-        wd = icu::UnicodeString::fromUTF8(tmp);
-    }
-#endif
+    const auto fn = wd + QStringLiteral("/244-ref.md");
+    const auto label = QStringLiteral("#ref/") + wd + QStringLiteral("/244-1.md");
+    const auto ln = wd + QStringLiteral("/244-1.md#ref");
 
-    const typename TRAIT::String fn = wd + TRAIT::latin1ToString("/244-ref.md");
-    const typename TRAIT::String label = TRAIT::latin1ToString("#ref/") + wd + TRAIT::latin1ToString("/244-1.md");
-    const typename TRAIT::String ln = wd + TRAIT::latin1ToString("/244-1.md#ref");
-
-#ifdef MD4QT_QT_SUPPORT
     const auto fnData = fn.toLocal8Bit();
     const auto lnData = ln.toLocal8Bit();
 
     const char *fileName = fnData.data();
     const char *link = lnData.data();
-#else
-    char tmp;
-    const auto len1 = fn.extract(0, fn.length(), &tmp, 1);
-    std::vector<char> data1(len1 + 1, 0);
-    fn.extract(0, fn.length(), data1.data(), len1);
-    const char *fileName = data1.data();
-
-    const auto len2 = ln.extract(0, ln.length(), &tmp, 1);
-    std::vector<char> data2(len2 + 1, 0);
-    ln.extract(0, ln.length(), data2.data(), len2);
-    const char *link = data2.data();
-#endif
 
     std::ofstream f(fileName, std::ios::out | std::ios::trunc);
 
@@ -1268,9 +1201,9 @@ TEST_CASE("244-ref")
     } else
         REQUIRE(false);
 
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/244-ref.md"), true);
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/244-ref.md"), true);
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 5);
@@ -1279,10 +1212,10 @@ TEST_CASE("244-ref")
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
 
     {
-        auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
         REQUIRE(p->items().size() == 1);
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
-        auto l = static_cast<MD::Link<TRAIT> *>(p->items().at(0).get());
+        auto l = static_cast<MD::Link *>(p->items().at(0).get());
         REQUIRE(l->url() == label);
     }
 
@@ -1290,11 +1223,11 @@ TEST_CASE("244-ref")
     REQUIRE(doc->items().at(3)->type() == MD::ItemType::Anchor);
     REQUIRE(doc->items().at(4)->type() == MD::ItemType::Paragraph);
 
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(4).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(4).get());
     REQUIRE(p->items().size() == 1);
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
-    REQUIRE(t->text() == TRAIT::latin1ToString("secret"));
+    auto t = static_cast<MD::Text *>(p->items().at(0).get());
+    REQUIRE(t->text() == QStringLiteral("secret"));
 }
 
 /*
@@ -1303,21 +1236,21 @@ TEST_CASE("244-ref")
 */
 TEST_CASE("245")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/245.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/245.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
     REQUIRE(p->items().size() == 1);
 
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    auto t = static_cast<MD::Text *>(p->items().at(0).get());
     REQUIRE(t->opts() == MD::StrikethroughText);
-    REQUIRE(t->text() == TRAIT::latin1ToString("text ~text"));
+    REQUIRE(t->text() == QStringLiteral("text ~text"));
     REQUIRE(t->openStyles().size() == 1);
     REQUIRE(t->openStyles().at(0) == MD::StyleDelim{MD::StrikethroughText, 0, 0, 1, 0});
     REQUIRE(t->closeStyles().size() == 1);
@@ -1330,21 +1263,21 @@ TEST_CASE("245")
 */
 TEST_CASE("246")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/246.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/246.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
     REQUIRE(p->items().size() == 1);
 
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
+    auto t = static_cast<MD::Text *>(p->items().at(0).get());
     REQUIRE(t->opts() == MD::TextWithoutFormat);
-    REQUIRE(t->text() == TRAIT::latin1ToString("~~text~"));
+    REQUIRE(t->text() == QStringLiteral("~~text~"));
     REQUIRE(t->openStyles().empty());
     REQUIRE(t->closeStyles().empty());
 }
@@ -1355,27 +1288,38 @@ TEST_CASE("246")
 */
 TEST_CASE("247")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/247.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/247.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
-    REQUIRE(p->items().size() == 1);
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 2);
 
-    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-    auto t = static_cast<MD::Text<TRAIT> *>(p->items().at(0).get());
-    REQUIRE(t->opts() == MD::BoldText);
-    REQUIRE(t->text() == TRAIT::latin1ToString("text text"));
-    REQUIRE(t->openStyles().size() == 2);
-    REQUIRE(t->openStyles().at(0) == MD::StyleDelim{MD::BoldText, 0, 0, 1, 0});
-    REQUIRE(t->openStyles().at(1) == MD::StyleDelim{MD::BoldText, 7, 0, 8, 0});
-    REQUIRE(t->closeStyles().size() == 2);
-    REQUIRE(t->closeStyles().at(0) == MD::StyleDelim{MD::BoldText, 13, 0, 14, 0});
-    REQUIRE(t->closeStyles().at(1) == MD::StyleDelim{MD::BoldText, 15, 0, 16, 0});
+    {
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
+        REQUIRE(t->opts() == MD::BoldText);
+        REQUIRE(t->text() == QStringLiteral("text "));
+        REQUIRE(t->openStyles().size() == 1);
+        REQUIRE(t->openStyles().at(0) == MD::StyleDelim{MD::BoldText, 0, 0, 1, 0});
+        REQUIRE(t->closeStyles().size() == 0);
+    }
+
+    {
+        REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
+        auto t = static_cast<MD::Text *>(p->items().at(1).get());
+        REQUIRE(t->opts() == MD::BoldText);
+        REQUIRE(t->text() == QStringLiteral("text"));
+        REQUIRE(t->openStyles().size() == 1);
+        REQUIRE(t->openStyles().at(0) == MD::StyleDelim{MD::BoldText, 7, 0, 8, 0});
+        REQUIRE(t->closeStyles().size() == 2);
+        REQUIRE(t->closeStyles().at(0) == MD::StyleDelim{MD::BoldText, 13, 0, 14, 0});
+        REQUIRE(t->closeStyles().at(1) == MD::StyleDelim{MD::BoldText, 15, 0, 16, 0});
+    }
 }
 
 /*
@@ -1384,21 +1328,21 @@ TEST_CASE("247")
 */
 TEST_CASE("248")
 {
-    MD::Parser<TRAIT> parser;
+    MD::Parser parser;
 
-    auto doc = parser.parse(TRAIT::latin1ToString("tests/parser/data/248.md"));
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/248.md"));
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph<TRAIT> *>(doc->items().at(1).get());
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
     REQUIRE(p->items().size() == 1);
 
     REQUIRE(p->items().at(0)->type() == MD::ItemType::RawHtml);
-    auto h = static_cast<MD::RawHtml<TRAIT> *>(p->items().at(0).get());
+    auto h = static_cast<MD::RawHtml *>(p->items().at(0).get());
     REQUIRE(h->opts() == MD::ItalicText);
-    REQUIRE(h->text() == TRAIT::latin1ToString("<a>"));
+    REQUIRE(h->text() == QStringLiteral("<a>"));
     REQUIRE(h->openStyles().size() == 1);
     REQUIRE(h->openStyles().at(0) == MD::StyleDelim{MD::ItalicText, 0, 0, 0, 0});
     REQUIRE(h->closeStyles().size() == 1);

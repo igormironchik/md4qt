@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2022-2025 Igor Mironchik <igor.mironchik@gmail.com>
 # SPDX-License-Identifier: MIT
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.19)
 
 SET(CMAKE_CXX_STANDARD 17)
 
@@ -24,8 +24,6 @@ include_directories(3rdparty/cmark-gfm/src
     ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/cmark-gfm/extensions
     ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 
-find_package(ICU REQUIRED COMPONENTS data dt uc i18n io in tu)
-find_package(uriparser REQUIRED)
 find_package(Qt6Core REQUIRED)
 find_package(Qt6Test REQUIRED)
 
@@ -39,5 +37,4 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../manual/complex.md
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../../bin/tests/manual)
 
 target_link_libraries(md_benchmark libcmark-gfm-extensions_static
-    libcmark-gfm_static Qt::Test Qt::Core ICU::data ICU::dt ICU::uc ICU::i18n ICU::io ICU::in ICU::tu
-    uriparser::uriparser)
+    libcmark-gfm_static md4qt::md4qt Qt::Test Qt::Core)

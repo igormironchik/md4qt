@@ -1,0 +1,9 @@
+/*!
+    \page md4qt-known_issues.md.html
+    \title Known issues
+    \inmodule md4qt
+
+    \brief Known issues
+
+    \include md4qt-known_issues.qdocinc
+*/

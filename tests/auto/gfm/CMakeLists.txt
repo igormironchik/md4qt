@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022-2025 Igor Mironchik <igor.mironchik@gmail.com>
+# SPDX-FileCopyrightText: 2025 Igor Mironchik <igor.mironchik@gmail.com>
 # SPDX-License-Identifier: MIT
 
 project(test.md_parser.gfm)
@@ -14,35 +14,15 @@ file(COPY ${MD_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/tests
 set(SRC main.cpp)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../3rdparty)
 
-if(BUILD_MD4QT_QT_TESTS)
-    find_package(Qt6Core REQUIRED)
+find_package(Qt6Core REQUIRED)
 
-    add_executable(test.md_parser.gfm.qt ${SRC})
-    target_compile_definitions(test.md_parser.gfm.qt PUBLIC TRAIT=MD::QStringTrait)
-    target_compile_definitions(test.md_parser.gfm.qt PUBLIC MD4QT_QT_SUPPORT)
+add_executable(test.md_parser.gfm ${SRC})
 
-    target_link_libraries(test.md_parser.gfm.qt Qt6::Core)
+target_link_libraries(test.md_parser.gfm md4qt::md4qt Qt6::Core)
 
-    add_test(NAME test.md_parser.gfm.qt
-        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.gfm.qt
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../bin)
-endif()
-
-if(BUILD_MD4QT_STL_TESTS)
-    find_package(ICU REQUIRED COMPONENTS data dt uc i18n io in tu)
-    find_package(uriparser REQUIRED)
-
-    add_executable(test.md_parser.gfm.stl ${SRC})
-    target_compile_definitions(test.md_parser.gfm.stl PUBLIC TRAIT=MD::UnicodeStringTrait)
-    target_compile_definitions(test.md_parser.gfm.stl PUBLIC MD4QT_ICU_STL_SUPPORT)
-
-    target_link_libraries(test.md_parser.gfm.stl
-        ICU::data ICU::dt ICU::uc ICU::i18n ICU::io ICU::in ICU::tu uriparser::uriparser)
-
-    add_test(NAME test.md_parser.gfm.stl
-        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.gfm.stl
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../bin)
-endif()
+add_test(NAME test.md_parser.gfm
+    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/test.md_parser.gfm
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../bin)

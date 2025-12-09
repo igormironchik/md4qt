@@ -1,20 +1,18 @@
-# SPDX-FileCopyrightText: 2022-2025 Igor Mironchik <igor.mironchik@gmail.com>
+# SPDX-FileCopyrightText: 2025 Igor Mironchik <igor.mironchik@gmail.com>
 # SPDX-License-Identifier: MIT
 
 cmake_minimum_required(VERSION 3.19)
 
-project(md4qt VERSION "4.1.3")
+project(md4qt VERSION "5.0.0")
 
 set(MD4QT_VERSION ${PROJECT_VERSION})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 option(BUILD_MD4QT_BENCHMARK "Build benchmark? Default OFF." OFF)
-option(BUILD_MD4QT_QT_TESTS "Build tests with Qt support? Default ON." ON)
-option(BUILD_MD4QT_STL_TESTS "Build tests with STL support? Default OFF." OFF)
+option(BUILD_MD4QT_TESTS "Build tests with Qt support? Default ON." ON)
 option(BUILD_MD2HTML_APP "Build md2html utility? Default OFF." OFF)
 option(BUILD_MD2QDOC_APP "Build md2qdoc utility? Default OFF." OFF)
-option(BUILD_TEST_BENCH "Build test benchmark? Default ON." ON)
 
 set(QT_MIN_VERSION "6.0")
 set(KF_MIN_VERSION "6.0")
@@ -30,6 +28,8 @@ include(KDEInstallDirs)
 include(KDECMakeSettings)
 include(KDECompilerSettings NO_POLICY_SCOPE)
 include(ECMSetupVersion)
+include(ECMGenerateQDoc)
+include(KDEGitCommitHooks)
 
 set(CMAKE_WIN32_EXECUTABLE FALSE)
 set(CMAKE_MACOSX_BUNDLE FALSE)
@@ -44,99 +44,97 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
 
-    set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
+if(BUILD_MD4QT_TESTS)
+    enable_testing()
 
-    if(BUILD_MD4QT_QT_TESTS OR BUILD_MD4QT_STL_TESTS OR BUILD_TEST_BENCH)
-        enable_testing()
+    add_subdirectory(tests)
+endif()
 
-        add_subdirectory(tests)
-    endif()
+if(BUILD_MD4QT_BENCHMARK)
+    add_subdirectory(tests/md_benchmark)
+endif(BUILD_MD4QT_BENCHMARK)
 
-    if(BUILD_MD4QT_BENCHMARK)
-        add_subdirectory(tests/md_benchmark)
-    endif(BUILD_MD4QT_BENCHMARK)
+file(GLOB_RECURSE HDR src/*.h)
+file(GLOB_RECURSE SRC src/*.cpp)
 
-    file(GLOB_RECURSE SRC md4qt/*)
+add_library(md4qt STATIC ${HDR} ${SRC})
+add_library(md4qt::md4qt ALIAS md4qt)
 
-    add_library(md4qt INTERFACE ${SRC})
-    add_library(md4qt::md4qt ALIAS md4qt)
+find_package(Qt6 COMPONENTS Core)
 
-    target_include_directories(md4qt INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-    )
+set_target_properties(md4qt PROPERTIES LINKER_LANGUAGE CXX)
+target_link_libraries(md4qt PRIVATE Qt6::Core)
 
-    ecm_setup_version(${PROJECT_VERSION}
-        VARIABLE_PREFIX MD4QT
-        VERSION_HEADER "${CMAKE_CURRENT_BINARY_DIR}/config-md4qt.h"
-    )
+target_include_directories(md4qt INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
 
-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/config-md4qt.h"
-            DESTINATION "${KDE_INSTALL_INCLUDEDIR}/md4qt")
+ecm_setup_version(${PROJECT_VERSION}
+    VARIABLE_PREFIX MD4QT
+    VERSION_HEADER "${CMAKE_CURRENT_BINARY_DIR}/config-md4qt.h"
+)
 
-    install(DIRECTORY md4qt
-            DESTINATION ${KDE_INSTALL_INCLUDEDIR}
-    )
+install(FILES ${HDR}
+    DESTINATION "${KDE_INSTALL_INCLUDEDIR}/md4qt")
 
-    install(TARGETS md4qt
-            EXPORT md4qt-targets
-            RUNTIME DESTINATION ${KDE_INSTALL_BINDIR}
-            ARCHIVE DESTINATION ${KDE_INSTALL_LIBDIR}
-            LIBRARY DESTINATION ${KDE_INSTALL_LIBDIR}
-            INCLUDES DESTINATION ${KDE_INSTALL_INCLUDEDIR}
-    )
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/config-md4qt.h"
+        DESTINATION "${KDE_INSTALL_INCLUDEDIR}/md4qt")
 
-    set(CMAKECONFIG_INSTALL_DIR "${KDE_INSTALL_CMAKEPACKAGEDIR}/md4qt")
+install(TARGETS md4qt
+        EXPORT md4qt-targets
+        RUNTIME DESTINATION ${KDE_INSTALL_BINDIR}
+        ARCHIVE DESTINATION ${KDE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${KDE_INSTALL_LIBDIR}
+        INCLUDES DESTINATION ${KDE_INSTALL_INCLUDEDIR}
+)
 
-    install(EXPORT md4qt-targets
-            DESTINATION ${CMAKECONFIG_INSTALL_DIR}
-            NAMESPACE md4qt::
-    )
+set(CMAKECONFIG_INSTALL_DIR "${KDE_INSTALL_CMAKEPACKAGEDIR}/md4qt")
 
-    include(CMakePackageConfigHelpers)
+install(EXPORT md4qt-targets
+        DESTINATION ${CMAKECONFIG_INSTALL_DIR}
+        NAMESPACE md4qt::
+)
 
-    write_basic_package_version_file(
-        "${CMAKE_CURRENT_BINARY_DIR}/md4qt-config-version.cmake"
-        VERSION ${MD4QT_VERSION}
-        COMPATIBILITY AnyNewerVersion)
+include(CMakePackageConfigHelpers)
 
-    configure_package_config_file(md4qt-config.cmake.in
-        "${CMAKE_CURRENT_BINARY_DIR}/md4qt-config.cmake"
-        INSTALL_DESTINATION ${CMAKECONFIG_INSTALL_DIR})
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/md4qt-config-version.cmake"
+    VERSION ${MD4QT_VERSION}
+    COMPATIBILITY AnyNewerVersion)
 
-    install(FILES ${PROJECT_BINARY_DIR}/md4qt-config.cmake
-        ${PROJECT_BINARY_DIR}/md4qt-config-version.cmake
-        DESTINATION ${CMAKECONFIG_INSTALL_DIR})
+configure_package_config_file(md4qt-config.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/md4qt-config.cmake"
+    INSTALL_DESTINATION ${CMAKECONFIG_INSTALL_DIR})
 
-    if(BUILD_MD2HTML_APP)
-        include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+install(FILES ${PROJECT_BINARY_DIR}/md4qt-config.cmake
+    ${PROJECT_BINARY_DIR}/md4qt-config-version.cmake
+    DESTINATION ${CMAKECONFIG_INSTALL_DIR})
 
-        find_package(Qt6Core REQUIRED)
+if(BUILD_MD2HTML_APP)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-        add_executable(md2html utils/md2html/main.cpp)
+    add_executable(md2html utils/md2html/main.cpp)
 
-        target_link_libraries(md2html Qt6::Core)
+    target_link_libraries(md2html md4qt::md4qt Qt6::Core)
 
-        install(TARGETS md2html RUNTIME DESTINATION ${KDE_INSTALL_BINDIR})
-    endif()
+    install(TARGETS md2html RUNTIME DESTINATION ${KDE_INSTALL_BINDIR})
+endif()
 
-    if(BUILD_MD2QDOC_APP)
-        include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+if(BUILD_MD2QDOC_APP)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-        find_package(Qt6Core REQUIRED)
+    add_executable(md2qdoc utils/md2qdoc/main.cpp)
 
-        add_executable(md2qdoc utils/md2qdoc/main.cpp)
+    target_link_libraries(md2qdoc md4qt::md4qt Qt6::Core)
 
-        target_link_libraries(md2qdoc Qt6::Core)
+    install(TARGETS md2qdoc RUNTIME DESTINATION ${KDE_INSTALL_BINDIR})
+endif()
 
-        install(TARGETS md2qdoc RUNTIME DESTINATION ${KDE_INSTALL_BINDIR})
-    endif()
+ecm_generate_qdoc(md4qt docs/md4qt.qdocconf)
+kde_configure_git_pre_commit_hook(CHECKS CLANG_FORMAT)
 
-else()
-
-    set(md4qt_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
-    set(md4qt_VERSION_STRING ${MD4QT_VERSION} PARENT_SCOPE)
-
-endif(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
+set(md4qt_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/src PARENT_SCOPE)
+set(md4qt_VERSION_STRING ${MD4QT_VERSION} PARENT_SCOPE)
