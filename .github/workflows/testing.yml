@@ -36,9 +36,17 @@ jobs:
     - run: sudo apt update
 
     - run: sudo apt install lcov
+    
+    - name: Install Conan
+      uses: turtlebrowser/get-conan@main
+      
+    - run: conan profile detect
+      
+    - name: Install dependencies with Conan
+      run: conan install . -s build_type=Debug -of . --build=missing
 
     - name: Generate Makefiles
-      run: cmake -S . -B .
+      run: cmake --preset conan-debug -DENABLE_COVERAGE=ON  -S . -B .
 
     - name: Build
       run: make
@@ -79,9 +87,17 @@ jobs:
       uses: jurplel/install-qt-action@v4
       with:
         version: '6.8.1'
+        
+    - name: Install Conan
+      uses: turtlebrowser/get-conan@main
+      
+    - run: conan profile detect
+      
+    - name: Install dependencies with Conan
+      run: conan install . -s build_type=Debug -of . --build=missing
 
     - name: Generate Makefiles
-      run: cmake -S . -B .
+      run: cmake --preset conan-default -S . -B .
 
     - name: Build
       run: cmake --build . --config Debug
@@ -108,9 +124,17 @@ jobs:
       uses: jurplel/install-qt-action@v4
       with:
         version: '6.8.1'
+        
+    - name: Install Conan
+      uses: turtlebrowser/get-conan@main
+      
+    - run: conan profile detect
+      
+    - name: Install dependencies with Conan
+      run: conan install . -s build_type=Debug -of . --build=missing
 
     - name: Generate Makefiles
-      run: cmake -S . -B .
+      run: cmake --preset conan-debug -S . -B .
 
     - name: Build
       run: make
