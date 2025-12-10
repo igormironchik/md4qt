@@ -69,7 +69,7 @@ public:
     }; // struct Emphasis
 
     /*!
-     * \typealias MD::Context::DelimiterQueue
+     * \typealias MD::InlineContext::DelimiterQueue
      * \inmodule md4qt
      * \inheaderfile md4qt/inline_context.h
      *
@@ -102,7 +102,7 @@ public:
     }
 
     /*!
-     * \typealias MD::Context::InlinesList
+     * \typealias MD::InlineContext::InlinesList
      * \inmodule md4qt
      * \inheaderfile md4qt/inline_context.h
      *

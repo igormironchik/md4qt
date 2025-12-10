@@ -122,6 +122,14 @@ public:
 
     /*!
      * Return whether this kind of block may break a paragraph.
+     *
+     * \a line Line.
+     *
+     * \a stream Stream.
+     *
+     * \a doc Document.
+     *
+     * \a ctx Context.
      */
     bool mayBreakParagraph(Line &line,
                            TextStream &stream,

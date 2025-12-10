@@ -28,7 +28,11 @@ include(KDEInstallDirs)
 include(KDECMakeSettings)
 include(KDECompilerSettings NO_POLICY_SCOPE)
 include(ECMSetupVersion)
-include(ECMGenerateQDoc)
+
+if(ECM_VERSION VERSION_GREATER_EQUAL "6.11.0")
+    include(ECMGenerateQDoc)
+endif()
+
 include(KDEGitCommitHooks)
 
 set(CMAKE_WIN32_EXECUTABLE FALSE)
@@ -133,8 +137,13 @@ if(BUILD_MD2QDOC_APP)
     install(TARGETS md2qdoc RUNTIME DESTINATION ${KDE_INSTALL_BINDIR})
 endif()
 
-ecm_generate_qdoc(md4qt docs/md4qt.qdocconf)
+if(ECM_VERSION VERSION_GREATER_EQUAL "6.11.0")
+    ecm_generate_qdoc(md4qt docs/md4qt.qdocconf)
+endif()
+
 kde_configure_git_pre_commit_hook(CHECKS CLANG_FORMAT)
 
-set(md4qt_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/src PARENT_SCOPE)
-set(md4qt_VERSION_STRING ${MD4QT_VERSION} PARENT_SCOPE)
+if(NOT ${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
+    set(md4qt_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/src PARENT_SCOPE)
+    set(md4qt_VERSION_STRING ${MD4QT_VERSION} PARENT_SCOPE)
+endif()

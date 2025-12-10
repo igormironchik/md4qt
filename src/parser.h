@@ -132,6 +132,10 @@ public:
 
     /*!
      * Adds new block parser to pipeline.
+     *
+     * \a parsers Receiver.
+     *
+     * \a parser Parent.
      */
     template<class T>
     static inline typename std::enable_if<std::is_base_of<BlockParser,
@@ -146,6 +150,8 @@ public:
 
     /*!
      * Adds new inline parser into pipeline.
+     *
+     * \a parsers Receiver.
      */
     template<class T,
              std::enable_if_t<std::is_base_of<InlineParser,
@@ -230,6 +236,8 @@ public:
 
     /*!
      * Makes default pipeline of block parsers.
+     *
+     * \a parser Parent.
      */
     static BlockParsers makeDefaultBlockParsersPipeline(Parser *parser);
 
@@ -240,6 +248,8 @@ public:
 
     /*!
      * Makes CommonMark pipeline of block parsers.
+     *
+     * \a parser Parent.
      */
     static BlockParsers makeCommonMarkBlockParsersPipeline(Parser *parser);
 
@@ -252,6 +262,14 @@ public:
      * Returns block parser for the given line.
      *
      * \note During this check \a line's position won't be moved accordingly.
+     *
+     * \a line Line.
+     *
+     * \a stream Stream.
+     *
+     * \a doc Document.
+     *
+     * \a ctx Context.
      */
     BlockParser *checkBlock(Line &line,
                             TextStream &stream,
@@ -262,6 +280,16 @@ public:
      * Returns block parser for the given line excluding the given block parser.
      *
      * \note During this check \a line's position won't be moved accordingly.
+     *
+     * \a line Line.
+     *
+     * \a stream Stream.
+     *
+     * \a doc Document.
+     *
+     * \a ctx Context.
+     *
+     * \a exclude Block parser that should be excluded.
      */
     BlockParser *checkBlockExcluding(Line &line,
                                      TextStream &stream,

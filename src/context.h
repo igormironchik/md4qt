@@ -195,6 +195,8 @@ public:
      * Append indentColumn to child indents.
      *
      * \a i Indent.
+     *
+     * \a d Delimiter.
      */
     inline void appendChildIndent(qsizetype i,
                                   const QChar &d = QChar())
@@ -254,6 +256,8 @@ public:
 
     /*!
      * Returns whether most nested front child is lazy.
+     *
+     * \a lineNumber Line number.
      */
     inline bool isLazyLine(qsizetype lineNumber) const
     {
@@ -272,6 +276,8 @@ public:
 
     /*!
      * Apply settings for child context.
+     *
+     * \a ctx Context.
      */
     void applyParentContext(Context &ctx);
 
@@ -290,6 +296,8 @@ public:
 
     /*!
      * Merge information about lines.
+     *
+     * \a other Line info.
      */
     inline void mergeLineInfo(const LineInfo &other)
     {
@@ -298,6 +306,10 @@ public:
 
     /*!
      * Add information about line of this block.
+     *
+     * \a lineNumber Line number.
+     *
+     * \a state State.
      */
     inline void appendLineInfo(qsizetype lineNumber,
                                const Line::State &state)
@@ -307,6 +319,8 @@ public:
 
     /*!
      * Returns start position of this block on line.
+     *
+     * \a lineNumber Line number.
      */
     inline Line::State startPos(qsizetype lineNumber) const
     {
@@ -315,6 +329,10 @@ public:
 
     /*!
      * Update start position of the line.
+     *
+     * \a lineNumber Line number.
+     *
+     * \a pos Position.
      */
     inline void updateStartPos(qsizetype lineNumber,
                                qsizetype pos)
@@ -334,6 +352,8 @@ public:
 
     /*!
      * Set the number of the first line of the block.
+     *
+     * \a number Line number.
      */
     inline void setFirstLineNumber(qsizetype number)
     {
@@ -350,6 +370,8 @@ public:
 
     /*!
      * Set the number of the last line of the block.
+     *
+     * \a number Line number.
      */
     inline void setLastLineNumber(qsizetype number)
     {
@@ -407,6 +429,8 @@ public:
 
     /*!
      * Set top list delimiter.
+     *
+     * \a d Delimiter.
      */
     inline void setTopListDelim(QChar d)
     {
@@ -424,6 +448,8 @@ public:
 
     /*!
      * Set not yet finished flag.
+     *
+     * \a on State flag.
      */
     inline void setNotFinished(bool on = true)
     {
@@ -441,6 +467,8 @@ public:
 
     /*!
      * Set this context to be discarded.
+     *
+     * \a on State flag.
      */
     inline void setDiscardForced(bool on = true)
     {
@@ -449,6 +477,8 @@ public:
 
     /*!
      * Set to not consider indents in MD::Context::indentForCheck() method.
+     *
+     * \a on State flag.
      */
     inline void setDontConsiderIndents(bool on = true)
     {
@@ -457,6 +487,8 @@ public:
 
     /*!
      * Actual at this time indent for MD::BlockParser::check() method.
+     *
+     * \a skipChildren Should child indents be considered?
      */
     inline qsizetype indentColumnForCheck(bool skipChildren) const
     {
@@ -465,6 +497,8 @@ public:
 
     /*!
      * Actual at this time minimum indent for MD::BlockParser::check() method.
+     *
+     * \a skipChildren Should child indents be considered?
      */
     inline qsizetype minimumIndentColumnForCheck(bool skipChildren) const
     {
@@ -476,7 +510,7 @@ public:
      *
      * \a column Column.
      *
-     * \a skipChildren Dont consider child indents.
+     * \a skipChildren Should child indents be considered?
      */
     inline bool isInIndent(qsizetype column,
                            bool skipChildren) const

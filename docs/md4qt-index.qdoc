@@ -2,7 +2,7 @@
     \page md4qt-index.html
     \title md4qt
 
-    Header-only C++ library for parsing Markdown.
+    Static C++ library for parsing Markdown.
 
     \section1 Using the Module
 

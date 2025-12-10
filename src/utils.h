@@ -123,6 +123,8 @@ inline void skipSpaces(Line &line)
 
 /*!
  * Return whether the given line is empty.
+ *
+ * \a line Line.
  */
 inline bool isEmptyLine(Line &line)
 {
@@ -158,7 +160,7 @@ void removeBackslashes(QString &str);
  *
  * Replace entities in the string with corresponding character.
  *
- * \a s String for modifications.
+ * \a str String for modifications.
  */
 void replaceEntity(QString &str);
 
@@ -168,6 +170,14 @@ void replaceEntity(QString &str);
  * Read link's title.
  *
  * \a line Line.
+ *
+ * \a startChar Receiver for surrounding of title character.
+ *
+ * \a startParenthesisCount Receiver for count of start parenthesis.
+ *
+ * \a startPos Receiver for a start position.
+ *
+ * \a endStarted Receiver for flag means that title is ended.
  */
 QString readLinkTitle(Line &line,
                       QChar &startChar,
@@ -199,11 +209,11 @@ QString readEscapedSequence(Line &line,
 /*!
  * \inheaderfile md4qt/utils.h
  *
- * Compare two style delimiters by theirs positions.
+ * Returns compare state of two style delimiters by theirs positions.
  *
- * \a line String for reading.
+ * \a s1 Left operand.
  *
- * \a endPos Receiver of last character's position in sequence.
+ * \a s2 Right operand.
  */
 bool operator<(const StyleDelim &s1,
                const StyleDelim &s2);
@@ -345,7 +355,7 @@ int htmlTagRule(Line &line);
  *
  * \a rule HTML tag rule.
  *
- * a onSameLine Flags that check is going on the same line as opening "<" character.
+ * \a onSameLine Flags that check is going on the same line as opening "<" character.
  */
 bool isClosed(Line &line,
               int rule,

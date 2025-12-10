@@ -109,6 +109,8 @@ public:
 
     /*!
      * Calculate all emphasises in context dropping that the text.
+     *
+     * \a ctx Inline context.
      */
     static void processEmphasises(InlineContext &ctx);
 

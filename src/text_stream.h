@@ -171,6 +171,8 @@ public:
 
     /*!
      * Restore state.
+     *
+     * \a state State.
      */
     inline void restoreState(const State *state = nullptr)
     {
@@ -327,6 +329,12 @@ public:
     Line currentLine();
 
     /*!
+     * \class MD::TextStreamBase::State
+     * \inmodule md4qt
+     * \inheaderfile md4qt/text_stream.h
+     *
+     * \brief State of the stream.
+     *
      * State of the stream.
      */
     struct State {
@@ -351,6 +359,8 @@ public:
 
     /*!
      * Restore state.
+     *
+     * \a state State.
      */
     void restoreState(const State *state = nullptr);
 
@@ -439,7 +449,7 @@ class ParagraphStream final
 public:
     /*!
      * \inmodule md4qt
-     * \typealias MD::TextStreamBase::HashedLines
+     * \typealias MD::ParagraphStream::HashedLines
      * \inheaderfile md4qt/text_stream.h
      *
      * \brief Type of hashed lines.
@@ -461,6 +471,12 @@ public:
     bool atEnd() const;
 
     /*!
+     * \class MD::ParagraphStream::State
+     * \inmodule md4qt
+     * \inheaderfile md4qt/text_stream.h
+     *
+     * \brief State of the stream.
+     *
      * State of the stream.
      */
     struct State {
@@ -487,11 +503,15 @@ public:
 
     /*!
      * Restore state.
+     *
+     * \a state State.
      */
     void restoreState(const State *state = nullptr);
 
     /*!
      * Restore state before the given.
+     *
+     * \a st State.
      */
     void restoreStateBefore(const State &st);
 

@@ -126,6 +126,14 @@ public:
 
     /*!
      * Return whether this kind of block may break a paragraph.
+     *
+     * \a line Line.
+     *
+     * \a stream Stream.
+     *
+     * \a doc Document.
+     *
+     * \a ctx Context.
      */
     bool mayBreakParagraph(Line &line,
                            TextStream &stream,
@@ -134,6 +142,8 @@ public:
 
     /*!
      * Returns current block.
+     *
+     * \a ctx Context.
      */
     QSharedPointer<Block> currentBlock(const Context &ctx) const override;
 

@@ -1,17 +1,14 @@
 include($KDE_DOCS/global/qt-module-defaults.qdocconf)
 
 project = md4qt
-description = Header-only C++ library for parsing Markdown.
+description = Static C++ library for parsing Markdown.
 
 documentationinheaders = true
 
-headerdirs += ../md4qt
-sourcedirs += ../md4qt \
+headerdirs += ../src
+sourcedirs += ../src \
               .
 imagedirs += ..
-
-defines += MD4QT_ICU_STL_SUPPORT \
-           MD4QT_QT_SUPPORT
 
 visibility = protected
 
