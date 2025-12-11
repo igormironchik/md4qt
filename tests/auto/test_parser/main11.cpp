@@ -366,3 +366,25 @@ TEST_CASE("325")
     auto l = static_cast<MD::List *>(f->items().at(1).get());
     REQUIRE(l->items().size() == 2);
 }
+
+/*
+[![License: GFDLv1.3](https://img.shields.io/badge/license-GFDLv1.3-blue
+)](https://www.gnu.org/licenses/fdl-1.3.html)
+
+*/
+TEST_CASE("326")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/326.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
+    auto l = static_cast<MD::Link *>(p->items().at(0).get());
+    REQUIRE(l->p()->items().size() == 1);
+    REQUIRE(l->p()->items().at(0)->type() == MD::ItemType::Image);
+}

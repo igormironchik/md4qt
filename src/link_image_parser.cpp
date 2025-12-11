@@ -161,6 +161,8 @@ LinkImageParser::parseDescription(const State::Delim &startParagraphDelim,
                                   const QString &fileName,
                                   QStringList &linksToParse)
 {
+    const auto sState = stream.currentState();
+
     stream.restoreStateBefore(startParagraphDelim.m_streamState);
     auto line = stream.readLine();
 
@@ -190,7 +192,7 @@ LinkImageParser::parseDescription(const State::Delim &startParagraphDelim,
         line = stream.readLine();
 
         if (stream.currentState() == endParagraphDelim.m_streamState) {
-            line = line.sliced(0, endParagraphDelim.m_lineState.m_pos);
+            line = line.sliced(0, endParagraphDelim.m_lineState.m_pos + 1);
             lines.insert(line.lineNumber(), line);
             endLine = line.lineNumber();
             paragraph->setEndColumn(line.length() - 1);
@@ -250,6 +252,8 @@ LinkImageParser::parseDescription(const State::Delim &startParagraphDelim,
 
     EmphasisParser::processEmphasises(inlineContext);
     ParagraphParser::makeTextObjects(inlineContext, pStream, paragraph);
+
+    stream.restoreState(&sState);
 
     return qMakePair(paragraph, text);
 }
@@ -384,6 +388,8 @@ QString LinkImageParser::readLabel(const State::Delim &startDelim,
                                    qsizetype &endTextPos,
                                    qsizetype &endTextLine)
 {
+    const auto sState = stream.currentState();
+
     stream.restoreStateBefore(startDelim.m_streamState);
     auto line = stream.readLine();
     line.restoreState(&startDelim.m_lineState);
@@ -460,6 +466,8 @@ QString LinkImageParser::readLabel(const State::Delim &startDelim,
             startSet = true;
         }
     }
+
+    stream.restoreState(&sState);
 
     return label;
 }
@@ -587,7 +595,7 @@ readLinkTitle(Line &line,
     if (line.currentChar() != s_quotationMarkChar
         && line.currentChar() != s_apostropheChar
         && line.currentChar() != s_leftParenthesisChar) {
-        return qMakePair(QString(), false);
+        return qMakePair(QString(), line.currentChar() == s_rightParenthesisChar);
     }
 
     const auto sc = line.currentChar();
@@ -705,11 +713,13 @@ bool LinkImageParser::checkInlineLinkImage(const State::Delim &startDelim,
         const auto title = readLinkTitle(line, stream, space);
 
         if (title.second) {
-            skipSpaces(line);
-
-            if (pos >= line.length()) {
-                line = stream.readLine();
+            if (line.currentChar() != s_rightParenthesisChar) {
                 skipSpaces(line);
+
+                if (pos >= line.length()) {
+                    line = stream.readLine();
+                    skipSpaces(line);
+                }
             }
 
             if (line.currentChar() == s_rightParenthesisChar) {
