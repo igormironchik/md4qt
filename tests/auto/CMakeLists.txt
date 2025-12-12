@@ -3,7 +3,9 @@
 
 project(tests)
 
-kde_enable_exceptions()
+if(ECM_FOUND)
+    kde_enable_exceptions()
+endif()
 
 if(BUILD_MD4QT_TESTS)
     add_subdirectory(test_funcs)

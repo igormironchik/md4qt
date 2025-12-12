@@ -31,7 +31,9 @@ set(CMAKE_AUTOMOC ON)
 
 add_executable(md_benchmark main.cpp)
 
-kde_target_enable_exceptions(md_benchmark PRIVATE)
+if(ECM_FOUND)
+    kde_target_enable_exceptions(md_benchmark PRIVATE)
+endif()
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../manual/complex.md
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../../bin/tests/manual)

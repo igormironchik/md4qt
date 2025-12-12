@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.19)
 
-project(md4qt VERSION "5.0.1")
+project(md4qt VERSION "5.0.2")
 
 set(MD4QT_VERSION ${PROJECT_VERSION})
 
@@ -17,23 +17,28 @@ option(BUILD_MD2QDOC_APP "Build md2qdoc utility? Default OFF." OFF)
 set(QT_MIN_VERSION "6.0")
 set(KF_MIN_VERSION "6.0")
 
-find_package(ECM ${KF_MIN_VERSION} REQUIRED NO_MODULE)
+find_package(ECM ${KF_MIN_VERSION} NO_MODULE)
 
-list(APPEND CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+if(ECM_FOUND)
+    list(APPEND CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+endif()
+
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_BINARY_DIR})
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_BINARY_DIR})
 
-include(KDEInstallDirs)
-include(KDECMakeSettings)
-include(KDECompilerSettings NO_POLICY_SCOPE)
-include(ECMSetupVersion)
+if(ECM_FOUND)
+    include(KDEInstallDirs)
+    include(KDECMakeSettings)
+    include(KDECompilerSettings NO_POLICY_SCOPE)
+    include(ECMSetupVersion)
 
-if(ECM_VERSION VERSION_GREATER_EQUAL "6.11.0")
-    include(ECMGenerateQDoc)
+    if(ECM_VERSION VERSION_GREATER_EQUAL "6.11.0")
+        include(ECMGenerateQDoc)
+    endif()
+
+    include(KDEGitCommitHooks)
 endif()
-
-include(KDEGitCommitHooks)
 
 set(CMAKE_WIN32_EXECUTABLE FALSE)
 set(CMAKE_MACOSX_BUNDLE FALSE)
@@ -66,7 +71,7 @@ file(GLOB_RECURSE SRC src/*.cpp)
 add_library(md4qt STATIC ${HDR} ${SRC})
 add_library(md4qt::md4qt ALIAS md4qt)
 
-find_package(Qt6 COMPONENTS Core)
+find_package(Qt6 REQUIRED COMPONENTS Core)
 
 set_target_properties(md4qt PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries(md4qt PRIVATE Qt6::Core)
@@ -76,26 +81,39 @@ target_include_directories(md4qt INTERFACE
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-ecm_setup_version(${PROJECT_VERSION}
-    VARIABLE_PREFIX MD4QT
-    VERSION_HEADER "${CMAKE_CURRENT_BINARY_DIR}/config-md4qt.h"
-)
+if(ECM_FOUND)
+    ecm_setup_version(${PROJECT_VERSION}
+        VARIABLE_PREFIX MD4QT
+        VERSION_HEADER "${CMAKE_CURRENT_BINARY_DIR}/config-md4qt.h"
+    )
+
+    set(MD4QT_INSTALL_INCLUDEDIR ${KDE_INSTALL_INCLUDEDIR})
+    set(MD4QT_INSTALL_BINDIR ${KDE_INSTALL_BINDIR})
+    set(MD4QT_INSTALL_LIBDIR ${KDE_INSTALL_LIBDIR})
+    set(CMAKECONFIG_INSTALL_DIR "${KDE_INSTALL_CMAKEPACKAGEDIR}/md4qt")
+else()
+    include(GNUInstallDirs)
+
+    set(MD4QT_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR})
+    set(MD4QT_INSTALL_BINDIR ${CMAKE_INSTALL_BINDIR})
+    set(MD4QT_INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR})
+    set(CMAKECONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/md4qt")
+endif()
+
 
 install(FILES ${HDR}
-    DESTINATION "${KDE_INSTALL_INCLUDEDIR}/md4qt")
+    DESTINATION "${MD4QT_INSTALL_INCLUDEDIR}/md4qt")
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/config-md4qt.h"
-        DESTINATION "${KDE_INSTALL_INCLUDEDIR}/md4qt")
+        DESTINATION "${MD4QT_INSTALL_INCLUDEDIR}/md4qt")
 
 install(TARGETS md4qt
         EXPORT md4qt-targets
-        RUNTIME DESTINATION ${KDE_INSTALL_BINDIR}
-        ARCHIVE DESTINATION ${KDE_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${KDE_INSTALL_LIBDIR}
-        INCLUDES DESTINATION ${KDE_INSTALL_INCLUDEDIR}
+        RUNTIME DESTINATION ${MD4QT_INSTALL_BINDIR}
+        ARCHIVE DESTINATION ${MD4QT_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${MD4QT_INSTALL_LIBDIR}
+        INCLUDES DESTINATION ${MD4QT_INSTALL_INCLUDEDIR}
 )
-
-set(CMAKECONFIG_INSTALL_DIR "${KDE_INSTALL_CMAKEPACKAGEDIR}/md4qt")
 
 install(EXPORT md4qt-targets
         DESTINATION ${CMAKECONFIG_INSTALL_DIR}
@@ -124,7 +142,7 @@ if(BUILD_MD2HTML_APP)
 
     target_link_libraries(md2html md4qt::md4qt Qt6::Core)
 
-    install(TARGETS md2html RUNTIME DESTINATION ${KDE_INSTALL_BINDIR})
+    install(TARGETS md2html RUNTIME DESTINATION ${MD4QT_INSTALL_BINDIR})
 endif()
 
 if(BUILD_MD2QDOC_APP)
@@ -134,14 +152,16 @@ if(BUILD_MD2QDOC_APP)
 
     target_link_libraries(md2qdoc md4qt::md4qt Qt6::Core)
 
-    install(TARGETS md2qdoc RUNTIME DESTINATION ${KDE_INSTALL_BINDIR})
+    install(TARGETS md2qdoc RUNTIME DESTINATION ${MD4QT_INSTALL_BINDIR})
 endif()
 
-if(ECM_VERSION VERSION_GREATER_EQUAL "6.11.0")
-    ecm_generate_qdoc(md4qt docs/md4qt.qdocconf)
-endif()
+if(ECM_FOUND)
+    if(ECM_VERSION VERSION_GREATER_EQUAL "6.11.0")
+        ecm_generate_qdoc(md4qt docs/md4qt.qdocconf)
+    endif()
 
-kde_configure_git_pre_commit_hook(CHECKS CLANG_FORMAT)
+    kde_configure_git_pre_commit_hook(CHECKS CLANG_FORMAT)
+endif()
 
 if(NOT ${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
     set(md4qt_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/src PARENT_SCOPE)
