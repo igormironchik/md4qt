@@ -76,8 +76,8 @@ bool WithPosition::isNullPositions() const
     return (m_startColumn == -1 || m_startLine == -1 || m_endColumn == -1 || m_endLine == -1);
 }
 
-inline bool operator==(const WithPosition &l,
-                       const WithPosition &r)
+bool operator==(const WithPosition &l,
+                const WithPosition &r)
 {
     return (l.startColumn() == r.startColumn()
             && l.startLine() == r.startLine()
