@@ -3,6 +3,4 @@
 
 project(plugins)
 
-kde_enable_exceptions()
-
 add_subdirectory(yaml)
