@@ -28,19 +28,9 @@ jobs:
       uses: jurplel/install-qt-action@v4
       with:
         version: '6.8.1'
-        
-    - name: Install Conan
-      id: conan
-      uses: turtlebrowser/get-conan@main
-
-    - name: Initialize Conan
-      run: conan profile detect
-      
-    - name: Install dependencies with Conan
-      run: conan install .
 
     - name: Generate Makefiles
-      run: cmake --preset conan-debug -DENABLE_COVERAGE=ON
+      run: cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_COVERAGE=ON .
 
     - name: Build
       run: make
