@@ -15,15 +15,14 @@ endif()
 
 set(SRC main.cpp)
 
+find_package(Qt6 REQUIRED COMPONENTS Core Test)
+
 file(GLOB MD_FILES data/*.md)
 file(COPY ${MD_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../../../../bin/tests/plugins/yaml/data)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../3rdparty)
-
-find_package(Qt6Core REQUIRED)
-find_package(Qt6Test REQUIRED)
 
 add_executable(test.plugins.yaml main.cpp)
 target_link_libraries(test.plugins.yaml md4qt::md4qt Qt6::Core)

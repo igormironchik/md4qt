@@ -31,7 +31,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 
 file(GLOB MAIN *.cpp)
 
-find_package(Qt6Core REQUIRED)
+find_package(Qt6 REQUIRED COMPONENTS Core)
 
 set(COUNTER "0")
 set(PCH_TARGET "")

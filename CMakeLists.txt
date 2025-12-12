@@ -38,6 +38,8 @@ if(ECM_FOUND)
     endif()
 
     include(KDEGitCommitHooks)
+else()
+    set(CMAKE_AUTOMOC ON)
 endif()
 
 set(CMAKE_WIN32_EXECUTABLE FALSE)

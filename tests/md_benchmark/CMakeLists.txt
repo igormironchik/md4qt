@@ -18,16 +18,13 @@ set(CMARK_TESTS OFF CACHE INTERNAL "" FORCE)
 set(CMARK_SHARED OFF CACHE INTERNAL "" FORCE)
 add_subdirectory(3rdparty/cmark-gfm)
 
+find_package(Qt6 REQUIRED COMPONENTS Test)
+
 include_directories(3rdparty/cmark-gfm/src
     3rdparty/cmark-gfm/extensions
     ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/cmark-gfm/src
     ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/cmark-gfm/extensions
     ${CMAKE_CURRENT_SOURCE_DIR}/../..)
-
-find_package(Qt6Core REQUIRED)
-find_package(Qt6Test REQUIRED)
-
-set(CMAKE_AUTOMOC ON)
 
 add_executable(md_benchmark main.cpp)
 

@@ -15,15 +15,14 @@ endif()
 
 set(SRC main.cpp)
 
+find_package(Qt6 REQUIRED COMPONENTS Core Test)
+
 file(GLOB MD_FILES data/*.md)
 file(COPY ${MD_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/tests/bench/data)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../3rdparty)
-
-find_package(Qt6Core REQUIRED)
-find_package(Qt6Test REQUIRED)
 
 add_executable(test.bench ${SRC})
 target_link_libraries(test.bench md4qt::md4qt Qt6::Core Qt6::Test)

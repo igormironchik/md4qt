@@ -13,11 +13,11 @@ file(COPY ${MD_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../../../bin/tests
 
 set(SRC main.cpp)
 
+find_package(Qt6 REQUIRED COMPONENTS Core)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../3rdparty)
-
-find_package(Qt6Core REQUIRED)
 
 add_executable(test.md_parser.gfm ${SRC})
 
