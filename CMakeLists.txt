@@ -93,6 +93,9 @@ if(ECM_FOUND)
     set(MD4QT_INSTALL_BINDIR ${KDE_INSTALL_BINDIR})
     set(MD4QT_INSTALL_LIBDIR ${KDE_INSTALL_LIBDIR})
     set(CMAKECONFIG_INSTALL_DIR "${KDE_INSTALL_CMAKEPACKAGEDIR}/md4qt")
+
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/config-md4qt.h"
+            DESTINATION "${MD4QT_INSTALL_INCLUDEDIR}/md4qt")
 else()
     include(GNUInstallDirs)
 
@@ -105,9 +108,6 @@ endif()
 
 install(FILES ${HDR}
     DESTINATION "${MD4QT_INSTALL_INCLUDEDIR}/md4qt")
-
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/config-md4qt.h"
-        DESTINATION "${MD4QT_INSTALL_INCLUDEDIR}/md4qt")
 
 install(TARGETS md4qt
         EXPORT md4qt-targets
