@@ -70,7 +70,7 @@ bool InlineMathParser::check(Line &line,
         if (dollarCount && dollarCount < 3) {
             const auto sState = stream.currentState();
 
-            qsizetype endPos;
+            qsizetype endPos = -1;
             qsizetype endLine = line.lineNumber();
 
             QString code;

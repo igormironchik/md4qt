@@ -388,3 +388,120 @@ TEST_CASE("326")
     REQUIRE(l->p()->items().size() == 1);
     REQUIRE(l->p()->items().at(0)->type() == MD::ItemType::Image);
 }
+
+/*
+1. | text
+1. text
+
+*/
+TEST_CASE("327")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/327.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
+    auto l = static_cast<MD::List *>(doc->items().at(1).get());
+    REQUIRE(l->items().size() == 2);
+
+    {
+        REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
+        auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
+        REQUIRE(li->items().size() == 1);
+        REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
+        auto p = static_cast<MD::Paragraph *>(li->items().at(0).get());
+        REQUIRE(p->items().size() == 1);
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    }
+
+    {
+        REQUIRE(l->items().at(1)->type() == MD::ItemType::ListItem);
+        auto li = static_cast<MD::ListItem *>(l->items().at(1).get());
+        REQUIRE(li->items().size() == 1);
+        REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
+        auto p = static_cast<MD::Paragraph *>(li->items().at(0).get());
+        REQUIRE(p->items().size() == 1);
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    }
+}
+
+/*
+1. | text
+--- |
+
+*/
+TEST_CASE("328")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/328.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
+    auto l = static_cast<MD::List *>(doc->items().at(1).get());
+    REQUIRE(l->items().size() == 1);
+
+    {
+        REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
+        auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
+        REQUIRE(li->items().size() == 1);
+        REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
+        auto p = static_cast<MD::Paragraph *>(li->items().at(0).get());
+        REQUIRE(p->items().size() == 2);
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+        REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
+    }
+}
+
+/*
+1. | text
+   | ---
+
+*/
+TEST_CASE("329")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/329.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
+    auto l = static_cast<MD::List *>(doc->items().at(1).get());
+    REQUIRE(l->items().size() == 1);
+
+    {
+        REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
+        auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
+        REQUIRE(li->items().size() == 1);
+        REQUIRE(li->items().at(0)->type() == MD::ItemType::Table);
+    }
+}
+
+/*
+1. | text
+   ---
+
+*/
+TEST_CASE("330")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/330.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
+    auto l = static_cast<MD::List *>(doc->items().at(1).get());
+    REQUIRE(l->items().size() == 1);
+
+    {
+        REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
+        auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
+        REQUIRE(li->items().size() == 1);
+        REQUIRE(li->items().at(0)->type() == MD::ItemType::Heading);
+    }
+}

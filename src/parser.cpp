@@ -461,6 +461,7 @@ void Parser::parse(Line &currentLine,
         if (ctx.children().back().block()) {
             if (state.m_state == BlockState::Discard && &ctx.children().back() == state.m_context) {
                 ctx.children().back().setBlock(nullptr);
+                ctx.children().back().setDiscardForced(false);
                 ctx.children().back().children().clear();
                 state.m_state = BlockState::None;
 

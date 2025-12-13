@@ -67,7 +67,10 @@ inline int isTableAlignment(Line &line)
 
     int c = 0;
 
+    auto wasPipe = false;
+
     if (line.currentChar() == s_verticalLineChar) {
+        wasPipe = true;
         line.nextChar();
         skipSpaces(line);
     }
@@ -76,6 +79,8 @@ inline int isTableAlignment(Line &line)
 
     while (line.position() < line.length()) {
         if (line.currentChar() == s_verticalLineChar) {
+            wasPipe = true;
+
             if (isColumnAlignment(line.sliced(pos, line.position() - pos))) {
                 ++c;
 
@@ -98,7 +103,7 @@ inline int isTableAlignment(Line &line)
         }
     }
 
-    return c;
+    return (wasPipe ? c : 0);
 }
 
 inline int isTableHeader(Line &line)
