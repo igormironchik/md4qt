@@ -5,7 +5,8 @@
 # or to provide custom queries or build logic.
 name: "build"
 
-on:
+on: 
+  workflow_dispatch:
   push:
     branches: [main, dev]
   pull_request:
