@@ -505,3 +505,21 @@ TEST_CASE("330")
         REQUIRE(li->items().at(0)->type() == MD::ItemType::Heading);
     }
 }
+
+/*
+[^]: not footnote
+
+[^1 ]: not footnote
+
+*/
+TEST_CASE("331")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/331.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 3);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
+}
