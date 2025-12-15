@@ -16,10 +16,10 @@ FencedCodeParser::FencedCodeParser(Parser *parser)
 {
 }
 
-bool isStartOfCode(Line &line,
-                   QString *syntax = nullptr,
-                   WithPosition *delim = nullptr,
-                   WithPosition *syntaxPos = nullptr)
+void parseStartOfCode(Line &line,
+                      QString *syntax = nullptr,
+                      WithPosition *delim = nullptr,
+                      WithPosition *syntaxPos = nullptr)
 {
     if (delim) {
         delim->setStartColumn(line.column());
@@ -44,10 +44,6 @@ bool isStartOfCode(Line &line,
             delim->setEndLine(line.lineNumber());
         }
 
-        if (c < 3) {
-            return false;
-        }
-
         if (syntax) {
             skipSpaces(line);
             qsizetype startSyntaxPos = line.position();
@@ -66,11 +62,7 @@ bool isStartOfCode(Line &line,
                 }
             }
         }
-
-        return true;
     }
-
-    return false;
 }
 
 bool isCodeFences(Line &line,
@@ -244,7 +236,7 @@ BlockState FencedCodeParser::process(Line &currentLine,
         m_startChar = currentLine.currentChar();
         m_startColumn = currentLine.column();
 
-        isStartOfCode(currentLine, &syntax, &m_startDelim, &syntaxPos);
+        parseStartOfCode(currentLine, &syntax, &m_startDelim, &syntaxPos);
 
         m_openCount = m_startDelim.endColumn() - m_startDelim.startColumn() + 1;
 

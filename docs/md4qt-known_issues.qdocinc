@@ -1,4 +1,4 @@
-\target #1-Autolinks//home/igor/Work/Projects/next/known_issues.md
+\target #1-Autolinks//home/igor/Work/Projects/md4qt/known_issues.md
 \section1 1. Autolinks
 
 In this library autolinks are checked by \c {QUrl} for validity. CommonMark is not so strict,

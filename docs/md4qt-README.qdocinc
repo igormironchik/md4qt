@@ -7,26 +7,26 @@ This library parses Markdown into tree structure.
 
 
 \list
-    \li \l {#Example//home/igor/Work/Projects/next/README.md} {Example}
-    \li \l {#License//home/igor/Work/Projects/next/README.md} {License}
-    \li \l {#Benchmark//home/igor/Work/Projects/next/README.md} {Benchmark}
-    \li \l {#Playground//home/igor/Work/Projects/next/README.md} {Playground}
-    \li \l {#Release-notes//home/igor/Work/Projects/next/README.md} {Release notes}
-    \li \l {#Known-issues//home/igor/Work/Projects/next/README.md} {Known issues}
-    \li \l {#What-should-I-know-about-links-in-the-document//home/igor/Work/Projects/next/README.md} {What should I know about links in the document?}
-    \li \l {#What-is-the-second-argument-of-MDParserparse//home/igor/Work/Projects/next/README.md} {What is the second argument of \c {MD::Parser::parse()}?}
-    \li \l {#What-is-an-MDAnchor//home/igor/Work/Projects/next/README.md} {What is an \c {MD::Anchor}?}
-    \li \l {#Does-the-library-throw-exceptions//home/igor/Work/Projects/next/README.md} {Does the library throw exceptions?}
-    \li \l {#Why-is-parsing-wrong-on-Windows-with-stdifstream//home/igor/Work/Projects/next/README.md} {Why is parsing wrong on Windows with \c {std::ifstream}?}
-    \li \l {#How-can-I-convert-MDDocument-into-HTML//home/igor/Work/Projects/next/README.md} {How can I convert \c {MD::Document} into \c {HTML}?}
-    \li \l {#How-can-I-obtain-positions-of-blockselements-in-Markdown-file//home/igor/Work/Projects/next/README.md} {How can I obtain positions of blocks/elements in \c {Markdown} file?}
-    \li \l {#How-can-I-easily-traverse-through-the-MDDocument//home/igor/Work/Projects/next/README.md} {How can I easily traverse through the \c {MD::Document}?}
-    \li \l {#Is-it-possible-to-find-Markdown-item-by-its-position//home/igor/Work/Projects/next/README.md} {Is it possible to find \c {Markdown} item by its position?}
-    \li \l {#How-can-I-walk-through-the-document-and-find-all-items-of-given-type//home/igor/Work/Projects/next/README.md} {How can I walk through the document and find all items of given type?}
-    \li \l {#How-can-I-add-and-process-a-custom-user-defined-item-in-MDDocument//home/igor/Work/Projects/next/README.md} {How can I add and process a custom (user-defined) item in \c {MD::Document}?}
+    \li \l {#Example//home/igor/Work/Projects/md4qt/README.md} {Example}
+    \li \l {#License//home/igor/Work/Projects/md4qt/README.md} {License}
+    \li \l {#Benchmark//home/igor/Work/Projects/md4qt/README.md} {Benchmark}
+    \li \l {#Playground//home/igor/Work/Projects/md4qt/README.md} {Playground}
+    \li \l {#Release-notes//home/igor/Work/Projects/md4qt/README.md} {Release notes}
+    \li \l {#Known-issues//home/igor/Work/Projects/md4qt/README.md} {Known issues}
+    \li \l {#What-should-I-know-about-links-in-the-document//home/igor/Work/Projects/md4qt/README.md} {What should I know about links in the document?}
+    \li \l {#What-is-the-second-argument-of-MDParserparse//home/igor/Work/Projects/md4qt/README.md} {What is the second argument of \c {MD::Parser::parse()}?}
+    \li \l {#What-is-an-MDAnchor//home/igor/Work/Projects/md4qt/README.md} {What is an \c {MD::Anchor}?}
+    \li \l {#Does-the-library-throw-exceptions//home/igor/Work/Projects/md4qt/README.md} {Does the library throw exceptions?}
+    \li \l {#Why-is-parsing-wrong-on-Windows-with-stdifstream//home/igor/Work/Projects/md4qt/README.md} {Why is parsing wrong on Windows with \c {std::ifstream}?}
+    \li \l {#How-can-I-convert-MDDocument-into-HTML//home/igor/Work/Projects/md4qt/README.md} {How can I convert \c {MD::Document} into \c {HTML}?}
+    \li \l {#How-can-I-obtain-positions-of-blockselements-in-Markdown-file//home/igor/Work/Projects/md4qt/README.md} {How can I obtain positions of blocks/elements in \c {Markdown} file?}
+    \li \l {#How-can-I-easily-traverse-through-the-MDDocument//home/igor/Work/Projects/md4qt/README.md} {How can I easily traverse through the \c {MD::Document}?}
+    \li \l {#Is-it-possible-to-find-Markdown-item-by-its-position//home/igor/Work/Projects/md4qt/README.md} {Is it possible to find \c {Markdown} item by its position?}
+    \li \l {#How-can-I-walk-through-the-document-and-find-all-items-of-given-type//home/igor/Work/Projects/md4qt/README.md} {How can I walk through the document and find all items of given type?}
+    \li \l {#How-can-I-add-and-process-a-custom-user-defined-item-in-MDDocument//home/igor/Work/Projects/md4qt/README.md} {How can I add and process a custom (user-defined) item in \c {MD::Document}?}
 \endlist
 
-\target #Example//home/igor/Work/Projects/next/README.md
+\target #Example//home/igor/Work/Projects/md4qt/README.md
 \section1 Example
 
 \code /
@@ -57,7 +57,7 @@ int main()
 }
 \endcode
 
-\target #License//home/igor/Work/Projects/next/README.md
+\target #License//home/igor/Work/Projects/md4qt/README.md
 \section1 License
 
 \code /
@@ -67,7 +67,7 @@ int main()
 *\1
 \endcode
 
-\target #Benchmark//home/igor/Work/Projects/next/README.md
+\target #Benchmark//home/igor/Work/Projects/md4qt/README.md
 \section1 Benchmark
 
 Approximate benchmark with \l {https://github.com/github/cmark-gfm} {cmark-gfm} says,
@@ -104,32 +104,32 @@ major extensions and sugar and cherry on the cake.
 
 \endtable
 
-\target #Playground//home/igor/Work/Projects/next/README.md
+\target #Playground//home/igor/Work/Projects/md4qt/README.md
 \section1 Playground
 
 You can play in action with \c {md4qt} in \l {https://github.com/igormironchik/markdown-tools} {Markdown Tools}. There you can find \c {Markdown} editor/viewer/converter to \c {PDF}.
 
 And \l {https://invent.kde.org/office/klevernotes} {KleverNotes} from \c {KDE} uses \c {md4qt} too.
 
-\target #Release-notes//home/igor/Work/Projects/next/README.md
+\target #Release-notes//home/igor/Work/Projects/md4qt/README.md
 \section1 Release notes
 
 
 \list
     \li Notes that version \b{5.0.0} is API incompatible with \b{4.x.x}. Version \b{5.0.0} was
-    \li fully refactored for better performance and be more user-friendly.
+        fully refactored for better performance and be more user-friendly.
     \li Note that version \b{4.0.0} is API incompatible with \b{3.0.0}. In version \b{4.0.0} were
         changed rules with spaces, this version fully supports CommonMark standard in this question.
         Methods \c {isSpaceBefore()}, \c {isSpaceAfter()} were removed, and spaces are presented as in
         Markdown, so keep it in mind.
 \endlist
 
-\target #Known-issues//home/igor/Work/Projects/next/README.md
+\target #Known-issues//home/igor/Work/Projects/md4qt/README.md
 \section1 Known issues
 
 You can find a list of know issues \l {md4qt-known_issues.md.html} {here}.
 
-\target #What-should-I-know-about-links-in-the-document//home/igor/Work/Projects/next/README.md
+\target #What-should-I-know-about-links-in-the-document//home/igor/Work/Projects/md4qt/README.md
 \section1 What should I know about links in the document?
 
 
@@ -154,7 +154,7 @@ You can find a list of know issues \l {md4qt-known_issues.md.html} {here}.
 
 \endlist
 
-\target #What-is-the-second-argument-of-MDParserparse//home/igor/Work/Projects/next/README.md
+\target #What-is-the-second-argument-of-MDParserparse//home/igor/Work/Projects/md4qt/README.md
 \section1 What is the second argument of \c {MD::Parser::parse()}?
 
 
@@ -165,7 +165,7 @@ You can find a list of know issues \l {md4qt-known_issues.md.html} {here}.
         then they will be parsed too and will exist in the resulting document.
 \endlist
 
-\target #What-is-an-MDAnchor//home/igor/Work/Projects/next/README.md
+\target #What-is-an-MDAnchor//home/igor/Work/Projects/md4qt/README.md
 \section1 What is an \c {MD::Anchor}?
 
 
@@ -176,7 +176,7 @@ You can find a list of know issues \l {md4qt-known_issues.md.html} {here}.
         the document you reached new file.
 \endlist
 
-\target #Does-the-library-throw-exceptions//home/igor/Work/Projects/next/README.md
+\target #Does-the-library-throw-exceptions//home/igor/Work/Projects/md4qt/README.md
 \section1 Does the library throw exceptions?
 
 
@@ -187,7 +187,7 @@ You can find a list of know issues \l {md4qt-known_issues.md.html} {here}.
         example.
 \endlist
 
-\target #Why-is-parsing-wrong-on-Windows-with-stdifstream//home/igor/Work/Projects/next/README.md
+\target #Why-is-parsing-wrong-on-Windows-with-stdifstream//home/igor/Work/Projects/md4qt/README.md
 \section1 Why is parsing wrong on Windows with \c {std::ifstream}?
 
 
@@ -197,7 +197,7 @@ You can find a list of know issues \l {md4qt-known_issues.md.html} {here}.
         flag. And yes, I expect to receive UTF-8 encoded content...
 \endlist
 
-\target #How-can-I-convert-MDDocument-into-HTML//home/igor/Work/Projects/next/README.md
+\target #How-can-I-convert-MDDocument-into-HTML//home/igor/Work/Projects/md4qt/README.md
 \section1 How can I convert \c {MD::Document} into \c {HTML}?
 
 
@@ -225,7 +225,7 @@ You can find a list of know issues \l {md4qt-known_issues.md.html} {here}.
 
 \endlist
 
-\target #How-can-I-obtain-positions-of-blockselements-in-Markdown-file//home/igor/Work/Projects/next/README.md
+\target #How-can-I-obtain-positions-of-blockselements-in-Markdown-file//home/igor/Work/Projects/md4qt/README.md
 \section1 How can I obtain positions of blocks/elements in \c {Markdown} file?
 
 
@@ -236,7 +236,7 @@ You can find a list of know issues \l {md4qt-known_issues.md.html} {here}.
         of any element will point to the last symbol in this element.
 \endlist
 
-\target #How-can-I-easily-traverse-through-the-MDDocument//home/igor/Work/Projects/next/README.md
+\target #How-can-I-easily-traverse-through-the-MDDocument//home/igor/Work/Projects/md4qt/README.md
 \section1 How can I easily traverse through the \c {MD::Document}?
 
 
@@ -257,7 +257,7 @@ You can find a list of know issues \l {md4qt-known_issues.md.html} {here}.
 
 \endlist
 
-\target #Is-it-possible-to-find-Markdown-item-by-its-position//home/igor/Work/Projects/next/README.md
+\target #Is-it-possible-to-find-Markdown-item-by-its-position//home/igor/Work/Projects/md4qt/README.md
 \section1 Is it possible to find \c {Markdown} item by its position?
 
 
@@ -267,7 +267,7 @@ You can find a list of know issues \l {md4qt-known_issues.md.html} {here}.
         nested first children by given position with \c {MD::PosCache::findFirstInCache()} method.
 \endlist
 
-\target #How-can-I-walk-through-the-document-and-find-all-items-of-given-type//home/igor/Work/Projects/next/README.md
+\target #How-can-I-walk-through-the-document-and-find-all-items-of-given-type//home/igor/Work/Projects/md4qt/README.md
 \section1 How can I walk through the document and find all items of given type?
 
 
@@ -298,7 +298,7 @@ You can find a list of know issues \l {md4qt-known_issues.md.html} {here}.
 
 \endlist
 
-\target #How-can-I-add-and-process-a-custom-user-defined-item-in-MDDocument//home/igor/Work/Projects/next/README.md
+\target #How-can-I-add-and-process-a-custom-user-defined-item-in-MDDocument//home/igor/Work/Projects/md4qt/README.md
 \section1 How can I add and process a custom (user-defined) item in \c {MD::Document}?
 
 

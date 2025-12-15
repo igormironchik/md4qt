@@ -105,7 +105,7 @@ public:
     /*!
      * Returns whether length of opening and closing delimiter should be equal to each other, or may differ.
      */
-    virtual bool isLengthCorrespond() const;
+    virtual bool isLengthCorrespond() const = 0;
 
     /*!
      * Calculate all emphasises in context dropping that the text.

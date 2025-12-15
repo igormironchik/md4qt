@@ -91,7 +91,7 @@ And [KleverNotes](https://invent.kde.org/office/klevernotes) from `KDE` uses `md
 # Release notes
 
 * Notes that version **5.0.0** is API incompatible with **4.x.x**. Version **5.0.0** was
-* fully refactored for better performance and be more user-friendly.
+fully refactored for better performance and be more user-friendly.
 
 * Note that version **4.0.0** is API incompatible with **3.0.0**. In version **4.0.0** were
 changed rules with spaces, this version fully supports CommonMark standard in this question.

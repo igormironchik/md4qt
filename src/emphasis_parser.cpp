@@ -89,11 +89,6 @@ bool EmphasisParser::isRightFlanking(const QChar &before,
     return (!uWhitespaceBefore && (!punctBefore || (punctBefore && (uWhitespaceAfter || punctAfter))));
 }
 
-bool EmphasisParser::isLengthCorrespond() const
-{
-    return true;
-}
-
 int lengthForward(const InlineContext::DelimiterQueue &emph,
                   qsizetype idx)
 {
