@@ -324,7 +324,11 @@ bool InlineHtmlParser::check(Line &line,
                     while (true) {
                         auto doBreak = false;
 
-                        const auto checkClose = [&doBreak, &pos, &line, &html, &closed]() -> bool {
+                        const auto checkClose = [&doBreak, &pos, &line, &html, &closed, &nextStage]() -> bool {
+                            if (nextStage == 3) {
+                                return false;
+                            }
+
                             if (line.currentChar() == s_solidusChar) {
                                 line.nextChar();
                                 skipSpaces(line);
