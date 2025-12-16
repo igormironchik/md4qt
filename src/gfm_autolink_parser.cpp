@@ -58,10 +58,6 @@ readLink(Line &line,
 
 inline qsizetype skipAtEnd(const QString &url)
 {
-    if (url.isEmpty()) {
-        return 0;
-    }
-
     static const QString s_punct = QStringLiteral("?!.,:*_~");
 
     auto pos = skipIfBackward(url.length() - 1, url, [](const QChar &c) {
