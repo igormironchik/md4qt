@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.19)
 
-project(md4qt VERSION "5.0.6")
+project(md4qt VERSION "5.0.7")
 
 set(MD4QT_VERSION ${PROJECT_VERSION})
 

@@ -182,7 +182,7 @@ public:
     /*!
      * Returns current state.
      */
-    inline const State &currentState() const
+    inline State currentState() const
     {
         return m_currentState;
     }
@@ -367,7 +367,7 @@ public:
     /*!
      * Returns current state.
      */
-    const State &currentState() const;
+    State currentState() const;
 
     /*!
      * Moves stream position to the beginning of the given line number.
@@ -518,7 +518,7 @@ public:
     /*!
      * Returns current state.
      */
-    const State &currentState() const;
+    State currentState() const;
 
 private:
     HashedLines m_lines;

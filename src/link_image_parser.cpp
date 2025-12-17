@@ -403,8 +403,6 @@ QString LinkImageParser::readLabel(const State::Delim &startDelim,
 
     startParagraphDelim.m_type = State::Delim::Link;
 
-    auto startSet = false;
-
     startTextPos = -1;
     startTextLine = -1;
     endTextPos = endLineState.m_pos - 1;
@@ -417,7 +415,13 @@ QString LinkImageParser::readLabel(const State::Delim &startDelim,
                         startTextPos};
         startParagraphDelim.m_streamState = startDelim.m_streamState;
         startTextLine = startDelim.m_streamState.m_lineNumber - 1;
-        startSet = true;
+    } else {
+        line = stream.readLine();
+        startTextPos = line.position();
+        startParagraphDelim.m_lineState = line.currentState();
+        startParagraphDelim.m_streamState = stream.currentState();
+        startTextLine = line.lineNumber();
+        pos = startTextPos;
     }
 
     endParagraphDelim.m_type = State::Delim::Link;
@@ -456,14 +460,6 @@ QString LinkImageParser::readLabel(const State::Delim &startDelim,
             pos = line.position();
         } else {
             break;
-        }
-
-        if (!startSet) {
-            startParagraphDelim.m_lineState = line.currentState();
-            startParagraphDelim.m_streamState = stream.currentState();
-            startTextPos = line.position();
-            startTextLine = line.lineNumber();
-            startSet = true;
         }
     }
 
@@ -679,9 +675,7 @@ bool LinkImageParser::checkInlineLinkImage(const State::Delim &startDelim,
     line.nextChar();
     line.nextChar();
 
-    auto pos = line.position();
-
-    if (pos >= line.length()) {
+    if (line.position() >= line.length()) {
         line = stream.readLine();
     }
 
@@ -716,7 +710,7 @@ bool LinkImageParser::checkInlineLinkImage(const State::Delim &startDelim,
             if (line.currentChar() != s_rightParenthesisChar) {
                 skipSpaces(line);
 
-                if (pos >= line.length()) {
+                if (line.position() >= line.length()) {
                     line = stream.readLine();
                     skipSpaces(line);
                 }

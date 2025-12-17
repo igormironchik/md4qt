@@ -104,7 +104,7 @@ void TextStreamBase::restoreState(const State *state)
     m_current = (state ? *state : m_saved);
 }
 
-const TextStreamBase::State &TextStreamBase::currentState() const
+TextStreamBase::State TextStreamBase::currentState() const
 {
     return m_current;
 }
@@ -196,7 +196,7 @@ void ParagraphStream::restoreStateBefore(const State &st)
     m_currentState.m_lineNumber = st.m_lineNumber - 1;
 }
 
-const ParagraphStream::State &ParagraphStream::currentState() const
+ParagraphStream::State ParagraphStream::currentState() const
 {
     return m_currentState;
 }
