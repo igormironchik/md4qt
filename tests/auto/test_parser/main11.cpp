@@ -623,7 +623,7 @@ TEST_CASE("336")
 }
 
 /*
-[](/url (t())
+[](/url (t()))
 
 [](/url (
 t
@@ -636,6 +636,8 @@ t
 "title"
 )
 
+[][[
+
 */
 TEST_CASE("337")
 {
@@ -644,7 +646,7 @@ TEST_CASE("337")
     auto doc = parser.parse(QStringLiteral("tests/parser/data/337.md"));
 
     REQUIRE(doc->isEmpty() == false);
-    REQUIRE(doc->items().size() == 5);
+    REQUIRE(doc->items().size() == 6);
 
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
@@ -672,6 +674,13 @@ TEST_CASE("337")
         auto p = static_cast<MD::Paragraph *>(doc->items().at(4).get());
         REQUIRE(p->items().size() == 1);
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
+    }
+
+    {
+        REQUIRE(doc->items().at(5)->type() == MD::ItemType::Paragraph);
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(5).get());
+        REQUIRE(p->items().size() == 1);
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
     }
 }
 
@@ -705,6 +714,8 @@ TEST_CASE("338")
 1
 ]
 
+[1][
+
 */
 TEST_CASE("339")
 {
@@ -713,10 +724,20 @@ TEST_CASE("339")
     auto doc = parser.parse(QStringLiteral("tests/parser/data/339.md"));
 
     REQUIRE(doc->isEmpty() == false);
-    REQUIRE(doc->items().size() == 2);
+    REQUIRE(doc->items().size() == 3);
 
-    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
-    REQUIRE(p->items().size() == 1);
-    REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
+    {
+        REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+        REQUIRE(p->items().size() == 1);
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
+    }
+
+    {
+        REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
+        REQUIRE(p->items().size() == 2);
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
+        REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
+    }
 }

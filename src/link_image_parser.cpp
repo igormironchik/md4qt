@@ -1111,10 +1111,6 @@ bool LinkImageParser::check(Line &line,
                                 }
                             }
 
-                            if (stop) {
-                                break;
-                            }
-
                             line.nextChar();
                             rs.next();
                         }
