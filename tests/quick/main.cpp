@@ -9,11 +9,11 @@
 int main()
 {
     MD::Parser parser;
-    QString data = QStringLiteral("### Heading 3 {#heading-3}");
+    QString data = QStringLiteral("* ```cpp");
     QTextStream stream(&data);
 
-    // auto doc = parser.parse(stream, QStringLiteral("."), QStringLiteral("1.md"));
-    auto doc = parser.parse(QStringLiteral("./footnote3.md"));
+    auto doc = parser.parse(stream, QStringLiteral("."), QStringLiteral("1.md"));
+    // auto doc = parser.parse(QStringLiteral("./footnote3.md"));
 
     return 0;
 }

@@ -140,32 +140,14 @@ BlockState ListParser::check(Line &currentLine,
             skipList(currentLine);
 
             if (isFormedList(currentLine, (checkWithoutProcessing ? dummy : m_lastItemIsEmpty), space)) {
-                if (dummy
-                    && delim == s_minusChar
-                    && isEmptyLine(currentLine)
-                    && ctx.block() == this
-                    && !ctx.children().isEmpty()) {
-                    auto p = dynamic_cast<ParagraphParser *>(ctx.children().back().block());
-
-                    if (p
-                        && ctx.children().back().lastLineNumber() + 1 == currentLine.lineNumber()
-                        && currentLine.column() >= indentFromColumn(ctx.lastChildIndent())) {
-                        currentLine.restoreState();
-
-                        return BlockState::None;
-                    }
-                }
-
+                // This is processing of list item inside list item in one line, like "* * list"
+                // In this case we should not append new child context so returning ContinueWithoutAppendingChildCtx.
                 if (ctx.parent() && ctx.parent()->block() && ctx.parent()->block() == this) {
                     currentLine.restoreState();
 
                     const auto state = continueCheck(currentLine, stream, doc, *ctx.parent(), path, fileName);
 
-                    if (state != BlockState::Stop) {
-                        return BlockState::ContinueWithoutAppendingChildCtx;
-                    } else {
-                        return state;
-                    }
+                    return (state != BlockState::Stop ? BlockState::ContinueWithoutAppendingChildCtx : state);
                 }
 
                 if (!checkWithoutProcessing) {
