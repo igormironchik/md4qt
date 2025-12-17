@@ -743,8 +743,7 @@ TEST_CASE("339")
 }
 
 /*
-* heading
-  -
+* [x text
 
 */
 TEST_CASE("340")
@@ -763,6 +762,12 @@ TEST_CASE("340")
         REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
         auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
         REQUIRE(li->items().size() == 1);
-        REQUIRE(li->items().at(0)->type() == MD::ItemType::Heading);
+        REQUIRE(!li->isTaskList());
+        REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
+        auto p = static_cast<MD::Paragraph *>(li->items().at(0).get());
+        REQUIRE(p->items().size() == 1);
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
+        REQUIRE(t->text() == QStringLiteral("[x text"));
     }
 }
