@@ -499,6 +499,14 @@ bool readHtmlAttrValue(Line &line)
 
 bool readHtmlAttributes(Line &line)
 {
+    const auto checkForEnd = [&line]() -> bool {
+        if (line.currentChar() == s_solidusChar) {
+            line.nextChar();
+        }
+
+        return (line.currentChar() == s_greaterSignChar);
+    };
+
     qsizetype p = line.position();
 
     skipSpaces(line);
@@ -519,7 +527,13 @@ bool readHtmlAttributes(Line &line)
         skipSpaces(line);
 
         if (line.currentChar() != s_equalSignChar) {
-            if (p == line.position()) {
+            if (line.currentChar() == s_solidusChar) {
+                if (!checkForEnd()) {
+                    return false;
+                }
+            } else if (checkForEnd()) {
+                return true;
+            } else if (p == line.position()) {
                 return false;
             } else {
                 continue;
@@ -539,9 +553,7 @@ bool readHtmlAttributes(Line &line)
         skipSpaces(line);
 
         if (line.currentChar() == s_solidusChar) {
-            line.nextChar();
-
-            if (line.currentChar() != s_greaterSignChar) {
+            if (!checkForEnd()) {
                 return false;
             }
         }

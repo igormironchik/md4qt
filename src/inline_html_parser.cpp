@@ -331,7 +331,13 @@ bool InlineHtmlParser::check(Line &line,
 
                             if (line.currentChar() == s_solidusChar) {
                                 line.nextChar();
-                                skipSpaces(line);
+
+                                if (line.currentChar() != s_greaterSignChar) {
+                                    doBreak = true;
+                                    closed = false;
+
+                                    return true;
+                                }
                             }
 
                             if (line.currentChar() == s_greaterSignChar) {
