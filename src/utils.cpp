@@ -499,14 +499,6 @@ bool readHtmlAttrValue(Line &line)
 
 bool readHtmlAttributes(Line &line)
 {
-    const auto checkForEnd = [&line]() -> bool {
-        if (line.currentChar() == s_solidusChar) {
-            line.nextChar();
-        }
-
-        return (line.currentChar() == s_greaterSignChar);
-    };
-
     qsizetype p = line.position();
 
     skipSpaces(line);
@@ -518,6 +510,10 @@ bool readHtmlAttributes(Line &line)
             return false;
         }
 
+        if (line.currentChar() == s_solidusChar) {
+            return true;
+        }
+
         if (line.position() < line.length() && !readHtmlAttrName(line)) {
             return false;
         }
@@ -527,11 +523,7 @@ bool readHtmlAttributes(Line &line)
         skipSpaces(line);
 
         if (line.currentChar() != s_equalSignChar) {
-            if (line.currentChar() == s_solidusChar) {
-                if (!checkForEnd()) {
-                    return false;
-                }
-            } else if (checkForEnd()) {
+            if (line.currentChar() == s_solidusChar || line.currentChar() == s_greaterSignChar) {
                 return true;
             } else if (p == line.position()) {
                 return false;
@@ -549,16 +541,6 @@ bool readHtmlAttributes(Line &line)
         }
 
         p = line.position();
-
-        skipSpaces(line);
-
-        if (line.currentChar() == s_solidusChar) {
-            if (!checkForEnd()) {
-                return false;
-            }
-        }
-
-        skipSpaces(line);
     }
 
     return true;
@@ -577,11 +559,11 @@ bool isHtmlTag(const QString &tag,
     }
 
     if (!readHtmlAttributes(line)) {
-        if (line.currentChar() == s_solidusChar) {
-            line.nextChar();
-        } else {
-            return false;
-        }
+        return false;
+    }
+
+    if (line.currentChar() == s_solidusChar) {
+        line.nextChar();
     }
 
     return (line.currentChar() == s_greaterSignChar);
