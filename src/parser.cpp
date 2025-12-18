@@ -297,28 +297,44 @@ void Parser::parse(QTextStream &s,
 
     while (!stream.atEnd()) {
         auto line = stream.readLine();
-        const auto empty = isEmptyLine(line);
+        auto empty = isEmptyLine(line);
 
         ParseState state;
 
-        do {
+        const auto moveToDiscardedIf = [&state, &line, &stream, &empty]() -> bool {
             if (state.m_state == BlockState::Discard) {
                 if (state.m_context && state.m_context->firstLineNumber() != -1) {
                     line = stream.moveTo(state.m_context->firstLineNumber());
-                } else {
-                    return;
+                    empty = isEmptyLine(line);
+
+                    return true;
                 }
             }
+
+            return false;
+        };
+
+        do {
+            moveToDiscardedIf();
 
             parse(line, stream, doc, ctx, path, fileName, linksToParse, state);
         } while (state.m_state == BlockState::Discard);
 
         if (stream.atEnd() && !empty) {
             line = Line(QStringView(), line.lineNumber() + 1);
+            auto discarded = false;
 
             do {
+                discarded = moveToDiscardedIf();
+
                 parse(line, stream, doc, ctx, path, fileName, linksToParse, state);
             } while (state.m_state == BlockState::Discard);
+
+            if (stream.atEnd() && !empty && discarded) {
+                line = Line(QStringView(), line.lineNumber() + 1);
+
+                parse(line, stream, doc, ctx, path, fileName, linksToParse, state);
+            }
         }
 
         if (stream.atEnd() && !ctx.children().isEmpty() && ctx.children().back().block()) {
