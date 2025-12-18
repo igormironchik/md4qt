@@ -111,3 +111,18 @@ TEST_CASE("348")
     REQUIRE(doc->items().size() == 2);
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
 }
+
+/*
+<? ? ?>
+
+*/
+TEST_CASE("349")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/349.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
+}
