@@ -473,54 +473,48 @@ void Parser::parse(Line &currentLine,
                    QStringList &linksToParse,
                    ParseState &state)
 {
-    if (isEmptyLine(currentLine) || currentLine.position() < currentLine.length()) {
-        if (ctx.children().back().block()) {
-            if (state.m_state == BlockState::Discard && &ctx.children().back() == state.m_context) {
-                ctx.children().back().setBlock(nullptr);
-                ctx.children().back().setDiscardForced(false);
-                ctx.children().back().children().clear();
-                state.m_state = BlockState::None;
+    if (ctx.children().back().block()) {
+        if (state.m_state == BlockState::Discard && &ctx.children().back() == state.m_context) {
+            ctx.children().back().setBlock(nullptr);
+            ctx.children().back().setDiscardForced(false);
+            ctx.children().back().children().clear();
+            state.m_state = BlockState::None;
+
+            loopBlockParsers(currentLine, stream, doc, ctx, path, fileName, linksToParse, state);
+        } else {
+            const auto st = ctx.children().back().block()->continueCheck(currentLine,
+                                                                         stream,
+                                                                         doc,
+                                                                         ctx.children().back(),
+                                                                         path,
+                                                                         fileName);
+
+            if (st == BlockState::Stop) {
+                ctx.children()
+                    .back()
+                    .block()
+                    ->finish(currentLine, stream, doc, nullptr, ctx.children().back(), path, fileName, linksToParse);
+                ctx.children().back().block()->reset(ctx.children().back());
+
+                Context child;
+                child.applyParentContext(ctx);
+                ctx.children().enqueue(child);
 
                 loopBlockParsers(currentLine, stream, doc, ctx, path, fileName, linksToParse, state);
-            } else {
-                const auto st = ctx.children().back().block()->continueCheck(currentLine,
-                                                                             stream,
-                                                                             doc,
-                                                                             ctx.children().back(),
-                                                                             path,
-                                                                             fileName);
-
-                if (st == BlockState::Stop) {
-                    ctx.children().back().block()->finish(currentLine,
-                                                          stream,
-                                                          doc,
-                                                          nullptr,
-                                                          ctx.children().back(),
-                                                          path,
-                                                          fileName,
-                                                          linksToParse);
-                    ctx.children().back().block()->reset(ctx.children().back());
-
-                    Context child;
-                    child.applyParentContext(ctx);
-                    ctx.children().enqueue(child);
-
-                    loopBlockParsers(currentLine, stream, doc, ctx, path, fileName, linksToParse, state);
-                } else if (st == BlockState::Discard) {
-                    if (state.m_context != &ctx.children().back()) {
-                        state.m_skip.clear();
-                    }
-
-                    state.m_context = &ctx.children().back();
-                    state.m_state = BlockState::Discard;
-                    state.m_skip.insert(ctx.children().back().block());
-                } else {
-                    parse(currentLine, stream, doc, ctx.children().back(), path, fileName, linksToParse, state);
+            } else if (st == BlockState::Discard) {
+                if (state.m_context != &ctx.children().back()) {
+                    state.m_skip.clear();
                 }
+
+                state.m_context = &ctx.children().back();
+                state.m_state = BlockState::Discard;
+                state.m_skip.insert(ctx.children().back().block());
+            } else {
+                parse(currentLine, stream, doc, ctx.children().back(), path, fileName, linksToParse, state);
             }
-        } else {
-            loopBlockParsers(currentLine, stream, doc, ctx, path, fileName, linksToParse, state);
         }
+    } else {
+        loopBlockParsers(currentLine, stream, doc, ctx, path, fileName, linksToParse, state);
     }
 }
 
