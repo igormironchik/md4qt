@@ -60,6 +60,8 @@ TEST_CASE("346")
 
 <a attr / val>
 
+<a 0a>
+
 */
 TEST_CASE("347")
 {
@@ -68,10 +70,20 @@ TEST_CASE("347")
     auto doc = parser.parse(QStringLiteral("tests/parser/data/347.md"));
 
     REQUIRE(doc->isEmpty() == false);
-    REQUIRE(doc->items().size() == 3);
+    REQUIRE(doc->items().size() == 4);
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
-    REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
-    auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
-    REQUIRE(p->items().size() == 1);
-    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+
+    {
+        REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
+        REQUIRE(p->items().size() == 1);
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    }
+
+    {
+        REQUIRE(doc->items().at(3)->type() == MD::ItemType::Paragraph);
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(3).get());
+        REQUIRE(p->items().size() == 1);
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    }
 }
