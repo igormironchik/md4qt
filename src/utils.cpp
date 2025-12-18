@@ -190,28 +190,30 @@ QString readLinkTitle(Line &line,
             }
         }
 
+        if (startParenthesisCount > 1) {
+            return QString();
+        }
+
         const auto endChar = (startChar == s_leftParenthesisChar ? s_rightParenthesisChar : startChar);
 
         QString title;
         ReverseSolidusHandler reverseSolidus;
 
         while (line.position() < line.length()) {
-            if (reverseSolidus.process(line.currentChar())) { }
+            reverseSolidus.process(line.currentChar());
+
             if (line.currentChar() == endChar && !reverseSolidus.isPrevReverseSolidus()) {
                 endStarted = true;
 
-                for (int i = 0; i < startParenthesisCount && line.position() < line.length();) {
-                    if (line.currentChar() != endChar) {
-                        return QString();
-                    }
+                --startParenthesisCount;
+                line.nextChar();
 
-                    line.nextChar();
-                    --startParenthesisCount;
+                if (!isEmptyLine(line)) {
+                    return QString();
                 }
 
                 break;
-            } else if ((line.currentChar() == startChar || line.currentChar() == endChar)
-                       && !reverseSolidus.isPrevReverseSolidus()) {
+            } else if (line.currentChar() == startChar && !reverseSolidus.isPrevReverseSolidus()) {
                 return QString();
             } else {
                 title.append(line.currentChar());

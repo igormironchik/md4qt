@@ -265,18 +265,18 @@ ParagraphParser::RefLinkState ParagraphParser::checkForReferenceLink(Line &curre
                 const auto titleStartPos = currentLine.position();
 
                 bool endStarted = false;
-                readLinkTitle(currentLine,
-                              m_refLinkTitleStartChar,
-                              m_refLinkStartParenthesisCount,
-                              m_refLinkTitleStartPos,
-                              endStarted);
+                const auto title = readLinkTitle(currentLine,
+                                                 m_refLinkTitleStartChar,
+                                                 m_refLinkStartParenthesisCount,
+                                                 m_refLinkTitleStartPos,
+                                                 endStarted);
 
                 if (m_refLinkTitlePos.startLine() == -1 && !m_refLinkTitleStartChar.isNull()) {
                     m_refLinkTitlePos.setStartColumn(titleStartPos);
                     m_refLinkTitlePos.setStartLine(currentLine.lineNumber());
                 }
 
-                if (endStarted
+                if ((endStarted || (title.isEmpty() && !isEmptyLine(currentLine)))
                     && m_refLinkStartParenthesisCount
                     && currentLine.lineNumber() == m_refLinkUrlPos.endLine()) {
                     return returnWrong();
