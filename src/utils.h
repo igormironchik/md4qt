@@ -122,7 +122,7 @@ inline void skipSpaces(Line &line)
 }
 
 /*!
- * Return whether the given line is empty.
+ * Return whether the given line is empty starting at the current position.
  *
  * \a line Line.
  */

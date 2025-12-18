@@ -505,12 +505,6 @@ void Parser::parse(Line &currentLine,
         } else {
             loopBlockParsers(currentLine, stream, doc, ctx, path, fileName, linksToParse, state);
         }
-    } else if (ctx.children().back().block()) {
-        ctx.children()
-            .back()
-            .block()
-            ->finish(currentLine, stream, doc, nullptr, ctx.children().back(), path, fileName, linksToParse);
-        ctx.children().back().block()->reset(ctx.children().back());
     }
 }
 
