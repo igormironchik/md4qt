@@ -718,20 +718,8 @@ bool isClosed(Line &line,
     } break;
 
     case 2: {
-        if (onSameLine) {
-            if (line.currentChar() == s_greaterSignChar) {
-                return true;
-            } else if (line.currentChar() == s_minusChar) {
-                const auto st = line.currentState();
-
-                line.nextChar();
-
-                if (line.currentChar() == s_greaterSignChar) {
-                    return true;
-                }
-
-                line.restoreState(&st);
-            }
+        if (onSameLine && line.currentChar() == s_greaterSignChar) {
+            return true;
         }
 
         skipIf(line, [](const QChar &c) {
