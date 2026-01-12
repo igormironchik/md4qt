@@ -1,5 +1,5 @@
 /*
-    SPDX-FileCopyrightText: 2025 Igor Mironchik <igor.mironchik@gmail.com>
+    SPDX-FileCopyrightText: 2026 Igor Mironchik <igor.mironchik@gmail.com>
     SPDX-License-Identifier: MIT
 */
 
@@ -140,4 +140,63 @@ TEST_CASE("350")
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
+}
+
+/*
+
+$$\[\mathrm{\mathbf{M}}(\alpha) =
+   \left(
+      \begin{matrix}
+         \cos(\alpha)+n_x^2\cdot (1-\cos(\alpha))  &  n_x\cdot n_y\cdot (1-\cos(\alpha))-n_z\cdot \sin(\alpha) &
+n_x\cdot n_z\cdot (1-\cos(\alpha))+n_y\cdot \sin(\alpha)\\
+         n_x\cdot n_y\cdot (1-\cos(\alpha))+n_z\cdot \sin(\alpha) & \cos(\alpha)+n_y^2\cdot (1-\cos(\alpha))  & n_y\cdot
+n_z\cdot (1-\cos(\alpha))-n_x\cdot \sin(\alpha)\\ n_z\cdot n_x\cdot (1-\cos(\alpha))-n_y\cdot \sin(\alpha) & n_z\cdot
+n_y\cdot (1-\cos(\alpha))+n_x\cdot \sin(\alpha)  & \cos(\alpha)+n_z^2\cdot (1-\cos(\alpha))
+      \end{matrix}
+   \right)
+\]$$
+
+*/
+TEST_CASE("351")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/351.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->startColumn() == 0);
+    REQUIRE(p->startLine() == 1);
+    REQUIRE(p->endColumn() == 3);
+    REQUIRE(p->endLine() == 9);
+
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Math);
+    auto m = static_cast<MD::Math *>(p->items().at(0).get());
+    REQUIRE(!m->isInline());
+    REQUIRE(m->expr()
+            == QStringLiteral("\\[\\mathrm{\\mathbf{M}}(\\alpha) =\n"
+                              "   \\left(\n"
+                              "      \\begin{matrix}\n"
+                              "         \\cos(\\alpha)+n_x^2\\cdot (1-\\cos(\\alpha))  &  "
+                              "n_x\\cdot n_y\\cdot (1-\\cos(\\alpha))-n_z\\cdot \\sin(\\alpha) &  "
+                              "n_x\\cdot n_z\\cdot (1-\\cos(\\alpha))+n_y\\cdot \\sin(\\alpha)\\\\\n"
+                              "         n_x\\cdot n_y\\cdot (1-\\cos(\\alpha))+n_z\\cdot \\sin(\\alpha) & "
+                              "\\cos(\\alpha)+n_y^2\\cdot (1-\\cos(\\alpha))  &   "
+                              "n_y\\cdot n_z\\cdot (1-\\cos(\\alpha))-n_x\\cdot \\sin(\\alpha)\\\\\n"
+                              "         n_z\\cdot n_x\\cdot (1-\\cos(\\alpha))-n_y\\cdot \\sin(\\alpha) & "
+                              "n_z\\cdot n_y\\cdot (1-\\cos(\\alpha))+n_x\\cdot \\sin(\\alpha)  & "
+                              "\\cos(\\alpha)+n_z^2\\cdot (1-\\cos(\\alpha))\n"
+                              "      \\end{matrix}\n"
+                              "   \\right)\n"
+                              "\\]"));
+    REQUIRE(m->startColumn() == 2);
+    REQUIRE(m->startLine() == 1);
+    REQUIRE(m->endColumn() == 1);
+    REQUIRE(m->endLine() == 9);
+    REQUIRE(m->startDelim() == MD::WithPosition{0, 1, 1, 1});
+    REQUIRE(m->endDelim() == MD::WithPosition{2, 9, 3, 9});
 }

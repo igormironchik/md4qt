@@ -1,5 +1,5 @@
 /*
-    SPDX-FileCopyrightText: 2025 Igor Mironchik <igor.mironchik@gmail.com>
+    SPDX-FileCopyrightText: 2026 Igor Mironchik <igor.mironchik@gmail.com>
     SPDX-License-Identifier: MIT
 */
 
@@ -27,7 +27,7 @@ class Parser;
  * \value Stop Means block was finished and next content should go for parsing of other block.
  * \value Continue Means this instance handles this line and parsing should give next lines to this block parser.
  * \value ContinueWithoutAppendingChildCtx Means this instance handles this line and parsing should give next lines
- *        to this block parser but child context should not be adder nor updated.
+ *        to this block parser but child context should not be added nor updated.
  * \value Discard Used on the next lines after check method to break processing with this block and try to process
  *        with other blocks.
  */
@@ -59,8 +59,8 @@ public:
 
     /*!
      * Returns check state for the current line and block type. This method should return BlockState::None if
-     * this string is not handled by him. This method should not return BlockState::Stop ever. If this
-     * block parser knows how to handle the current line it should return BlockState::Continue.
+     * this string is not handled by him. If this block parser knows how to handle the current line it should
+     * return BlockState::Continue or BlockState::Stop.
      *
      * \a currentLine Current processing line.
      *

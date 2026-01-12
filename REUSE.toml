@@ -12,7 +12,7 @@ SPDX-License-Identifier = "CC-BY-SA-4.0"
 [[annotations]]
 path = ["tests/auto/commonmark/0.30/**.md", "tests/auto/commonmark/0.31.2/**.md", "tests/auto/html/data/**.md", "apply-clang-format.sh"]
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2025 Igor Mironchik <igor.mironchik@gmail.com>"
+SPDX-FileCopyrightText = "2026 Igor Mironchik <igor.mironchik@gmail.com>"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
@@ -36,7 +36,7 @@ SPDX-License-Identifier = "MIT"
 [[annotations]]
 path = ["tests/auto/test_parser/data/**", "docs/**", "tests/auto/plugins/emphasis/data/**.md", "tests/auto/plugins/yaml/data/**.md"]
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2025 Igor Mironchik <igor.mironchik@gmail.com>"
+SPDX-FileCopyrightText = "2026 Igor Mironchik <igor.mironchik@gmail.com>"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
@@ -62,9 +62,3 @@ path = "tests/utils/entity/entities.json"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "WHATWG (Apple, Google, Mozilla, Microsoft)"
 SPDX-License-Identifier = "CC-BY-4.0"
-
-[[annotations]]
-path = "tests/utils/entity/main.cpp"
-precedence = "aggregate"
-SPDX-FileCopyrightText = "2025 Igor Mironchik <igor.mironchik@gmail.com>"
-SPDX-License-Identifier = "MIT"

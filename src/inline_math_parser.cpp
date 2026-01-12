@@ -1,5 +1,5 @@
 /*
-    SPDX-FileCopyrightText: 2025 Igor Mironchik <igor.mironchik@gmail.com>
+    SPDX-FileCopyrightText: 2026 Igor Mironchik <igor.mironchik@gmail.com>
     SPDX-License-Identifier: MIT
 */
 
@@ -107,7 +107,7 @@ bool InlineMathParser::check(Line &line,
                                 item->setInline(dollarCount == 1);
                                 item->setStartLine(startLine);
                                 item->setEndColumn(endPos);
-                                item->setEndLine(endLine);
+                                item->setEndLine(endDelimPos > 0 ? endLine : endLine - 1);
                                 item->setStartDelim({startDelimPos,
                                                      line.lineNumber(),
                                                      startDelimPos + dollarCount - 1,
@@ -137,8 +137,6 @@ bool InlineMathParser::check(Line &line,
                     rs.next();
                 }
 
-                endLine = tmp.lineNumber();
-
                 appendCode(tmp, pos, tmp.position(), code, checkPos && !first, startPos, startLine);
 
                 if (stream.atEnd()) {
@@ -146,6 +144,7 @@ bool InlineMathParser::check(Line &line,
                 }
 
                 tmp = stream.readLine();
+                endLine = tmp.lineNumber();
                 checkPos = checkPos && first;
                 first = false;
             }

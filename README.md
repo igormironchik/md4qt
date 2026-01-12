@@ -22,7 +22,6 @@ This library parses Markdown into tree structure.
 * [What is the second argument of `MD::Parser::parse()`?](#what-is-the-second-argument-of-mdparserparse)
 * [What is an `MD::Anchor`?](#what-is-an-mdanchor)
 * [Does the library throw exceptions?](#does-the-library-throw-exceptions)
-* [Why is parsing wrong on Windows with `std::ifstream`?](#why-is-parsing-wrong-on-windows-with-stdifstream)
 * [How can I convert `MD::Document` into `HTML`?](#how-can-i-convert-mddocument-into-html)
 * [How can I obtain positions of blocks/elements in `Markdown` file?](#how-can-i-obtain-positions-of-blockselements-in-markdown-file)
 * [How can I easily traverse through the `MD::Document`?](#how-can-i-easily-traverse-through-the-mddocument)
@@ -33,7 +32,7 @@ This library parses Markdown into tree structure.
 # Example
 
 ```cpp
-#include <md4qt/parser.hpp>
+#include <md4qt/parser.h>
 
 int main()
 {
@@ -64,7 +63,7 @@ int main()
 
 ```cpp
 /*
-    SPDX-FileCopyrightText: 2025 Igor Mironchik <igor.mironchik@gmail.com>
+    SPDX-FileCopyrightText: 2026 Igor Mironchik <igor.mironchik@gmail.com>
     SPDX-License-Identifier: MIT
 */
 ```
@@ -117,7 +116,7 @@ labelled links, look:
    const auto it = doc->labeledLinks().find(url);
    
    if (it != doc->labeledLinks().cend()) {
-       url = it->second->url();
+       url = it.value()->url();
    }
    ```
 
@@ -142,19 +141,12 @@ don't need to inform user about errors. Qt itself doesn't use exceptions either.
 So you can catch only standard C++ exceptions, like `std::bad_alloc`, for
 example.
 
-# Why is parsing wrong on Windows with `std::ifstream`?
-
- * Such a problem can occur on Windows with MSVC if you open the file in text
-mode, so for `MD::Parser` always open `std::ifstream` with `std::ios::binary`
-flag. And yes, I expect to receive UTF-8 encoded content...
-
 # How can I convert `MD::Document` into `HTML`?
 
  * In version `2.0.5` were made commits with implementation of
 `MD::toHtml()` function. You can do the following:
 
    ```cpp
-   #define MD4QT_QT_SUPPORT
    #include <md4qt/parser.h>
    #include <md4qt/html.h>
 

@@ -1,9 +1,9 @@
-# SPDX-FileCopyrightText: 2025 Igor Mironchik <igor.mironchik@gmail.com>
+# SPDX-FileCopyrightText: 2026 Igor Mironchik <igor.mironchik@gmail.com>
 # SPDX-License-Identifier: MIT
 
 cmake_minimum_required(VERSION 3.19)
 
-project(md4qt VERSION "5.0.8")
+project(md4qt VERSION "5.0.9")
 
 set(MD4QT_VERSION ${PROJECT_VERSION})
 

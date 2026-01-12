@@ -17,7 +17,6 @@ This library parses Markdown into tree structure.
     \li \l {#What-is-the-second-argument-of-MDParserparse//home/igor/Work/Projects/md4qt/README.md} {What is the second argument of \c {MD::Parser::parse()}?}
     \li \l {#What-is-an-MDAnchor//home/igor/Work/Projects/md4qt/README.md} {What is an \c {MD::Anchor}?}
     \li \l {#Does-the-library-throw-exceptions//home/igor/Work/Projects/md4qt/README.md} {Does the library throw exceptions?}
-    \li \l {#Why-is-parsing-wrong-on-Windows-with-stdifstream//home/igor/Work/Projects/md4qt/README.md} {Why is parsing wrong on Windows with \c {std::ifstream}?}
     \li \l {#How-can-I-convert-MDDocument-into-HTML//home/igor/Work/Projects/md4qt/README.md} {How can I convert \c {MD::Document} into \c {HTML}?}
     \li \l {#How-can-I-obtain-positions-of-blockselements-in-Markdown-file//home/igor/Work/Projects/md4qt/README.md} {How can I obtain positions of blocks/elements in \c {Markdown} file?}
     \li \l {#How-can-I-easily-traverse-through-the-MDDocument//home/igor/Work/Projects/md4qt/README.md} {How can I easily traverse through the \c {MD::Document}?}
@@ -30,7 +29,7 @@ This library parses Markdown into tree structure.
 \section1 Example
 
 \code /
-#include <md4qt\1parser.hpp>
+#include <md4qt\1parser.h>
 
 int main()
 {
@@ -62,7 +61,7 @@ int main()
 
 \code /
 \1*
-    SPDX-FileCopyrightText: 2025 Igor Mironchik <igor.mironchik@gmail.com>
+    SPDX-FileCopyrightText: 2026 Igor Mironchik <igor.mironchik@gmail.com>
     SPDX-License-Identifier: MIT
 *\1
 \endcode
@@ -147,7 +146,7 @@ You can find a list of know issues \l {md4qt-known_issues.md.html} {here}.
         const auto it = doc->labeledLinks().find(url);
         
         if (it != doc->labeledLinks().cend()) {
-            url = it->second->url();
+            url = it.value()->url();
         }
         \endcode
 
@@ -187,16 +186,6 @@ You can find a list of know issues \l {md4qt-known_issues.md.html} {here}.
         example.
 \endlist
 
-\target #Why-is-parsing-wrong-on-Windows-with-stdifstream//home/igor/Work/Projects/md4qt/README.md
-\section1 Why is parsing wrong on Windows with \c {std::ifstream}?
-
-
-\list
-    \li Such a problem can occur on Windows with MSVC if you open the file in text
-        mode, so for \c {MD::Parser} always open \c {std::ifstream} with \c {std::ios::binary}
-        flag. And yes, I expect to receive UTF-8 encoded content...
-\endlist
-
 \target #How-can-I-convert-MDDocument-into-HTML//home/igor/Work/Projects/md4qt/README.md
 \section1 How can I convert \c {MD::Document} into \c {HTML}?
 
@@ -206,7 +195,6 @@ You can find a list of know issues \l {md4qt-known_issues.md.html} {here}.
         \c {MD::toHtml()} function. You can do the following:
 
         \code /
-        #define MD4QT_QT_SUPPORT
         #include <md4qt\1parser.h>
         #include <md4qt\1html.h>
         
