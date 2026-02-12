@@ -486,7 +486,7 @@ public:
     }
 
     /*!
-     * Actual at this time indent for MD::BlockParser::check() method.
+     * Returns actual at this time indent for MD::BlockParser::check() method.
      *
      * \a skipChildren Should child indents be considered?
      */
@@ -496,26 +496,13 @@ public:
     }
 
     /*!
-     * Actual at this time minimum indent for MD::BlockParser::check() method.
-     *
-     * \a skipChildren Should child indents be considered?
-     */
-    inline qsizetype minimumIndentColumnForCheck(bool skipChildren) const
-    {
-        return (m_dontConsiderIndents ? 0 : (skipChildren ? indentColumn() : firstChildIndent()));
-    }
-
-    /*!
      * Returns whether the given column is in range.
      *
      * \a column Column.
-     *
-     * \a skipChildren Should child indents be considered?
      */
-    inline bool isInIndent(qsizetype column,
-                           bool skipChildren) const
+    inline bool isInIndent(qsizetype column) const
     {
-        return (column - indentColumnForCheck(skipChildren) < 4
+        return (column - indentColumnForCheck(false) < 4
                 && (column < indentFromColumn(indentColumn()) + 4
                     || (hasChildIndents() ? column > firstChildIndent() : false)));
     }

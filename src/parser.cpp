@@ -387,6 +387,10 @@ void Parser::parse(QTextStream &s,
         }
 
         if (stream.atEnd() && childCtx->block()) {
+            if (line.position() < line.length()) {
+                childCtx->block()->process(line, stream, doc, doc, *childCtx, path, fileName, linksToParse);
+            }
+
             line = Line(QStringView(), line.lineNumber() + 1);
 
             childCtx->block()->finish(line, stream, doc, doc, *childCtx, path, fileName, linksToParse);

@@ -10,7 +10,7 @@ SPDX-FileCopyrightText = "John MacFarlane"
 SPDX-License-Identifier = "CC-BY-SA-4.0"
 
 [[annotations]]
-path = ["tests/auto/commonmark/0.30/**.md", "tests/auto/commonmark/0.31.2/**.md", "tests/auto/html/data/**.md", "apply-clang-format.sh"]
+path = ["tests/auto/commonmark/0.30/**.md", "tests/auto/commonmark/0.31.2/**.md", "tests/auto/html/data/**.md", "apply-clang-format.sh", "codecov.yml"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Igor Mironchik <igor.mironchik@gmail.com>"
 SPDX-License-Identifier = "MIT"

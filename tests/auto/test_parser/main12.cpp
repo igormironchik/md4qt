@@ -200,3 +200,95 @@ TEST_CASE("351")
     REQUIRE(m->startDelim() == MD::WithPosition{0, 1, 1, 1});
     REQUIRE(m->endDelim() == MD::WithPosition{2, 9, 3, 9});
 }
+
+/*
+- list item
+  - nested list item
+    > quoteblock
+
+*/
+TEST_CASE("352")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/352.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
+    auto l = static_cast<MD::List *>(doc->items().at(1).get());
+    REQUIRE(l->items().size() == 1);
+    REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
+
+    {
+        auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
+        REQUIRE(li->items().size() == 2);
+        REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
+        REQUIRE(li->items().at(1)->type() == MD::ItemType::List);
+        auto l = static_cast<MD::List *>(li->items().at(1).get());
+        REQUIRE(l->items().size() == 1);
+        REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
+
+        {
+            auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
+            REQUIRE(li->items().size() == 2);
+            REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
+            REQUIRE(li->items().at(1)->type() == MD::ItemType::Blockquote);
+        }
+    }
+}
+
+/*
+- list item
+  - nested list item
+  > quoteblock
+
+*/
+TEST_CASE("353")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/353.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
+    auto l = static_cast<MD::List *>(doc->items().at(1).get());
+    REQUIRE(l->items().size() == 1);
+    REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
+
+    auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
+    REQUIRE(li->items().size() == 3);
+    REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
+    REQUIRE(li->items().at(1)->type() == MD::ItemType::List);
+    REQUIRE(li->items().at(2)->type() == MD::ItemType::Blockquote);
+}
+
+/*
+- list item
+  - nested list item
+> quote block
+*/
+TEST_CASE("354")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/354.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 3);
+
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
+    auto l = static_cast<MD::List *>(doc->items().at(1).get());
+    REQUIRE(l->items().size() == 1);
+    REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
+
+    auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
+    REQUIRE(li->items().size() == 2);
+    REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
+    REQUIRE(li->items().at(1)->type() == MD::ItemType::List);
+
+    REQUIRE(doc->items().at(2)->type() == MD::ItemType::Blockquote);
+}

@@ -127,7 +127,7 @@ BlockState ListParser::check(Line &currentLine,
 
     skipSpaces(currentLine);
 
-    if (ctx.isInIndent(currentLine.column(), false)) {
+    if (ctx.isInIndent(currentLine.column())) {
         QChar delim;
         if (isList(currentLine,
                    (ctx.children().isEmpty() ? nullptr : &ctx.children().back()),

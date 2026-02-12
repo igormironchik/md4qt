@@ -133,7 +133,7 @@ BlockState FencedCodeParser::check(Line &currentLine,
 
     const auto start = currentLine.column();
 
-    if (ctx.isInIndent(currentLine.column(), false)) {
+    if (ctx.isInIndent(currentLine.column())) {
         const auto fenced = isCodeFences(currentLine, m_openCount, m_startChar, false);
 
         if (fenced) {

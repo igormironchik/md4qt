@@ -33,7 +33,7 @@ BlockState ATXHeadingParser::check(Line &currentLine,
 
     skipSpaces(currentLine);
 
-    if (ctx.isInIndent(currentLine.column(), false)) {
+    if (ctx.isInIndent(currentLine.column())) {
         int count = 0;
 
         while (currentLine.currentChar() == s_numberSignChar) {

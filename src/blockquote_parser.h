@@ -157,7 +157,7 @@ private:
         const auto st = currentLine.currentState();
         skipSpaces(currentLine);
 
-        const auto res = (ctx.isInIndent(currentLine.column(), true) && currentLine.currentChar() == s_greaterSignChar);
+        const auto res = (ctx.isInIndent(currentLine.column()) && currentLine.currentChar() == s_greaterSignChar);
 
         if (!res) {
             currentLine.restoreState(&st);

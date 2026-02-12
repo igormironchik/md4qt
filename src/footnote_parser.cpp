@@ -85,7 +85,7 @@ BlockState FootnoteParser::check(Line &currentLine,
 
     skipSpaces(currentLine);
 
-    if (ctx.isInIndent(currentLine.column(), false)) {
+    if (ctx.isInIndent(currentLine.column())) {
         if (isFootnote(currentLine)) {
             currentLine.restoreState();
 

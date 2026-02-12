@@ -164,7 +164,7 @@ BlockState TableParser::check(Line &currentLine,
 
     skipSpaces(currentLine);
 
-    if (ctx.isInIndent(currentLine.column(), false)) {
+    if (ctx.isInIndent(currentLine.column())) {
         const auto c = isTableHeader(currentLine);
 
         if (c) {
@@ -204,7 +204,7 @@ BlockState TableParser::continueCheck(Line &currentLine,
 
     skipSpaces(currentLine);
 
-    if (ctx.isInIndent(currentLine.column(), false)) {
+    if (ctx.isInIndent(currentLine.column())) {
         if (m_checkAlign) {
             m_checkAlign = false;
 

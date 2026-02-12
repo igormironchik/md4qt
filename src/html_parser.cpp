@@ -32,7 +32,7 @@ BlockState HTMLParser::check(Line &currentLine,
 
     skipSpaces(currentLine);
 
-    if (ctx.isInIndent(currentLine.column(), false)) {
+    if (ctx.isInIndent(currentLine.column())) {
         m_rule = htmlTagRule(currentLine);
 
         if (m_rule == 7
