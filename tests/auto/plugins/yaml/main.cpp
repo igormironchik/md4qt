@@ -38,31 +38,37 @@ TEST_CASE("002")
 {
     auto doc = loadTest(QStringLiteral("002"));
 
-    REQUIRE(doc->isEmpty() == false);
-    REQUIRE(doc->items().size() == 3);
+    const auto checkDoc = [](QSharedPointer<MD::Document> doc) {
+        REQUIRE(doc->isEmpty() == false);
+        REQUIRE(doc->items().size() == 3);
 
-    REQUIRE(doc->items().at(1)->type() == static_cast<MD::ItemType>(static_cast<int>(MD::ItemType::UserDefined) + 1));
-    auto h = static_cast<MD::YAMLHeader *>(doc->items().at(1).get());
-    REQUIRE(h->startColumn() == 0);
-    REQUIRE(h->startLine() == 2);
-    REQUIRE(h->endColumn() == 3);
-    REQUIRE(h->endLine() == 4);
-    REQUIRE(h->yaml() == QStringLiteral("id: 1"));
-    REQUIRE(h->startDelim() == MD::WithPosition{0, 2, 2, 2});
-    REQUIRE(h->endDelim() == MD::WithPosition{0, 4, 3, 4});
+        REQUIRE(doc->items().at(1)->type()
+                == static_cast<MD::ItemType>(static_cast<int>(MD::ItemType::UserDefined) + 1));
+        auto h = static_cast<MD::YAMLHeader *>(doc->items().at(1).get());
+        REQUIRE(h->startColumn() == 0);
+        REQUIRE(h->startLine() == 2);
+        REQUIRE(h->endColumn() == 3);
+        REQUIRE(h->endLine() == 4);
+        REQUIRE(h->yaml() == QStringLiteral("id: 1"));
+        REQUIRE(h->startDelim() == MD::WithPosition{0, 2, 2, 2});
+        REQUIRE(h->endDelim() == MD::WithPosition{0, 4, 3, 4});
 
-    REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
+        REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
 
-    auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
-    REQUIRE(p->items().size() == 1);
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
+        REQUIRE(p->items().size() == 1);
 
-    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-    auto t = static_cast<MD::Text *>(p->items().at(0).get());
-    REQUIRE(t->startColumn() == 0);
-    REQUIRE(t->startLine() == 5);
-    REQUIRE(t->endColumn() == 3);
-    REQUIRE(t->endLine() == 5);
-    REQUIRE(t->text() == QStringLiteral("text"));
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+        auto t = static_cast<MD::Text *>(p->items().at(0).get());
+        REQUIRE(t->startColumn() == 0);
+        REQUIRE(t->startLine() == 5);
+        REQUIRE(t->endColumn() == 3);
+        REQUIRE(t->endLine() == 5);
+        REQUIRE(t->text() == QStringLiteral("text"));
+    };
+
+    checkDoc(doc);
+    checkDoc(doc->clone().staticCast<MD::Document>());
 }
 
 /*
