@@ -1102,6 +1102,8 @@ QSharedPointer<Item> Document::clone(Document *doc) const
         d->insertLabeledLink(it.key(), it.value()->clone(d.get()).staticCast<Link>());
     }
 
+    d->auxLabelsMap() = auxLabelsMap();
+
     return d;
 }
 
@@ -1136,6 +1138,16 @@ void Document::insertLabeledHeading(const QString &label,
                                     HeadingSharedPointer h)
 {
     m_labeledHeadings.insert(label, h);
+}
+
+Document::AuxLabelsMap &Document::auxLabelsMap()
+{
+    return m_auxLabelsMap;
+}
+
+const Document::AuxLabelsMap &Document::auxLabelsMap() const
+{
+    return m_auxLabelsMap;
 }
 
 } /* namespace MD */

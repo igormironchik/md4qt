@@ -2241,6 +2241,24 @@ public:
     void insertLabeledHeading(const QString &label,
                               HeadingSharedPointer h);
 
+    /*!
+     * \typealias MD::Document::AuxLabelsMap
+     *
+     * Type of an auxiliary map of labels for headings. Usually it's not needed for user
+     * but serves for resolving of conflict of the headings with the same content.
+     */
+    using AuxLabelsMap = QMap<QString, QMap<QString, qsizetype>>;
+
+    /*!
+     * Returns auxiliary map for resolving headings' ids labels.
+     */
+    AuxLabelsMap &auxLabelsMap();
+
+    /*!
+     * Returns auxiliary map for resolving headings' ids labels.
+     */
+    const AuxLabelsMap &auxLabelsMap() const;
+
 private:
     /*!
      * Map of footnotes.
@@ -2254,6 +2272,10 @@ private:
      * Map of headings.
      */
     LabeledHeadings m_labeledHeadings;
+    /*!
+     * Auxiliary map for resolving headings' ids labels.
+     */
+    AuxLabelsMap m_auxLabelsMap;
 
     Q_DISABLE_COPY(Document)
 }; // class Document;

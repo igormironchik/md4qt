@@ -136,9 +136,24 @@ void ATXHeadingParser::processLabel(QSharedPointer<Paragraph> paragraph,
                                     QSharedPointer<Heading> heading,
                                     QSharedPointer<Document> doc)
 {
-    auto label = s_numberSignChar + ParagraphParser::paragraphToLabel(paragraph);
+    QString label = s_numberSignChar + ParagraphParser::paragraphToLabel(paragraph);
 
     const QString labelPath = s_solidusChar + (!path.isEmpty() ? QString(path + s_solidusChar) : QString()) + fileName;
+
+    if (doc->auxLabelsMap().contains(label)) {
+        if (doc->auxLabelsMap()[label].contains(labelPath)) {
+            const auto count = doc->auxLabelsMap()[label][labelPath];
+            doc->auxLabelsMap()[label][labelPath] = count + 1;
+            label.append(s_minusChar + QString::number(count + 1));
+            doc->auxLabelsMap().insert(label, {});
+            doc->auxLabelsMap()[label].insert(labelPath, 0);
+        } else {
+            doc->auxLabelsMap()[label].insert(labelPath, 0);
+        }
+    } else {
+        doc->auxLabelsMap().insert(label, {});
+        doc->auxLabelsMap()[label].insert(labelPath, 0);
+    }
 
     heading->setLabel(label + labelPath);
     heading->labelVariants().push_back(heading->label());

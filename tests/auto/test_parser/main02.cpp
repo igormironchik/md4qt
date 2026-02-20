@@ -1788,7 +1788,7 @@ TEST_CASE("046")
 
         REQUIRE(h->label() == label);
 
-        REQUIRE(doc->labeledHeadings().size() == 5);
+        REQUIRE(doc->labeledHeadings().size() == 13);
         const auto hit = doc->labeledHeadings().find(label);
         REQUIRE(hit != doc->labeledHeadings().cend());
         REQUIRE(hit.value().get() == h);

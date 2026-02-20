@@ -11,6 +11,9 @@
 #include "parser.h"
 #include "utils.h"
 
+// Qt include.
+#include <QDir>
+
 /*
 [](<a<>) []((a ))
 
@@ -291,4 +294,89 @@ TEST_CASE("354")
     REQUIRE(li->items().at(1)->type() == MD::ItemType::List);
 
     REQUIRE(doc->items().at(2)->type() == MD::ItemType::Blockquote);
+}
+
+/*
+# tool
+# tool
+# tool
+*/
+TEST_CASE("355")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/355.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 4);
+    REQUIRE(doc->labeledHeadings().size() == 3);
+
+    const QString path = QDir().absolutePath() + QStringLiteral("/tests/parser/data/355.md");
+
+    {
+        REQUIRE(doc->items().at(1)->type() == MD::ItemType::Heading);
+        auto h = static_cast<MD::Heading *>(doc->items().at(1).get());
+        const QString label = QStringLiteral("#tool/") + path;
+        REQUIRE(h->label() == label);
+        REQUIRE(doc->labeledHeadings().contains(label));
+    }
+
+    {
+        REQUIRE(doc->items().at(2)->type() == MD::ItemType::Heading);
+        auto h = static_cast<MD::Heading *>(doc->items().at(2).get());
+        const QString label = QStringLiteral("#tool-1/") + path;
+        REQUIRE(h->label() == label);
+        REQUIRE(doc->labeledHeadings().contains(label));
+    }
+
+    {
+        REQUIRE(doc->items().at(3)->type() == MD::ItemType::Heading);
+        auto h = static_cast<MD::Heading *>(doc->items().at(3).get());
+        const QString label = QStringLiteral("#tool-2/") + path;
+        REQUIRE(h->label() == label);
+        REQUIRE(doc->labeledHeadings().contains(label));
+    }
+}
+
+/*
+# tool
+# tool
+# tool 1
+
+*/
+TEST_CASE("356")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/356.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 4);
+    REQUIRE(doc->labeledHeadings().size() == 3);
+
+    const QString path = QDir().absolutePath() + QStringLiteral("/tests/parser/data/356.md");
+
+    {
+        REQUIRE(doc->items().at(1)->type() == MD::ItemType::Heading);
+        auto h = static_cast<MD::Heading *>(doc->items().at(1).get());
+        const QString label = QStringLiteral("#tool/") + path;
+        REQUIRE(h->label() == label);
+        REQUIRE(doc->labeledHeadings().contains(label));
+    }
+
+    {
+        REQUIRE(doc->items().at(2)->type() == MD::ItemType::Heading);
+        auto h = static_cast<MD::Heading *>(doc->items().at(2).get());
+        const QString label = QStringLiteral("#tool-1/") + path;
+        REQUIRE(h->label() == label);
+        REQUIRE(doc->labeledHeadings().contains(label));
+    }
+
+    {
+        REQUIRE(doc->items().at(3)->type() == MD::ItemType::Heading);
+        auto h = static_cast<MD::Heading *>(doc->items().at(3).get());
+        const QString label = QStringLiteral("#tool-1-1/") + path;
+        REQUIRE(h->label() == label);
+        REQUIRE(doc->labeledHeadings().contains(label));
+    }
 }
