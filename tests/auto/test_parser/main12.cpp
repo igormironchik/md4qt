@@ -472,3 +472,87 @@ TEST_CASE("358")
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Heading);
     REQUIRE(doc->items().at(2)->type() == MD::ItemType::Blockquote);
 }
+
+TEST_CASE("doc")
+{
+    {
+        MD::StyleDelim style{MD::TextOption::BoldText, 0, 0, 0, 0};
+        REQUIRE(style.style() == MD::TextOption::BoldText);
+        style.setStyle(MD::TextOption::ItalicText);
+        REQUIRE(style.style() == MD::TextOption::ItalicText);
+
+        MD::Text text;
+        text.openStyles() = {style};
+        text.closeStyles() = {style};
+
+        const auto &textConstRef = text;
+        REQUIRE(textConstRef.openStyles().size() == 1);
+        REQUIRE(textConstRef.closeStyles().size() == 1);
+    }
+
+    {
+        MD::Blockquote quote;
+        quote.delims().append(MD::WithPosition{});
+        quote.delims().append(MD::WithPosition{});
+        quote.appendItem(QSharedPointer<MD::Text>::create());
+        quote.appendItem(QSharedPointer<MD::Text>::create());
+
+        REQUIRE(quote.items().size() == 2);
+        REQUIRE(quote.delims().size() == 2);
+
+        quote.insertItem(1, QSharedPointer<MD::Code>::create(QString(), false, true));
+
+        REQUIRE(quote.items().size() == 3);
+        REQUIRE(quote.items().at(1)->type() == MD::ItemType::Code);
+
+        const auto &quoteConstRef = quote;
+
+        REQUIRE(quoteConstRef.delims().size() == 2);
+    }
+
+    {
+        MD::Heading heading;
+        heading.setLabelVariants(MD::Heading::LabelsVector() << QStringLiteral("1") << QStringLiteral("2"));
+
+        REQUIRE(heading.labelVariants().size() == 2);
+
+        const auto &headingConstRef = heading;
+
+        REQUIRE(headingConstRef.labelVariants().size() == 2);
+    }
+
+    {
+        const auto delim = MD::WithPosition{0, 0, 0, 0};
+        MD::ListItem item;
+        item.setTaskDelim(delim);
+        REQUIRE(item.taskDelim() == delim);
+    }
+
+    {
+        MD::TableRow row;
+        REQUIRE(row.isEmpty());
+    }
+
+    {
+        MD::Table table;
+        table.setColumnAlignment(0, MD::Table::AlignLeft);
+
+        REQUIRE(table.columnAlignment(0) == MD::Table::AlignLeft);
+
+        table.setColumnAlignment(0, MD::Table::AlignRight);
+
+        REQUIRE(table.columnAlignment(0) == MD::Table::AlignRight);
+    }
+
+    {
+        MD::FootnoteRef ref(QStringLiteral("1"));
+        const auto idPos = MD::WithPosition{0, 0, 0, 0};
+        ref.setIdPos(idPos);
+
+        REQUIRE(ref.idPos() == idPos);
+
+        const auto clone = ref.clone().staticCast<MD::FootnoteRef>();
+
+        REQUIRE(clone->idPos() == idPos);
+    }
+}
