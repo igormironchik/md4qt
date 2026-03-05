@@ -585,3 +585,51 @@ TEST_CASE("whitespace")
 
     REQUIRE(e.check(line, stream, ctx, doc, QString(), QString(), linksToParse, parser, rs));
 }
+
+/*
+```math
+*/
+TEST_CASE("359")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/359.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Math);
+    auto m = static_cast<MD::Math *>(p->items().at(0).get());
+    REQUIRE(m->startColumn() == 7);
+    REQUIRE(m->startLine() == 0);
+    REQUIRE(m->endColumn() == 7);
+    REQUIRE(m->endLine() == 0);
+}
+
+/*
+```math
+```
+
+*/
+TEST_CASE("360")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/360.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Math);
+    auto m = static_cast<MD::Math *>(p->items().at(0).get());
+    REQUIRE(m->startColumn() == 7);
+    REQUIRE(m->startLine() == 0);
+    REQUIRE(m->endColumn() == 7);
+    REQUIRE(m->endLine() == 0);
+}
