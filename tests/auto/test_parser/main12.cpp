@@ -8,6 +8,7 @@
 #include <doctest/doctest.h>
 
 // md4qt include.
+#include "atx_heading_parser.h"
 #include "parser.h"
 #include "utils.h"
 
@@ -378,5 +379,76 @@ TEST_CASE("356")
         const QString label = QStringLiteral("#tool-1-1/") + path;
         REQUIRE(h->label() == label);
         REQUIRE(doc->labeledHeadings().contains(label));
+    }
+}
+
+/*
+# tool
+# tool
+
+[](357-1.md)
+
+*/
+TEST_CASE("357")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/357.md"), true);
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 8);
+    REQUIRE(doc->labeledHeadings().size() == 4);
+
+    const QString path357 = QDir().absolutePath() + QStringLiteral("/tests/parser/data/357.md");
+
+    {
+        REQUIRE(doc->items().at(1)->type() == MD::ItemType::Heading);
+        auto h = static_cast<MD::Heading *>(doc->items().at(1).get());
+        const QString label = QStringLiteral("#tool/") + path357;
+        REQUIRE(h->label() == label);
+        REQUIRE(doc->labeledHeadings().contains(label));
+    }
+
+    {
+        REQUIRE(doc->items().at(2)->type() == MD::ItemType::Heading);
+        auto h = static_cast<MD::Heading *>(doc->items().at(2).get());
+        const QString label = QStringLiteral("#tool-1/") + path357;
+        REQUIRE(h->label() == label);
+        REQUIRE(doc->labeledHeadings().contains(label));
+    }
+
+    REQUIRE(doc->items().at(3)->type() == MD::ItemType::Paragraph);
+    REQUIRE(doc->items().at(4)->type() == MD::ItemType::PageBreak);
+    REQUIRE(doc->items().at(5)->type() == MD::ItemType::Anchor);
+
+    const QString path357_1 = QDir().absolutePath() + QStringLiteral("/tests/parser/data/357-1.md");
+
+    {
+        REQUIRE(doc->items().at(6)->type() == MD::ItemType::Heading);
+        auto h = static_cast<MD::Heading *>(doc->items().at(6).get());
+        const QString label = QStringLiteral("#tool/") + path357_1;
+        REQUIRE(h->label() == label);
+        REQUIRE(doc->labeledHeadings().contains(label));
+    }
+
+    {
+        REQUIRE(doc->items().at(7)->type() == MD::ItemType::Heading);
+        auto h = static_cast<MD::Heading *>(doc->items().at(7).get());
+        const QString label = QStringLiteral("#tool-1/") + path357_1;
+        REQUIRE(h->label() == label);
+        REQUIRE(doc->labeledHeadings().contains(label));
+    }
+
+    {
+        MD::ATXHeadingParser atx(nullptr);
+
+        MD::Line line;
+        QString str;
+        QTextStream qstream(&str);
+        MD::TextStream stream(qstream);
+        QSharedPointer<MD::Document> doc(new MD::Document);
+        MD::Context ctx;
+
+        REQUIRE(atx.continueCheck(line, stream, doc, ctx, {}, {}) == MD::BlockState::Stop);
     }
 }
