@@ -63,6 +63,20 @@ TEST_CASE("003")
     REQUIRE(html == required);
 }
 
+TEST_CASE("ids_map_003")
+{
+    MD::Parser p;
+    const auto doc = p.parse(QStringLiteral("tests/html/data/003.md"));
+
+    struct Visitor : public MD::details::HtmlVisitor {
+        using MD::details::HtmlVisitor::getId;
+    };
+
+    Visitor visitor;
+
+    REQUIRE(visitor.getId(doc->items().at(1).get()) == doc->items().at(1).staticCast<MD::Heading>()->label());
+}
+
 /*
 | heading1 | heading2 | heading3 |
 | :--- | :---: | ---: |
@@ -442,5 +456,127 @@ TEST_CASE("020")
     auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/020.md")), false, {}, false);
     const QString required =
         QStringLiteral("<p dir=\"auto\">What is a <a href=\"https://www.google.com\">Google</a>?</p>");
+    REQUIRE(html == required);
+}
+
+TEST_CASE("ids_map_020")
+{
+    MD::Parser p;
+    const auto doc = p.parse(QStringLiteral("tests/html/data/020.md"));
+    MD::details::IdsMap idsMap;
+    idsMap.insert(doc->items().at(1).get(), QStringLiteral("p-1"));
+
+    auto html = MD::toHtml(doc, false, {}, false, &idsMap);
+    const QString required =
+        QStringLiteral("<p dir=\"auto\" id=\"p-1\">What is a <a href=\"https://www.google.com\">Google</a>?</p>");
+    REQUIRE(html == required);
+}
+
+/*
+# heading
+
+[link 1](#heading) [link 2](#not-heading) [link 3](021.md) www.google.com
+
+*/
+TEST_CASE("021")
+{
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/021.md")), false, {}, false);
+    const QString required = QStringLiteral("\n<h1 id=\"heading/")
+        + fullPath(21)
+        + QStringLiteral("\" dir=\"auto\">heading</h1>\n")
+        + QStringLiteral("<p dir=\"auto\"><a href=\"#heading/")
+        + fullPath(21)
+        + QStringLiteral("\">link 1</a> ")
+        + QStringLiteral("<a href=\"#not-heading\">link 2</a> ")
+        + QStringLiteral("<a href=\"#")
+        + fullPath(21)
+        + QStringLiteral("\">link 3</a> ")
+        + QStringLiteral("<a href=\"http://www.google.com\">http://www.google.com</a>")
+        + QStringLiteral("</p>");
+    REQUIRE(html == required);
+}
+
+/*
+[^1] [^2] [^2] [^2]
+
+[^2]: foot
+
+*/
+TEST_CASE("022")
+{
+    const auto path = fullPath(22);
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/022.md")),
+                           false,
+                           QStringLiteral("<img src=\"qrc://ref.png\" />"),
+                           false);
+    const QString required = QStringLiteral("<p dir=\"auto\">[^1] ")
+        + QStringLiteral("<sup><a href=\"##^2/")
+        + path
+        + QStringLiteral("\" id=\"ref-#^2/")
+        + path
+        + QStringLiteral("-1\">1</a></sup> ")
+        + QStringLiteral("<sup><a href=\"##^2/")
+        + path
+        + QStringLiteral("\" id=\"ref-#^2/")
+        + path
+        + QStringLiteral("-2\">1</a></sup> ")
+        + QStringLiteral("<sup><a href=\"##^2/")
+        + path
+        + QStringLiteral("\" id=\"ref-#^2/")
+        + path
+        + QStringLiteral("-3\">1</a></sup>")
+        + QStringLiteral("</p>"
+                         "<section class=\"footnotes\"><ol dir=\"auto\"><li id=\"#^2/")
+        + path
+        + QStringLiteral("\"><p dir=\"auto\">foot")
+        + QStringLiteral("<a href=\"#ref-#^2/")
+        + path
+        + QStringLiteral("-1\"><img src=\"qrc://ref.png\" /></a>")
+        + QStringLiteral("<a href=\"#ref-#^2/")
+        + path
+        + QStringLiteral("-2\"><img src=\"qrc://ref.png\" /></a>")
+        + QStringLiteral("<a href=\"#ref-#^2/")
+        + path
+        + QStringLiteral("-3\"><img src=\"qrc://ref.png\" /></a>")
+        + QStringLiteral("</p></li></ol></section>\n");
+    REQUIRE(html == required);
+}
+
+/*
+* [ ] task
+
+  task
+
+*/
+TEST_CASE("023")
+{
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/023.md")), false, {}, false);
+    const QString required = QStringLiteral(
+        "\n<ul class=\"contains-task-list\" dir=\"auto\">\n"
+        "<li class=\"task-list-item\">"
+        "<p dir=\"auto\">"
+        "<input type=\"checkbox\" id=\"\" disabled=\"\" class=\"task-list-item-checkbox\">\n"
+        "task</p>"
+        "<p dir=\"auto\">task</p></li>\n</ul>\n");
+    REQUIRE(html == required);
+}
+
+/*
+* [ ] task
+
+*/
+TEST_CASE("024")
+{
+    MD::Parser p;
+    auto html = MD::toHtml(p.parse(QStringLiteral("tests/html/data/024.md")), false, {}, false);
+    const QString required = QStringLiteral(
+        "\n<ul class=\"contains-task-list\" dir=\"auto\">\n"
+        "<li class=\"task-list-item\">"
+        "<input type=\"checkbox\" id=\"\" disabled=\"\" class=\"task-list-item-checkbox\">\n"
+        "task"
+        "</li>\n</ul>\n");
     REQUIRE(html == required);
 }

@@ -526,7 +526,7 @@ void HtmlVisitor::onFootnoteRef(FootnoteRef *ref)
                 m_html.push_back(QString::number(m_fns.size() + 1));
             }
 
-            m_fns.push_back({ref->id(), 1, 0});
+            m_fns.push_back({ref->id(), 1, 1});
         } else if (!m_justCollectFootnoteRefs) {
             m_html.push_back(QString::number(std::distance(m_fns.begin(), r) + 1));
         }
