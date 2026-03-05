@@ -633,3 +633,24 @@ TEST_CASE("360")
     REQUIRE(m->endColumn() == 7);
     REQUIRE(m->endLine() == 0);
 }
+
+/*
+text[^1]
+
+
+
+[^1]: note
+
+*/
+TEST_CASE("361")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/361.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    REQUIRE(doc->footnotesMap().size() == 1);
+}
