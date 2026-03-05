@@ -8,8 +8,12 @@
 #include <doctest/doctest.h>
 
 // md4qt include.
+#include "asterisk_emphasis_parser.h"
 #include "atx_heading_parser.h"
+#include "inline_context.h"
 #include "parser.h"
+#include "reverse_solidus.h"
+#include "text_stream.h"
 #include "utils.h"
 
 // Qt include.
@@ -555,4 +559,29 @@ TEST_CASE("doc")
 
         REQUIRE(clone->idPos() == idPos);
     }
+}
+
+TEST_CASE("whitespace")
+{
+    MD::AsteriskEmphasisParser e;
+    MD::ReverseSolidusHandler rs;
+    QString data = QStringLiteral("*a");
+    data.prepend(QLatin1Char(0x0C));
+    MD::Line line(data, 0);
+    rs.process(line.currentChar());
+    line.nextChar();
+    rs.next();
+
+    MD::ParagraphStream::HashedLines lines;
+    lines.insert(0, line);
+    MD::ParagraphStream stream(lines, 0, 0);
+
+    MD::InlineContext ctx;
+
+    auto doc = QSharedPointer<MD::Document>::create();
+
+    QStringList linksToParse;
+    MD::Parser parser;
+
+    REQUIRE(e.check(line, stream, ctx, doc, QString(), QString(), linksToParse, parser, rs));
 }
