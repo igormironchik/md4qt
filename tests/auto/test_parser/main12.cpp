@@ -452,3 +452,23 @@ TEST_CASE("357")
         REQUIRE(atx.continueCheck(line, stream, doc, ctx, {}, {}) == MD::BlockState::Stop);
     }
 }
+
+/*
+# heading
+
+
+> quote
+
+*/
+TEST_CASE("358")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/358.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 3);
+
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Heading);
+    REQUIRE(doc->items().at(2)->type() == MD::ItemType::Blockquote);
+}
