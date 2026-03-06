@@ -917,8 +917,6 @@ bool LinkImageParser::checkRefLinkImage(const State::Delim &startDelim,
 
                 if (it != doc->labeledLinks().cend()) {
                     img->setUrl(it.value()->url());
-                } else {
-                    img->setUrl(link->url());
                 }
 
                 img->setStartColumn(startLabelPos);
