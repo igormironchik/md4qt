@@ -10,6 +10,7 @@
 // md4qt include.
 #include "asterisk_emphasis_parser.h"
 #include "atx_heading_parser.h"
+#include "constants.h"
 #include "inline_context.h"
 #include "paragraph_parser.h"
 #include "parser.h"
@@ -758,4 +759,13 @@ TEST_CASE("test_stream")
 
         REQUIRE(stream.readLine().lineNumber() == -1);
     }
+}
+
+TEST_CASE("line")
+{
+    QString data(QChar(0x00));
+    MD::Line line(data, 0);
+
+    REQUIRE(line.currentChar() == MD::s_replaceChar);
+    REQUIRE(line.sliced(0).currentChar() == MD::s_replaceChar);
 }
