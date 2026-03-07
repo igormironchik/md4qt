@@ -769,3 +769,58 @@ TEST_CASE("line")
     REQUIRE(line.currentChar() == MD::s_replaceChar);
     REQUIRE(line.sliced(0).currentChar() == MD::s_replaceChar);
 }
+
+TEST_CASE("functions")
+{
+    {
+        const QString data = QStringLiteral("a\nb");
+        MD::Line line(data, 0);
+        REQUIRE(MD::readLinkDestination(line).isEmpty());
+    }
+
+    {
+        const QString data = QStringLiteral("a");
+        MD::Line line(data, 0);
+        line.saveState();
+        REQUIRE(MD::readLinkDestination(line) == QStringLiteral("a"));
+        line.restoreState();
+        line.nextChar();
+        REQUIRE(MD::readLinkDestination(line).isEmpty());
+    }
+
+    {
+        QString en = QStringLiteral("&#x0;");
+        MD::replaceEntity(en);
+        REQUIRE(en == MD::s_replaceChar);
+    }
+
+    {
+        const QString data = QStringLiteral("");
+        MD::Line line(data, 0);
+        QChar startChar;
+        int startParenthesisCount;
+        qsizetype startPos;
+        bool endStarted;
+        REQUIRE(MD::readLinkTitle(line, startChar, startParenthesisCount, startPos, endStarted).isEmpty());
+    }
+
+    {
+        const QString data = QStringLiteral("");
+        MD::Line line(data, 0);
+        REQUIRE(MD::readEscapedSequence(line).isEmpty());
+    }
+
+    {
+        const MD::StyleDelim s1(MD::TextOption::ItalicText, -1, -1, -1, -1);
+        const MD::StyleDelim s2(MD::TextOption::ItalicText, 0, 0, 0, 0);
+
+        REQUIRE(s2 < s1);
+    }
+
+    {
+        const QString data = QStringLiteral("");
+        MD::Line line(data, 0);
+
+        REQUIRE(!MD::isClosed(line, 8, true));
+    }
+}
