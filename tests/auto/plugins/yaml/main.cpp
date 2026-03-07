@@ -148,3 +148,71 @@ TEST_CASE("005")
     REQUIRE(b->items().at(0)->type() == MD::ItemType::HorizontalLine);
     REQUIRE(b->items().at(1)->type() == MD::ItemType::Paragraph);
 }
+
+/*
+---
+id: 1
+out: text
+...
+text
+
+*/
+TEST_CASE("006")
+{
+    auto doc = loadTest(QStringLiteral("006"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 3);
+
+    REQUIRE(doc->items().at(1)->type() == static_cast<MD::ItemType>(static_cast<int>(MD::ItemType::UserDefined) + 1));
+    auto h = static_cast<MD::YAMLHeader *>(doc->items().at(1).get());
+    REQUIRE(h->startColumn() == 0);
+    REQUIRE(h->startLine() == 0);
+    REQUIRE(h->endColumn() == 2);
+    REQUIRE(h->endLine() == 3);
+    REQUIRE(h->yaml() == QStringLiteral("id: 1\nout: text"));
+    REQUIRE(h->startDelim() == MD::WithPosition{0, 0, 2, 0});
+    REQUIRE(h->endDelim() == MD::WithPosition{0, 3, 2, 3});
+
+    REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
+
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
+    REQUIRE(p->items().size() == 1);
+
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text *>(p->items().at(0).get());
+    REQUIRE(t->startColumn() == 0);
+    REQUIRE(t->startLine() == 4);
+    REQUIRE(t->endColumn() == 3);
+    REQUIRE(t->endLine() == 4);
+    REQUIRE(t->text() == QStringLiteral("text"));
+}
+
+TEST_CASE("yaml_parser")
+{
+    {
+        MD::YAMLParser yaml(nullptr);
+
+        MD::Line line;
+        QString str;
+        QTextStream qstream(&str);
+        MD::TextStream stream(qstream);
+        QSharedPointer<MD::Document> doc(new MD::Document);
+        MD::Context ctx;
+
+        REQUIRE(yaml.continueCheck(line, stream, doc, ctx, {}, {}) == MD::BlockState::None);
+    }
+
+    {
+        MD::YAMLParser yaml(nullptr);
+
+        MD::Line line;
+        QString str;
+        QTextStream qstream(&str);
+        MD::TextStream stream(qstream);
+        QSharedPointer<MD::Document> doc(new MD::Document);
+        MD::Context ctx;
+
+        REQUIRE(yaml.mayBreakParagraph(line, stream, doc, ctx) == false);
+    }
+}
