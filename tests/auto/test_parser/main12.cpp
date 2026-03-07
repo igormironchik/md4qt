@@ -732,3 +732,30 @@ TEST_CASE("paragraph_to_label")
 
     REQUIRE(MD::ParagraphParser::paragraphToLabel(p) == QStringLiteral("text1img2link1"));
 }
+
+TEST_CASE("test_stream")
+{
+    {
+        QString data = QStringLiteral("str");
+        QTextStream sstream(&data);
+        MD::TextStream stream(sstream);
+
+        REQUIRE(stream.currentLine().lineNumber() == -1);
+
+        REQUIRE(stream.moveTo(0).lineNumber() == -1);
+
+        REQUIRE(stream.readLine().lineNumber() == 0);
+    }
+
+    {
+        QString data = QStringLiteral("");
+        QTextStream sstream(&data);
+        MD::TextStream stream(sstream);
+
+        REQUIRE(stream.currentLine().lineNumber() == -1);
+
+        REQUIRE(stream.moveTo(0).lineNumber() == -1);
+
+        REQUIRE(stream.readLine().lineNumber() == -1);
+    }
+}
