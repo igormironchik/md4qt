@@ -11,6 +11,7 @@
 #include "asterisk_emphasis_parser.h"
 #include "atx_heading_parser.h"
 #include "inline_context.h"
+#include "paragraph_parser.h"
 #include "parser.h"
 #include "reverse_solidus.h"
 #include "text_stream.h"
@@ -653,4 +654,81 @@ TEST_CASE("361")
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
     REQUIRE(doc->footnotesMap().size() == 1);
+}
+
+/*
+[ref]: <<>
+
+[ref]:
+> quote
+
+*/
+TEST_CASE("362")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/362.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 4);
+
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
+    REQUIRE(doc->items().at(3)->type() == MD::ItemType::Blockquote);
+}
+
+/*
+*[](/url)to_skip*
+
+*/
+TEST_CASE("test_to_skip")
+{
+    const QString data = QStringLiteral("*[](/url)to_skip*");
+    MD::Line line(data, 0);
+    MD::ParagraphStream::HashedLines lines;
+    lines.insert(0, line);
+    MD::ParagraphStream stream(lines, 0, 0);
+    MD::InlineContext ctx;
+    ctx.openStyles().append(MD::StyleDelim(MD::TextOption::ItalicText, 0, 0, 0, 0));
+    auto link = QSharedPointer<MD::Link>::create();
+    link->setStartColumn(1);
+    link->setStartLine(0);
+    link->setEndColumn(8);
+    link->setEndLine(0);
+    ctx.inlines().append(link);
+    ctx.closeStyles().append(MD::StyleDelim(MD::TextOption::ItalicText, 16, 0, 16, 0));
+    auto p = QSharedPointer<MD::Paragraph>::create();
+    MD::ParagraphParser::makeTextObjects(ctx, stream, p, MD::WithPosition(9, 0, 15, 0));
+
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
+    auto l = static_cast<MD::Link *>(p->items().at(0).get());
+    REQUIRE(l->openStyles().size() == 1);
+    REQUIRE(l->closeStyles().size() == 1);
+}
+
+TEST_CASE("paragraph_to_label")
+{
+    REQUIRE(MD::ParagraphParser::paragraphToLabel(nullptr).isEmpty());
+
+    QSharedPointer<MD::Paragraph> p(new MD::Paragraph);
+
+    QSharedPointer<MD::Image> img1(new MD::Image);
+
+    QSharedPointer<MD::Text> text1(new MD::Text);
+    text1->setText(QStringLiteral("text1"));
+
+    img1->p()->appendItem(text1);
+
+    QSharedPointer<MD::Image> img2(new MD::Image);
+    img2->setText(QStringLiteral("img2"));
+
+    QSharedPointer<MD::Link> link1(new MD::Link);
+    link1->setText(QStringLiteral("link1"));
+
+    p->appendItem(img1);
+    p->appendItem(img2);
+    p->appendItem(link1);
+
+    REQUIRE(MD::ParagraphParser::paragraphToLabel(p) == QStringLiteral("text1img2link1"));
 }

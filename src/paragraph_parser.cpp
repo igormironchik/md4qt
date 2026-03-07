@@ -131,11 +131,6 @@ ParagraphParser::RefLinkState ParagraphParser::checkForReferenceLink(Line &curre
                         return returnWrong();
                     }
 
-                    if (m_refLinkTextPos.startColumn() == -1) {
-                        m_refLinkTextPos.setStartColumn(currentLine.position());
-                        m_refLinkTextPos.setStartLine(currentLine.lineNumber());
-                    }
-
                     if (currentLine.currentChar() == s_rightSquareBracketChar && !rs.isPrevReverseSolidus()) {
                         if (!label.simplified().isEmpty()) {
                             m_refLinkStage = RefLinkParserStage::S2;
@@ -165,26 +160,21 @@ ParagraphParser::RefLinkState ParagraphParser::checkForReferenceLink(Line &curre
 
             // ]:
             case RefLinkParserStage::S2: {
-                if (currentLine.currentChar() == s_rightSquareBracketChar
-                    && currentLine.position() < currentLine.length()) {
+                currentLine.nextChar();
+                rs.next();
+
+                if (currentLine.currentChar() == s_colonChar
+                    && !rs.isPrevReverseSolidus()
+                    && m_refLinkLabel.length()
+                    && m_refLinkLabel.length() < 1000) {
+                    m_refLinkLabel = s_numberSignChar
+                        + m_refLinkLabel.toCaseFolded().toUpper()
+                        + s_solidusChar
+                        + (path.isEmpty() ? QString() : path + s_solidusChar)
+                        + fileName;
                     currentLine.nextChar();
                     rs.next();
-
-                    if (currentLine.currentChar() == s_colonChar
-                        && !rs.isPrevReverseSolidus()
-                        && m_refLinkLabel.length()
-                        && m_refLinkLabel.length() < 1000) {
-                        m_refLinkLabel = s_numberSignChar
-                            + m_refLinkLabel.toCaseFolded().toUpper()
-                            + s_solidusChar
-                            + (path.isEmpty() ? QString() : path + s_solidusChar)
-                            + fileName;
-                        currentLine.nextChar();
-                        rs.next();
-                        m_refLinkStage = RefLinkParserStage::S3;
-                    } else {
-                        return returnWrong();
-                    }
+                    m_refLinkStage = RefLinkParserStage::S3;
                 } else {
                     return returnWrong();
                 }
@@ -250,12 +240,9 @@ ParagraphParser::RefLinkState ParagraphParser::checkForReferenceLink(Line &curre
             case RefLinkParserStage::S4: {
                 skipSpaces(currentLine);
 
-                if (currentLine.position() == currentLine.length()) {
-                    if (m_refLinkUrlPos.startLine() == currentLine.lineNumber()) {
-                        return RefLinkState::Continue;
-                    } else {
-                        return returnWrong();
-                    }
+                if (currentLine.position() == currentLine.length()
+                    && m_refLinkUrlPos.startLine() == currentLine.lineNumber()) {
+                    return RefLinkState::Continue;
                 }
 
                 if (!m_wasSpace) {
@@ -316,13 +303,9 @@ ParagraphParser::RefLinkState ParagraphParser::checkForReferenceLink(Line &curre
             } break;
 
             default: {
-                if (m_refLinkStage == RefLinkParserStage::SF) {
-                    if (m_refLinkTitlePos.startColumn() == -1) {
-                        currentLine.restoreState(&st);
-                        doBreak = true;
-                    }
-                } else {
-                    return returnWrong();
+                if (m_refLinkTitlePos.startColumn() == -1) {
+                    currentLine.restoreState(&st);
+                    doBreak = true;
                 }
             }
             }
@@ -871,11 +854,7 @@ void ParagraphParser::makeTextObjects(InlineContext &ctx,
                 placeEmph();
 
                 if (!open.isEmpty()) {
-                    if (!toPlace.m_item) {
-                        text->openStyles().append(open);
-                    } else {
-                        toPlace.m_item->openStyles().append(open);
-                    }
+                    text->openStyles().append(open);
 
                     open.clear();
                 }
