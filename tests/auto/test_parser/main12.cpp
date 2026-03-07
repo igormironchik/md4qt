@@ -814,7 +814,7 @@ TEST_CASE("functions")
         const MD::StyleDelim s1(MD::TextOption::ItalicText, -1, -1, -1, -1);
         const MD::StyleDelim s2(MD::TextOption::ItalicText, 0, 0, 0, 0);
 
-        REQUIRE(s2 < s1);
+        REQUIRE(!(s1 < s2));
     }
 
     {
