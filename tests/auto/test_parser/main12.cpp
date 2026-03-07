@@ -823,4 +823,20 @@ TEST_CASE("functions")
 
         REQUIRE(!MD::isClosed(line, 8, true));
     }
+
+    {
+        const QString data = QStringLiteral("aaa");
+        REQUIRE(MD::skipIfBackward(3,
+                                   data,
+                                   [](const QChar &ch) {
+                                       return ch == QLatin1Char('a');
+                                   })
+                == -1);
+        REQUIRE(MD::skipIfBackward(-2,
+                                   data,
+                                   [](const QChar &ch) {
+                                       return ch == QLatin1Char('a');
+                                   })
+                == -1);
+    }
 }
