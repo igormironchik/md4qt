@@ -15,7 +15,9 @@
 #include "paragraph_parser.h"
 #include "parser.h"
 #include "reverse_solidus.h"
+#include "setext_heading_parser.h"
 #include "text_stream.h"
+#include "thematic_break_parser.h"
 #include "utils.h"
 
 // Qt include.
@@ -838,5 +840,27 @@ TEST_CASE("functions")
                                        return ch == QLatin1Char('a');
                                    })
                 == -1);
+    }
+}
+
+TEST_CASE("some_things")
+{
+    MD::Line line;
+    QString str;
+    QTextStream qstream(&str);
+    MD::TextStream stream(qstream);
+    QSharedPointer<MD::Document> doc(new MD::Document);
+    MD::Context ctx;
+
+    {
+        MD::ThematicBreakParser tb(nullptr);
+
+        REQUIRE(tb.continueCheck(line, stream, doc, ctx, {}, {}) == MD::BlockState::Stop);
+    }
+
+    {
+        MD::SetextHeadingParser sh(nullptr);
+
+        REQUIRE(sh.continueCheck(line, stream, doc, ctx, {}, {}) == MD::BlockState::Stop);
     }
 }
