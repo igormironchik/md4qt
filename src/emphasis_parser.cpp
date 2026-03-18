@@ -55,6 +55,8 @@ bool EmphasisParser::check(Line &currentLine,
             } else {
                 currentLine.restoreState(&st);
             }
+        } else {
+            currentLine.restoreState(&st);
         }
     }
 

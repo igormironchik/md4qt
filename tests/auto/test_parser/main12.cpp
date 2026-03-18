@@ -864,3 +864,147 @@ TEST_CASE("some_things")
         REQUIRE(sh.continueCheck(line, stream, doc, ctx, {}, {}) == MD::BlockState::Stop);
     }
 }
+
+MD::ItemWithOpts::Styles makeStylesByTwo(int style,
+                                         qsizetype startPos,
+                                         qsizetype lineNumber,
+                                         qsizetype length)
+{
+    MD::ItemWithOpts::Styles styles;
+
+    for (auto i = 0; i < length; i += 2) {
+        styles.append(MD::StyleDelim(style, startPos + i, lineNumber, startPos + i + 1, lineNumber));
+    }
+
+    return styles;
+}
+
+class SubEmphasisParser : public MD::EmphasisParser
+{
+public:
+    SubEmphasisParser()
+        : m_symbol(QLatin1Char('-'))
+    {
+    }
+
+    ~SubEmphasisParser() override = default;
+
+    const QChar &symbol() const override
+    {
+        return m_symbol;
+    }
+
+    bool isEmphasis(int length) const override
+    {
+        return (length % 2 == 0);
+    }
+
+    bool isLengthCorrespond() const override
+    {
+        return false;
+    }
+
+    MD::ItemWithOpts::Styles openStyles(qsizetype startPos,
+                                        qsizetype lineNumber,
+                                        qsizetype length) const override
+    {
+        return makeStylesByTwo(8, startPos, lineNumber, length);
+    }
+
+    MD::ItemWithOpts::Styles closeStyles(qsizetype startPos,
+                                         qsizetype lineNumber,
+                                         qsizetype length) const override
+    {
+        return makeStylesByTwo(8, startPos, lineNumber, length);
+    }
+
+private:
+    const QChar m_symbol;
+}; // class SubEmphasisParser
+
+class HighlightEmphasisParser : public MD::EmphasisParser
+{
+public:
+    HighlightEmphasisParser()
+        : m_symbol(QLatin1Char('='))
+    {
+    }
+    ~HighlightEmphasisParser() override = default;
+
+    const QChar &symbol() const override
+    {
+        return m_symbol;
+    }
+
+    bool isEmphasis(int length) const override
+    {
+        return (length % 2 == 0);
+    }
+
+    bool isLengthCorrespond() const override
+    {
+        return false;
+    }
+
+    MD::ItemWithOpts::Styles openStyles(qsizetype startPos,
+                                        qsizetype lineNumber,
+                                        qsizetype length) const override
+    {
+        return makeStylesByTwo(16, startPos, lineNumber, length);
+    }
+
+    MD::ItemWithOpts::Styles closeStyles(qsizetype startPos,
+                                         qsizetype lineNumber,
+                                         qsizetype length) const override
+    {
+        return makeStylesByTwo(16, startPos, lineNumber, length);
+    }
+
+private:
+    const QChar m_symbol;
+}; // class HighlightEmphasisParser
+
+/*
+--===--==--==--==
+
+*/
+TEST_CASE("363")
+{
+    MD::Parser parser;
+
+    MD::Parser::InlineParsers inlineParsers;
+
+    MD::Parser::appendInlineParser<SubEmphasisParser>(inlineParsers);
+    MD::Parser::appendInlineParser<HighlightEmphasisParser>(inlineParsers);
+
+    parser.setInlineParsers(inlineParsers);
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/363.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 3);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t1 = static_cast<MD::Text *>(p->items().at(0).get());
+    REQUIRE(t1->openStyles().size() == 1);
+    REQUIRE(t1->closeStyles().size() == 1);
+    REQUIRE(t1->text() == QStringLiteral("==="));
+    REQUIRE(t1->opts() == 8);
+
+    REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
+    auto t2 = static_cast<MD::Text *>(p->items().at(1).get());
+    REQUIRE(t2->openStyles().size() == 1);
+    REQUIRE(t2->closeStyles().size() == 1);
+    REQUIRE(t2->text() == QStringLiteral("--"));
+    REQUIRE(t2->opts() == 16);
+
+    REQUIRE(p->items().at(2)->type() == MD::ItemType::Text);
+    auto t3 = static_cast<MD::Text *>(p->items().at(2).get());
+    REQUIRE(t3->openStyles().size() == 0);
+    REQUIRE(t3->closeStyles().size() == 0);
+    REQUIRE(t3->text() == QStringLiteral("--=="));
+    REQUIRE(t3->opts() == MD::TextOption::TextWithoutFormat);
+}
