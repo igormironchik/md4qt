@@ -115,7 +115,7 @@ And \l {https://invent.kde.org/office/klevernotes} {KleverNotes} from \c {KDE} u
 
 
 \list
-    \li Notes that version \b{5.0.0} is API incompatible with \b{4.x.x}. Version \b{5.0.0} was
+    \li Note that version \b{5.0.0} is API incompatible with \b{4.x.x}. Version \b{5.0.0} was
         fully refactored for better performance and be more user-friendly.
     \li Note that version \b{4.0.0} is API incompatible with \b{3.0.0}. In version \b{4.0.0} were
         changed rules with spaces, this version fully supports CommonMark standard in this question.
