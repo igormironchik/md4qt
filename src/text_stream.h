@@ -135,7 +135,7 @@ public:
      * \inmodule md4qt
      * \inheaderfile md4qt/text_stream.h
      *
-     * \brief State of the line.
+     * \brief Current state of the line.
      *
      * State of the line.
      */
@@ -333,7 +333,7 @@ public:
      * \inmodule md4qt
      * \inheaderfile md4qt/text_stream.h
      *
-     * \brief State of the stream.
+     * \brief Current state of the stream.
      *
      * State of the stream.
      */
@@ -475,7 +475,7 @@ public:
      * \inmodule md4qt
      * \inheaderfile md4qt/text_stream.h
      *
-     * \brief State of the stream.
+     * \brief Current state of the stream.
      *
      * State of the stream.
      */
