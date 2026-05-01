@@ -1008,3 +1008,60 @@ TEST_CASE("363")
     REQUIRE(t3->text() == QStringLiteral("--=="));
     REQUIRE(t3->opts() == MD::TextOption::TextWithoutFormat);
 }
+
+/*
+* ```
+*
+
+*/
+TEST_CASE("364")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/364.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
+    auto l = static_cast<MD::List *>(doc->items().at(1).get());
+    REQUIRE(l->items().size() == 2);
+    auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
+    REQUIRE(li->items().size() == 1);
+    REQUIRE(li->items().at(0)->type() == MD::ItemType::Code);
+    auto c = static_cast<MD::Code *>(li->items().at(0).get());
+    REQUIRE(c->startDelim() == MD::WithPosition{2, 0, 4, 0});
+    REQUIRE(c->startColumn() == 5);
+    REQUIRE(c->startLine() == 0);
+    REQUIRE(c->endColumn() == 5);
+    REQUIRE(c->endLine() == 0);
+    REQUIRE(c->endDelim().isNullPositions());
+}
+
+/*
+* [x] text
+  ---
+
+*/
+TEST_CASE("365")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/365.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
+    auto l = static_cast<MD::List *>(doc->items().at(1).get());
+    REQUIRE(l->items().size() == 1);
+    auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
+    REQUIRE(li->items().size() == 1);
+    REQUIRE(!li->isTaskList());
+    REQUIRE(li->items().at(0)->type() == MD::ItemType::Heading);
+    auto h = static_cast<MD::Heading *>(li->items().at(0).get());
+    REQUIRE(h->text()->items().size() == 1);
+    REQUIRE(h->text()->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text *>(h->text()->items().at(0).get());
+    REQUIRE(t->text() == QStringLiteral("[x] text"));
+}

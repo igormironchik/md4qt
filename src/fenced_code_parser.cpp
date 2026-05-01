@@ -443,4 +443,22 @@ bool FencedCodeParser::mayBreakParagraph(Line &,
     return true;
 }
 
+void FencedCodeParser::finish(Line &,
+                              TextStream &,
+                              QSharedPointer<Document>,
+                              QSharedPointer<Block>,
+                              Context &,
+                              const QString &,
+                              const QString &,
+                              QStringList &)
+{
+    if (m_code && m_code->isNullPositions()) {
+        m_code->setStartColumn(m_code->syntaxPos().isNullPositions() ? m_code->startDelim().endColumn() + 1
+                                                                     : m_code->syntaxPos().endColumn() + 1);
+        m_code->setStartLine(m_code->startDelim().startLine());
+        m_code->setEndColumn(m_code->startColumn());
+        m_code->setEndLine(m_code->startLine());
+    }
+}
+
 } /* namespace MD */

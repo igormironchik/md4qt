@@ -495,7 +495,7 @@ BlockState ListParser::process(Line &currentLine,
                                   ? dynamic_cast<ParagraphParser *>(ctx.children().front().block())
                                   : nullptr);
 
-        if (p) {
+        if (p && !(ctx.children().size() > 1 && dynamic_cast<SetextHeadingParser *>(ctx.children()[1].block()))) {
             if (ctx.children().front().firstLineNumber() == currentLine.lineNumber()) {
                 const auto st = currentLine.currentState();
 
