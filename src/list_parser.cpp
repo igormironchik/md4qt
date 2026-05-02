@@ -563,11 +563,7 @@ BlockState ListParser::process(Line &currentLine,
         m_lastBlockState =
             BlockParser::process(currentLine, stream, doc, m_lastListItem, ctx, path, fileName, linksToParse);
 
-        if (!emptyLine) {
-            applyLastPosition(ctx, currentLine.length() - 1, currentLine.lineNumber());
-        } else {
-            m_lastBlockState = BlockState::None;
-        }
+        applyLastPosition(ctx, currentLine.length() - (currentLine.length() ? 1 : 0), currentLine.lineNumber());
     }
 
     return state.m_state;

@@ -39,16 +39,16 @@ TEST_CASE("184")
         REQUIRE(l->items().size() == 1);
         REQUIRE(l->startColumn() == 0);
         REQUIRE(l->startLine() == 0);
-        REQUIRE(l->endColumn() == 9);
-        REQUIRE(l->endLine() == 9);
+        REQUIRE(l->endColumn() == 0);
+        REQUIRE(l->endLine() == 11);
 
         REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
         auto i = static_cast<MD::ListItem *>(l->items().at(0).get());
         REQUIRE(i->items().size() == 2);
         REQUIRE(i->startColumn() == 0);
         REQUIRE(i->startLine() == 0);
-        REQUIRE(i->endColumn() == 9);
-        REQUIRE(i->endLine() == 9);
+        REQUIRE(i->endColumn() == 0);
+        REQUIRE(i->endLine() == 11);
         REQUIRE(i->delim() == MD::WithPosition{0, 0, 0, 0});
 
         REQUIRE(i->items().at(0)->type() == MD::ItemType::Paragraph);
@@ -63,8 +63,8 @@ TEST_CASE("184")
             auto l = static_cast<MD::List *>(i->items().at(1).get());
             REQUIRE(l->startColumn() == 2);
             REQUIRE(l->startLine() == 2);
-            REQUIRE(l->endColumn() == 9);
-            REQUIRE(l->endLine() == 9);
+            REQUIRE(l->endColumn() == 0);
+            REQUIRE(l->endLine() == 11);
             REQUIRE(l->items().size() == 1);
 
             REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
@@ -72,8 +72,8 @@ TEST_CASE("184")
             REQUIRE(i->items().size() == 4);
             REQUIRE(i->startColumn() == 2);
             REQUIRE(i->startLine() == 2);
-            REQUIRE(i->endColumn() == 9);
-            REQUIRE(i->endLine() == 9);
+            REQUIRE(i->endColumn() == 0);
+            REQUIRE(i->endLine() == 11);
             REQUIRE(i->delim() == MD::WithPosition{2, 2, 2, 2});
 
             REQUIRE(i->items().at(0)->type() == MD::ItemType::Paragraph);
@@ -88,8 +88,8 @@ TEST_CASE("184")
                 auto l = static_cast<MD::List *>(i->items().at(1).get());
                 REQUIRE(l->startColumn() == 4);
                 REQUIRE(l->startLine() == 3);
-                REQUIRE(l->endColumn() == 9);
-                REQUIRE(l->endLine() == 3);
+                REQUIRE(l->endColumn() == 0);
+                REQUIRE(l->endLine() == 4);
                 REQUIRE(l->items().size() == 1);
 
                 REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
@@ -97,8 +97,8 @@ TEST_CASE("184")
                 REQUIRE(i->items().size() == 1);
                 REQUIRE(i->startColumn() == 4);
                 REQUIRE(i->startLine() == 3);
-                REQUIRE(i->endColumn() == 9);
-                REQUIRE(i->endLine() == 3);
+                REQUIRE(i->endColumn() == 0);
+                REQUIRE(i->endLine() == 4);
                 REQUIRE(i->delim() == MD::WithPosition{4, 3, 4, 3});
 
                 REQUIRE(i->items().at(0)->type() == MD::ItemType::Paragraph);
@@ -122,8 +122,8 @@ TEST_CASE("184")
                 auto l = static_cast<MD::List *>(i->items().at(3).get());
                 REQUIRE(l->startColumn() == 4);
                 REQUIRE(l->startLine() == 9);
-                REQUIRE(l->endColumn() == 9);
-                REQUIRE(l->endLine() == 9);
+                REQUIRE(l->endColumn() == 0);
+                REQUIRE(l->endLine() == 11);
                 REQUIRE(l->items().size() == 1);
 
                 REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
@@ -131,8 +131,8 @@ TEST_CASE("184")
                 REQUIRE(i->items().size() == 1);
                 REQUIRE(i->startColumn() == 4);
                 REQUIRE(i->startLine() == 9);
-                REQUIRE(i->endColumn() == 9);
-                REQUIRE(i->endLine() == 9);
+                REQUIRE(i->endColumn() == 0);
+                REQUIRE(i->endLine() == 11);
                 REQUIRE(i->delim() == MD::WithPosition{4, 9, 4, 9});
 
                 REQUIRE(i->items().at(0)->type() == MD::ItemType::Paragraph);
@@ -226,16 +226,16 @@ TEST_CASE("187")
         REQUIRE(l->items().size() == 1);
         REQUIRE(l->startColumn() == 0);
         REQUIRE(l->startLine() == 0);
-        REQUIRE(l->endColumn() == 9);
-        REQUIRE(l->endLine() == 17);
+        REQUIRE(l->endColumn() == 0);
+        REQUIRE(l->endLine() == 18);
 
         REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
         auto i = static_cast<MD::ListItem *>(l->items().at(0).get());
         REQUIRE(i->items().size() == 2);
         REQUIRE(i->startColumn() == 0);
         REQUIRE(i->startLine() == 0);
-        REQUIRE(i->endColumn() == 9);
-        REQUIRE(i->endLine() == 17);
+        REQUIRE(i->endColumn() == 0);
+        REQUIRE(i->endLine() == 18);
         REQUIRE(i->delim() == MD::WithPosition{0, 0, 0, 0});
 
         REQUIRE(i->items().at(0)->type() == MD::ItemType::Paragraph);
@@ -250,8 +250,8 @@ TEST_CASE("187")
             auto l = static_cast<MD::List *>(i->items().at(1).get());
             REQUIRE(l->startColumn() == 2);
             REQUIRE(l->startLine() == 2);
-            REQUIRE(l->endColumn() == 9);
-            REQUIRE(l->endLine() == 17);
+            REQUIRE(l->endColumn() == 0);
+            REQUIRE(l->endLine() == 18);
             REQUIRE(l->items().size() == 1);
 
             REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
@@ -259,8 +259,8 @@ TEST_CASE("187")
             REQUIRE(i->items().size() == 7);
             REQUIRE(i->startColumn() == 2);
             REQUIRE(i->startLine() == 2);
-            REQUIRE(i->endColumn() == 9);
-            REQUIRE(i->endLine() == 17);
+            REQUIRE(i->endColumn() == 0);
+            REQUIRE(i->endLine() == 18);
             REQUIRE(i->delim() == MD::WithPosition{2, 2, 2, 2});
 
             REQUIRE(i->items().at(0)->type() == MD::ItemType::Paragraph);
@@ -275,8 +275,8 @@ TEST_CASE("187")
                 auto l = static_cast<MD::List *>(i->items().at(1).get());
                 REQUIRE(l->startColumn() == 4);
                 REQUIRE(l->startLine() == 3);
-                REQUIRE(l->endColumn() == 9);
-                REQUIRE(l->endLine() == 3);
+                REQUIRE(l->endColumn() == 0);
+                REQUIRE(l->endLine() == 4);
                 REQUIRE(l->items().size() == 1);
 
                 REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
@@ -284,8 +284,8 @@ TEST_CASE("187")
                 REQUIRE(i->items().size() == 1);
                 REQUIRE(i->startColumn() == 4);
                 REQUIRE(i->startLine() == 3);
-                REQUIRE(i->endColumn() == 9);
-                REQUIRE(i->endLine() == 3);
+                REQUIRE(i->endColumn() == 0);
+                REQUIRE(i->endLine() == 4);
                 REQUIRE(i->delim() == MD::WithPosition{4, 3, 4, 3});
 
                 REQUIRE(i->items().at(0)->type() == MD::ItemType::Paragraph);
@@ -306,8 +306,8 @@ TEST_CASE("187")
                 auto l = static_cast<MD::List *>(i->items().at(3).get());
                 REQUIRE(l->startColumn() == 4);
                 REQUIRE(l->startLine() == 9);
-                REQUIRE(l->endColumn() == 9);
-                REQUIRE(l->endLine() == 9);
+                REQUIRE(l->endColumn() == 0);
+                REQUIRE(l->endLine() == 10);
                 REQUIRE(l->items().size() == 1);
 
                 REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
@@ -315,8 +315,8 @@ TEST_CASE("187")
                 REQUIRE(i->items().size() == 1);
                 REQUIRE(i->startColumn() == 4);
                 REQUIRE(i->startLine() == 9);
-                REQUIRE(i->endColumn() == 9);
-                REQUIRE(i->endLine() == 9);
+                REQUIRE(i->endColumn() == 0);
+                REQUIRE(i->endLine() == 10);
                 REQUIRE(i->delim() == MD::WithPosition{4, 9, 4, 9});
 
                 REQUIRE(i->items().at(0)->type() == MD::ItemType::Paragraph);
@@ -346,8 +346,8 @@ TEST_CASE("187")
                 auto l = static_cast<MD::List *>(i->items().at(6).get());
                 REQUIRE(l->startColumn() == 4);
                 REQUIRE(l->startLine() == 17);
-                REQUIRE(l->endColumn() == 9);
-                REQUIRE(l->endLine() == 17);
+                REQUIRE(l->endColumn() == 0);
+                REQUIRE(l->endLine() == 18);
                 REQUIRE(l->items().size() == 1);
 
                 REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
@@ -355,8 +355,8 @@ TEST_CASE("187")
                 REQUIRE(i->items().size() == 1);
                 REQUIRE(i->startColumn() == 4);
                 REQUIRE(i->startLine() == 17);
-                REQUIRE(i->endColumn() == 9);
-                REQUIRE(i->endLine() == 17);
+                REQUIRE(i->endColumn() == 0);
+                REQUIRE(i->endLine() == 18);
                 REQUIRE(i->delim() == MD::WithPosition{4, 17, 4, 17});
 
                 REQUIRE(i->items().at(0)->type() == MD::ItemType::Paragraph);
@@ -394,16 +394,16 @@ TEST_CASE("188")
         REQUIRE(l->items().size() == 1);
         REQUIRE(l->startColumn() == 0);
         REQUIRE(l->startLine() == 0);
-        REQUIRE(l->endColumn() == 11);
-        REQUIRE(l->endLine() == 2);
+        REQUIRE(l->endColumn() == 0);
+        REQUIRE(l->endLine() == 3);
 
         REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
         auto i = static_cast<MD::ListItem *>(l->items().at(0).get());
         REQUIRE(i->items().size() == 2);
         REQUIRE(i->startColumn() == 0);
         REQUIRE(i->startLine() == 0);
-        REQUIRE(i->endColumn() == 11);
-        REQUIRE(i->endLine() == 2);
+        REQUIRE(i->endColumn() == 0);
+        REQUIRE(i->endLine() == 3);
         REQUIRE(i->delim() == MD::WithPosition{0, 0, 0, 0});
 
         REQUIRE(i->items().at(0)->type() == MD::ItemType::Paragraph);
@@ -418,16 +418,16 @@ TEST_CASE("188")
         REQUIRE(l->items().size() == 1);
         REQUIRE(l->startColumn() == 0);
         REQUIRE(l->startLine() == 6);
-        REQUIRE(l->endColumn() == 11);
-        REQUIRE(l->endLine() == 10);
+        REQUIRE(l->endColumn() == 0);
+        REQUIRE(l->endLine() == 11);
 
         REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
         auto i = static_cast<MD::ListItem *>(l->items().at(0).get());
         REQUIRE(i->items().size() == 2);
         REQUIRE(i->startColumn() == 0);
         REQUIRE(i->startLine() == 6);
-        REQUIRE(i->endColumn() == 11);
-        REQUIRE(i->endLine() == 10);
+        REQUIRE(i->endColumn() == 0);
+        REQUIRE(i->endLine() == 11);
         REQUIRE(i->delim() == MD::WithPosition{0, 6, 0, 6});
 
         REQUIRE(i->items().at(0)->type() == MD::ItemType::Paragraph);
@@ -438,8 +438,8 @@ TEST_CASE("188")
             REQUIRE(l->items().size() == 1);
             REQUIRE(l->startColumn() == 2);
             REQUIRE(l->startLine() == 7);
-            REQUIRE(l->endColumn() == 11);
-            REQUIRE(l->endLine() == 10);
+            REQUIRE(l->endColumn() == 0);
+            REQUIRE(l->endLine() == 11);
 
             REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
             auto i = static_cast<MD::ListItem *>(l->items().at(0).get());

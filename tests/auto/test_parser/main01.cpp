@@ -1465,8 +1465,8 @@ TEST_CASE("023")
         auto l = static_cast<MD::List *>(doc->items().at(1).get());
         REQUIRE(l->startColumn() == 0);
         REQUIRE(l->startLine() == 0);
-        REQUIRE(l->endColumn() == 7);
-        REQUIRE(l->endLine() == 2);
+        REQUIRE(l->endColumn() == 0);
+        REQUIRE(l->endLine() == 3);
 
         REQUIRE(l->items().size() == 3);
 
@@ -1476,8 +1476,8 @@ TEST_CASE("023")
             auto item = static_cast<MD::ListItem *>(l->items().at(i).get());
             REQUIRE(item->startColumn() == 0);
             REQUIRE(item->startLine() == i);
-            REQUIRE(item->endColumn() == 7);
-            REQUIRE(item->endLine() == i);
+            REQUIRE(item->endColumn() == (i < 2 ? 7 : 0));
+            REQUIRE(item->endLine() == (i < 2 ? i : i + 1));
             REQUIRE(item->delim() == MD::WithPosition{0, i, 0, i});
 
             REQUIRE(item->listType() == MD::ListItem::Unordered);
@@ -1562,8 +1562,8 @@ TEST_CASE("024")
     auto l = static_cast<MD::List *>(doc->items().at(1).get());
     REQUIRE(l->startColumn() == 0);
     REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endColumn() == 9);
-    REQUIRE(l->endLine() == 8);
+    REQUIRE(l->endColumn() == 0);
+    REQUIRE(l->endLine() == 9);
 
     REQUIRE(l->items().size() == 3);
 
@@ -1573,8 +1573,8 @@ TEST_CASE("024")
         auto item = static_cast<MD::ListItem *>(l->items().at(i).get());
         REQUIRE(item->startColumn() == 0);
         REQUIRE(item->startLine() == i * 3);
-        REQUIRE(item->endColumn() == 9);
-        REQUIRE(item->endLine() == 2 + i * 3);
+        REQUIRE(item->endColumn() == (i < 2 ? 9 : 0));
+        REQUIRE(item->endLine() == 2 + i * 3 + (i < 2 ? 0 : 1));
 
         REQUIRE(item->listType() == MD::ListItem::Unordered);
 
@@ -1626,8 +1626,8 @@ TEST_CASE("025")
     auto l = static_cast<MD::List *>(doc->items().at(1).get());
     REQUIRE(l->startColumn() == 0);
     REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endColumn() == 18);
-    REQUIRE(l->endLine() == 10);
+    REQUIRE(l->endColumn() == 0);
+    REQUIRE(l->endLine() == 11);
 
     REQUIRE(l->items().size() == 3);
 
@@ -1637,8 +1637,8 @@ TEST_CASE("025")
         auto item = static_cast<MD::ListItem *>(l->items().at(i).get());
         REQUIRE(item->startColumn() == 0);
         REQUIRE(item->startLine() == i * 4);
-        REQUIRE(item->endColumn() == 18);
-        REQUIRE(item->endLine() == 2 + i * 4);
+        REQUIRE(item->endColumn() == (i < 2 ? 3 : 0));
+        REQUIRE(item->endLine() == 3 + i * 4);
         REQUIRE(item->delim() == MD::WithPosition{0, i * 4, 0, i * 4});
 
         REQUIRE(item->listType() == MD::ListItem::Unordered);
@@ -1733,8 +1733,8 @@ TEST_CASE("026")
     auto l = static_cast<MD::List *>(doc->items().at(1).get());
     REQUIRE(l->startColumn() == 0);
     REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endColumn() == 20);
-    REQUIRE(l->endLine() == 22);
+    REQUIRE(l->endColumn() == 0);
+    REQUIRE(l->endLine() == 23);
 
     REQUIRE(l->items().size() == 3);
 
@@ -1744,8 +1744,8 @@ TEST_CASE("026")
         auto item = static_cast<MD::ListItem *>(l->items().at(i).get());
         REQUIRE(item->startColumn() == 0);
         REQUIRE(item->startLine() == 0 + 8 * i);
-        REQUIRE(item->endColumn() == 20);
-        REQUIRE(item->endLine() == 6 + 8 * i);
+        REQUIRE(item->endColumn() == 0);
+        REQUIRE(item->endLine() == 7 + 8 * i);
         REQUIRE(item->delim() == MD::WithPosition{0, i * 8, 0, i * 8});
 
         REQUIRE(item->listType() == MD::ListItem::Unordered);
@@ -1804,16 +1804,16 @@ TEST_CASE("026")
             auto nl = static_cast<MD::List *>(item->items().at(2).get());
             REQUIRE(nl->startColumn() == 2);
             REQUIRE(nl->startLine() == 4 + 8 * i);
-            REQUIRE(nl->endColumn() == 20);
-            REQUIRE(nl->endLine() == 6 + 8 * i);
+            REQUIRE(nl->endColumn() == 0);
+            REQUIRE(nl->endLine() == 7 + 8 * i);
 
             REQUIRE(nl->items().at(0)->type() == MD::ItemType::ListItem);
 
             auto item = static_cast<MD::ListItem *>(nl->items().at(0).get());
             REQUIRE(item->startColumn() == 2);
             REQUIRE(item->startLine() == 4 + 8 * i);
-            REQUIRE(item->endColumn() == 20);
-            REQUIRE(item->endLine() == 6 + 8 * i);
+            REQUIRE(item->endColumn() == 0);
+            REQUIRE(item->endLine() == 7 + 8 * i);
             REQUIRE(item->delim() == MD::WithPosition{2, 4 + 8 * i, 2, 4 + 8 * i});
 
             REQUIRE(item->listType() == MD::ListItem::Unordered);
@@ -1897,8 +1897,8 @@ TEST_CASE("027")
     auto l = static_cast<MD::List *>(doc->items().at(1).get());
     REQUIRE(l->startColumn() == 0);
     REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endColumn() == 9);
-    REQUIRE(l->endLine() == 10);
+    REQUIRE(l->endColumn() == 0);
+    REQUIRE(l->endLine() == 11);
 
     REQUIRE(l->items().size() == 3);
 
@@ -1908,8 +1908,8 @@ TEST_CASE("027")
         auto item = static_cast<MD::ListItem *>(l->items().at(i).get());
         REQUIRE(item->startColumn() == 0);
         REQUIRE(item->startLine() == 0 + 4 * i);
-        REQUIRE(item->endColumn() == 9);
-        REQUIRE(item->endLine() == 2 + 4 * i);
+        REQUIRE(item->endColumn() == (i < 2 ? 3 : 0));
+        REQUIRE(item->endLine() == 3 + 4 * i);
         REQUIRE(item->delim() == MD::WithPosition{0, i * 4, 0, i * 4});
 
         REQUIRE(item->listType() == MD::ListItem::Unordered);
@@ -1988,8 +1988,8 @@ TEST_CASE("028")
     auto l = static_cast<MD::List *>(doc->items().at(1).get());
     REQUIRE(l->startColumn() == 0);
     REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endColumn() == 6);
-    REQUIRE(l->endLine() == 16);
+    REQUIRE(l->endColumn() == 0);
+    REQUIRE(l->endLine() == 17);
 
     REQUIRE(l->items().size() == 3);
 
@@ -1999,8 +1999,8 @@ TEST_CASE("028")
         auto item = static_cast<MD::ListItem *>(l->items().at(i).get());
         REQUIRE(item->startColumn() == 0);
         REQUIRE(item->startLine() == 0 + 6 * i);
-        REQUIRE(item->endColumn() == 6);
-        REQUIRE(item->endLine() == 4 + 6 * i);
+        REQUIRE(item->endColumn() == (i < 2 ? 3 : 0));
+        REQUIRE(item->endLine() == 5 + 6 * i);
         REQUIRE(item->delim() == MD::WithPosition{0, i * 6, 0, i * 6});
 
         REQUIRE(item->listType() == MD::ListItem::Unordered);
@@ -2090,8 +2090,8 @@ TEST_CASE("029")
     auto l = static_cast<MD::List *>(doc->items().at(1).get());
     REQUIRE(l->startColumn() == 0);
     REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endColumn() == 24);
-    REQUIRE(l->endLine() == 22);
+    REQUIRE(l->endColumn() == 0);
+    REQUIRE(l->endLine() == 23);
 
     REQUIRE(l->items().size() == 3);
 
@@ -2101,8 +2101,8 @@ TEST_CASE("029")
         auto item = static_cast<MD::ListItem *>(l->items().at(i).get());
         REQUIRE(item->startColumn() == 0);
         REQUIRE(item->startLine() == 8 * i);
-        REQUIRE(item->endColumn() == 24);
-        REQUIRE(item->endLine() == 6 + 8 * i);
+        REQUIRE(item->endColumn() == (i < 2 ? 3 : 0));
+        REQUIRE(item->endLine() == 7 + 8 * i);
         REQUIRE(item->delim() == MD::WithPosition{0, 8 * i, 0, 8 * i});
 
         REQUIRE(item->listType() == MD::ListItem::Unordered);
@@ -2161,16 +2161,16 @@ TEST_CASE("029")
             auto nl = static_cast<MD::List *>(item->items().at(2).get());
             REQUIRE(nl->startColumn() == 4);
             REQUIRE(nl->startLine() == 4 + 8 * i);
-            REQUIRE(nl->endColumn() == 24);
-            REQUIRE(nl->endLine() == 6 + 8 * i);
+            REQUIRE(nl->endColumn() == (i < 2 ? 3 : 0));
+            REQUIRE(nl->endLine() == 7 + 8 * i);
 
             REQUIRE(nl->items().at(0)->type() == MD::ItemType::ListItem);
 
             auto item = static_cast<MD::ListItem *>(nl->items().at(0).get());
             REQUIRE(item->startColumn() == 4);
             REQUIRE(item->startLine() == 4 + 8 * i);
-            REQUIRE(item->endColumn() == 24);
-            REQUIRE(item->endLine() == 6 + 8 * i);
+            REQUIRE(item->endColumn() == (i < 2 ? 3 : 0));
+            REQUIRE(item->endLine() == 7 + 8 * i);
             REQUIRE(item->delim() == MD::WithPosition{4, 4 + 8 * i, 4, 4 + 8 * i});
 
             REQUIRE(item->listType() == MD::ListItem::Unordered);

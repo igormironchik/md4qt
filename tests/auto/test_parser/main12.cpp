@@ -1118,3 +1118,41 @@ TEST_CASE("367")
     REQUIRE(c->endColumn() == 9);
     REQUIRE(c->endLine() == 0);
 }
+
+/*
+* ```cpp
+
+* ```cpp
+
+*/
+TEST_CASE("368")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/368.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
+    auto l = static_cast<MD::List *>(doc->items().at(1).get());
+    REQUIRE(l->items().size() == 2);
+
+    {
+        auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
+        REQUIRE(li->items().size() == 1);
+        REQUIRE(li->items().at(0)->type() == MD::ItemType::Code);
+        auto c = static_cast<MD::Code *>(li->items().at(0).get());
+        REQUIRE(c->startDelim() == MD::WithPosition{2, 0, 4, 0});
+        REQUIRE(c->endDelim().isNullPositions());
+    }
+
+    {
+        auto li = static_cast<MD::ListItem *>(l->items().at(1).get());
+        REQUIRE(li->items().size() == 1);
+        REQUIRE(li->items().at(0)->type() == MD::ItemType::Code);
+        auto c = static_cast<MD::Code *>(li->items().at(0).get());
+        REQUIRE(c->startDelim() == MD::WithPosition{2, 2, 4, 2});
+        REQUIRE(c->endDelim().isNullPositions());
+    }
+}
