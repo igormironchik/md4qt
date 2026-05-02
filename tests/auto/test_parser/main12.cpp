@@ -1065,3 +1065,33 @@ TEST_CASE("365")
     auto t = static_cast<MD::Text *>(h->text()->items().at(0).get());
     REQUIRE(t->text() == QStringLiteral("[x] text"));
 }
+
+/*
+* ```yaml
+*
+
+*/
+TEST_CASE("366")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/366.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
+    auto l = static_cast<MD::List *>(doc->items().at(1).get());
+    REQUIRE(l->items().size() == 2);
+    auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
+    REQUIRE(li->items().size() == 1);
+    REQUIRE(li->items().at(0)->type() == MD::ItemType::Code);
+    auto c = static_cast<MD::Code *>(li->items().at(0).get());
+    REQUIRE(c->startDelim() == MD::WithPosition{2, 0, 4, 0});
+    REQUIRE(c->syntaxPos() == MD::WithPosition{5, 0, 8, 0});
+    REQUIRE(c->startColumn() == 9);
+    REQUIRE(c->startLine() == 0);
+    REQUIRE(c->endColumn() == 9);
+    REQUIRE(c->endLine() == 0);
+    REQUIRE(c->endDelim().isNullPositions());
+}

@@ -443,8 +443,8 @@ bool FencedCodeParser::mayBreakParagraph(Line &,
     return true;
 }
 
-void FencedCodeParser::finish(Line &,
-                              TextStream &,
+void FencedCodeParser::finish(Line &currentLine,
+                              TextStream &stream,
                               QSharedPointer<Document>,
                               QSharedPointer<Block>,
                               Context &,
@@ -456,7 +456,14 @@ void FencedCodeParser::finish(Line &,
         m_code->setStartColumn(m_code->syntaxPos().isNullPositions() ? m_code->startDelim().endColumn() + 1
                                                                      : m_code->syntaxPos().endColumn() + 1);
         m_code->setStartLine(m_code->startDelim().startLine());
-        m_code->setEndColumn(m_code->startColumn());
+
+        const auto st = stream.currentState();
+        const auto line = stream.moveTo(currentLine.lineNumber() - 1);
+
+        m_code->setEndColumn(m_code->startColumn() <= line.length() - 1 ? line.length() - 1 : line.length());
+
+        stream.restoreState(&st);
+
         m_code->setEndLine(m_code->startLine());
     }
 }
