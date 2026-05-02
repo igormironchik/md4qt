@@ -453,18 +453,15 @@ void FencedCodeParser::finish(Line &currentLine,
                               QStringList &)
 {
     if (m_code && m_code->isNullPositions()) {
-        m_code->setStartColumn(m_code->syntaxPos().isNullPositions() ? m_code->startDelim().endColumn() + 1
-                                                                     : m_code->syntaxPos().endColumn() + 1);
-        m_code->setStartLine(m_code->startDelim().startLine());
-
         const auto st = stream.currentState();
         const auto line = stream.moveTo(currentLine.lineNumber() - 1);
 
-        m_code->setEndColumn(m_code->startColumn() <= line.length() - 1 ? line.length() - 1 : line.length());
+        m_code->setStartColumn(line.length());
+        m_code->setStartLine(m_code->startDelim().startLine());
+        m_code->setEndColumn(line.length());
+        m_code->setEndLine(m_code->startLine());
 
         stream.restoreState(&st);
-
-        m_code->setEndLine(m_code->startLine());
     }
 }
 

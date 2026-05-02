@@ -1089,9 +1089,32 @@ TEST_CASE("366")
     auto c = static_cast<MD::Code *>(li->items().at(0).get());
     REQUIRE(c->startDelim() == MD::WithPosition{2, 0, 4, 0});
     REQUIRE(c->syntaxPos() == MD::WithPosition{5, 0, 8, 0});
+    REQUIRE(c->startColumn() == 10);
+    REQUIRE(c->startLine() == 0);
+    REQUIRE(c->endColumn() == 10);
+    REQUIRE(c->endLine() == 0);
+    REQUIRE(c->endDelim().isNullPositions());
+}
+
+/*
+```cpp
+
+*/
+TEST_CASE("367")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/367.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Code);
+    auto c = static_cast<MD::Code *>(doc->items().at(1).get());
+    REQUIRE(c->startDelim() == MD::WithPosition{0, 0, 2, 0});
+    REQUIRE(c->syntaxPos() == MD::WithPosition{3, 0, 5, 0});
+    REQUIRE(c->endDelim().isNullPositions());
     REQUIRE(c->startColumn() == 9);
     REQUIRE(c->startLine() == 0);
     REQUIRE(c->endColumn() == 9);
     REQUIRE(c->endLine() == 0);
-    REQUIRE(c->endDelim().isNullPositions());
 }
