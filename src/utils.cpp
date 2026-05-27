@@ -10,6 +10,9 @@
 #include "entities_map.h"
 #include "reverse_solidus.h"
 
+// Qt include.
+#include <QRegularExpression>
+
 namespace MD
 {
 
@@ -411,6 +414,14 @@ bool isEmail(const QString &url)
     }
 
     return false;
+}
+
+bool isCommonMarkAutolinkUri(const QString &uri)
+{
+    static const QRegularExpression s_uri(QStringLiteral(
+        "^[A-Za-z][A-Za-z0-9.+-]{1,31}:[^\\x00-\\x20<>\\x7F]*$"));
+
+    return s_uri.match(uri).hasMatch();
 }
 
 bool isValidTagName(const QString &tag)

@@ -260,6 +260,16 @@ inline bool isValidUrl(const QString &url)
     return (u.isValid() && !u.isRelative());
 }
 
+/*!
+ * \inheaderfile md4qt/utils.h
+ *
+ * Returns whether the given string is an absolute URI according to CommonMark's
+ * autolink grammar.
+ *
+ * \a uri String for checking.
+ */
+bool isCommonMarkAutolinkUri(const QString &uri);
+
 /*
     "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
     "(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"

@@ -22,6 +22,7 @@
 
 // Qt include.
 #include <QDir>
+#include <QTextStream>
 
 /*
 [](<a<>) []((a ))
@@ -65,6 +66,40 @@ TEST_CASE("345")
 TEST_CASE("346")
 {
     REQUIRE(!MD::isEmail(QStringLiteral("mail@a#.net")));
+}
+
+TEST_CASE("autolink_uri_validation_config")
+{
+    QString markdown = QStringLiteral("<made-up-scheme://foo,bar>");
+
+    {
+        QTextStream stream(&markdown);
+        MD::Parser parser;
+        auto doc = parser.parse(stream, QString(), QString());
+
+        REQUIRE(doc->isEmpty() == false);
+        REQUIRE(doc->items().size() == 2);
+        REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+        REQUIRE(p->items().size() == 1);
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    }
+
+    {
+        QTextStream stream(&markdown);
+        MD::Parser parser;
+        parser.setAutolinkUriValidation(MD::Parser::AutolinkUriValidation::CommonMark);
+        auto doc = parser.parse(stream, QString(), QString());
+
+        REQUIRE(doc->isEmpty() == false);
+        REQUIRE(doc->items().size() == 2);
+        REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+        REQUIRE(p->items().size() == 1);
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
+        auto l = static_cast<MD::Link *>(p->items().at(0).get());
+        REQUIRE(l->url() == markdown.sliced(1, markdown.length() - 2));
+    }
 }
 
 /*

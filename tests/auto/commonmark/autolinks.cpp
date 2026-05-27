@@ -103,14 +103,38 @@ TEST_CASE("597")
 
 TEST_CASE("598")
 {
-    MESSAGE("This test is not strict to CommonMark 0.30.");
-    MESSAGE("Skip for now.");
+    const auto doc = load_test(598);
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
+    auto l = static_cast<MD::Link *>(p->items().at(0).get());
+    REQUIRE(l->img()->isEmpty());
+    REQUIRE(l->opts() == MD::TextWithoutFormat);
+    REQUIRE(l->text().size() == 0);
+    REQUIRE(l->url() == QStringLiteral("made-up-scheme://foo,bar"));
 }
 
 TEST_CASE("599")
 {
-    MESSAGE("This test is not strict to CommonMark 0.30.");
-    MESSAGE("Skip for now.");
+    const auto doc = load_test(599);
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
+    auto l = static_cast<MD::Link *>(p->items().at(0).get());
+    REQUIRE(l->img()->isEmpty());
+    REQUIRE(l->opts() == MD::TextWithoutFormat);
+    REQUIRE(l->text().size() == 0);
+    REQUIRE(l->url() == QStringLiteral("http://../"));
 }
 
 TEST_CASE("600")
@@ -133,27 +157,36 @@ TEST_CASE("600")
 
 TEST_CASE("601")
 {
-    MESSAGE("This test is not strict to CommonMark due to GitHub's autolinks extension.");
-    MESSAGE("Skip for now.");
+    const auto doc = load_test(601);
 
-    // const auto doc = load_test( 601 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-    // REQUIRE( doc->isEmpty() == false );
-    // REQUIRE( doc->items().size() == 2 );
-
-    // REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-    // auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-    // REQUIRE( p->items().size() == 1 );
-    // REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-    // auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-    // REQUIRE( t->opts() == MD::TextWithoutFormat );
-    // REQUIRE( t->text() == u8"<http://foo.bar/baz bim>" );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text *>(p->items().at(0).get());
+    REQUIRE(t->opts() == MD::TextWithoutFormat);
+    REQUIRE(t->text() == QStringLiteral("<http://foo.bar/baz bim>"));
 }
 
 TEST_CASE("602")
 {
-    MESSAGE("This test is not strict to CommonMark 0.30.");
-    MESSAGE("Skip for now.");
+    const auto doc = load_test(602);
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
+    auto l = static_cast<MD::Link *>(p->items().at(0).get());
+    REQUIRE(l->img()->isEmpty());
+    REQUIRE(l->opts() == MD::TextWithoutFormat);
+    REQUIRE(l->text().size() == 0);
+    REQUIRE(l->url() == QStringLiteral("http://example.com/\\[\\"));
 }
 
 TEST_CASE("603")
@@ -226,27 +259,34 @@ TEST_CASE("606")
 
 TEST_CASE("607")
 {
-    MESSAGE("This test is not strict to CommonMark due to GitHub's autolink extension.");
-    MESSAGE("Skip for now.");
+    const auto doc = load_test(607);
 
-    // const auto doc = load_test( 607 );
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
 
-    // REQUIRE( doc->isEmpty() == false );
-    // REQUIRE( doc->items().size() == 2 );
-
-    // REQUIRE( doc->items().at( 1 )->type() == MD::ItemType::Paragraph );
-    // auto p = static_cast< MD::Paragraph< TRAIT >* > ( doc->items().at( 1 ).get() );
-    // REQUIRE( p->items().size() == 1 );
-    // REQUIRE( p->items().at( 0 )->type() == MD::ItemType::Text );
-    // auto t = static_cast< MD::Text< TRAIT >* > ( p->items().at( 0 ).get() );
-    // REQUIRE( t->opts() == MD::TextWithoutFormat );
-    // REQUIRE( t->text() == u8"< http://foo.bar >" );
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text *>(p->items().at(0).get());
+    REQUIRE(t->opts() == MD::TextWithoutFormat);
+    REQUIRE(t->text() == QStringLiteral("< http://foo.bar >"));
 }
 
 TEST_CASE("608")
 {
-    MESSAGE("This test is not strict to CommonMark 0.30.");
-    MESSAGE("Skip for now.");
+    const auto doc = load_test(608);
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text *>(p->items().at(0).get());
+    REQUIRE(t->opts() == MD::TextWithoutFormat);
+    REQUIRE(t->text() == QStringLiteral("<m:abc>"));
 }
 
 TEST_CASE("609")

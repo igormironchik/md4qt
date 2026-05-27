@@ -7,6 +7,7 @@
 #include "autolink_parser.h"
 #include "constants.h"
 #include "inline_context.h"
+#include "parser.h"
 #include "reverse_solidus.h"
 #include "text_stream.h"
 #include "utils.h"
@@ -15,7 +16,8 @@ namespace MD
 {
 
 QString readURI(Line &line,
-                ParagraphStream &stream)
+                ParagraphStream &stream,
+                bool commonMark)
 {
     QString url;
 
@@ -25,7 +27,7 @@ QString readURI(Line &line,
         while (line.position() < line.length()) {
             url.append(line.currentChar());
 
-            if (reverseSolidus.isNotEscaped(line.currentChar())) {
+            if (commonMark || reverseSolidus.isNotEscaped(line.currentChar())) {
                 if (isAsciiControl(line.currentChar())) {
                     return QString();
                 } else if (line.currentChar() == s_greaterSignChar) {
@@ -40,10 +42,13 @@ QString readURI(Line &line,
             }
 
             line.nextChar();
-            reverseSolidus.next();
+
+            if (!commonMark) {
+                reverseSolidus.next();
+            }
         }
 
-        if (!stream.atEnd()) {
+        if (!commonMark && !stream.atEnd()) {
             line = stream.readLine();
         } else {
             break;
@@ -60,7 +65,7 @@ bool AutolinkParser::check(Line &line,
                            const QString &,
                            const QString &,
                            QStringList &,
-                           Parser &,
+                           Parser &parser,
                            const ReverseSolidusHandler &rs)
 {
     if (line.currentChar() == s_lessSignChar && !rs.isPrevReverseSolidus()) {
@@ -72,9 +77,11 @@ bool AutolinkParser::check(Line &line,
 
         line.nextChar();
 
-        const auto uri = readURI(line, stream);
+        const auto commonMark = (parser.autolinkUriValidation() == Parser::AutolinkUriValidation::CommonMark);
+        const auto uri = readURI(line, stream, commonMark);
+        const auto validUri = (commonMark ? isCommonMarkAutolinkUri(uri) : isValidUrl(uri));
 
-        if (!isValidUrl(uri) && !isEmail(uri)) {
+        if (!validUri && !isEmail(uri)) {
             stream.restoreStateBefore(sState);
             line = stream.readLine();
             line.restoreState(&lState);
