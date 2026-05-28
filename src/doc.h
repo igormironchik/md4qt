@@ -1365,6 +1365,10 @@ public:
      */
     void setUrl(const QString &u);
 
+    const QString &title() const;
+
+    void setTitle(const QString &t);
+
     /*!
      * Returns not parsed text of link's description.
      */
@@ -1423,6 +1427,7 @@ private:
      * URL.
      */
     QString m_url;
+    QString m_title;
     /*!
      * Not parsed content of link's description.
      */

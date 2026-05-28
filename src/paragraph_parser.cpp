@@ -29,6 +29,7 @@ void ParagraphParser::clearRefLink()
 {
     m_reference.reset();
     m_refLinkLabel.clear();
+    m_refLinkTitle.clear();
     m_wasSpace = false;
     m_refLinkStage = RefLinkParserStage::S0;
     m_refLinkTextPos = {};
@@ -257,6 +258,11 @@ ParagraphParser::RefLinkState ParagraphParser::checkForReferenceLink(Line &curre
                                                  m_refLinkStartParenthesisCount,
                                                  m_refLinkTitleStartPos,
                                                  endStarted);
+                if (!title.isEmpty()) {
+                    if (!m_refLinkTitle.isEmpty())
+                        m_refLinkTitle.append(s_newLineChar);
+                    m_refLinkTitle.append(title);
+                }
 
                 if (m_refLinkTitlePos.startLine() == -1 && !m_refLinkTitleStartChar.isNull()) {
                     m_refLinkTitlePos.setStartColumn(titleStartPos);
@@ -341,6 +347,7 @@ qsizetype ParagraphParser::insertRefLink(QSharedPointer<Document> doc,
     m_startLine = pStartlineNumber;
 
     m_reference->setText(m_refLinkLabel);
+    m_reference->setTitle(m_refLinkTitle);
     m_reference->setTextPos(m_refLinkTextPos);
 
     if (m_refLinkTitlePos.endLine() != -1) {

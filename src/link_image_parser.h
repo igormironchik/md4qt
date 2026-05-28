@@ -150,6 +150,7 @@ private:
                            QStringList &linksToParse,
                            Parser &parser);
     void makeLink(const QString &url,
+                  const QString &title,
                   QStringList &linksToParse,
                   const QString &path,
                   const QString &fileName,
@@ -166,6 +167,7 @@ private:
                   qsizetype endLinkPos,
                   qsizetype endLinkLine);
     void makeImage(const QString &url,
+                   const QString &title,
                    QStringList &linksToParse,
                    const QString &path,
                    const QString &fileName,

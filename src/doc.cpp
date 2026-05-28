@@ -635,6 +635,7 @@ void LinkBase::applyLinkBase(const LinkBase &other,
     if (this != &other) {
         ItemWithOpts::applyItemWithOpts(other);
         setUrl(other.url());
+        setTitle(other.title());
         setText(other.text());
         setP(other.p()->clone(doc).staticCast<Paragraph>());
         setTextPos(other.textPos());
@@ -650,6 +651,16 @@ const QString &LinkBase::url() const
 void LinkBase::setUrl(const QString &u)
 {
     m_url = u;
+}
+
+const QString &LinkBase::title() const
+{
+    return m_title;
+}
+
+void LinkBase::setTitle(const QString &t)
+{
+    m_title = t;
 }
 
 const QString &LinkBase::text() const

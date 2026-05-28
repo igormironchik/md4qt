@@ -289,6 +289,7 @@ void LinkImageParser::setImgAndP(const QPair<QSharedPointer<Paragraph>,
 }
 
 void LinkImageParser::makeLink(const QString &url,
+                               const QString &title,
                                QStringList &linksToParse,
                                const QString &path,
                                const QString &fileName,
@@ -308,6 +309,7 @@ void LinkImageParser::makeLink(const QString &url,
     auto link = QSharedPointer<Link>::create();
 
     link->setUrl(prepareUrl(url, linksToParse, path, fileName));
+    link->setTitle(title);
     link->setTextPos(textPos);
     link->setUrlPos(urlPos);
 
@@ -332,6 +334,7 @@ void LinkImageParser::makeLink(const QString &url,
 }
 
 void LinkImageParser::makeImage(const QString &url,
+                                const QString &title,
                                 QStringList &linksToParse,
                                 const QString &path,
                                 const QString &fileName,
@@ -351,6 +354,7 @@ void LinkImageParser::makeImage(const QString &url,
     auto img = QSharedPointer<Image>::create();
 
     img->setUrl(prepareUrl(url, linksToParse, path, fileName));
+    img->setTitle(title);
     img->setTextPos(textPos);
     img->setUrlPos(urlPos);
 
@@ -519,6 +523,7 @@ LinkImageParser::checkShortcutLinkImage(const State::Delim &startDelim,
         if (it != doc->labeledLinks().cend()) {
             if (startDelim.m_type == State::Delim::Link) {
                 makeLink(u,
+                         it.value()->title(),
                          linksToParse,
                          path,
                          fileName,
@@ -536,6 +541,7 @@ LinkImageParser::checkShortcutLinkImage(const State::Delim &startDelim,
                          endLinkLine);
             } else {
                 makeImage(it.value()->url(),
+                          it.value()->title(),
                           linksToParse,
                           path,
                           fileName,
@@ -745,6 +751,7 @@ bool LinkImageParser::checkInlineLinkImage(const State::Delim &startDelim,
 
                 if (startDelim.m_type == State::Delim::Link) {
                     makeLink(url,
+                             title.first,
                              linksToParse,
                              path,
                              fileName,
@@ -762,6 +769,7 @@ bool LinkImageParser::checkInlineLinkImage(const State::Delim &startDelim,
                              line.lineNumber());
                 } else {
                     makeImage(url,
+                              title.first,
                               linksToParse,
                               path,
                               fileName,
@@ -917,6 +925,10 @@ bool LinkImageParser::checkRefLinkImage(const State::Delim &startDelim,
 
                 if (it != doc->labeledLinks().cend()) {
                     img->setUrl(it.value()->url());
+                    img->setTitle(it.value()->title());
+                } else {
+                    img->setUrl(link->url());
+                    img->setTitle(link->title());
                 }
 
                 img->setStartColumn(startLabelPos);
