@@ -97,10 +97,6 @@ changed rules with spaces, this version fully supports CommonMark standard in th
 Methods `isSpaceBefore()`, `isSpaceAfter()` were removed, and spaces are presented as in
 Markdown, so keep it in mind.
 
-# Known issues
-
-You can find a list of know issues [here](./known_issues.md).
-
 # What should I know about links in the document?
 
  * In some cases in Markdown link's URL is something document related. So, when
