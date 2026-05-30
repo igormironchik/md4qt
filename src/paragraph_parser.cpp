@@ -259,8 +259,9 @@ ParagraphParser::RefLinkState ParagraphParser::checkForReferenceLink(Line &curre
                                                  m_refLinkTitleStartPos,
                                                  endStarted);
                 if (!title.isEmpty()) {
-                    if (!m_refLinkTitle.isEmpty())
+                    if (!m_refLinkTitle.isEmpty()) {
                         m_refLinkTitle.append(s_newLineChar);
+                    }
                     m_refLinkTitle.append(title);
                 }
 

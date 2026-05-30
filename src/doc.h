@@ -1365,8 +1365,16 @@ public:
      */
     void setUrl(const QString &u);
 
+    /*!
+     * Returns title of the link.
+     */
     const QString &title() const;
 
+    /*!
+     * Set title of the link.
+     *
+     * \a t New value.
+     */
     void setTitle(const QString &t);
 
     /*!
