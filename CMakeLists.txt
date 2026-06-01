@@ -13,6 +13,7 @@ option(BUILD_MD4QT_BENCHMARK "Build benchmark? Default OFF." OFF)
 option(BUILD_MD4QT_TESTS "Build tests with Qt support? Default ON." ON)
 option(BUILD_MD2HTML_APP "Build md2html utility? Default OFF." OFF)
 option(BUILD_MD2QDOC_APP "Build md2qdoc utility? Default OFF." OFF)
+option(INSTALL_MD4QT "Install md4qt targets? Default ON." ON)
 
 set(QT_MIN_VERSION "6.0")
 set(KF_MIN_VERSION "6.0")
@@ -99,8 +100,10 @@ if(ECM_FOUND)
     set(MD4QT_INSTALL_LIBDIR ${KDE_INSTALL_LIBDIR})
     set(CMAKECONFIG_INSTALL_DIR "${KDE_INSTALL_CMAKEPACKAGEDIR}/md4qt")
 
-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/config-md4qt.h"
-            DESTINATION "${MD4QT_INSTALL_INCLUDEDIR}/md4qt")
+    if(INSTALL_MD4QT)
+        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/config-md4qt.h"
+                DESTINATION "${MD4QT_INSTALL_INCLUDEDIR}/md4qt")
+    endif()
 else()
     include(GNUInstallDirs)
 
@@ -110,22 +113,23 @@ else()
     set(CMAKECONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/md4qt")
 endif()
 
+if(INSTALL_MD4QT)
+    install(FILES ${HDR}
+        DESTINATION "${MD4QT_INSTALL_INCLUDEDIR}/md4qt")
 
-install(FILES ${HDR}
-    DESTINATION "${MD4QT_INSTALL_INCLUDEDIR}/md4qt")
+    install(TARGETS md4qt
+            EXPORT md4qt-targets
+            RUNTIME DESTINATION ${MD4QT_INSTALL_BINDIR}
+            ARCHIVE DESTINATION ${MD4QT_INSTALL_LIBDIR}
+            LIBRARY DESTINATION ${MD4QT_INSTALL_LIBDIR}
+            INCLUDES DESTINATION ${MD4QT_INSTALL_INCLUDEDIR}
+    )
 
-install(TARGETS md4qt
-        EXPORT md4qt-targets
-        RUNTIME DESTINATION ${MD4QT_INSTALL_BINDIR}
-        ARCHIVE DESTINATION ${MD4QT_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${MD4QT_INSTALL_LIBDIR}
-        INCLUDES DESTINATION ${MD4QT_INSTALL_INCLUDEDIR}
-)
-
-install(EXPORT md4qt-targets
-        DESTINATION ${CMAKECONFIG_INSTALL_DIR}
-        NAMESPACE md4qt::
-)
+    install(EXPORT md4qt-targets
+            DESTINATION ${CMAKECONFIG_INSTALL_DIR}
+            NAMESPACE md4qt::
+    )
+endif()
 
 include(CMakePackageConfigHelpers)
 
@@ -138,9 +142,11 @@ configure_package_config_file(md4qt-config.cmake.in
     "${CMAKE_CURRENT_BINARY_DIR}/md4qt-config.cmake"
     INSTALL_DESTINATION ${CMAKECONFIG_INSTALL_DIR})
 
-install(FILES ${PROJECT_BINARY_DIR}/md4qt-config.cmake
-    ${PROJECT_BINARY_DIR}/md4qt-config-version.cmake
-    DESTINATION ${CMAKECONFIG_INSTALL_DIR})
+if(INSTALL_MD4QT)
+    install(FILES ${PROJECT_BINARY_DIR}/md4qt-config.cmake
+        ${PROJECT_BINARY_DIR}/md4qt-config-version.cmake
+        DESTINATION ${CMAKECONFIG_INSTALL_DIR})
+endif()
 
 if(BUILD_MD2HTML_APP)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -149,7 +155,9 @@ if(BUILD_MD2HTML_APP)
 
     target_link_libraries(md2html md4qt::md4qt Qt6::Core)
 
-    install(TARGETS md2html RUNTIME DESTINATION ${MD4QT_INSTALL_BINDIR})
+    if(INSTALL_MD4QT)
+        install(TARGETS md2html RUNTIME DESTINATION ${MD4QT_INSTALL_BINDIR})
+    endif()
 endif()
 
 if(BUILD_MD2QDOC_APP)
@@ -159,7 +167,9 @@ if(BUILD_MD2QDOC_APP)
 
     target_link_libraries(md2qdoc md4qt::md4qt Qt6::Core)
 
-    install(TARGETS md2qdoc RUNTIME DESTINATION ${MD4QT_INSTALL_BINDIR})
+    if(INSTALL_MD4QT)
+        install(TARGETS md2qdoc RUNTIME DESTINATION ${MD4QT_INSTALL_BINDIR})
+    endif()
 endif()
 
 if(ECM_FOUND)
