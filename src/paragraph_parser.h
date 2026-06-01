@@ -243,6 +243,7 @@ private:
     qsizetype m_startLine = -1;
     RefLinkParserStage m_refLinkStage = RefLinkParserStage::S0;
     QString m_refLinkLabel;
+    QString m_refLinkTitle;
     WithPosition m_refLinkTextPos;
     WithPosition m_refLinkUrlPos;
     WithPosition m_refLinkTitlePos;
