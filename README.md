@@ -17,7 +17,6 @@ This library parses Markdown into tree structure.
 * [Benchmark](#benchmark)
 * [Playground](#playground)
 * [Release notes](#release-notes)
-* [Known issues](#known-issues)
 * [What should I know about links in the document?](#what-should-i-know-about-links-in-the-document)
 * [What is the second argument of `MD::Parser::parse()`?](#what-is-the-second-argument-of-mdparserparse)
 * [What is an `MD::Anchor`?](#what-is-an-mdanchor)
