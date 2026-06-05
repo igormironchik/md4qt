@@ -1191,3 +1191,23 @@ TEST_CASE("368")
         REQUIRE(c->endDelim().isNullPositions());
     }
 }
+
+TEST_CASE("ascii_control_in_autolink")
+{
+    QString markdown = QStringLiteral("<https://www.");
+    markdown.append(QLatin1Char(0x02));
+    markdown.append(QStringLiteral("google.com"));
+
+    QTextStream stream(&markdown);
+    MD::Parser parser;
+    auto doc = parser.parse(stream, QString(), QString());
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 1);
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+    auto t = static_cast<MD::Text *>(p->items().at(0).get());
+    REQUIRE(t->text() == markdown);
+}
