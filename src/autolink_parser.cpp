@@ -15,51 +15,33 @@
 namespace MD
 {
 
-QString readURI(Line &line,
-                ParagraphStream &stream,
-                bool commonMark)
+QString readURI(Line &line)
 {
     QString url;
 
-    while (true) {
-        ReverseSolidusHandler reverseSolidus;
+    while (line.position() < line.length()) {
+        url.append(line.currentChar());
 
-        while (line.position() < line.length()) {
-            url.append(line.currentChar());
-
-            if (commonMark || reverseSolidus.isNotEscaped(line.currentChar())) {
-                if (isAsciiControl(line.currentChar())) {
-                    return QString();
-                } else if (line.currentChar() == s_greaterSignChar) {
-                    line.nextChar();
-
-                    url.removeLast();
-
-                    return url;
-                } else if (line.currentChar() == s_lessSignChar) {
-                    return QString();
-                }
-            }
-
+        if (isAsciiControl(line.currentChar())) {
+            return QString();
+        } else if (line.currentChar() == s_greaterSignChar) {
             line.nextChar();
 
-            if (!commonMark) {
-                reverseSolidus.next();
-            }
+            url.removeLast();
+
+            return url;
+        } else if (line.currentChar() == s_lessSignChar) {
+            return QString();
         }
 
-        if (!commonMark && !stream.atEnd()) {
-            line = stream.readLine();
-        } else {
-            break;
-        }
+        line.nextChar();
     }
 
     return QString();
 }
 
 bool AutolinkParser::check(Line &line,
-                           ParagraphStream &stream,
+                           ParagraphStream &,
                            InlineContext &ctx,
                            QSharedPointer<Document>,
                            const QString &,
@@ -69,7 +51,6 @@ bool AutolinkParser::check(Line &line,
                            const ReverseSolidusHandler &rs)
 {
     if (line.currentChar() == s_lessSignChar && !rs.isPrevReverseSolidus()) {
-        const auto sState = stream.currentState();
         const auto lState = line.currentState();
 
         const auto startPos = line.position();
@@ -78,12 +59,10 @@ bool AutolinkParser::check(Line &line,
         line.nextChar();
 
         const auto commonMark = (parser.autolinkUriValidation() == Parser::AutolinkUriValidation::CommonMark);
-        const auto uri = readURI(line, stream, commonMark);
+        const auto uri = readURI(line);
         const auto validUri = (commonMark ? isCommonMarkAutolinkUri(uri) : isValidUrl(uri));
 
         if (!validUri && !isEmail(uri)) {
-            stream.restoreStateBefore(sState);
-            line = stream.readLine();
             line.restoreState(&lState);
 
             return false;
