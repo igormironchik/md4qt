@@ -54,17 +54,17 @@ class Parser final
 {
 public:
     /*!
-     * Autolink URI validation mode.
+     * \enum MD::Parser::AutolinkUriValidation
+     * \inmodule md4qt
+     * \inheaderfile md4qt/parser.h
+     *
+     * \brief Autolink URI validation mode.
+     *
+     * \value QUrl Use Qt's QUrl validation.
+     * \value CommonMark Use CommonMark's absolute URI grammar.
      */
     enum class AutolinkUriValidation {
-        /*!
-         * Use Qt's QUrl validation.
-         */
         QUrl,
-
-        /*!
-         * Use CommonMark's absolute URI grammar.
-         */
         CommonMark
     }; // enum class AutolinkUriValidation
 
