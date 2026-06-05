@@ -413,6 +413,34 @@ bool isEmail(const QString &url)
     return false;
 }
 
+bool isCommonMarkAutolinkUri(const QString &uri)
+{
+    static const QString s_allowedInSchema = QStringLiteral("+.-");
+
+    const auto i = uri.indexOf(s_colonChar);
+
+    if (i > 1 && i <= 32 && isAsciiLetter(uri[0])) {
+        for (auto j = 1; j < i; ++j) {
+            if (!isAsciiLetter(uri[j]) && !uri[j].isDigit() && s_allowedInSchema.indexOf(uri[j]) == -1) {
+                return false;
+            }
+        }
+
+        for (auto j = i + i; j < uri.length(); ++j) {
+            if (isAsciiControl(uri[j])
+                || uri[j] == s_spaceChar
+                || uri[j] == s_lessSignChar
+                || uri[j] == s_greaterSignChar) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
 bool isValidTagName(const QString &tag)
 {
     if (!tag.isEmpty()) {

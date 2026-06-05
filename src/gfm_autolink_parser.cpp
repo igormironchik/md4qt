@@ -7,6 +7,7 @@
 #include "gfm_autolink_parser.h"
 #include "constants.h"
 #include "inline_context.h"
+#include "parser.h"
 #include "reverse_solidus.h"
 #include "utils.h"
 
@@ -110,6 +111,18 @@ inline void makeLink(const Line::State &start,
     line.restoreState(&end);
 }
 
+inline bool isValidHttpAutolink(const QString &url,
+                                Parser &parser)
+{
+    if (parser.autolinkUriValidation() == Parser::AutolinkUriValidation::CommonMark) {
+        return isCommonMarkAutolinkUri(url);
+    } else {
+        QUrl u(url, QUrl::StrictMode);
+
+        return (u.isValid() && !u.host().isEmpty());
+    }
+}
+
 GfmAutolinkParser::GfmAutolinkParser(QSharedPointer<LinkImageParser> linkParser)
     : m_linkParser(linkParser)
 {
@@ -137,9 +150,7 @@ bool GfmAutolinkParser::check(Line &line,
                 url.first.prepend(s_httpString);
                 url.first = url.first.left(url.first.length() - skip);
 
-                QUrl u(url.first, QUrl::StrictMode);
-
-                if (u.isValid() && !u.host().isEmpty()) {
+                if (isValidHttpAutolink(url.first, parser)) {
                     makeLink(st,
                              url.first,
                              ctx,
@@ -154,9 +165,7 @@ bool GfmAutolinkParser::check(Line &line,
             } else if (url.first.startsWith(s_httpString)) {
                 url.first = url.first.left(url.first.length() - skip);
 
-                QUrl u(url.first, QUrl::StrictMode);
-
-                if (u.isValid() && !u.host().isEmpty()) {
+                if (isValidHttpAutolink(url.first, parser)) {
                     makeLink(st, url.first, ctx, line.lineNumber(), url.first.length(), url.second, line, skip);
 
                     return true;
@@ -164,9 +173,7 @@ bool GfmAutolinkParser::check(Line &line,
             } else if (url.first.startsWith(s_httpsString)) {
                 url.first = url.first.left(url.first.length() - skip);
 
-                QUrl u(url.first, QUrl::StrictMode);
-
-                if (u.isValid() && !u.host().isEmpty()) {
+                if (isValidHttpAutolink(url.first, parser)) {
                     makeLink(st, url.first, ctx, line.lineNumber(), url.first.length(), url.second, line, skip);
 
                     return true;

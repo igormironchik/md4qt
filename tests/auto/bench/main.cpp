@@ -239,6 +239,36 @@ private Q_SLOTS:
             parser.parse(QStringLiteral("tests/bench/data/rawtabs.md"), false);
         }
     }
+
+    void autolinks()
+    {
+        static QString s_data = QStringLiteral(
+            "<https://www.google.com><https://www.google.com><https://www.google.com><https://www.google.com><https://"
+            "www.google.com>"
+            "<https://www.google.com><https://www.google.com><https://www.google.com><https://www.google.com><https://"
+            "www.google.com>"
+            "<https://www.google.com><https://www.google.com><https://www.google.com><https://www.google.com><https://"
+            "www.google.com>"
+            "<https://www.google.com><https://www.google.com><https://www.google.com><https://www.google.com><https://"
+            "www.google.com>"
+            "<https://www.google.com><https://www.google.com><https://www.google.com><https://www.google.com><https://"
+            "www.google.com>");
+
+        QBENCHMARK {
+            MD::Parser parser;
+            QTextStream stream(&s_data);
+
+            parser.parse(stream, {}, {});
+        }
+
+        QBENCHMARK {
+            MD::Parser parser;
+            parser.setAutolinkUriValidation(MD::Parser::AutolinkUriValidation::CommonMark);
+            QTextStream stream(&s_data);
+
+            parser.parse(stream, {}, {});
+        }
+    }
 };
 
 QTEST_GUILESS_MAIN(Bench)

@@ -30,6 +30,7 @@ inline QSharedPointer<MD::Document> load_test(int n,
     path.append(".md");
 
     MD::Parser p;
+    p.setAutolinkUriValidation(MD::Parser::AutolinkUriValidation::CommonMark);
     p.setBlockParsers(MD::Parser::makeCommonMarkBlockParsersPipeline(&p));
     p.setInlineParsers(MD::Parser::makeCommonMarkInlineParsersPipeline());
 

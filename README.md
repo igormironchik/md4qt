@@ -17,7 +17,6 @@ This library parses Markdown into tree structure.
 * [Benchmark](#benchmark)
 * [Playground](#playground)
 * [Release notes](#release-notes)
-* [Known issues](#known-issues)
 * [What should I know about links in the document?](#what-should-i-know-about-links-in-the-document)
 * [What is the second argument of `MD::Parser::parse()`?](#what-is-the-second-argument-of-mdparserparse)
 * [What is an `MD::Anchor`?](#what-is-an-mdanchor)
@@ -96,10 +95,6 @@ fully refactored for better performance and be more user-friendly.
 changed rules with spaces, this version fully supports CommonMark standard in this question.
 Methods `isSpaceBefore()`, `isSpaceAfter()` were removed, and spaces are presented as in
 Markdown, so keep it in mind.
-
-# Known issues
-
-You can find a list of know issues [here](./known_issues.md).
 
 # What should I know about links in the document?
 

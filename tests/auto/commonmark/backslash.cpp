@@ -173,8 +173,6 @@ TEST_CASE("019")
 
 TEST_CASE("020")
 {
-    MESSAGE("This test is not strict to CommonMark 0.30.");
-
     const auto doc = load_test(20);
 
     REQUIRE(doc->isEmpty() == false);
@@ -184,9 +182,9 @@ TEST_CASE("020")
 
     auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
     REQUIRE(p->items().size() == 1);
-    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
-    auto t = static_cast<MD::Text *>(p->items().at(0).get());
-    REQUIRE(t->text() == QStringLiteral("<http://example.com?find=*>"));
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
+    auto l = static_cast<MD::Link *>(p->items().at(0).get());
+    REQUIRE(l->url() == QStringLiteral("http://example.com?find=\\*"));
 }
 
 TEST_CASE("021")

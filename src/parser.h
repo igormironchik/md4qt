@@ -54,6 +54,21 @@ class Parser final
 {
 public:
     /*!
+     * \enum MD::Parser::AutolinkUriValidation
+     * \inmodule md4qt
+     * \inheaderfile md4qt/parser.h
+     *
+     * \brief Autolink URI validation mode.
+     *
+     * \value QUrl Use Qt's QUrl validation.
+     * \value CommonMark Use CommonMark's absolute URI grammar.
+     */
+    enum class AutolinkUriValidation {
+        QUrl,
+        CommonMark
+    }; // enum class AutolinkUriValidation
+
+    /*!
      * Default constructor.
      *
      * GitHub's autolinks extension will be added by default.
@@ -111,6 +126,27 @@ public:
                                    bool recursive = true,
                                    const QStringList &ext = {QStringLiteral("md"),
                                                              QStringLiteral("markdown")});
+
+    /*!
+     * Returns autolink URI validation mode.
+     */
+    inline AutolinkUriValidation autolinkUriValidation() const
+    {
+        return m_autolinkUriValidation;
+    }
+
+    /*!
+     * Sets autolink URI validation mode.
+     *
+     * QUrl validation preserves historical md4qt behavior, while CommonMark
+     * accepts all absolute URIs allowed by the CommonMark autolink grammar.
+     *
+     * \a validation Validation mode.
+     */
+    inline void setAutolinkUriValidation(AutolinkUriValidation validation)
+    {
+        m_autolinkUriValidation = validation;
+    }
 
     /*!
      * \inmodule md4qt
@@ -358,6 +394,7 @@ private:
     QVector<QSharedPointer<BlockParser>> m_blockParsers;
     InlineParsers m_allInlineParsers;
     QHash<QChar, InlineParsers> m_inlineParsers;
+    AutolinkUriValidation m_autolinkUriValidation = AutolinkUriValidation::QUrl;
 
     Q_DISABLE_COPY(Parser)
 }; // class Parser
