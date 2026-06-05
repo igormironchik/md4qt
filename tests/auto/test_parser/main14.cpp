@@ -18,6 +18,11 @@
 // isCommonMarkAutolinkUri unit tests
 //
 
+TEST_CASE("commonmark_autolink_uri_invalid_schema")
+{
+    REQUIRE(!MD::isCommonMarkAutolinkUri(QStringLiteral("ht*tp://example.com")));
+}
+
 TEST_CASE("commonmark_autolink_uri_valid_http")
 {
     REQUIRE(MD::isCommonMarkAutolinkUri(QStringLiteral("http://example.com")));
