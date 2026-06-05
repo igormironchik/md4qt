@@ -140,6 +140,8 @@ public:
      *
      * QUrl validation preserves historical md4qt behavior, while CommonMark
      * accepts all absolute URIs allowed by the CommonMark autolink grammar.
+     *
+     * \a validation Validation mode.
      */
     inline void setAutolinkUriValidation(AutolinkUriValidation validation)
     {
