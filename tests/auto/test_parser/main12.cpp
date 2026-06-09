@@ -1211,3 +1211,80 @@ TEST_CASE("ascii_control_in_autolink")
     auto t = static_cast<MD::Text *>(p->items().at(0).get());
     REQUIRE(t->text() == markdown);
 }
+
+/*
+text[^1] text[^2]
+
+[^1]: foot1
+[^2]: foot2
+
+text[^1] text[^2]
+
+*/
+TEST_CASE("369")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/369.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 3);
+
+    {
+        REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+        REQUIRE(p->items().size() == 4);
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+        REQUIRE(p->items().at(1)->type() == MD::ItemType::FootnoteRef);
+        REQUIRE(p->items().at(2)->type() == MD::ItemType::Text);
+        REQUIRE(p->items().at(3)->type() == MD::ItemType::FootnoteRef);
+    }
+
+    {
+        REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
+        REQUIRE(p->items().size() == 4);
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+        REQUIRE(p->items().at(1)->type() == MD::ItemType::FootnoteRef);
+        REQUIRE(p->items().at(2)->type() == MD::ItemType::Text);
+        REQUIRE(p->items().at(3)->type() == MD::ItemType::FootnoteRef);
+    }
+
+    REQUIRE(doc->footnotesMap().size() == 2);
+
+    for (auto it = doc->footnotesMap().cbegin(), last = doc->footnotesMap().cend(); it != last; ++it) {
+        REQUIRE((*it)->items().size() == 1);
+    }
+}
+
+/*
+text[^1] text[^2]
+
+[^1]: foot1
+[^2]: foot2
+*/
+TEST_CASE("370")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/370.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+
+    {
+        REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+        REQUIRE(p->items().size() == 4);
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+        REQUIRE(p->items().at(1)->type() == MD::ItemType::FootnoteRef);
+        REQUIRE(p->items().at(2)->type() == MD::ItemType::Text);
+        REQUIRE(p->items().at(3)->type() == MD::ItemType::FootnoteRef);
+    }
+
+    REQUIRE(doc->footnotesMap().size() == 2);
+
+    for (auto it = doc->footnotesMap().cbegin(), last = doc->footnotesMap().cend(); it != last; ++it) {
+        REQUIRE((*it)->items().size() == 1);
+    }
+}

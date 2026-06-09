@@ -109,6 +109,34 @@ public:
                        QStringList &linksToParse) override;
 
     /*!
+     * Finish things. This method invokes after MD::BlockState::Stop state recieved or at the end of file.
+     *
+     * \a currentLine Current processing line.
+     *
+     * \a stream Stream of the lines.
+     *
+     * \a doc Document.
+     *
+     * \a parent Parent of this block.
+     *
+     * \a ctx Current parsing context.
+     *
+     * \a path Path to Markdown file.
+     *
+     * \a fileName File name of the Markdown file.
+     *
+     * \a linksToParse List of links for further parsing.
+     */
+    void finish(Line &currentLine,
+                TextStream &stream,
+                QSharedPointer<Document> doc,
+                QSharedPointer<Block> parent,
+                Context &ctx,
+                const QString &path,
+                const QString &fileName,
+                QStringList &linksToParse) override;
+
+    /*!
      * Reset state of the block parser for further reuse on the given context.
      *
      * \a ctx Context.

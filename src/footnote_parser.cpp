@@ -309,4 +309,18 @@ bool FootnoteParser::mayBreakParagraph(Line &,
     return true;
 }
 
+void FootnoteParser::finish(Line &currentLine,
+                            TextStream &stream,
+                            QSharedPointer<Document> doc,
+                            QSharedPointer<Block>,
+                            Context &ctx,
+                            const QString &path,
+                            const QString &fileName,
+                            QStringList &linksToParse)
+{
+    if (m_note && ctx.children().size() && ctx.children().front().block()) {
+        BlockParser::process(currentLine, stream, doc, m_note, ctx, path, fileName, linksToParse);
+    }
+}
+
 } /* namespace MD */
