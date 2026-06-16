@@ -8,6 +8,7 @@
 #include <doctest/doctest.h>
 
 // md4qt include.
+#include "algo.h"
 #include "asterisk_emphasis_parser.h"
 #include "atx_heading_parser.h"
 #include "constants.h"
@@ -1287,4 +1288,98 @@ TEST_CASE("370")
     for (auto it = doc->footnotesMap().cbegin(), last = doc->footnotesMap().cend(); it != last; ++it) {
         REQUIRE((*it)->items().size() == 1);
     }
+}
+
+TEST_CASE("block_parser")
+{
+    MD::Parser parser;
+    MD::ParagraphParser p(&parser);
+    MD::Context ctx;
+    REQUIRE(p.currentBlock(ctx) == nullptr);
+}
+
+/*
+text[^1] text[^2]
+
+[^1]: foot1
+[^2]: foot2
+*/
+TEST_CASE("370-1")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/370.md"), QStringLiteral("/"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+
+    {
+        REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+        REQUIRE(p->items().size() == 4);
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+        REQUIRE(p->items().at(1)->type() == MD::ItemType::FootnoteRef);
+        REQUIRE(p->items().at(2)->type() == MD::ItemType::Text);
+        REQUIRE(p->items().at(3)->type() == MD::ItemType::FootnoteRef);
+    }
+
+    REQUIRE(doc->footnotesMap().size() == 2);
+
+    for (auto it = doc->footnotesMap().cbegin(), last = doc->footnotesMap().cend(); it != last; ++it) {
+        REQUIRE((*it)->items().size() == 1);
+    }
+}
+
+TEST_CASE("text_stream")
+{
+    struct My : public MD::Item {
+        MD::ItemType type() const override
+        {
+            return MD::ItemType::UserDefined;
+        }
+
+        QSharedPointer<MD::Item> clone(MD::Document *doc = nullptr) const override
+        {
+            Q_UNUSED(doc)
+
+            return {};
+        }
+    };
+
+    auto doc = QSharedPointer<MD::Document>::create();
+
+    auto my = QSharedPointer<My>::create();
+
+    auto b = QSharedPointer<MD::Blockquote>::create();
+    b->appendItem(my);
+
+    auto l = QSharedPointer<MD::List>::create();
+    auto li = QSharedPointer<MD::ListItem>::create();
+    li->appendItem(my);
+    l->appendItem(li);
+
+    auto t = QSharedPointer<MD::Table>::create();
+    auto r = QSharedPointer<MD::TableRow>::create();
+    t->appendRow(r);
+    auto c = QSharedPointer<MD::TableCell>::create();
+    c->appendItem(my);
+    r->appendCell(c);
+    t->setColumnAlignment(0, MD::Table::AlignLeft);
+
+    auto f = QSharedPointer<MD::Footnote>::create();
+    f->appendItem(my);
+
+    doc->insertFootnote(QStringLiteral("f1"), f);
+
+    doc->appendItem(b);
+    doc->appendItem(l);
+    doc->appendItem(t);
+
+    int count = 0;
+
+    MD::forEach(QVector<MD::ItemType>() << MD::ItemType::UserDefined, doc, [&count](MD::Item *) {
+        ++count;
+    });
+
+    REQUIRE(count == 4);
 }

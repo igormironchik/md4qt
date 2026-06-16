@@ -536,8 +536,9 @@ void HtmlVisitor::onFootnoteRef(FootnoteRef *ref)
 
             closeStyle(ref->closeStyles());
         }
-    } else
+    } else {
         onText(static_cast<Text *>(ref));
+    }
 }
 
 void HtmlVisitor::onListItem(ListItem *i,

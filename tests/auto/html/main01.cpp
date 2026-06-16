@@ -580,3 +580,38 @@ TEST_CASE("024")
         "</li>\n</ul>\n");
     REQUIRE(html == required);
 }
+
+TEST_CASE("025")
+{
+    auto doc = QSharedPointer<MD::Document>::create();
+    auto p = QSharedPointer<MD::Paragraph>::create();
+    auto l1 = QSharedPointer<MD::Link>::create();
+    l1->setText(QStringLiteral("link 1"));
+    l1->setUrl(QStringLiteral("/link1"));
+    auto l2 = QSharedPointer<MD::Link>::create();
+    auto i = QSharedPointer<MD::Image>::create();
+    i->setUrl(QStringLiteral("/img1.png"));
+    l2->setImg(i);
+    l2->setUrl(QStringLiteral("/link2"));
+    p->appendItem(l1);
+    p->appendItem(l2);
+    doc->appendItem(p);
+    auto html = MD::toHtml(doc, false, {}, false);
+    const QString required = QStringLiteral(
+        "<p dir=\"auto\"><a href=\"/link1\">link 1</a><a href=\"/link2\"><img src=\"/img1.png\" alt=\"\" "
+        "style=\"max-width:100%;\" /></a></p>");
+    REQUIRE(html == required);
+}
+
+TEST_CASE("026")
+{
+    auto doc = QSharedPointer<MD::Document>::create();
+    auto p = QSharedPointer<MD::Paragraph>::create();
+    auto r1 = QSharedPointer<MD::FootnoteRef>::create(QStringLiteral("ref1"));
+    r1->setText(QStringLiteral("ref 1"));
+    p->appendItem(r1);
+    doc->appendItem(p);
+    auto html = MD::toHtml(doc, false, {}, false);
+    const QString required = QStringLiteral("<p dir=\"auto\">ref 1</p>");
+    REQUIRE(html == required);
+}
