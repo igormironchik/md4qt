@@ -1288,3 +1288,11 @@ TEST_CASE("370")
         REQUIRE((*it)->items().size() == 1);
     }
 }
+
+TEST_CASE("block_parser")
+{
+    MD::Parser parser;
+    MD::ParagraphParser p(&parser);
+    MD::Context ctx;
+    REQUIRE(p.currentBlock(ctx) == nullptr);
+}
