@@ -1296,3 +1296,35 @@ TEST_CASE("block_parser")
     MD::Context ctx;
     REQUIRE(p.currentBlock(ctx) == nullptr);
 }
+
+/*
+text[^1] text[^2]
+
+[^1]: foot1
+[^2]: foot2
+*/
+TEST_CASE("370-1")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/370.md"), QStringLiteral("/"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+
+    {
+        REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+        REQUIRE(p->items().size() == 4);
+        REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+        REQUIRE(p->items().at(1)->type() == MD::ItemType::FootnoteRef);
+        REQUIRE(p->items().at(2)->type() == MD::ItemType::Text);
+        REQUIRE(p->items().at(3)->type() == MD::ItemType::FootnoteRef);
+    }
+
+    REQUIRE(doc->footnotesMap().size() == 2);
+
+    for (auto it = doc->footnotesMap().cbegin(), last = doc->footnotesMap().cend(); it != last; ++it) {
+        REQUIRE((*it)->items().size() == 1);
+    }
+}
