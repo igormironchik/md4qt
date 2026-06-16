@@ -272,6 +272,7 @@ void Visitor::onTableCell(TableCell *c)
 
             case ItemType::Math:
                 onMath(static_cast<Math *>(it->get()));
+                break;
 
             default:
                 break;
