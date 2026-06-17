@@ -74,7 +74,7 @@ public:
      * GitHub's autolinks extension will be added by default.
      */
     Parser();
-    ~Parser() = default;
+    ~Parser();
 
     /*!
      * Returns Parsed Markdown document.

@@ -16,6 +16,8 @@ FencedCodeParser::FencedCodeParser(Parser *parser)
 {
 }
 
+FencedCodeParser::~FencedCodeParser() = default;
+
 void parseStartOfCode(Line &line,
                       QString *syntax = nullptr,
                       WithPosition *delim = nullptr,

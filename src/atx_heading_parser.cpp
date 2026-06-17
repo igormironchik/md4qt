@@ -21,6 +21,8 @@ ATXHeadingParser::ATXHeadingParser(Parser *parser)
 {
 }
 
+ATXHeadingParser::~ATXHeadingParser() = default;
+
 BlockState ATXHeadingParser::check(Line &currentLine,
                                    TextStream &,
                                    QSharedPointer<Document>,

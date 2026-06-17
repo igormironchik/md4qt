@@ -14,6 +14,8 @@ Context::Context(Context *prnt)
 {
 }
 
+Context::~Context() = default;
+
 void Context::applyParentContext(Context &ctx)
 {
     setIndentColumn(ctx.lastChildIndent());

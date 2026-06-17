@@ -29,8 +29,8 @@ namespace MD
 class LinkImageParser : public InlineParser
 {
 public:
-    LinkImageParser() = default;
-    ~LinkImageParser() override = default;
+    LinkImageParser();
+    ~LinkImageParser() override;
 
     /*!
      * Check if current character (string) is handled by this parser.

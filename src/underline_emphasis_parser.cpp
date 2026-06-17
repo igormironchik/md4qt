@@ -11,6 +11,10 @@ namespace MD
 
 const QChar UnderlineEmphasisParser::m_symbol = QLatin1Char('_');
 
+UnderlineEmphasisParser::UnderlineEmphasisParser() = default;
+
+UnderlineEmphasisParser::~UnderlineEmphasisParser() = default;
+
 const QChar &UnderlineEmphasisParser::symbol() const
 {
     return m_symbol;

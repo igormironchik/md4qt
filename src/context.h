@@ -37,7 +37,7 @@ class Context final
 {
 public:
     explicit Context(Context *prnt = nullptr);
-    ~Context() = default;
+    ~Context();
 
     /*!
      * Returns parent contex.

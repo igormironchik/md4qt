@@ -21,6 +21,8 @@ IndentedCodeParser::IndentedCodeParser(Parser *parser)
 {
 }
 
+IndentedCodeParser::~IndentedCodeParser() = default;
+
 BlockState IndentedCodeParser::check(Line &currentLine,
                                      TextStream &,
                                      QSharedPointer<Document>,

@@ -21,9 +21,11 @@ AlgoVisitor::AlgoVisitor(unsigned int mnl,
                          ItemFunctor f)
     : m_maxNestingLevel(mnl)
     , m_types(t)
-    , m_func(f)
+    , m_func(std::move(f))
 {
 }
+
+AlgoVisitor::~AlgoVisitor() = default;
 
 void AlgoVisitor::walk(QSharedPointer<Document> doc)
 {

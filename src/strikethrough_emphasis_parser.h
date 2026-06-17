@@ -24,8 +24,8 @@ namespace MD
 class StrikethroughEmphasisParser : public EmphasisParser
 {
 public:
-    StrikethroughEmphasisParser() = default;
-    ~StrikethroughEmphasisParser() override = default;
+    StrikethroughEmphasisParser();
+    ~StrikethroughEmphasisParser() override;
 
     /*!
      * Returns delimiter character for this kind of emphasis.

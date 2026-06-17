@@ -29,10 +29,10 @@ class InlineContext;
 class EmphasisParser : public InlineParser
 {
 protected:
-    EmphasisParser() = default;
+    EmphasisParser();
 
 public:
-    ~EmphasisParser() override = default;
+    ~EmphasisParser() override;
 
     /*!
      * Check if current character (string) is handled by this parser.

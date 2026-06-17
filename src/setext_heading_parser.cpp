@@ -20,6 +20,8 @@ SetextHeadingParser::SetextHeadingParser(Parser *parser)
 {
 }
 
+SetextHeadingParser::~SetextHeadingParser() = default;
+
 inline bool isSetextUnderline(Line &line)
 {
     const auto rollback = line.makeRollbackObject();

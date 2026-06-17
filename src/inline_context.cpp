@@ -9,8 +9,8 @@
 namespace MD
 {
 
-InlineContext::InlineContext()
-{
-}
+InlineContext::InlineContext() = default;
+
+InlineContext::~InlineContext() = default;
 
 } /* namespace MD */

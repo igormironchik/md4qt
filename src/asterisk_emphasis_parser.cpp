@@ -11,6 +11,10 @@ namespace MD
 
 const QChar AsteriskEmphasisParser::m_symbol = QLatin1Char('*');
 
+AsteriskEmphasisParser::AsteriskEmphasisParser() = default;
+
+AsteriskEmphasisParser::~AsteriskEmphasisParser() = default;
+
 const QChar &AsteriskEmphasisParser::symbol() const
 {
     return m_symbol;

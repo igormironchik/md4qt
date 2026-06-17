@@ -13,6 +13,10 @@ namespace MD
 // WithPosition
 //
 
+WithPosition::WithPosition() = default;
+
+WithPosition::~WithPosition() = default;
+
 WithPosition::WithPosition(qsizetype startColumn,
                            qsizetype startLine,
                            qsizetype endColumn,
@@ -86,6 +90,14 @@ bool operator==(const WithPosition &l,
 }
 
 //
+// Item
+//
+
+Item::Item() = default;
+
+Item::~Item() = default;
+
+//
 // StyleDelim
 //
 
@@ -101,6 +113,8 @@ StyleDelim::StyleDelim(int s,
     , m_style(s)
 {
 }
+
+StyleDelim::~StyleDelim() = default;
 
 int StyleDelim::style() const
 {
@@ -121,6 +135,10 @@ bool operator==(const StyleDelim &l,
 //
 // ItemWithOpts
 //
+
+ItemWithOpts::ItemWithOpts() = default;
+
+ItemWithOpts::~ItemWithOpts() = default;
 
 void ItemWithOpts::applyItemWithOpts(const ItemWithOpts &other)
 {
@@ -166,6 +184,10 @@ ItemWithOpts::Styles &ItemWithOpts::closeStyles()
 // PageBreak
 //
 
+PageBreak::PageBreak() = default;
+
+PageBreak::~PageBreak() = default;
+
 ItemType PageBreak::type() const
 {
     return ItemType::PageBreak;
@@ -181,6 +203,10 @@ QSharedPointer<Item> PageBreak::clone(Document *doc) const
 //
 // HorizontalLine
 //
+
+HorizontalLine::HorizontalLine() = default;
+
+HorizontalLine::~HorizontalLine() = default;
 
 ItemType HorizontalLine::type() const
 {
@@ -206,6 +232,8 @@ Anchor::Anchor(const QString &l)
 {
 }
 
+Anchor::~Anchor() = default;
+
 QSharedPointer<Item> Anchor::clone(Document *doc) const
 {
     Q_UNUSED(doc)
@@ -226,6 +254,10 @@ const QString &Anchor::label() const
 //
 // RawHtml
 //
+
+RawHtml::RawHtml() = default;
+
+RawHtml::~RawHtml() = default;
 
 QSharedPointer<Item> RawHtml::clone(Document *doc) const
 {
@@ -256,6 +288,10 @@ void RawHtml::setText(const QString &t)
 //
 // Text
 //
+
+Text::Text() = default;
+
+Text::~Text() = default;
 
 void Text::applyText(const Text &t)
 {
@@ -294,6 +330,10 @@ void Text::setText(const QString &t)
 // LineBreak
 //
 
+LineBreak::LineBreak() = default;
+
+LineBreak::~LineBreak() = default;
+
 QSharedPointer<Item> LineBreak::clone(Document *doc) const
 {
     Q_UNUSED(doc)
@@ -312,6 +352,10 @@ ItemType LineBreak::type() const
 //
 // Block
 //
+
+Block::Block() = default;
+
+Block::~Block() = default;
 
 void Block::applyBlock(const Block &other,
                        Document *doc)
@@ -364,6 +408,10 @@ bool Block::isEmpty() const
 // Paragraph
 //
 
+Paragraph::Paragraph() = default;
+
+Paragraph::~Paragraph() = default;
+
 QSharedPointer<Item> Paragraph::clone(Document *doc) const
 {
     auto p = QSharedPointer<Paragraph>::create();
@@ -385,6 +433,8 @@ Heading::Heading()
     : m_text(new Paragraph)
 {
 }
+
+Heading::~Heading() = default;
 
 QSharedPointer<Item> Heading::clone(Document *doc) const
 {
@@ -485,6 +535,10 @@ void Heading::setLabelVariants(const LabelsVector &vars)
 // Blockquote
 //
 
+Blockquote::Blockquote() = default;
+
+Blockquote::~Blockquote() = default;
+
 QSharedPointer<Item> Blockquote::clone(Document *doc) const
 {
     auto b = QSharedPointer<Blockquote>::create();
@@ -512,6 +566,10 @@ Blockquote::Delims &Blockquote::delims()
 //
 // ListItem
 //
+
+ListItem::ListItem() = default;
+
+ListItem::~ListItem() = default;
 
 QSharedPointer<Item> ListItem::clone(Document *doc) const
 {
@@ -607,6 +665,10 @@ void ListItem::setTaskDelim(const WithPosition &d)
 // List
 //
 
+List::List() = default;
+
+List::~List() = default;
+
 QSharedPointer<Item> List::clone(Document *doc) const
 {
     auto l = QSharedPointer<List>::create();
@@ -628,6 +690,8 @@ LinkBase::LinkBase()
     : m_p(new Paragraph)
 {
 }
+
+LinkBase::~LinkBase() = default;
 
 void LinkBase::applyLinkBase(const LinkBase &other,
                              Document *doc)
@@ -712,6 +776,10 @@ void LinkBase::setUrlPos(const WithPosition &pos)
 // Image
 //
 
+Image::Image() = default;
+
+Image::~Image() = default;
+
 QSharedPointer<Item> Image::clone(Document *doc) const
 {
     auto i = QSharedPointer<Image>::create();
@@ -734,6 +802,8 @@ Link::Link()
     , m_img(new Image)
 {
 }
+
+Link::~Link() = default;
 
 QSharedPointer<Item> Link::clone(Document *doc) const
 {
@@ -772,6 +842,8 @@ Code::Code(const QString &t,
     , m_fensed(fensedCode)
 {
 }
+
+Code::~Code() = default;
 
 void Code::applyCode(const Code &other)
 {
@@ -883,6 +955,8 @@ Math::Math()
 {
 }
 
+Math::~Math() = default;
+
 QSharedPointer<Item> Math::clone(Document *doc) const
 {
     Q_UNUSED(doc)
@@ -912,6 +986,10 @@ void Math::setExpr(const QString &e)
 // TableCell
 //
 
+TableCell::TableCell() = default;
+
+TableCell::~TableCell() = default;
+
 QSharedPointer<Item> TableCell::clone(Document *doc) const
 {
     auto c = QSharedPointer<TableCell>::create();
@@ -928,6 +1006,10 @@ ItemType TableCell::type() const
 //
 // TableRow
 //
+
+TableRow::TableRow() = default;
+
+TableRow::~TableRow() = default;
 
 QSharedPointer<Item> TableRow::clone(Document *doc) const
 {
@@ -964,6 +1046,10 @@ bool TableRow::isEmpty() const
 //
 // Table
 //
+
+Table::Table() = default;
+
+Table::~Table() = default;
 
 QSharedPointer<Item> Table::clone(Document *doc) const
 {
@@ -1030,6 +1116,8 @@ FootnoteRef::FootnoteRef(const QString &i)
 {
 }
 
+FootnoteRef::~FootnoteRef() = default;
+
 QSharedPointer<Item> FootnoteRef::clone(Document *doc) const
 {
     Q_UNUSED(doc)
@@ -1065,6 +1153,10 @@ void FootnoteRef::setIdPos(const WithPosition &pos)
 // Footnote
 //
 
+Footnote::Footnote() = default;
+
+Footnote::~Footnote() = default;
+
 QSharedPointer<Item> Footnote::clone(Document *doc) const
 {
     auto f = QSharedPointer<Footnote>::create();
@@ -1092,6 +1184,10 @@ void Footnote::setIdPos(const WithPosition &pos)
 //
 // Document
 //
+
+Document::Document() = default;
+
+Document::~Document() = default;
 
 ItemType Document::type() const
 {

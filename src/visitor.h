@@ -33,8 +33,8 @@ public:
     /*!
      * Default constructor.
      */
-    Visitor() = default;
-    virtual ~Visitor() = default;
+    Visitor();
+    virtual ~Visitor();
 
     /*!
      * Walk through the document.

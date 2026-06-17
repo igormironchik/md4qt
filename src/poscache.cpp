@@ -100,6 +100,10 @@ bool comparePosRangeUpper(const details::PosRange &range,
 // PosCache
 //
 
+PosCache::PosCache() = default;
+
+PosCache::~PosCache() = default;
+
 void PosCache::initialize(QSharedPointer<MD::Document> doc)
 {
     m_cache.clear();

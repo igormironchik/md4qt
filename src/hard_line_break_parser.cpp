@@ -14,6 +14,10 @@
 namespace MD
 {
 
+HardLineBreakParser::HardLineBreakParser() = default;
+
+HardLineBreakParser::~HardLineBreakParser() = default;
+
 bool HardLineBreakParser::check(Line &line,
                                 ParagraphStream &stream,
                                 InlineContext &ctx,

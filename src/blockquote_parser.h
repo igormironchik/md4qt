@@ -30,7 +30,7 @@ class BlockquoteParser : public BlockParser
 {
 public:
     explicit BlockquoteParser(Parser *parser);
-    ~BlockquoteParser() override = default;
+    ~BlockquoteParser() override;
 
     /*!
      * Returns check state for the current line and block type. This method should return BlockState::None if

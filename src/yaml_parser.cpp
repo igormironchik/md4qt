@@ -10,6 +10,36 @@
 namespace MD
 {
 
+//
+// YAMLHeader
+//
+
+YAMLHeader::YAMLHeader() = default;
+
+YAMLHeader::~YAMLHeader() = default;
+
+ItemType YAMLHeader::type() const
+{
+    return static_cast<ItemType>(static_cast<int>(ItemType::UserDefined) + 1);
+}
+
+QSharedPointer<Item> YAMLHeader::clone(Document *doc) const
+{
+    Q_UNUSED(doc)
+
+    auto h = QSharedPointer<YAMLHeader>::create();
+    h->applyPositions(*this);
+    h->setYaml(yaml());
+    h->setStartDelim(startDelim());
+    h->setEndDelim(endDelim());
+
+    return h;
+}
+
+//
+// YAMLParser
+//
+
 static const QString s_startString = QStringLiteral("---");
 static const QString s_endString = QStringLiteral("...");
 
@@ -17,6 +47,8 @@ YAMLParser::YAMLParser(Parser *parser)
     : BlockParser(parser)
 {
 }
+
+YAMLParser::~YAMLParser() = default;
 
 BlockState YAMLParser::check(Line &currentLine,
                              TextStream &stream,

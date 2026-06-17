@@ -27,34 +27,20 @@ namespace MD
 class YAMLHeader : public Item
 {
 public:
-    YAMLHeader() = default;
-    ~YAMLHeader() override = default;
+    YAMLHeader();
+    ~YAMLHeader() override;
 
     /*!
      * Returns type of the item.
      */
-    ItemType type() const override
-    {
-        return static_cast<ItemType>(static_cast<int>(ItemType::UserDefined) + 1);
-    }
+    ItemType type() const override;
 
     /*!
      * Clone this item.
      *
      * \a doc Parent of new item.
      */
-    QSharedPointer<Item> clone(Document *doc = nullptr) const override
-    {
-        Q_UNUSED(doc)
-
-        auto h = QSharedPointer<YAMLHeader>::create();
-        h->applyPositions(*this);
-        h->setYaml(yaml());
-        h->setStartDelim(startDelim());
-        h->setEndDelim(endDelim());
-
-        return h;
-    }
+    QSharedPointer<Item> clone(Document *doc = nullptr) const override;
 
     /*!
      * Returns YAML content.
@@ -142,7 +128,7 @@ class YAMLParser : public BlockParser
 {
 public:
     explicit YAMLParser(Parser *parser);
-    ~YAMLParser() override = default;
+    ~YAMLParser() override;
 
     /*!
      * Returns check state for the current line and block type. This method should return BlockState::None if

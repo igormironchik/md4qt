@@ -69,7 +69,7 @@ public:
     AlgoVisitor(unsigned int mnl,
                 const QVector<ItemType> &t,
                 ItemFunctor f);
-    ~AlgoVisitor() override = default;
+    ~AlgoVisitor() override;
 
     /*!
      * Walk through the document.

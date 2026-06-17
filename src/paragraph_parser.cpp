@@ -25,6 +25,8 @@ ParagraphParser::ParagraphParser(Parser *parser)
 {
 }
 
+ParagraphParser::~ParagraphParser() = default;
+
 void ParagraphParser::clearRefLink()
 {
     m_reference.reset();

@@ -14,6 +14,8 @@ BlockquoteParser::BlockquoteParser(Parser *parser)
 {
 }
 
+BlockquoteParser::~BlockquoteParser() = default;
+
 void BlockquoteParser::processGreaterSign(Line &currentLine,
                                           Context &ctx)
 {

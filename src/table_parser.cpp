@@ -152,6 +152,8 @@ TableParser::TableParser(Parser *parser)
 {
 }
 
+TableParser::~TableParser() = default;
+
 BlockState TableParser::check(Line &currentLine,
                               TextStream &,
                               QSharedPointer<Document>,

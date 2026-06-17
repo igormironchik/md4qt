@@ -24,8 +24,8 @@ namespace MD
 class UnderlineEmphasisParser : public AsteriskEmphasisParser
 {
 public:
-    UnderlineEmphasisParser() = default;
-    ~UnderlineEmphasisParser() override = default;
+    UnderlineEmphasisParser();
+    ~UnderlineEmphasisParser() override;
 
     /*!
      * Returns delimiter character for this kind of emphasis.

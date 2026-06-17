@@ -106,6 +106,10 @@ inline bool pushIfClosed(const QString &html,
     return false;
 }
 
+InlineHtmlParser::InlineHtmlParser() = default;
+
+InlineHtmlParser::~InlineHtmlParser() = default;
+
 bool InlineHtmlParser::check(Line &line,
                              ParagraphStream &stream,
                              InlineContext &ctx,
@@ -451,9 +455,11 @@ bool InlineHtmlParser::check(Line &line,
                             }
                         } break;
 
+                        // GCOVR_EXCL_START
                         default: {
                             doBreak = true;
                         } break;
+                            // GCOVR_EXCL_STOP
                         }
 
                         if (doBreak) {

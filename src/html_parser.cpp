@@ -20,6 +20,8 @@ HTMLParser::HTMLParser(Parser *parser)
 {
 }
 
+HTMLParser::~HTMLParser() = default;
+
 BlockState HTMLParser::check(Line &currentLine,
                              TextStream &,
                              QSharedPointer<Document>,

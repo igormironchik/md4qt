@@ -25,7 +25,7 @@ class ATXHeadingParser : public BlockParser
 {
 public:
     explicit ATXHeadingParser(Parser *parser);
-    virtual ~ATXHeadingParser() = default;
+    virtual ~ATXHeadingParser();
 
     /*!
      * Returns check state for the current line and block type. This method should return BlockState::None if

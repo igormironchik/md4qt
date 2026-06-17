@@ -25,7 +25,7 @@ class FootnoteParser : public BlockParser
 {
 public:
     explicit FootnoteParser(Parser *parser);
-    ~FootnoteParser() override = default;
+    ~FootnoteParser() override;
 
     /*!
      * Returns check state for the current line and block type. This method should return BlockState::None if

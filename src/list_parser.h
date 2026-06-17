@@ -25,7 +25,7 @@ class ListParser : public BlockParser
 {
 public:
     explicit ListParser(Parser *parser);
-    ~ListParser() override = default;
+    ~ListParser() override;
 
     /*!
      * Returns check state for the current line and block type. This method should return BlockState::None if

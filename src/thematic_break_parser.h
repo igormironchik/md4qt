@@ -25,7 +25,7 @@ class ThematicBreakParser : public BlockParser
 {
 public:
     explicit ThematicBreakParser(Parser *parser);
-    ~ThematicBreakParser() override = default;
+    ~ThematicBreakParser() override;
 
     /*!
      * Returns check state for the current line and block type. This method should return BlockState::None if

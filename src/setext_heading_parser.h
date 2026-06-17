@@ -25,7 +25,7 @@ class SetextHeadingParser : public BlockParser
 {
 public:
     explicit SetextHeadingParser(Parser *parser);
-    ~SetextHeadingParser() override = default;
+    ~SetextHeadingParser() override;
 
     /*!
      * Returns check state for the current line and block type. This method should return BlockState::None if

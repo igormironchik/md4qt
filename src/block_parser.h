@@ -55,7 +55,7 @@ protected:
     explicit BlockParser(Parser *parser);
 
 public:
-    virtual ~BlockParser() = default;
+    virtual ~BlockParser();
 
     /*!
      * Returns check state for the current line and block type. This method should return BlockState::None if

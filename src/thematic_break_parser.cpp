@@ -15,6 +15,8 @@ ThematicBreakParser::ThematicBreakParser(Parser *parser)
 {
 }
 
+ThematicBreakParser::~ThematicBreakParser() = default;
+
 BlockState ThematicBreakParser::check(Line &currentLine,
                                       TextStream &,
                                       QSharedPointer<Document>,

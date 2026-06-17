@@ -182,8 +182,8 @@ public:
     /*!
      * Default constructor.
      */
-    PosCache() = default;
-    ~PosCache() override = default;
+    PosCache();
+    ~PosCache() override;
 
     /*!
      * Initialize m_cache with the given document.

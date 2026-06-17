@@ -25,7 +25,7 @@ class IndentedCodeParser : public BlockParser
 {
 public:
     explicit IndentedCodeParser(Parser *parser);
-    virtual ~IndentedCodeParser() = default;
+    virtual ~IndentedCodeParser();
 
     /*!
      * Returns check state for the current line and block type. This method should return BlockState::None if

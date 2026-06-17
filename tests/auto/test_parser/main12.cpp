@@ -1383,3 +1383,45 @@ TEST_CASE("text_stream")
 
     REQUIRE(count == 4);
 }
+
+/*
+text <?a?> <!a> <![CDATA[a]]>
+
+*/
+TEST_CASE("371")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/371.md"), QStringLiteral("/"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
+    auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
+    REQUIRE(p->items().size() == 6);
+
+    REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
+
+    {
+        REQUIRE(p->items().at(1)->type() == MD::ItemType::RawHtml);
+        auto h = static_cast<MD::RawHtml *>(p->items().at(1).get());
+        REQUIRE(h->text() == QStringLiteral("<?a?>"));
+    }
+
+    REQUIRE(p->items().at(2)->type() == MD::ItemType::Text);
+
+    {
+        REQUIRE(p->items().at(3)->type() == MD::ItemType::RawHtml);
+        auto h = static_cast<MD::RawHtml *>(p->items().at(3).get());
+        REQUIRE(h->text() == QStringLiteral("<!a>"));
+    }
+
+    REQUIRE(p->items().at(4)->type() == MD::ItemType::Text);
+
+    {
+        REQUIRE(p->items().at(5)->type() == MD::ItemType::RawHtml);
+        auto h = static_cast<MD::RawHtml *>(p->items().at(5).get());
+        REQUIRE(h->text() == QStringLiteral("<![CDATA[a]]>"));
+    }
+}

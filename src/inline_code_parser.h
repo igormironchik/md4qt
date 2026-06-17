@@ -24,8 +24,8 @@ namespace MD
 class InlineCodeParser : public InlineParser
 {
 public:
-    InlineCodeParser() = default;
-    ~InlineCodeParser() override = default;
+    InlineCodeParser();
+    ~InlineCodeParser() override;
 
     /*!
      * Check if current character (string) is handled by this parser.

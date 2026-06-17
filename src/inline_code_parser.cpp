@@ -15,6 +15,10 @@
 namespace MD
 {
 
+InlineCodeParser::InlineCodeParser() = default;
+
+InlineCodeParser::~InlineCodeParser() = default;
+
 bool InlineCodeParser::check(Line &line,
                              ParagraphStream &stream,
                              InlineContext &ctx,

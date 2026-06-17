@@ -40,6 +40,10 @@ QString readURI(Line &line)
     return QString();
 }
 
+AutolinkParser::AutolinkParser() = default;
+
+AutolinkParser::~AutolinkParser() = default;
+
 bool AutolinkParser::check(Line &line,
                            ParagraphStream &,
                            InlineContext &ctx,

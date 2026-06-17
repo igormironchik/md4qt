@@ -31,10 +31,10 @@ class ReverseSolidusHandler;
 class InlineParser
 {
 protected:
-    InlineParser() = default;
+    InlineParser();
 
 public:
-    virtual ~InlineParser() = default;
+    virtual ~InlineParser();
 
     /*!
      * Check if current character (string) is handled by this parser.
@@ -76,18 +76,14 @@ public:
      * Push state of the parser on stack. For some parsers this is needed, as links, for example,
      * parses its description part as paragraph. This is a subject for implementation of parser...
      */
-    virtual void pushState()
-    {
-    }
+    virtual void pushState();
 
     /*!
      * Pop state of the parser from stack.
      *
      * \sa pushState()
      */
-    virtual void popState()
-    {
-    }
+    virtual void popState();
 
     /*!
      * Returns string with all symbols that can start this kind of inline.

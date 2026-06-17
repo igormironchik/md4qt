@@ -27,7 +27,7 @@ class ParagraphParser : public BlockParser
 {
 public:
     explicit ParagraphParser(Parser *parser);
-    ~ParagraphParser() override = default;
+    ~ParagraphParser() override;
 
     /*!
      * Returns check state for the current line and block type. This method should return BlockState::None if

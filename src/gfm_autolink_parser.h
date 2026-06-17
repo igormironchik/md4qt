@@ -26,7 +26,7 @@ class GfmAutolinkParser : public InlineParser
 {
 public:
     explicit GfmAutolinkParser(QSharedPointer<LinkImageParser> linkParser);
-    ~GfmAutolinkParser() override = default;
+    ~GfmAutolinkParser() override;
 
     /*!
      * Check if current character (string) is handled by this parser.

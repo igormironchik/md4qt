@@ -24,8 +24,8 @@ namespace MD
 class HardLineBreakParser : public InlineParser
 {
 public:
-    HardLineBreakParser() = default;
-    ~HardLineBreakParser() override = default;
+    HardLineBreakParser();
+    ~HardLineBreakParser() override;
 
     /*!
      * Check if current character (string) is handled by this parser.

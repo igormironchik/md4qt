@@ -36,6 +36,10 @@ inline void appendCode(const Line &line,
     }
 }
 
+InlineMathParser::InlineMathParser() = default;
+
+InlineMathParser::~InlineMathParser() = default;
+
 bool InlineMathParser::check(Line &line,
                              ParagraphStream &stream,
                              InlineContext &ctx,

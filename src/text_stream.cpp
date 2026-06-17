@@ -25,9 +25,40 @@ Line::Line(QStringView v,
 {
 }
 
+Line::State::State()
+{
+}
+
+Line::State::State(qsizetype column,
+                   qsizetype pos)
+    : m_column(column)
+    , m_pos(pos)
+{
+}
+
+Line::RollbackLine::RollbackLine(Line &line)
+    : m_line(line)
+    , m_state(m_line.currentState())
+{
+}
+
+Line::RollbackLine::~RollbackLine()
+{
+    if (m_enabled) {
+        m_line.restoreState(&m_state);
+    }
+}
+
+void Line::RollbackLine::enable(bool on)
+{
+    m_enabled = on;
+}
+
 //
 // TextStreamBase
 //
+
+TextStreamBase::~TextStreamBase() = default;
 
 Line TextStreamBase::currentLine()
 {
@@ -199,6 +230,16 @@ void ParagraphStream::restoreStateBefore(const State &st)
 ParagraphStream::State ParagraphStream::currentState() const
 {
     return m_currentState;
+}
+
+bool ParagraphStream::State::operator==(const State &other) const
+{
+    return m_lineNumber == other.m_lineNumber;
+}
+
+bool ParagraphStream::State::operator!=(const State &other) const
+{
+    return !(operator==(other));
 }
 
 } /* namespace MD */

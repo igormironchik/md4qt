@@ -25,7 +25,7 @@ class FencedCodeParser : public BlockParser
 {
 public:
     explicit FencedCodeParser(Parser *parser);
-    virtual ~FencedCodeParser() = default;
+    virtual ~FencedCodeParser();
 
     /*!
      * Returns check state for the current line and block type. This method should return BlockState::None if

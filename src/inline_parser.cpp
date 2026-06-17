@@ -9,4 +9,16 @@
 namespace MD
 {
 
+InlineParser::InlineParser() = default;
+
+InlineParser::~InlineParser() = default;
+
+void InlineParser::pushState()
+{
+}
+
+void InlineParser::popState()
+{
+}
+
 } /* namespace MD */

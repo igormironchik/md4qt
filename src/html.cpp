@@ -16,6 +16,10 @@ namespace details
 // HtmlVisitor
 //
 
+HtmlVisitor::HtmlVisitor() = default;
+
+HtmlVisitor::~HtmlVisitor() = default;
+
 QString HtmlVisitor::toHtml(QSharedPointer<Document> doc,
                             const QString &footnoteBackLinkContent,
                             bool wrappedInArticle,
@@ -78,8 +82,10 @@ void HtmlVisitor::openStyle(const typename ItemWithOpts::Styles &styles)
             m_html.push_back(QStringLiteral("<del>"));
             break;
 
+        // GCOVR_EXCL_START
         default:
             break;
+            // GCOVR_EXCL_STOP
         }
     }
 }
@@ -100,8 +106,10 @@ void HtmlVisitor::closeStyle(const typename ItemWithOpts::Styles &styles)
             m_html.push_back(QStringLiteral("</del>"));
             break;
 
+        // GCOVR_EXCL_START
         default:
             break;
+            // GCOVR_EXCL_STOP
         }
     }
 }
@@ -177,8 +185,10 @@ void HtmlVisitor::onHeading(Heading *h)
         onHeading(h, QStringLiteral("h") + QString::number(h->level()));
         break;
 
+    // GCOVR_EXCL_START
     default:
         break;
+        // GCOVR_EXCL_STOP
     }
 
     if (!m_justCollectFootnoteRefs) {
@@ -708,8 +718,10 @@ QString HtmlVisitor::tableAlignmentToHtml(typename Table::Alignment a)
         html.push_back(QStringLiteral(" align=\"right\""));
         break;
 
+    // GCOVR_EXCL_START
     default:
         break;
+        // GCOVR_EXCL_STOP
     }
 
     return html;

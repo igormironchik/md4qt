@@ -26,7 +26,7 @@ class TableParser : public BlockParser
 {
 public:
     explicit TableParser(Parser *parser);
-    ~TableParser() override = default;
+    ~TableParser() override;
 
     /*!
      * Returns check state for the current line and block type. This method should return BlockState::None if

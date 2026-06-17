@@ -16,6 +16,8 @@ BlockParser::BlockParser(Parser *parser)
 {
 }
 
+BlockParser::~BlockParser() = default;
+
 Parser *BlockParser::parser() const
 {
     return m_parser;

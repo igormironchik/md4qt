@@ -11,6 +11,10 @@ namespace MD
 
 const QChar StrikethroughEmphasisParser::m_symbol = QLatin1Char('~');
 
+StrikethroughEmphasisParser::StrikethroughEmphasisParser() = default;
+
+StrikethroughEmphasisParser::~StrikethroughEmphasisParser() = default;
+
 const QChar &StrikethroughEmphasisParser::symbol() const
 {
     return m_symbol;

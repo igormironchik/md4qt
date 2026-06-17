@@ -948,6 +948,10 @@ bool LinkImageParser::checkRefLinkImage(const State::Delim &startDelim,
     return false;
 }
 
+LinkImageParser::LinkImageParser() = default;
+
+LinkImageParser::~LinkImageParser() = default;
+
 bool LinkImageParser::check(Line &line,
                             ParagraphStream &stream,
                             InlineContext &ctx,

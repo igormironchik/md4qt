@@ -73,6 +73,8 @@ FootnoteParser::FootnoteParser(Parser *parser)
 {
 }
 
+FootnoteParser::~FootnoteParser() = default;
+
 BlockState FootnoteParser::check(Line &currentLine,
                                  TextStream &,
                                  QSharedPointer<Document> doc,

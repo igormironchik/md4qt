@@ -13,6 +13,10 @@ namespace MD
 // Visitor
 //
 
+Visitor::Visitor() = default;
+
+Visitor::~Visitor() = default;
+
 void Visitor::process(QSharedPointer<Document> d)
 {
     m_anchors.clear();
@@ -134,8 +138,10 @@ void Visitor::onParagraph(Paragraph *p,
                 onRawHtml(static_cast<RawHtml *>(it->get()));
                 break;
 
+            // GCOVR_EXCL_START
             default:
                 break;
+                // GCOVR_EXCL_STOP
             }
         }
     }
@@ -180,8 +186,10 @@ void Visitor::onBlockquote(Blockquote *b)
                 onRawHtml(static_cast<RawHtml *>(it->get()));
                 break;
 
+            // GCOVR_EXCL_START
             default:
                 break;
+                // GCOVR_EXCL_STOP
             }
         }
     }
@@ -230,8 +238,10 @@ void Visitor::onListItem(ListItem *i,
                 onHorizontalLine(static_cast<HorizontalLine *>(it->get()));
                 break;
 
+            // GCOVR_EXCL_START
             default:
                 break;
+                // GCOVR_EXCL_STOP
             }
         }
 
@@ -274,8 +284,10 @@ void Visitor::onTableCell(TableCell *c)
                 onMath(static_cast<Math *>(it->get()));
                 break;
 
+            // GCOVR_EXCL_START
             default:
                 break;
+                // GCOVR_EXCL_STOP
             }
         }
     }
@@ -320,8 +332,10 @@ void Visitor::onFootnote(Footnote *f)
                 onHorizontalLine(static_cast<HorizontalLine *>(it->get()));
                 break;
 
+            // GCOVR_EXCL_START
             default:
                 break;
+                // GCOVR_EXCL_STOP
             }
         }
     }

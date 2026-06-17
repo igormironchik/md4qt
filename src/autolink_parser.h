@@ -24,8 +24,8 @@ namespace MD
 class AutolinkParser : public InlineParser
 {
 public:
-    AutolinkParser() = default;
-    ~AutolinkParser() override = default;
+    AutolinkParser();
+    ~AutolinkParser() override;
 
     /*!
      * Check if current character (string) is handled by this parser.

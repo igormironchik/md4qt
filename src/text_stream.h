@@ -140,16 +140,9 @@ public:
      * State of the line.
      */
     struct State {
-        State()
-        {
-        }
-
+        State();
         State(qsizetype column,
-              qsizetype pos)
-            : m_column(column)
-            , m_pos(pos)
-        {
-        }
+              qsizetype pos);
 
         /*!
          * Column.
@@ -213,23 +206,10 @@ public:
      * Auxiliary struct to make a rollback of line state on destruction. On construction state will be saved.
      */
     struct RollbackLine {
-        explicit RollbackLine(Line &line)
-            : m_line(line)
-            , m_state(m_line.currentState())
-        {
-        }
+        explicit RollbackLine(Line &line);
+        ~RollbackLine();
 
-        ~RollbackLine()
-        {
-            if (m_enabled) {
-                m_line.restoreState(&m_state);
-            }
-        }
-
-        void enable(bool on = true)
-        {
-            m_enabled = on;
-        }
+        void enable(bool on = true);
 
     private:
         Line &m_line;
@@ -310,7 +290,7 @@ private:
 class TextStreamBase
 {
 protected:
-    virtual ~TextStreamBase() = default;
+    virtual ~TextStreamBase();
 
 public:
     /*!
@@ -485,15 +465,8 @@ public:
          */
         qsizetype m_lineNumber = 0;
 
-        bool operator==(const State &other) const
-        {
-            return m_lineNumber == other.m_lineNumber;
-        }
-
-        bool operator!=(const State &other) const
-        {
-            return !(operator==(other));
-        }
+        bool operator==(const State &other) const;
+        bool operator!=(const State &other) const;
     }; // struct state
 
     /*!

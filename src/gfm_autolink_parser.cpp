@@ -128,6 +128,8 @@ GfmAutolinkParser::GfmAutolinkParser(QSharedPointer<LinkImageParser> linkParser)
 {
 }
 
+GfmAutolinkParser::~GfmAutolinkParser() = default;
+
 bool GfmAutolinkParser::check(Line &line,
                               ParagraphStream &stream,
                               InlineContext &ctx,

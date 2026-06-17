@@ -24,8 +24,8 @@ namespace MD
 class InlineMathParser : public InlineParser
 {
 public:
-    InlineMathParser() = default;
-    ~InlineMathParser() override = default;
+    InlineMathParser();
+    ~InlineMathParser() override;
 
     /*!
      * Check if current character (string) is handled by this parser.

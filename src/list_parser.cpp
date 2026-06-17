@@ -19,6 +19,8 @@ ListParser::ListParser(Parser *parser)
 {
 }
 
+ListParser::~ListParser() = default;
+
 bool isOrderedList(Line &line,
                    int *num = nullptr,
                    int *len = nullptr,

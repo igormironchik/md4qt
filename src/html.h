@@ -78,8 +78,8 @@ public:
     /*!
      * Default constructor.
      */
-    HtmlVisitor() = default;
-    ~HtmlVisitor() override = default;
+    HtmlVisitor();
+    ~HtmlVisitor() override;
 
     /*!
      * Walk through the document.

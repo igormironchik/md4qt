@@ -24,8 +24,8 @@ namespace MD
 class InlineHtmlParser : public InlineParser
 {
 public:
-    InlineHtmlParser() = default;
-    ~InlineHtmlParser() override = default;
+    InlineHtmlParser();
+    ~InlineHtmlParser() override;
 
     /*!
      * Check if current character (string) is handled by this parser.

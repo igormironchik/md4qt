@@ -30,7 +30,7 @@ class InlineContext final
 {
 public:
     InlineContext();
-    ~InlineContext() = default;
+    ~InlineContext();
 
     /*!
      * \class MD::InlineContext::Delimiter

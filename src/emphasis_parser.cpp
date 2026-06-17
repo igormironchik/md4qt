@@ -16,6 +16,10 @@
 namespace MD
 {
 
+EmphasisParser::EmphasisParser() = default;
+
+EmphasisParser::~EmphasisParser() = default;
+
 bool EmphasisParser::check(Line &currentLine,
                            ParagraphStream &,
                            InlineContext &ctx,

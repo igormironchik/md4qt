@@ -53,6 +53,8 @@ Parser::Parser()
     setInlineParsers(makeDefaultInlineParsersPipeline());
 }
 
+Parser::~Parser() = default;
+
 QSharedPointer<Document> Parser::parse(const QString &fileName,
                                        bool recursive,
                                        const QStringList &ext)

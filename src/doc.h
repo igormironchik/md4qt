@@ -98,8 +98,8 @@ public:
      *
      * All positions will be set to -1.
      */
-    WithPosition() = default;
-    virtual ~WithPosition() = default;
+    WithPosition();
+    virtual ~WithPosition();
 
     /*!
      * Initializing constructor with all positions.
@@ -232,10 +232,10 @@ protected:
     /*!
      * Default constructor.
      */
-    Item() = default;
+    Item();
 
 public:
-    ~Item() override = default;
+    ~Item() override;
 
     /*!
      * Returns type of the item.
@@ -321,7 +321,7 @@ public:
                qsizetype endColumn,
                qsizetype endLine);
 
-    ~StyleDelim() override = default;
+    ~StyleDelim() override;
 
     /*!
      * Returns style.
@@ -372,10 +372,10 @@ protected:
     /*!
      * Default constructor.
      */
-    ItemWithOpts() = default;
+    ItemWithOpts();
 
 public:
-    ~ItemWithOpts() override = default;
+    ~ItemWithOpts() override;
 
     /*!
      * Apply other item with options to this.
@@ -462,8 +462,8 @@ public:
     /*!
      * Default constructor.
      */
-    PageBreak() = default;
-    ~PageBreak() override = default;
+    PageBreak();
+    ~PageBreak() override;
 
     /*!
      * Returns type of the item.
@@ -500,8 +500,8 @@ public:
     /*!
      * Default constructor.
      */
-    HorizontalLine() = default;
-    ~HorizontalLine() override = default;
+    HorizontalLine();
+    ~HorizontalLine() override;
 
     /*!
      * Returns type of the item.
@@ -545,7 +545,7 @@ public:
      * \a l Label.
      */
     explicit Anchor(const QString &l);
-    ~Anchor() override = default;
+    ~Anchor() override;
 
     /*!
      * Clone this anchor.
@@ -593,8 +593,8 @@ public:
     /*!
      * Default constructor.
      */
-    RawHtml() = default;
-    ~RawHtml() override = default;
+    RawHtml();
+    ~RawHtml() override;
 
     /*!
      * Clone this raw HTML.
@@ -649,8 +649,8 @@ public:
     /*!
      * Default constructor.
      */
-    Text() = default;
-    ~Text() override = default;
+    Text();
+    ~Text() override;
 
     /*!
      * Apply other text to this.
@@ -711,8 +711,8 @@ public:
     /*!
      * Default constructor.
      */
-    LineBreak() = default;
-    ~LineBreak() override = default;
+    LineBreak();
+    ~LineBreak() override;
 
     /*!
      * Clone this line break.
@@ -751,10 +751,10 @@ protected:
     /*!
      * Default constructor.
      */
-    Block() = default;
+    Block();
 
 public:
-    ~Block() override = default;
+    ~Block() override;
 
     /*!
      * \typealias MD::Block::ItemSharedPointer
@@ -849,8 +849,8 @@ public:
     /*!
      * Default constructor.
      */
-    Paragraph() = default;
-    ~Paragraph() override = default;
+    Paragraph();
+    ~Paragraph() override;
 
     /*!
      * Clone this paragraph.
@@ -888,7 +888,7 @@ public:
      * Default constructor.
      */
     Heading();
-    ~Heading() override = default;
+    ~Heading() override;
 
     /*!
      * \typealias MD::Heading::Delims
@@ -1053,8 +1053,8 @@ public:
     /*!
      * Default constructor.
      */
-    Blockquote() = default;
-    ~Blockquote() override = default;
+    Blockquote();
+    ~Blockquote() override;
 
     /*!
      * Clone this blockquote.
@@ -1115,8 +1115,8 @@ public:
     /*!
      * Default constructor.
      */
-    ListItem() = default;
-    ~ListItem() override = default;
+    ListItem();
+    ~ListItem() override;
 
     /*!
      * Clone this list item.
@@ -1293,8 +1293,8 @@ public:
     /*!
      * Default constructor.
      */
-    List() = default;
-    ~List() override = default;
+    List();
+    ~List() override;
 
     /*!
      * Clone this list.
@@ -1334,7 +1334,7 @@ public:
      * Default constructor.
      */
     LinkBase();
-    ~LinkBase() override = default;
+    ~LinkBase() override;
 
     /*!
      * Apply other base of link to this.
@@ -1475,8 +1475,8 @@ public:
     /*!
      * Default constructor.
      */
-    Image() = default;
-    ~Image() override = default;
+    Image();
+    ~Image() override;
 
     /*!
      * Clone this image.
@@ -1523,7 +1523,7 @@ public:
      */
     QSharedPointer<Item> clone(Document *doc = nullptr) const override;
 
-    ~Link() override = default;
+    ~Link() override;
 
     /*!
      * Returns type of the item.
@@ -1587,7 +1587,7 @@ public:
     Code(const QString &t,
          bool fensedCode,
          bool inl);
-    ~Code() override = default;
+    ~Code() override;
 
     /*!
      * Apply other code to this.
@@ -1745,7 +1745,7 @@ public:
      * Default constructor.
      */
     Math();
-    ~Math() override = default;
+    ~Math() override;
 
     /*!
      * Clone this LaTeX math expression.
@@ -1796,8 +1796,8 @@ public:
     /*!
      * Default constructor.
      */
-    TableCell() = default;
-    ~TableCell() override = default;
+    TableCell();
+    ~TableCell() override;
 
     /*!
      * Clone this table cell.
@@ -1836,8 +1836,8 @@ public:
     /*!
      * Default constructor.
      */
-    TableRow() = default;
-    ~TableRow() override = default;
+    TableRow();
+    ~TableRow() override;
 
     /*!
      * Clone this table row.
@@ -1911,8 +1911,8 @@ public:
     /*!
      * Default constructor.
      */
-    Table() = default;
-    ~Table() override = default;
+    Table();
+    ~Table() override;
 
     /*!
      * Clone this table.
@@ -2037,7 +2037,7 @@ public:
      * \a i ID.
      */
     explicit FootnoteRef(const QString &i);
-    ~FootnoteRef() override = default;
+    ~FootnoteRef() override;
 
     /*!
      * Clone this footnote reference.
@@ -2100,8 +2100,8 @@ public:
     /*!
      * Default constructor.
      */
-    Footnote() = default;
-    ~Footnote() override = default;
+    Footnote();
+    ~Footnote() override;
 
     /*!
      * Clone this footnote.
@@ -2155,8 +2155,8 @@ public:
     /*!
      * Default constructor.
      */
-    Document() = default;
-    ~Document() override = default;
+    Document();
+    ~Document() override;
 
     /*!
      * Returns type of the item.
