@@ -455,11 +455,11 @@ bool InlineHtmlParser::check(Line &line,
                             }
                         } break;
 
-                        // GCOVR_EXCL_START
+                        // LCOV_EXCL_START
                         default: {
                             doBreak = true;
                         } break;
-                            // GCOVR_EXCL_STOP
+                            // LCOV_EXCL_STOP
                         }
 
                         if (doBreak) {

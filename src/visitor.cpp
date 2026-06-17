@@ -138,10 +138,10 @@ void Visitor::onParagraph(Paragraph *p,
                 onRawHtml(static_cast<RawHtml *>(it->get()));
                 break;
 
-            // GCOVR_EXCL_START
+            // LCOV_EXCL_START
             default:
                 break;
-                // GCOVR_EXCL_STOP
+                // LCOV_EXCL_STOP
             }
         }
     }
@@ -186,10 +186,10 @@ void Visitor::onBlockquote(Blockquote *b)
                 onRawHtml(static_cast<RawHtml *>(it->get()));
                 break;
 
-            // GCOVR_EXCL_START
+            // LCOV_EXCL_START
             default:
                 break;
-                // GCOVR_EXCL_STOP
+                // LCOV_EXCL_STOP
             }
         }
     }
@@ -238,10 +238,10 @@ void Visitor::onListItem(ListItem *i,
                 onHorizontalLine(static_cast<HorizontalLine *>(it->get()));
                 break;
 
-            // GCOVR_EXCL_START
+            // LCOV_EXCL_START
             default:
                 break;
-                // GCOVR_EXCL_STOP
+                // LCOV_EXCL_STOP
             }
         }
 
@@ -284,10 +284,10 @@ void Visitor::onTableCell(TableCell *c)
                 onMath(static_cast<Math *>(it->get()));
                 break;
 
-            // GCOVR_EXCL_START
+            // LCOV_EXCL_START
             default:
                 break;
-                // GCOVR_EXCL_STOP
+                // LCOV_EXCL_STOP
             }
         }
     }
@@ -332,10 +332,10 @@ void Visitor::onFootnote(Footnote *f)
                 onHorizontalLine(static_cast<HorizontalLine *>(it->get()));
                 break;
 
-            // GCOVR_EXCL_START
+            // LCOV_EXCL_START
             default:
                 break;
-                // GCOVR_EXCL_STOP
+                // LCOV_EXCL_STOP
             }
         }
     }
