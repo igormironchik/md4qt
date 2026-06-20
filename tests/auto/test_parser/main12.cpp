@@ -1425,3 +1425,49 @@ TEST_CASE("371")
         REQUIRE(h->text() == QStringLiteral("<![CDATA[a]]>"));
     }
 }
+
+/*
+```
+    ```<lang>
+        code goes here
+    ```
+```
+Text
+
+Text
+
+*/
+TEST_CASE("372")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/372.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 4);
+
+    {
+        REQUIRE(doc->items().at(1)->type() == MD::ItemType::Code);
+        auto c = static_cast<MD::Code *>(doc->items().at(1).get());
+        REQUIRE(c->startDelim() == MD::WithPosition{0, 0, 2, 0});
+        REQUIRE(c->endDelim() == MD::WithPosition{0, 4, 2, 4});
+    }
+
+    {
+        REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
+        REQUIRE(p->startColumn() == 0);
+        REQUIRE(p->startLine() == 5);
+        REQUIRE(p->endColumn() == 3);
+        REQUIRE(p->endLine() == 5);
+    }
+
+    {
+        REQUIRE(doc->items().at(3)->type() == MD::ItemType::Paragraph);
+        auto p = static_cast<MD::Paragraph *>(doc->items().at(3).get());
+        REQUIRE(p->startColumn() == 0);
+        REQUIRE(p->startLine() == 7);
+        REQUIRE(p->endColumn() == 3);
+        REQUIRE(p->endLine() == 7);
+    }
+}

@@ -172,7 +172,10 @@ BlockState FencedCodeParser::continueCheck(Line &currentLine,
     if (currentLine.column() >= ctx.indentColumn() || isEmptyLine(currentLine)) {
         qsizetype closeCount = 0;
         QChar fc;
-        if (isCodeFences(currentLine, closeCount, fc, true) && fc == m_startChar && closeCount >= m_openCount) {
+        if (ctx.isInIndent(currentLine.column())
+            && isCodeFences(currentLine, closeCount, fc, true)
+            && fc == m_startChar
+            && closeCount >= m_openCount) {
             currentLine.skip();
 
             ctx.setNotFinished(false);
@@ -300,7 +303,7 @@ BlockState FencedCodeParser::process(Line &currentLine,
             }
 
             if (isCodeFences(currentLine, closeCount, fc, true)
-                && startPos < (ctx.indentColumn() + (ctx.indentColumn() ? 5 : 4))
+                && ctx.isInIndent(startPos)
                 && fc == m_startChar
                 && closeCount >= m_openCount) {
                 if (m_code) {
