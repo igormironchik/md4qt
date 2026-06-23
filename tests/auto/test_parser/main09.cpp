@@ -15,6 +15,8 @@
 #include <QDir>
 #include <QFile>
 
+#include "test_utils.h"
+
 /*
 *<a>text</a>*
 
@@ -88,10 +90,7 @@ TEST_CASE("251")
     REQUIRE(h->delims().front() == MD::WithPosition{0, 0, 1, 0});
     REQUIRE(h->delims().back() == MD::WithPosition{21, 0, 22, 0});
     auto t = static_cast<MD::Text *>(h->text()->items().at(0).get());
-    REQUIRE(t->startColumn() == 3);
-    REQUIRE(t->startLine() == 0);
-    REQUIRE(t->endColumn() == 9);
-    REQUIRE(t->endLine() == 0);
+    CHECK_POSITIONS(t, 3, 0, 9, 0);
     REQUIRE(t->text() == QStringLiteral("headig "));
 }
 
@@ -142,10 +141,7 @@ TEST_CASE("231-1")
     REQUIRE(p->items().size() == 1);
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
     auto t = static_cast<MD::Text *>(p->items().at(0).get());
-    REQUIRE(t->startColumn() == 0);
-    REQUIRE(t->startLine() == 0);
-    REQUIRE(t->endColumn() == 13);
-    REQUIRE(t->endLine() == 0);
+    CHECK_POSITIONS(t, 0, 0, 13, 0);
     REQUIRE(t->text() == QStringLiteral("www.google.com"));
 }
 
@@ -227,10 +223,7 @@ TEST_CASE("256")
         auto t = static_cast<MD::Text *>(p->items().at(2).get());
         REQUIRE(t->text() == QStringLiteral("*"));
         REQUIRE(t->opts() == MD::TextWithoutFormat);
-        REQUIRE(t->startColumn() == 13);
-        REQUIRE(t->startLine() == 0);
-        REQUIRE(t->endColumn() == 13);
-        REQUIRE(t->endLine() == 0);
+        CHECK_POSITIONS(t, 13, 0, 13, 0);
     }
 }
 
@@ -332,11 +325,13 @@ TEST_CASE("259")
     REQUIRE(p->items().at(3)->type() == MD::ItemType::Image);
     REQUIRE(p->items().at(4)->type() == MD::ItemType::FootnoteRef);
 
-    for (int i = 0; i < 2; ++i)
+    for (int i = 0; i < 2; ++i) {
         REQUIRE(static_cast<MD::ItemWithOpts *>(p->items().at(i).get())->startColumn() == 2);
+    }
 
-    for (int i = 2; i < 5; ++i)
+    for (int i = 2; i < 5; ++i) {
         REQUIRE(static_cast<MD::ItemWithOpts *>(p->items().at(i).get())->startColumn() == 1);
+    }
 }
 
 /*
@@ -460,74 +455,50 @@ TEST_CASE("261")
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
     auto l = static_cast<MD::List *>(doc->items().at(1).get());
     REQUIRE(l->items().size() == 3);
-    REQUIRE(l->startColumn() == 0);
-    REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endColumn() == 0);
-    REQUIRE(l->endLine() == 7);
+    CHECK_POSITIONS(l, 0, 0, 0, 7);
 
     {
         REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
         auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
-        REQUIRE(li->startColumn() == 0);
-        REQUIRE(li->startLine() == 0);
-        REQUIRE(li->endColumn() == 55);
-        REQUIRE(li->endLine() == 0);
+        CHECK_POSITIONS(li, 0, 0, 55, 0);
         REQUIRE(li->items().size() == 1);
     }
 
     {
         REQUIRE(l->items().at(1)->type() == MD::ItemType::ListItem);
         auto li = static_cast<MD::ListItem *>(l->items().at(1).get());
-        REQUIRE(li->startColumn() == 0);
-        REQUIRE(li->startLine() == 1);
-        REQUIRE(li->endColumn() == 33);
-        REQUIRE(li->endLine() == 5);
+        CHECK_POSITIONS(li, 0, 1, 33, 5);
         REQUIRE(li->items().size() == 2);
 
         REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
         REQUIRE(li->items().at(1)->type() == MD::ItemType::List);
         auto l = static_cast<MD::List *>(li->items().at(1).get());
-        REQUIRE(l->startColumn() == 2);
-        REQUIRE(l->startLine() == 2);
-        REQUIRE(l->endColumn() == 33);
-        REQUIRE(l->endLine() == 5);
+        CHECK_POSITIONS(l, 2, 2, 33, 5);
 
         {
             REQUIRE(l->items().size() == 1);
             REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
             auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
-            REQUIRE(li->startColumn() == 2);
-            REQUIRE(li->startLine() == 2);
-            REQUIRE(li->endColumn() == 33);
-            REQUIRE(li->endLine() == 5);
+            CHECK_POSITIONS(li, 2, 2, 33, 5);
             REQUIRE(li->items().size() == 4);
             REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
 
             {
                 REQUIRE(li->items().at(1)->type() == MD::ItemType::List);
                 auto l = static_cast<MD::List *>(li->items().at(1).get());
-                REQUIRE(l->startColumn() == 4);
-                REQUIRE(l->startLine() == 3);
-                REQUIRE(l->endColumn() == 36);
-                REQUIRE(l->endLine() == 3);
+                CHECK_POSITIONS(l, 4, 3, 36, 3);
             }
 
             {
                 REQUIRE(li->items().at(2)->type() == MD::ItemType::List);
                 auto l = static_cast<MD::List *>(li->items().at(2).get());
-                REQUIRE(l->startColumn() == 4);
-                REQUIRE(l->startLine() == 4);
-                REQUIRE(l->endColumn() == 38);
-                REQUIRE(l->endLine() == 4);
+                CHECK_POSITIONS(l, 4, 4, 38, 4);
             }
 
             {
                 REQUIRE(li->items().at(3)->type() == MD::ItemType::List);
                 auto l = static_cast<MD::List *>(li->items().at(3).get());
-                REQUIRE(l->startColumn() == 4);
-                REQUIRE(l->startLine() == 5);
-                REQUIRE(l->endColumn() == 33);
-                REQUIRE(l->endLine() == 5);
+                CHECK_POSITIONS(l, 4, 5, 33, 5);
             }
         }
     }
@@ -535,10 +506,7 @@ TEST_CASE("261")
     {
         REQUIRE(l->items().at(2)->type() == MD::ItemType::ListItem);
         auto li = static_cast<MD::ListItem *>(l->items().at(2).get());
-        REQUIRE(li->startColumn() == 0);
-        REQUIRE(li->startLine() == 6);
-        REQUIRE(li->endColumn() == 0);
-        REQUIRE(li->endLine() == 7);
+        CHECK_POSITIONS(li, 0, 6, 0, 7);
         REQUIRE(li->items().size() == 1);
     }
 }
@@ -565,14 +533,12 @@ TEST_CASE("262")
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
     auto l = static_cast<MD::List *>(doc->items().at(1).get());
-    REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endLine() == 1);
+    CHECK_LINES(l, 0, 1);
 
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::RawHtml);
         auto h = static_cast<MD::RawHtml *>(doc->items().at(2).get());
-        REQUIRE(h->startLine() == 2);
-        REQUIRE(h->endLine() == 2);
+        CHECK_LINES(h, 2, 2);
     }
 
     REQUIRE(doc->items().at(3)->type() == MD::ItemType::Paragraph);
@@ -580,8 +546,7 @@ TEST_CASE("262")
     {
         REQUIRE(doc->items().at(4)->type() == MD::ItemType::RawHtml);
         auto h = static_cast<MD::RawHtml *>(doc->items().at(4).get());
-        REQUIRE(h->startLine() == 6);
-        REQUIRE(h->endLine() == 7);
+        CHECK_LINES(h, 6, 7);
     }
 }
 
@@ -602,12 +567,10 @@ TEST_CASE("263")
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
     auto l = static_cast<MD::List *>(doc->items().at(1).get());
-    REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endLine() == 0);
+    CHECK_LINES(l, 0, 0);
     REQUIRE(doc->items().at(2)->type() == MD::ItemType::RawHtml);
     auto h = static_cast<MD::RawHtml *>(doc->items().at(2).get());
-    REQUIRE(h->startLine() == 1);
-    REQUIRE(h->endLine() == 2);
+    CHECK_LINES(h, 1, 2);
 }
 
 /*
@@ -627,19 +590,16 @@ TEST_CASE("264")
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
     auto l = static_cast<MD::List *>(doc->items().at(1).get());
-    REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endLine() == 3);
+    CHECK_LINES(l, 0, 3);
     REQUIRE(l->items().size() == 1);
     auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
     REQUIRE(li->items().size() == 2);
     REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
     auto p = static_cast<MD::Paragraph *>(li->items().at(0).get());
-    REQUIRE(p->startLine() == 0);
-    REQUIRE(p->endLine() == 0);
+    CHECK_LINES(p, 0, 0);
     REQUIRE(li->items().at(1)->type() == MD::ItemType::RawHtml);
     auto h = static_cast<MD::RawHtml *>(li->items().at(1).get());
-    REQUIRE(h->startLine() == 1);
-    REQUIRE(h->endLine() == 2);
+    CHECK_LINES(h, 1, 2);
 }
 
 /*
@@ -661,21 +621,18 @@ TEST_CASE("265")
     {
         REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
         auto l = static_cast<MD::List *>(doc->items().at(1).get());
-        REQUIRE(l->startLine() == 0);
-        REQUIRE(l->endLine() == 0);
+        CHECK_LINES(l, 0, 0);
         REQUIRE(l->items().size() == 1);
     }
 
     REQUIRE(doc->items().at(2)->type() == MD::ItemType::RawHtml);
     auto h = static_cast<MD::RawHtml *>(doc->items().at(2).get());
-    REQUIRE(h->startLine() == 1);
-    REQUIRE(h->endLine() == 1);
+    CHECK_LINES(h, 1, 1);
 
     {
         REQUIRE(doc->items().at(3)->type() == MD::ItemType::List);
         auto l = static_cast<MD::List *>(doc->items().at(3).get());
-        REQUIRE(l->startLine() == 3);
-        REQUIRE(l->endLine() == 4);
+        CHECK_LINES(l, 3, 4);
         REQUIRE(l->items().size() == 1);
     }
 }
@@ -699,21 +656,18 @@ TEST_CASE("266")
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
     auto l = static_cast<MD::List *>(doc->items().at(1).get());
-    REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endLine() == 5);
+    CHECK_LINES(l, 0, 5);
     REQUIRE(l->items().size() == 2);
 
     REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
     auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
-    REQUIRE(li->startLine() == 0);
-    REQUIRE(li->endLine() == 3);
+    CHECK_LINES(li, 0, 3);
     REQUIRE(li->items().size() == 3);
     REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
     REQUIRE(li->items().at(1)->type() == MD::ItemType::List);
     REQUIRE(li->items().at(2)->type() == MD::ItemType::RawHtml);
     auto h = static_cast<MD::RawHtml *>(li->items().at(2).get());
-    REQUIRE(h->startLine() == 3);
-    REQUIRE(h->endLine() == 3);
+    CHECK_LINES(h, 3, 3);
 }
 
 /*
@@ -733,14 +687,12 @@ TEST_CASE("267")
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
     auto l = static_cast<MD::List *>(doc->items().at(1).get());
-    REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endLine() == 0);
+    CHECK_LINES(l, 0, 0);
     REQUIRE(l->items().size() == 1);
 
     REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
     auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
-    REQUIRE(li->startLine() == 0);
-    REQUIRE(li->endLine() == 0);
+    CHECK_LINES(li, 0, 0);
     REQUIRE(li->items().size() == 1);
     REQUIRE(li->items().at(0)->type() == MD::ItemType::RawHtml);
 
@@ -766,14 +718,12 @@ TEST_CASE("268")
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
     auto l = static_cast<MD::List *>(doc->items().at(1).get());
-    REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endLine() == 3);
+    CHECK_LINES(l, 0, 3);
     REQUIRE(l->items().size() == 1);
 
     REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
     auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
-    REQUIRE(li->startLine() == 0);
-    REQUIRE(li->endLine() == 3);
+    CHECK_LINES(li, 0, 3);
     REQUIRE(li->items().size() == 2);
     REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
     REQUIRE(li->items().at(1)->type() == MD::ItemType::RawHtml);
@@ -797,14 +747,12 @@ TEST_CASE("269")
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
     auto l = static_cast<MD::List *>(doc->items().at(1).get());
-    REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endLine() == 4);
+    CHECK_LINES(l, 0, 4);
     REQUIRE(l->items().size() == 1);
 
     REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
     auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
-    REQUIRE(li->startLine() == 0);
-    REQUIRE(li->endLine() == 4);
+    CHECK_LINES(li, 0, 4);
     REQUIRE(li->items().size() == 3);
     REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
     REQUIRE(li->items().at(1)->type() == MD::ItemType::RawHtml);
@@ -828,14 +776,12 @@ TEST_CASE("270")
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
     auto l = static_cast<MD::List *>(doc->items().at(1).get());
-    REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endLine() == 1);
+    CHECK_LINES(l, 0, 1);
     REQUIRE(l->items().size() == 1);
 
     REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
     auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
-    REQUIRE(li->startLine() == 0);
-    REQUIRE(li->endLine() == 1);
+    CHECK_LINES(li, 0, 1);
     REQUIRE(li->items().size() == 2);
     REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
     REQUIRE(li->items().at(1)->type() == MD::ItemType::RawHtml);
@@ -865,15 +811,13 @@ TEST_CASE("271")
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
     auto l = static_cast<MD::List *>(doc->items().at(1).get());
-    REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endLine() == 6);
+    CHECK_LINES(l, 0, 6);
     REQUIRE(l->items().size() == 1);
 
     {
         REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
         auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
-        REQUIRE(li->startLine() == 0);
-        REQUIRE(li->endLine() == 6);
+        CHECK_LINES(li, 0, 6);
         REQUIRE(li->items().size() == 3);
         REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
         REQUIRE(li->items().at(1)->type() == MD::ItemType::List);
@@ -881,8 +825,7 @@ TEST_CASE("271")
 
         {
             auto l = static_cast<MD::List *>(li->items().at(1).get());
-            REQUIRE(l->startLine() == 1);
-            REQUIRE(l->endLine() == 5);
+            CHECK_LINES(l, 1, 5);
             REQUIRE(l->items().size() == 1);
             REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
             auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
@@ -914,15 +857,13 @@ TEST_CASE("272")
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
     auto l = static_cast<MD::List *>(doc->items().at(1).get());
-    REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endLine() == 4);
+    CHECK_LINES(l, 0, 4);
     REQUIRE(l->items().size() == 1);
 
     {
         REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
         auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
-        REQUIRE(li->startLine() == 0);
-        REQUIRE(li->endLine() == 4);
+        CHECK_LINES(li, 0, 4);
         REQUIRE(li->items().size() == 3);
         REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
         REQUIRE(li->items().at(1)->type() == MD::ItemType::RawHtml);
@@ -930,8 +871,7 @@ TEST_CASE("272")
 
         {
             auto l = static_cast<MD::List *>(li->items().at(2).get());
-            REQUIRE(l->startLine() == 3);
-            REQUIRE(l->endLine() == 4);
+            CHECK_LINES(l, 3, 4);
             REQUIRE(l->items().size() == 1);
             REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
             auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
@@ -963,15 +903,13 @@ TEST_CASE("273")
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
     auto l = static_cast<MD::List *>(doc->items().at(1).get());
-    REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endLine() == 8);
+    CHECK_LINES(l, 0, 8);
     REQUIRE(l->items().size() == 1);
 
     {
         REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
         auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
-        REQUIRE(li->startLine() == 0);
-        REQUIRE(li->endLine() == 8);
+        CHECK_LINES(li, 0, 8);
         REQUIRE(li->items().size() == 6);
         REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
         REQUIRE(li->items().at(1)->type() == MD::ItemType::RawHtml);
@@ -1032,24 +970,15 @@ TEST_CASE("275")
 
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
     auto l = static_cast<MD::List *>(doc->items().at(1).get());
-    REQUIRE(l->startColumn() == 0);
-    REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endColumn() == 5);
-    REQUIRE(l->endLine() == 0);
+    CHECK_POSITIONS(l, 0, 0, 5, 0);
 
     REQUIRE(doc->items().at(2)->type() == MD::ItemType::RawHtml);
     auto h = static_cast<MD::RawHtml *>(doc->items().at(2).get());
-    REQUIRE(h->startColumn() == 0);
-    REQUIRE(h->startLine() == 1);
-    REQUIRE(h->endColumn() == 2);
-    REQUIRE(h->endLine() == 3);
+    CHECK_POSITIONS(h, 0, 1, 2, 3);
 
     REQUIRE(doc->items().at(3)->type() == MD::ItemType::Paragraph);
     auto p = static_cast<MD::Paragraph *>(doc->items().at(3).get());
-    REQUIRE(p->startColumn() == 0);
-    REQUIRE(p->startLine() == 5);
-    REQUIRE(p->endColumn() == 8);
-    REQUIRE(p->endLine() == 5);
+    CHECK_POSITIONS(p, 0, 5, 8, 5);
 }
 
 /*
@@ -1097,10 +1026,7 @@ TEST_CASE("276")
 
             auto p = static_cast<MD::Paragraph *>(li->items().at(0).get());
             REQUIRE(p->items().size() == 2);
-            REQUIRE(p->startColumn() == 7);
-            REQUIRE(p->startLine() == 8);
-            REQUIRE(p->endColumn() == 6);
-            REQUIRE(p->endLine() == 9);
+            CHECK_POSITIONS(p, 7, 8, 6, 9);
         }
     }
 }
@@ -1123,10 +1049,7 @@ TEST_CASE("277")
     REQUIRE(doc->items().size() == 2);
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
     auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
-    REQUIRE(p->startColumn() == 0);
-    REQUIRE(p->startLine() == 0);
-    REQUIRE(p->endColumn() == 9);
-    REQUIRE(p->endLine() == 4);
+    CHECK_POSITIONS(p, 0, 0, 9, 4);
 
     REQUIRE(doc->labeledLinks().empty());
 }
@@ -1172,10 +1095,7 @@ TEST_CASE("279")
     REQUIRE(doc->items().size() == 2);
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
     auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
-    REQUIRE(p->startColumn() == 0);
-    REQUIRE(p->startLine() == 0);
-    REQUIRE(p->endColumn() == 17);
-    REQUIRE(p->endLine() == 0);
+    CHECK_POSITIONS(p, 0, 0, 17, 0);
     REQUIRE(p->items().size() == 1);
 }
 
@@ -1193,19 +1113,13 @@ TEST_CASE("280")
     REQUIRE(doc->items().size() == 2);
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
     auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
-    REQUIRE(p->startColumn() == 0);
-    REQUIRE(p->startLine() == 0);
-    REQUIRE(p->endColumn() == 13);
-    REQUIRE(p->endLine() == 0);
+    CHECK_POSITIONS(p, 0, 0, 13, 0);
     REQUIRE(p->items().size() == 2);
 
     {
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
         auto t = static_cast<MD::Text *>(p->items().at(0).get());
-        REQUIRE(t->startColumn() == 2);
-        REQUIRE(t->startLine() == 0);
-        REQUIRE(t->endColumn() == 5);
-        REQUIRE(t->endLine() == 0);
+        CHECK_POSITIONS(t, 2, 0, 5, 0);
         REQUIRE(t->opts() == MD::StrikethroughText);
         REQUIRE(t->openStyles().size() == 1);
         REQUIRE(t->closeStyles().size() == 1);
@@ -1214,10 +1128,7 @@ TEST_CASE("280")
     {
         REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
         auto t = static_cast<MD::Text *>(p->items().at(1).get());
-        REQUIRE(t->startColumn() == 8);
-        REQUIRE(t->startLine() == 0);
-        REQUIRE(t->endColumn() == 13);
-        REQUIRE(t->endLine() == 0);
+        CHECK_POSITIONS(t, 8, 0, 13, 0);
         REQUIRE(t->opts() == MD::TextWithoutFormat);
         REQUIRE(t->openStyles().empty());
         REQUIRE(t->closeStyles().empty());

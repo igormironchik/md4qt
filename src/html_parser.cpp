@@ -116,6 +116,7 @@ BlockState HTMLParser::process(Line &currentLine,
         m_html->setStartLine(currentLine.lineNumber());
         m_html->setEndColumn(currentLine.length() - 1);
         m_html->setEndLine(currentLine.lineNumber());
+        ctx.setItem(m_html.get());
 
         m_html->setText(currentLine.slicedCopy(currentLine.position()));
 

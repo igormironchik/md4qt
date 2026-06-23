@@ -394,6 +394,7 @@ BlockState TableParser::process(Line &currentLine,
         m_table->setStartLine(currentLine.lineNumber());
         m_table->setEndColumn(currentLine.length() - 1);
         m_table->setEndLine(currentLine.lineNumber());
+        ctx.setItem(m_table.get());
         parent->appendItem(m_table);
 
         m_checkAlign = true;

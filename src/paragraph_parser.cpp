@@ -473,7 +473,12 @@ BlockState ParagraphParser::process(Line &currentLine,
                 m_paragraph = QSharedPointer<Paragraph>::create();
                 m_paragraph->setStartColumn(line.position());
                 m_paragraph->setStartLine(line.lineNumber());
-                parent->appendItem(m_paragraph);
+
+                if (ctx.parent() && ctx.parent()->block() && ctx.parent()->item()) {
+                    static_cast<Block *>(ctx.parent()->item())->appendItem(m_paragraph);
+                } else {
+                    parent->appendItem(m_paragraph);
+                }
 
                 ParagraphStream::HashedLines lines;
                 const auto startLineNumber = line.lineNumber();

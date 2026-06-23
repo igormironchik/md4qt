@@ -124,7 +124,7 @@ BlockState YAMLParser::process(Line &currentLine,
                                TextStream &,
                                QSharedPointer<Document>,
                                QSharedPointer<Block> parent,
-                               Context &,
+                               Context &ctx,
                                const QString &,
                                const QString &,
                                QStringList &)
@@ -143,6 +143,7 @@ BlockState YAMLParser::process(Line &currentLine,
         m_yaml->setStartDelim(
             {currentLine.position(), currentLine.lineNumber(), currentLine.length() - 1, currentLine.lineNumber()});
         parent->appendItem(m_yaml);
+        ctx.setItem(m_yaml.get());
 
         return BlockState::Continue;
     } else {

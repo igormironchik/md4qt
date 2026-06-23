@@ -167,6 +167,8 @@ private:
                           bool makeListItem,
                           QStringList &linksToParse);
 
+    void setLastListItem(Context &ctx);
+
 private:
     QSharedPointer<List> m_list;
     QSharedPointer<ListItem> m_lastListItem;

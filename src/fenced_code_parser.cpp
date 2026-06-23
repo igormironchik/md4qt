@@ -230,6 +230,7 @@ BlockState FencedCodeParser::process(Line &currentLine,
         ctx.appendChildIndent(pStartPos);
 
         m_code = QSharedPointer<Code>::create(QString(), true, false);
+        ctx.setItem(m_code.get());
 
         if (stream.atEnd()) {
             m_code->setStartColumn(currentLine.length());

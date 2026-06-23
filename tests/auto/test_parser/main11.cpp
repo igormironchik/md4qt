@@ -10,6 +10,8 @@
 // md4qt include.
 #include "parser.h"
 
+#include "test_utils.h"
+
 /*
 *   text
    * text
@@ -44,10 +46,7 @@ TEST_CASE("313")
     REQUIRE(doc->items().size() == 2);
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Blockquote);
     auto b = static_cast<MD::Blockquote *>(doc->items().at(1).get());
-    REQUIRE(b->startColumn() == 0);
-    REQUIRE(b->startLine() == 0);
-    REQUIRE(b->endColumn() == 1);
-    REQUIRE(b->endLine() == 0);
+    CHECK_POSITIONS(b, 0, 0, 1, 0);
 }
 
 /*
@@ -133,17 +132,11 @@ TEST_CASE("317")
     REQUIRE(doc->items().size() == 2);
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Blockquote);
     auto b = static_cast<MD::Blockquote *>(doc->items().at(1).get());
-    REQUIRE(b->startColumn() == 0);
-    REQUIRE(b->startLine() == 0);
-    REQUIRE(b->endColumn() == 1);
-    REQUIRE(b->endLine() == 1);
+    CHECK_POSITIONS(b, 0, 0, 1, 1);
     REQUIRE(b->items().size() == 1);
     REQUIRE(b->items().at(0)->type() == MD::ItemType::Code);
     auto c = static_cast<MD::Code *>(b->items().at(0).get());
-    REQUIRE(c->startColumn() == 2);
-    REQUIRE(c->startLine() == 1);
-    REQUIRE(c->endColumn() == 2);
-    REQUIRE(c->endLine() == 1);
+    CHECK_POSITIONS(c, 2, 1, 2, 1);
     REQUIRE(c->text() == QStringLiteral("\n"));
 }
 
@@ -161,10 +154,7 @@ TEST_CASE("318")
     REQUIRE(doc->items().size() == 2);
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Code);
     auto c = static_cast<MD::Code *>(doc->items().at(1).get());
-    REQUIRE(c->startColumn() == 6);
-    REQUIRE(c->startLine() == 0);
-    REQUIRE(c->endColumn() == 6);
-    REQUIRE(c->endLine() == 0);
+    CHECK_POSITIONS(c, 6, 0, 6, 0);
 }
 
 /*
@@ -181,21 +171,12 @@ TEST_CASE("319")
     REQUIRE(doc->items().size() == 2);
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Heading);
     auto h = static_cast<MD::Heading *>(doc->items().at(1).get());
-    REQUIRE(h->startColumn() == 0);
-    REQUIRE(h->startLine() == 0);
-    REQUIRE(h->endColumn() == 6);
-    REQUIRE(h->endLine() == 0);
+    CHECK_POSITIONS(h, 0, 0, 6, 0);
     REQUIRE(h->text()->items().size() == 1);
-    REQUIRE(h->text()->startColumn() == 4);
-    REQUIRE(h->text()->startLine() == 0);
-    REQUIRE(h->text()->endColumn() == 6);
-    REQUIRE(h->text()->endLine() == 0);
+    CHECK_POSITIONS(h->text().get(), 4, 0, 6, 0);
     REQUIRE(h->text()->items().at(0)->type() == MD::ItemType::Text);
     auto t = static_cast<MD::Text *>(h->text()->items().at(0).get());
-    REQUIRE(t->startColumn() == 4);
-    REQUIRE(t->startLine() == 0);
-    REQUIRE(t->endColumn() == 6);
-    REQUIRE(t->endLine() == 0);
+    CHECK_POSITIONS(t, 4, 0, 6, 0);
 }
 
 /*

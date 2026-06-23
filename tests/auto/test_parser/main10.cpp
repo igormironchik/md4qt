@@ -13,6 +13,8 @@
 // Qt include.
 #include <QDir>
 
+#include "test_utils.h"
+
 /*
  - 1
   - 2
@@ -244,10 +246,7 @@ TEST_CASE("285")
     REQUIRE(doc->items().at(2)->type() == MD::ItemType::Code);
     auto c = static_cast<MD::Code *>(doc->items().at(2).get());
     REQUIRE(c->text() == QStringLiteral("- 4"));
-    REQUIRE(c->startColumn() == 4);
-    REQUIRE(c->startLine() == 11);
-    REQUIRE(c->endColumn() == 6);
-    REQUIRE(c->endLine() == 11);
+    CHECK_POSITIONS(c, 4, 11, 6, 11);
 
     {
         REQUIRE(doc->items().at(3)->type() == MD::ItemType::List);
@@ -641,10 +640,7 @@ TEST_CASE("302")
     REQUIRE(doc->items().size() == 2);
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::RawHtml);
     auto h = static_cast<MD::RawHtml *>(doc->items().at(1).get());
-    REQUIRE(h->startColumn() == 0);
-    REQUIRE(h->startLine() == 0);
-    REQUIRE(h->endColumn() == 29);
-    REQUIRE(h->endLine() == 1);
+    CHECK_POSITIONS(h, 0, 0, 29, 1);
 }
 
 /*
@@ -669,10 +665,7 @@ TEST_CASE("303")
     REQUIRE(p->items().size() == 1);
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
     auto l = static_cast<MD::Link *>(p->items().at(0).get());
-    REQUIRE(l->startColumn() == 0);
-    REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endColumn() == 120);
-    REQUIRE(l->endLine() == 4);
+    CHECK_POSITIONS(l, 0, 0, 120, 4);
     REQUIRE(l->p()->items().size() == 2);
     REQUIRE(l->p()->items().at(0)->type() == MD::ItemType::Image);
     REQUIRE(l->p()->items().at(1)->type() == MD::ItemType::Text);
@@ -753,17 +746,11 @@ TEST_CASE("305")
     REQUIRE(p->items().size() == 2);
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
     auto l = static_cast<MD::Link *>(p->items().at(0).get());
-    REQUIRE(l->startColumn() == 0);
-    REQUIRE(l->startLine() == 0);
-    REQUIRE(l->endColumn() == 21);
-    REQUIRE(l->endLine() == 0);
+    CHECK_POSITIONS(l, 0, 0, 21, 0);
     REQUIRE(l->url() == QStringLiteral("https://www.google.com"));
     REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
     auto t = static_cast<MD::Text *>(p->items().at(1).get());
-    REQUIRE(t->startColumn() == 22);
-    REQUIRE(t->startLine() == 0);
-    REQUIRE(t->endColumn() == 22);
-    REQUIRE(t->endLine() == 0);
+    CHECK_POSITIONS(t, 22, 0, 22, 0);
     REQUIRE(t->text() == QStringLiteral("."));
 }
 
@@ -787,10 +774,7 @@ TEST_CASE("306")
     {
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
         auto l = static_cast<MD::Link *>(p->items().at(0).get());
-        REQUIRE(l->startColumn() == 0);
-        REQUIRE(l->startLine() == 0);
-        REQUIRE(l->endColumn() == 13);
-        REQUIRE(l->endLine() == 0);
+        CHECK_POSITIONS(l, 0, 0, 13, 0);
         REQUIRE(l->url() == QStringLiteral("http://www.google.com"));
         REQUIRE(l->textPos() == MD::WithPosition{0, 0, 13, 0});
         REQUIRE(l->urlPos() == l->textPos());
@@ -799,20 +783,14 @@ TEST_CASE("306")
     {
         REQUIRE(p->items().at(1)->type() == MD::ItemType::Text);
         auto t = static_cast<MD::Text *>(p->items().at(1).get());
-        REQUIRE(t->startColumn() == 14);
-        REQUIRE(t->startLine() == 0);
-        REQUIRE(t->endColumn() == 15);
-        REQUIRE(t->endLine() == 0);
+        CHECK_POSITIONS(t, 14, 0, 15, 0);
         REQUIRE(t->text() == QStringLiteral(". "));
     }
 
     {
         REQUIRE(p->items().at(2)->type() == MD::ItemType::Link);
         auto l = static_cast<MD::Link *>(p->items().at(2).get());
-        REQUIRE(l->startColumn() == 16);
-        REQUIRE(l->startLine() == 0);
-        REQUIRE(l->endColumn() == 37);
-        REQUIRE(l->endLine() == 0);
+        CHECK_POSITIONS(l, 16, 0, 37, 0);
         REQUIRE(l->url() == QStringLiteral("https://www.google.com"));
         REQUIRE(l->textPos() == MD::WithPosition{16, 0, 37, 0});
         REQUIRE(l->urlPos() == l->textPos());
@@ -821,10 +799,7 @@ TEST_CASE("306")
     {
         REQUIRE(p->items().at(3)->type() == MD::ItemType::Text);
         auto t = static_cast<MD::Text *>(p->items().at(3).get());
-        REQUIRE(t->startColumn() == 38);
-        REQUIRE(t->startLine() == 0);
-        REQUIRE(t->endColumn() == 38);
-        REQUIRE(t->endLine() == 0);
+        CHECK_POSITIONS(t, 38, 0, 38, 0);
         REQUIRE(t->text() == QStringLiteral(")"));
     }
 }
@@ -848,10 +823,7 @@ TEST_CASE("307")
 
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Text);
     auto t = static_cast<MD::Text *>(p->items().at(0).get());
-    REQUIRE(t->startColumn() == 0);
-    REQUIRE(t->startLine() == 0);
-    REQUIRE(t->endColumn() == 16);
-    REQUIRE(t->endLine() == 0);
+    CHECK_POSITIONS(t, 0, 0, 16, 0);
     REQUIRE(t->text() == QStringLiteral("...www.google.com"));
 }
 

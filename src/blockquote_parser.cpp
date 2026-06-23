@@ -115,6 +115,7 @@ BlockState BlockquoteParser::process(Line &currentLine,
         quote->setStartColumn(currentLine.position());
         quote->setStartLine(currentLine.lineNumber());
         parent->appendItem(quote);
+        ctx.setItem(quote.get());
         m_quotes.insert(&ctx, quote);
     } else {
         quote = m_quotes[&ctx];

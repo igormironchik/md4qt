@@ -25,6 +25,8 @@
 #include <QDir>
 #include <QTextStream>
 
+#include "test_utils.h"
+
 /*
 [](<a<>) []((a ))
 
@@ -217,10 +219,7 @@ TEST_CASE("351")
     REQUIRE(doc->items().at(1)->type() == MD::ItemType::Paragraph);
     auto p = static_cast<MD::Paragraph *>(doc->items().at(1).get());
     REQUIRE(p->items().size() == 1);
-    REQUIRE(p->startColumn() == 0);
-    REQUIRE(p->startLine() == 1);
-    REQUIRE(p->endColumn() == 3);
-    REQUIRE(p->endLine() == 9);
+    CHECK_POSITIONS(p, 0, 1, 3, 9);
 
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Math);
     auto m = static_cast<MD::Math *>(p->items().at(0).get());
@@ -241,10 +240,7 @@ TEST_CASE("351")
                               "      \\end{matrix}\n"
                               "   \\right)\n"
                               "\\]"));
-    REQUIRE(m->startColumn() == 2);
-    REQUIRE(m->startLine() == 1);
-    REQUIRE(m->endColumn() == 1);
-    REQUIRE(m->endLine() == 9);
+    CHECK_POSITIONS(m, 2, 1, 1, 9);
     REQUIRE(m->startDelim() == MD::WithPosition{0, 1, 1, 1});
     REQUIRE(m->endDelim() == MD::WithPosition{2, 9, 3, 9});
 }
@@ -643,10 +639,7 @@ TEST_CASE("359")
     REQUIRE(p->items().size() == 1);
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Math);
     auto m = static_cast<MD::Math *>(p->items().at(0).get());
-    REQUIRE(m->startColumn() == 7);
-    REQUIRE(m->startLine() == 0);
-    REQUIRE(m->endColumn() == 7);
-    REQUIRE(m->endLine() == 0);
+    CHECK_POSITIONS(m, 7, 0, 7, 0);
 }
 
 /*
@@ -668,10 +661,7 @@ TEST_CASE("360")
     REQUIRE(p->items().size() == 1);
     REQUIRE(p->items().at(0)->type() == MD::ItemType::Math);
     auto m = static_cast<MD::Math *>(p->items().at(0).get());
-    REQUIRE(m->startColumn() == 7);
-    REQUIRE(m->startLine() == 0);
-    REQUIRE(m->endColumn() == 7);
-    REQUIRE(m->endLine() == 0);
+    CHECK_POSITIONS(m, 7, 0, 7, 0);
 }
 
 /*
@@ -1067,10 +1057,7 @@ TEST_CASE("364")
     REQUIRE(li->items().at(0)->type() == MD::ItemType::Code);
     auto c = static_cast<MD::Code *>(li->items().at(0).get());
     REQUIRE(c->startDelim() == MD::WithPosition{2, 0, 4, 0});
-    REQUIRE(c->startColumn() == 5);
-    REQUIRE(c->startLine() == 0);
-    REQUIRE(c->endColumn() == 5);
-    REQUIRE(c->endLine() == 0);
+    CHECK_POSITIONS(c, 5, 0, 5, 0);
     REQUIRE(c->endDelim().isNullPositions());
 }
 
@@ -1125,10 +1112,7 @@ TEST_CASE("366")
     auto c = static_cast<MD::Code *>(li->items().at(0).get());
     REQUIRE(c->startDelim() == MD::WithPosition{2, 0, 4, 0});
     REQUIRE(c->syntaxPos() == MD::WithPosition{5, 0, 8, 0});
-    REQUIRE(c->startColumn() == 10);
-    REQUIRE(c->startLine() == 0);
-    REQUIRE(c->endColumn() == 10);
-    REQUIRE(c->endLine() == 0);
+    CHECK_POSITIONS(c, 10, 0, 10, 0);
     REQUIRE(c->endDelim().isNullPositions());
 }
 
@@ -1149,10 +1133,7 @@ TEST_CASE("367")
     REQUIRE(c->startDelim() == MD::WithPosition{0, 0, 2, 0});
     REQUIRE(c->syntaxPos() == MD::WithPosition{3, 0, 5, 0});
     REQUIRE(c->endDelim().isNullPositions());
-    REQUIRE(c->startColumn() == 9);
-    REQUIRE(c->startLine() == 0);
-    REQUIRE(c->endColumn() == 9);
-    REQUIRE(c->endLine() == 0);
+    CHECK_POSITIONS(c, 9, 0, 9, 0);
 }
 
 /*
@@ -1456,18 +1437,166 @@ TEST_CASE("372")
     {
         REQUIRE(doc->items().at(2)->type() == MD::ItemType::Paragraph);
         auto p = static_cast<MD::Paragraph *>(doc->items().at(2).get());
-        REQUIRE(p->startColumn() == 0);
-        REQUIRE(p->startLine() == 5);
-        REQUIRE(p->endColumn() == 3);
-        REQUIRE(p->endLine() == 5);
+        CHECK_POSITIONS(p, 0, 5, 3, 5);
     }
 
     {
         REQUIRE(doc->items().at(3)->type() == MD::ItemType::Paragraph);
         auto p = static_cast<MD::Paragraph *>(doc->items().at(3).get());
-        REQUIRE(p->startColumn() == 0);
-        REQUIRE(p->startLine() == 7);
-        REQUIRE(p->endColumn() == 3);
-        REQUIRE(p->endLine() == 7);
+        CHECK_POSITIONS(p, 0, 7, 3, 7);
     }
+}
+
+/*
+1. Ordered item
+   > - Bullet inside quote
+   > - Another bullet
+
+*/
+TEST_CASE("373")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/373.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
+    auto l = static_cast<MD::List *>(doc->items().at(1).get());
+    REQUIRE(l->items().size() == 1);
+    REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
+    auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
+    REQUIRE(li->listType() == MD::ListItem::Ordered);
+    REQUIRE(li->items().size() == 2);
+    REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
+    REQUIRE(li->items().at(1)->type() == MD::ItemType::Blockquote);
+    auto b = static_cast<MD::Blockquote *>(li->items().at(1).get());
+    REQUIRE(b->items().size() == 1);
+    REQUIRE(b->items().at(0)->type() == MD::ItemType::List);
+    auto l1 = static_cast<MD::List *>(b->items().at(0).get());
+    REQUIRE(l1->items().size() == 2);
+
+    {
+        REQUIRE(l1->items().at(0)->type() == MD::ItemType::ListItem);
+        auto li1 = static_cast<MD::ListItem *>(l1->items().at(0).get());
+        REQUIRE(li1->items().size() == 1);
+        REQUIRE(li1->items().at(0)->type() == MD::ItemType::Paragraph);
+    }
+
+    {
+        REQUIRE(l1->items().at(1)->type() == MD::ItemType::ListItem);
+        auto li1 = static_cast<MD::ListItem *>(l1->items().at(1).get());
+        REQUIRE(li1->items().size() == 1);
+        REQUIRE(li1->items().at(0)->type() == MD::ItemType::Paragraph);
+    }
+}
+
+/*
+1. Ordered item
+   > - Bullet inside quote
+   > - Another bullet
+   >
+   > ```cpp
+   > // this is some code
+   > ```
+
+*/
+TEST_CASE("374")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/374.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
+    auto l = static_cast<MD::List *>(doc->items().at(1).get());
+    REQUIRE(l->items().size() == 1);
+    REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
+    auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
+    REQUIRE(li->listType() == MD::ListItem::Ordered);
+    REQUIRE(li->items().size() == 2);
+    REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
+    REQUIRE(li->items().at(1)->type() == MD::ItemType::Blockquote);
+    auto b = static_cast<MD::Blockquote *>(li->items().at(1).get());
+    REQUIRE(b->items().size() == 2);
+    REQUIRE(b->items().at(0)->type() == MD::ItemType::List);
+    auto l1 = static_cast<MD::List *>(b->items().at(0).get());
+    REQUIRE(l1->items().size() == 2);
+
+    {
+        REQUIRE(l1->items().at(0)->type() == MD::ItemType::ListItem);
+        auto li1 = static_cast<MD::ListItem *>(l1->items().at(0).get());
+        REQUIRE(li1->items().size() == 1);
+        REQUIRE(li1->items().at(0)->type() == MD::ItemType::Paragraph);
+    }
+
+    {
+        REQUIRE(l1->items().at(1)->type() == MD::ItemType::ListItem);
+        auto li1 = static_cast<MD::ListItem *>(l1->items().at(1).get());
+        REQUIRE(li1->items().size() == 1);
+        REQUIRE(li1->items().at(0)->type() == MD::ItemType::Paragraph);
+    }
+
+    REQUIRE(b->items().at(1)->type() == MD::ItemType::Code);
+    auto c = static_cast<MD::Code *>(b->items().at(1).get());
+    REQUIRE(c->isFensedCode());
+}
+
+/*
+1. Ordered item
+   > - Bullet inside quote
+   > - Another bullet
+   > ```cpp
+   > // this is some code
+   > ```
+
+*/
+TEST_CASE("375")
+{
+    MD::Parser parser;
+
+    auto doc = parser.parse(QStringLiteral("tests/parser/data/375.md"));
+
+    REQUIRE(doc->isEmpty() == false);
+    REQUIRE(doc->items().size() == 2);
+    REQUIRE(doc->items().at(1)->type() == MD::ItemType::List);
+    auto l = static_cast<MD::List *>(doc->items().at(1).get());
+    CHECK_POSITIONS(l, 0, 0, 0, 6);
+    REQUIRE(l->items().size() == 1);
+    REQUIRE(l->items().at(0)->type() == MD::ItemType::ListItem);
+    auto li = static_cast<MD::ListItem *>(l->items().at(0).get());
+    CHECK_POSITIONS(li, 0, 0, 0, 6);
+    REQUIRE(li->listType() == MD::ListItem::Ordered);
+    REQUIRE(li->items().size() == 2);
+    REQUIRE(li->items().at(0)->type() == MD::ItemType::Paragraph);
+    REQUIRE(li->items().at(1)->type() == MD::ItemType::Blockquote);
+    auto b = static_cast<MD::Blockquote *>(li->items().at(1).get());
+    CHECK_POSITIONS(b, 3, 1, 7, 5);
+    REQUIRE(b->items().size() == 2);
+    REQUIRE(b->items().at(0)->type() == MD::ItemType::List);
+    auto l1 = static_cast<MD::List *>(b->items().at(0).get());
+    CHECK_POSITIONS(l1, 5, 1, 20, 2);
+    REQUIRE(l1->items().size() == 2);
+
+    {
+        REQUIRE(l1->items().at(0)->type() == MD::ItemType::ListItem);
+        auto li1 = static_cast<MD::ListItem *>(l1->items().at(0).get());
+        CHECK_POSITIONS(li1, 5, 1, 25, 1);
+        REQUIRE(li1->items().size() == 1);
+        REQUIRE(li1->items().at(0)->type() == MD::ItemType::Paragraph);
+    }
+
+    {
+        REQUIRE(l1->items().at(1)->type() == MD::ItemType::ListItem);
+        auto li1 = static_cast<MD::ListItem *>(l1->items().at(1).get());
+        CHECK_POSITIONS(li1, 5, 2, 20, 2);
+        REQUIRE(li1->items().size() == 1);
+        REQUIRE(li1->items().at(0)->type() == MD::ItemType::Paragraph);
+    }
+
+    REQUIRE(b->items().at(1)->type() == MD::ItemType::Code);
+    auto c = static_cast<MD::Code *>(b->items().at(1).get());
+    CHECK_POSITIONS(c, 5, 4, 24, 4);
+    REQUIRE(c->isFensedCode());
 }

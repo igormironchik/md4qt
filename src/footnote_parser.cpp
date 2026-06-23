@@ -225,6 +225,7 @@ BlockState FootnoteParser::process(Line &currentLine,
         m_note->setStartLine(currentLine.lineNumber());
         m_note->setEndColumn(currentLine.length() - 1);
         m_note->setEndLine(currentLine.lineNumber());
+        ctx.setItem(m_note.get());
 
         processLabel(currentLine, doc, path, fileName, m_note);
 

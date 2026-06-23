@@ -507,9 +507,28 @@ public:
                     || (hasChildIndents() ? column > firstChildIndent() : false)));
     }
 
+    /*!
+     * Returns item in the document for this context.
+     */
+    inline Item *item() const
+    {
+        return m_item;
+    }
+
+    /*!
+     * Set item in the document for this context.
+     *
+     * \a i Item.
+     */
+    inline void setItem(Item *i)
+    {
+        m_item = i;
+    }
+
 private:
     Context *m_parent = nullptr;
     BlockParser *m_block = nullptr;
+    Item *m_item = nullptr;
     Children m_children;
     ChildLists m_lists;
     qsizetype m_indent = 0;

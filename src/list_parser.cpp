@@ -418,6 +418,14 @@ BlockState ListParser::continueCheck(Line &currentLine,
     return processList(currentLine, stream, doc, ctx, path, fileName, false, dummy).m_state;
 }
 
+void ListParser::setLastListItem(Context &ctx)
+{
+    if (!ctx.lists().isEmpty() && !ctx.lists().back()->items().isEmpty()) {
+        m_lastListItem = ctx.lists().back()->items().back().staticCast<ListItem>();
+        ctx.setItem(m_lastListItem.get());
+    }
+}
+
 BlockState ListParser::process(Line &currentLine,
                                TextStream &stream,
                                QSharedPointer<Document> doc,
@@ -464,6 +472,8 @@ BlockState ListParser::process(Line &currentLine,
         looped = true;
         currentLine.restoreState(&lineState);
 
+        setLastListItem(ctx);
+
         state = processList(currentLine, stream, doc, ctx, path, fileName, true, linksToParse);
 
         if (state.m_state != BlockState::Stop) {
@@ -472,7 +482,11 @@ BlockState ListParser::process(Line &currentLine,
                     auto list = QSharedPointer<List>::create();
                     list->setStartColumn(state.m_item->startColumn());
                     list->setStartLine(state.m_item->startLine());
-                    m_lastListItem->appendItem(list);
+                    if (ctx.parent() && ctx.parent()->block() && ctx.parent()->item()) {
+                        static_cast<Block *>(ctx.parent()->item())->appendItem(list);
+                    } else {
+                        m_lastListItem->appendItem(list);
+                    }
                     ctx.lists().append(list);
                 } else if (state.m_makeNewList) {
                     auto list = QSharedPointer<List>::create();
@@ -486,7 +500,7 @@ BlockState ListParser::process(Line &currentLine,
                 ctx.lists().back()->appendItem(state.m_item);
             }
 
-            m_lastListItem = ctx.lists().back()->items().back().staticCast<ListItem>();
+            setLastListItem(ctx);
 
             applyLastPosition(ctx, currentLine.length() - 1, currentLine.lineNumber());
         } else {
@@ -556,8 +570,8 @@ BlockState ListParser::process(Line &currentLine,
     if (!looped) {
         state = processList(currentLine, stream, doc, ctx, path, fileName, true, linksToParse);
 
-        if (!ctx.lists().isEmpty() && !ctx.lists().back()->items().isEmpty()) {
-            m_lastListItem = ctx.lists().back()->items().back().staticCast<ListItem>();
+        if (state.m_state != MD::BlockState::Stop) {
+            setLastListItem(ctx);
         }
     }
 
@@ -573,7 +587,23 @@ BlockState ListParser::process(Line &currentLine,
 
 void ListParser::reset(Context &ctx)
 {
-    resetOnAllContexts();
+    m_lastItemIsEmpty = false;
+    auto *parent = ctx.parent();
+    auto clearRootList = true;
+
+    while (parent) {
+        if (parent->block() && !parent->lists().isEmpty()) {
+            clearRootList = false;
+            break;
+        }
+
+        parent = parent->parent();
+    }
+
+    if (clearRootList) {
+        m_list.reset();
+        m_lastListItem.reset();
+    }
 
     BlockParser::reset(ctx);
 

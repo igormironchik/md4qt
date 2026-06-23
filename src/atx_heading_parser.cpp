@@ -172,7 +172,7 @@ BlockState ATXHeadingParser::process(Line &currentLine,
                                      TextStream &,
                                      QSharedPointer<Document> doc,
                                      QSharedPointer<Block> parent,
-                                     Context &,
+                                     Context &ctx,
                                      const QString &path,
                                      const QString &fileName,
                                      QStringList &linksToParse)
@@ -191,6 +191,7 @@ BlockState ATXHeadingParser::process(Line &currentLine,
     heading->setEndColumn(currentLine.length() - 1);
     heading->setEndLine(currentLine.lineNumber());
     parent->appendItem(heading);
+    ctx.setItem(heading.get());
 
     Heading::Delims delims;
     WithPosition startDelim;

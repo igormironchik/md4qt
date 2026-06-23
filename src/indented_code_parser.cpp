@@ -102,6 +102,7 @@ BlockState IndentedCodeParser::process(Line &currentLine,
                                    - (currentLine.column() > codeColumn(ctx.maxAvailableIndent()) ? 1 : 0));
             m_code->setStartLine(currentLine.lineNumber());
             parent->appendItem(m_code);
+            ctx.setItem(m_code.get());
         }
 
         if (m_code) {
