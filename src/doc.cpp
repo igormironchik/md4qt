@@ -165,9 +165,19 @@ const ItemWithOpts::Styles &ItemWithOpts::openStyles() const
     return m_openStyles;
 }
 
-ItemWithOpts::Styles &ItemWithOpts::openStyles()
+void ItemWithOpts::setOpenStyles(const Styles &s)
 {
-    return m_openStyles;
+    m_openStyles = s;
+}
+
+void ItemWithOpts::appendOpenStyle(const StyleDelim &s)
+{
+    m_openStyles.append(s);
+}
+
+void ItemWithOpts::appendOpenStyles(const Styles &s)
+{
+    m_openStyles.append(s);
 }
 
 const ItemWithOpts::Styles &ItemWithOpts::closeStyles() const
@@ -175,9 +185,19 @@ const ItemWithOpts::Styles &ItemWithOpts::closeStyles() const
     return m_closeStyles;
 }
 
-ItemWithOpts::Styles &ItemWithOpts::closeStyles()
+void ItemWithOpts::setCloseStyles(const Styles &s)
 {
-    return m_closeStyles;
+    m_closeStyles = s;
+}
+
+void ItemWithOpts::appendCloseStyle(const StyleDelim &s)
+{
+    m_closeStyles.append(s);
+}
+
+void ItemWithOpts::appendCloseStyles(const Styles &s)
+{
+    m_closeStyles.append(s);
 }
 
 //
@@ -249,6 +269,11 @@ ItemType Anchor::type() const
 const QString &Anchor::label() const
 {
     return m_label;
+}
+
+void Anchor::setLabel(const QString &l)
+{
+    m_label = l;
 }
 
 //
@@ -374,6 +399,11 @@ void Block::applyBlock(const Block &other,
 const Block::Items &Block::items() const
 {
     return m_items;
+}
+
+void Block::setItems(const Items &i)
+{
+    m_items = i;
 }
 
 void Block::insertItem(qsizetype idx,
@@ -521,14 +551,14 @@ const Heading::LabelsVector &Heading::labelVariants() const
     return m_labelVariants;
 }
 
-Heading::LabelsVector &Heading::labelVariants()
-{
-    return m_labelVariants;
-}
-
 void Heading::setLabelVariants(const LabelsVector &vars)
 {
     m_labelVariants = vars;
+}
+
+void Heading::appendLabelVariant(const QString &v)
+{
+    m_labelVariants.append(v);
 }
 
 //
@@ -543,7 +573,7 @@ QSharedPointer<Item> Blockquote::clone(Document *doc) const
 {
     auto b = QSharedPointer<Blockquote>::create();
     b->applyBlock(*this, doc);
-    b->delims() = m_delims;
+    b->setDelims(m_delims);
 
     return b;
 }
@@ -558,9 +588,14 @@ const Blockquote::Delims &Blockquote::delims() const
     return m_delims;
 }
 
-Blockquote::Delims &Blockquote::delims()
+void Blockquote::setDelims(const Delims &d)
 {
-    return m_delims;
+    m_delims = d;
+}
+
+void Blockquote::appendDelim(const WithPosition &p)
+{
+    m_delims.append(p);
 }
 
 //
@@ -1033,6 +1068,11 @@ const TableRow::Cells &TableRow::cells() const
     return m_cells;
 }
 
+void TableRow::setCells(const Cells &c)
+{
+    m_cells = c;
+}
+
 void TableRow::appendCell(TableCellSharedPointer c)
 {
     m_cells.push_back(c);
@@ -1075,6 +1115,11 @@ ItemType Table::type() const
 const Table::Rows &Table::rows() const
 {
     return m_rows;
+}
+
+void Table::setRows(Rows &r)
+{
+    m_rows = r;
 }
 
 void Table::appendRow(TableRowSharedPointer r)
@@ -1137,6 +1182,11 @@ ItemType FootnoteRef::type() const
 const QString &FootnoteRef::id() const
 {
     return m_id;
+}
+
+void FootnoteRef::setId(const QString &i)
+{
+    m_id = i;
 }
 
 const WithPosition &FootnoteRef::idPos() const
@@ -1209,7 +1259,7 @@ QSharedPointer<Item> Document::clone(Document *doc) const
         d->insertLabeledLink(it.key(), it.value()->clone(d.get()).staticCast<Link>());
     }
 
-    d->auxLabelsMap() = auxLabelsMap();
+    d->setAuxLabelsMap(auxLabelsMap());
 
     return d;
 }
@@ -1217,6 +1267,11 @@ QSharedPointer<Item> Document::clone(Document *doc) const
 const Document::Footnotes &Document::footnotesMap() const
 {
     return m_footnotes;
+}
+
+void Document::setFootnotesMap(const Footnotes &f)
+{
+    m_footnotes = f;
 }
 
 void Document::insertFootnote(const QString &id,
@@ -1230,6 +1285,11 @@ const Document::LabeledLinks &Document::labeledLinks() const
     return m_labeledLinks;
 }
 
+void Document::setLabeledLinks(const LabeledLinks &l)
+{
+    m_labeledLinks = l;
+}
+
 void Document::insertLabeledLink(const QString &label,
                                  LinkSharedPointer lnk)
 {
@@ -1241,20 +1301,41 @@ const Document::LabeledHeadings &Document::labeledHeadings() const
     return m_labeledHeadings;
 }
 
+void Document::setLabeledHeadings(const LabeledHeadings &h)
+{
+    m_labeledHeadings = h;
+}
+
 void Document::insertLabeledHeading(const QString &label,
                                     HeadingSharedPointer h)
 {
     m_labeledHeadings.insert(label, h);
 }
 
-Document::AuxLabelsMap &Document::auxLabelsMap()
+const Document::AuxLabelsMap &Document::auxLabelsMap() const
 {
     return m_auxLabelsMap;
 }
 
-const Document::AuxLabelsMap &Document::auxLabelsMap() const
+void Document::setAuxLabelsMap(const AuxLabelsMap &m)
 {
-    return m_auxLabelsMap;
+    m_auxLabelsMap = m;
+}
+
+void Document::insertAuxLabel(const QString &label,
+                              const QString &path)
+{
+    if (!m_auxLabelsMap.contains(label)) {
+        m_auxLabelsMap.insert(label, {});
+    }
+
+    m_auxLabelsMap[label].insert(path, 0);
+}
+
+void Document::incrementAuxLabelCounter(const QString &label,
+                                        const QString &path)
+{
+    ++m_auxLabelsMap[label][path];
 }
 
 } /* namespace MD */

@@ -522,8 +522,8 @@ TEST_CASE("doc")
         REQUIRE(style.style() == MD::TextOption::ItalicText);
 
         MD::Text text;
-        text.openStyles() = {style};
-        text.closeStyles() = {style};
+        text.setOpenStyles({style});
+        text.setCloseStyles({style});
 
         const auto &textConstRef = text;
         REQUIRE(textConstRef.openStyles().size() == 1);
@@ -532,8 +532,8 @@ TEST_CASE("doc")
 
     {
         MD::Blockquote quote;
-        quote.delims().append(MD::WithPosition{});
-        quote.delims().append(MD::WithPosition{});
+        quote.appendDelim(MD::WithPosition{});
+        quote.appendDelim(MD::WithPosition{});
         quote.appendItem(QSharedPointer<MD::Text>::create());
         quote.appendItem(QSharedPointer<MD::Text>::create());
 

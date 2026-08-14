@@ -817,7 +817,7 @@ void ParagraphParser::makeTextObjects(InlineContext &ctx,
 
         while (line.position() < line.length()) {
             if (!close.isEmpty() && !p->isEmpty()) {
-                p->items().back().staticCast<ItemWithOpts>()->closeStyles().append(close);
+                p->items().back().staticCast<ItemWithOpts>()->appendCloseStyles(close);
                 clearStyles(opts, opened);
                 close.clear();
             }
@@ -853,7 +853,7 @@ void ParagraphParser::makeTextObjects(InlineContext &ctx,
                     placeEmph();
 
                     if (!close.isEmpty()) {
-                        text->closeStyles().append(close);
+                        text->appendCloseStyles(close);
                         clearStyles(opts, opened);
                         close.clear();
                     }
@@ -869,13 +869,13 @@ void ParagraphParser::makeTextObjects(InlineContext &ctx,
                 placeEmph();
 
                 if (!open.isEmpty()) {
-                    text->openStyles().append(open);
+                    text->appendOpenStyles(open);
 
                     open.clear();
                 }
 
                 if (!close.isEmpty() && item) {
-                    item->closeStyles().append(close);
+                    item->appendCloseStyles(close);
                     clearStyles(opts, opened);
                     close.clear();
                 }
@@ -883,8 +883,8 @@ void ParagraphParser::makeTextObjects(InlineContext &ctx,
                 moveAfterPos(line, stream, toPlace);
 
                 if (toPlace.m_item) {
-                    toPlace.m_item->openStyles() = text->openStyles();
-                    text->openStyles().clear();
+                    toPlace.m_item->setOpenStyles(text->openStyles());
+                    text->setOpenStyles({});
                     p->appendItem(toPlace.m_item);
                     item = toPlace.m_item;
                 }
@@ -933,7 +933,7 @@ void ParagraphParser::makeTextObjects(InlineContext &ctx,
     }
 
     if (!close.isEmpty() && !p->isEmpty()) {
-        p->items().back().staticCast<ItemWithOpts>()->closeStyles().append(close);
+        p->items().back().staticCast<ItemWithOpts>()->appendCloseStyles(close);
     }
 
     stream.restoreState();

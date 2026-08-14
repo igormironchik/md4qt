@@ -123,7 +123,7 @@ BlockState BlockquoteParser::process(Line &currentLine,
 
     if (isBlockquoteOrLazyLine(currentLine, ctx)) {
         if (currentLine.currentChar() == s_greaterSignChar) {
-            quote->delims().append(
+            quote->appendDelim(
                 {currentLine.column(), currentLine.lineNumber(), currentLine.column(), currentLine.lineNumber()});
 
             processGreaterSign(currentLine, ctx);

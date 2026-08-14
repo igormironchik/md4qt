@@ -11,6 +11,7 @@ clang-format --style=file -i --sort-includes tests/auto/html/*.cpp
 clang-format --style=file -i --sort-includes tests/auto/commonmark/*.cpp
 clang-format --style=file -i --sort-includes tests/auto/poscache/*.cpp
 clang-format --style=file -i --sort-includes tests/auto/test_parser/*.cpp
+clang-format --style=file -i --sort-includes tests/auto/test_parser/*.h
 clang-format --style=file -i --sort-includes tests/auto/test_funcs/*.cpp
 clang-format --style=file -i --sort-includes tests/auto/plugins/yaml/*.cpp
 clang-format --style=file -i --sort-includes utils/md2html/*.cpp

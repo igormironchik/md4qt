@@ -409,9 +409,25 @@ public:
     const Styles &openStyles() const;
 
     /*!
-     * Returns list of all opening emphasises.
+     * Set the list of all opening emphasises.
+     *
+     * \a s The list of all opening emphasises.
      */
-    Styles &openStyles();
+    void setOpenStyles(const Styles &s);
+
+    /*!
+     * Append opening style delimiter.
+     *
+     * \a s Style delimiter.
+     */
+    void appendOpenStyle(const StyleDelim &s);
+
+    /*!
+     * Append opening styles delimiters.
+     *
+     * \a s Styles delimiters.
+     */
+    void appendOpenStyles(const Styles &s);
 
     /*!
      * Returns list of all closing emphasises.
@@ -419,9 +435,25 @@ public:
     const Styles &closeStyles() const;
 
     /*!
-     * Returns list of all closing emphasises.
+     * Set the list of all closing emphasises.
+     *
+     * \a s The list of all closing emphasises.
      */
-    Styles &closeStyles();
+    void setCloseStyles(const Styles &s);
+
+    /*!
+     * Append closing style delimiter.
+     *
+     * \a s Style delimiter.
+     */
+    void appendCloseStyle(const StyleDelim &s);
+
+    /*!
+     * Append closing styles delimiters.
+     *
+     * \a s Styles delimiters.
+     */
+    void appendCloseStyles(const Styles &s);
 
 private:
     /*!
@@ -563,6 +595,13 @@ public:
      * Returns label of this anchor.
      */
     const QString &label() const;
+
+    /*!
+     * Set label.
+     *
+     * \a l New label value.
+     */
+    void setLabel(const QString &l);
 
 private:
     Q_DISABLE_COPY(Anchor)
@@ -785,6 +824,13 @@ public:
     const Items &items() const;
 
     /*!
+     * Set list of child items.
+     *
+     * \a i List of child items.
+     */
+    void setItems(const Items &i);
+
+    /*!
      * Insert child item at given position.
      *
      * \a idx Index where insert.
@@ -994,16 +1040,18 @@ public:
     const LabelsVector &labelVariants() const;
 
     /*!
-     * Returns label variants.
-     */
-    LabelsVector &labelVariants();
-
-    /*!
      * Set label variants.
      *
      * \a vars New value.
      */
     void setLabelVariants(const LabelsVector &vars);
+
+    /*!
+     * Append label variant.
+     *
+     * \a v Label variant.
+     */
+    void appendLabelVariant(const QString &v);
 
 private:
     /*!
@@ -1081,9 +1129,18 @@ public:
     const Delims &delims() const;
 
     /*!
-     * Returns list of service characters.
+     * Set list of service characters.
+     *
+     * \a d List of service characters.
      */
-    Delims &delims();
+    void setDelims(const Delims &d);
+
+    /*!
+     * Append service character position.
+     *
+     * \a p Service character position.
+     */
+    void appendDelim(const WithPosition &p);
 
 private:
     /*!
@@ -1870,6 +1927,13 @@ public:
     const Cells &cells() const;
 
     /*!
+     * Set list of cells.
+     *
+     * \a c Cells.
+     */
+    void setCells(const Cells &c);
+
+    /*!
      * Append cell.
      *
      * \a c New value.
@@ -1943,6 +2007,13 @@ public:
      * Returns list of rows.
      */
     const Rows &rows() const;
+
+    /*!
+     * Set list of rows.
+     *
+     * \a r Rows.
+     */
+    void setRows(Rows &r);
 
     /*!
      * Append row.
@@ -2055,6 +2126,13 @@ public:
      * Returns ID of footnote reference.
      */
     const QString &id() const;
+
+    /*!
+     * Set ID of footnote reference.
+     *
+     * \a i ID.
+     */
+    void setId(const QString &i);
 
     /*!
      * Returns position of ID.
@@ -2189,6 +2267,13 @@ public:
     const Footnotes &footnotesMap() const;
 
     /*!
+     * Set map of footnotes.
+     *
+     * \a f Map of footnotes.
+     */
+    void setFootnotesMap(const Footnotes &f);
+
+    /*!
      * Insert footnote with the give ID.
      *
      * \a id ID.
@@ -2215,6 +2300,13 @@ public:
      * Returns map of shortcut links.
      */
     const LabeledLinks &labeledLinks() const;
+
+    /*!
+     * Set map of shortcut links.
+     *
+     * \a l Map of labeled links.
+     */
+    void setLabeledLinks(const LabeledLinks &l);
 
     /*!
      * Insert shortcut link with the given label.
@@ -2245,6 +2337,13 @@ public:
     const LabeledHeadings &labeledHeadings() const;
 
     /*!
+     * Set map of headings.
+     *
+     * \a h Labeled headings.
+     */
+    void setLabeledHeadings(const LabeledHeadings &h);
+
+    /*!
      * Insert heading with the given label.
      *
      * \a label Label.
@@ -2265,12 +2364,34 @@ public:
     /*!
      * Returns auxiliary map for resolving headings' ids labels.
      */
-    AuxLabelsMap &auxLabelsMap();
+    const AuxLabelsMap &auxLabelsMap() const;
 
     /*!
-     * Returns auxiliary map for resolving headings' ids labels.
+     * Set auxiliary map for resolving headings' ids labels.
+     *
+     * \a m Auxiliary map for resolving headings' ids labels.
      */
-    const AuxLabelsMap &auxLabelsMap() const;
+    void setAuxLabelsMap(const AuxLabelsMap &m);
+
+    /*!
+     * Insert auxiliary label.
+     *
+     * \a label Label.
+     *
+     * \a path Path.
+     */
+    void insertAuxLabel(const QString &label,
+                        const QString &path);
+
+    /*!
+     * Increment auxiliary label counter.
+     *
+     * \a label Label.
+     *
+     * \a path Path.
+     */
+    void incrementAuxLabelCounter(const QString &label,
+                                  const QString &path);
 
 private:
     /*!

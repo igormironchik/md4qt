@@ -82,7 +82,7 @@ add_library(md4qt::md4qt ALIAS md4qt)
 find_package(Qt6 REQUIRED COMPONENTS Core)
 
 set_target_properties(md4qt PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries(md4qt PRIVATE Qt6::Core)
+target_link_libraries(md4qt PUBLIC Qt6::Core)
 
 target_include_directories(md4qt INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>

@@ -145,26 +145,21 @@ void ATXHeadingParser::processLabel(QSharedPointer<Paragraph> paragraph,
     if (doc->auxLabelsMap().contains(label)) {
         if (doc->auxLabelsMap()[label].contains(labelPath)) {
             const auto count = doc->auxLabelsMap()[label][labelPath];
-            doc->auxLabelsMap()[label][labelPath] = count + 1;
+            doc->incrementAuxLabelCounter(label, labelPath);
             label.append(s_minusChar + QString::number(count + 1));
-            doc->auxLabelsMap().insert(label, {});
-            doc->auxLabelsMap()[label].insert(labelPath, 0);
-        } else {
-            doc->auxLabelsMap()[label].insert(labelPath, 0);
         }
-    } else {
-        doc->auxLabelsMap().insert(label, {});
-        doc->auxLabelsMap()[label].insert(labelPath, 0);
     }
 
+    doc->insertAuxLabel(label, labelPath);
+
     heading->setLabel(label + labelPath);
-    heading->labelVariants().push_back(heading->label());
+    heading->appendLabelVariant(heading->label());
 
     doc->insertLabeledHeading(label + labelPath, heading);
 
     if (label != label.toLower()) {
         doc->insertLabeledHeading(label.toLower() + labelPath, heading);
-        heading->labelVariants().push_back(label.toLower() + labelPath);
+        heading->appendLabelVariant(label.toLower() + labelPath);
     }
 }
 
@@ -300,7 +295,7 @@ BlockState ATXHeadingParser::process(Line &currentLine,
 
     if (heading->isLabeled()) {
         doc->insertLabeledHeading(heading->label(), heading);
-        heading->labelVariants().push_back(heading->label());
+        heading->appendLabelVariant(heading->label());
     } else {
         processLabel(paragraph, path, fileName, heading, doc);
     }

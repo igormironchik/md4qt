@@ -69,22 +69,18 @@ int main()
 
 # Benchmark
 
-Approximate benchmark with [cmark-gfm](https://github.com/github/cmark-gfm) says,
-that Qt6 version of `md4qt` is slower ~8 times.
-But you will get complete C++ tree structure of the Markdown document with all
-major extensions and sugar and cherry on the cake.
-
-| Markdown library | Result |
+| Markdown library | Result *(approximate time of parsing `tests/manual/complex.md` document)* |
 | --- | --- |
 | [cmark-gfm](https://github.com/github/cmark-gfm) | ~0.22 ms |
-| `md4qt` with `Qt6` | ~1.7 ms |
-| `md4qt` with `Qt6` without `GitHub` auto-links extension | ~1.2 ms |
+| `md4qt` | ~1.7 ms |
+| `md4qt` without `GitHub` auto-links extension | ~1.2 ms |
 
 # Playground
 
-You can play in action with `md4qt` in [Markdown Tools](https://github.com/igormironchik/markdown-tools). There you can find `Markdown` editor/viewer/converter to `PDF`.
-
-And [KleverNotes](https://invent.kde.org/office/klevernotes) from `KDE` uses `md4qt` too.
+| Applications using `md4qt` |
+| -------------------------- |
+| [Markdown Tools](https://github.com/igormironchik/markdown-tools) |
+| [KleverNotes](https://invent.kde.org/office/klevernotes) |
 
 # Release notes
 
