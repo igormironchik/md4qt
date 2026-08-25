@@ -214,7 +214,7 @@ TEST_CASE("200")
     REQUIRE(l->text() == QStringLiteral("foo"));
     const auto lit = doc->labeledLinks().find(l->url());
     REQUIRE(lit != doc->labeledLinks().cend());
-    REQUIRE(lit.value()->url() == QStringLiteral(""));
+    REQUIRE(lit.value()->url() == QString());
 }
 
 TEST_CASE("201")

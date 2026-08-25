@@ -777,7 +777,7 @@ TEST_CASE("test_stream")
     }
 
     {
-        QString data = QStringLiteral("");
+        QString data;
         QTextStream sstream(&data);
         MD::TextStream stream(sstream);
 
@@ -823,7 +823,7 @@ TEST_CASE("functions")
     }
 
     {
-        const QString data = QStringLiteral("");
+        const QString data;
         MD::Line line(data, 0);
         QChar startChar;
         int startParenthesisCount;
@@ -833,7 +833,7 @@ TEST_CASE("functions")
     }
 
     {
-        const QString data = QStringLiteral("");
+        const QString data;
         MD::Line line(data, 0);
         REQUIRE(MD::readEscapedSequence(line).isEmpty());
     }
@@ -846,7 +846,7 @@ TEST_CASE("functions")
     }
 
     {
-        const QString data = QStringLiteral("");
+        const QString data;
         MD::Line line(data, 0);
 
         REQUIRE(!MD::isClosed(line, 8, true));

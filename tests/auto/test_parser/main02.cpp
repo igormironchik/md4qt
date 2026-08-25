@@ -53,7 +53,7 @@ TEST_CASE("031")
         CHECK_POSITIONS(l, 0, 2, 43, 2);
     }
 
-    const auto wd = QDir().absolutePath() + QStringLiteral("/tests/parser/data");
+    const QString wd = QDir().absolutePath() + QStringLiteral("/tests/parser/data");
 
     auto checkDoc = [&wd](QSharedPointer<MD::Document> doc) {
         REQUIRE(doc->isEmpty() == false);

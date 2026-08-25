@@ -2384,6 +2384,16 @@ public:
                         const QString &path);
 
     /*!
+     * Returns auxiliary label current counter.
+     *
+     * \a label Label.
+     *
+     * \a path Path.
+     */
+    qsizetype getAuxLabelCounter(const QString &label,
+                                 const QString &path);
+
+    /*!
      * Increment auxiliary label counter.
      *
      * \a label Label.

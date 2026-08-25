@@ -679,7 +679,7 @@ TEST_CASE("303")
 */
 TEST_CASE("304")
 {
-    const auto wd = QDir().absolutePath() + QStringLiteral("/tests/parser/");
+    const QString wd = QDir().absolutePath() + QStringLiteral("/tests/parser/");
 
     MD::Parser parser;
 

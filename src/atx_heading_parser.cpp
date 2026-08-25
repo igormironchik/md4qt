@@ -144,7 +144,7 @@ void ATXHeadingParser::processLabel(QSharedPointer<Paragraph> paragraph,
 
     if (doc->auxLabelsMap().contains(label)) {
         if (doc->auxLabelsMap()[label].contains(labelPath)) {
-            const auto count = doc->auxLabelsMap()[label][labelPath];
+            const auto count = doc->getAuxLabelCounter(label, labelPath);
             doc->incrementAuxLabelCounter(label, labelPath);
             label.append(s_minusChar + QString::number(count + 1));
         }

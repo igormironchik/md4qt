@@ -1332,6 +1332,22 @@ void Document::insertAuxLabel(const QString &label,
     m_auxLabelsMap[label].insert(path, 0);
 }
 
+qsizetype Document::getAuxLabelCounter(const QString &label,
+                                       const QString &path)
+{
+    const auto it = m_auxLabelsMap.constFind(label);
+
+    if (it != m_auxLabelsMap.constEnd()) {
+        const auto cit = it->constFind(path);
+
+        if (cit != it->constEnd()) {
+            return cit.value();
+        }
+    }
+
+    return 0;
+}
+
 void Document::incrementAuxLabelCounter(const QString &label,
                                         const QString &path)
 {

@@ -1040,7 +1040,7 @@ TEST_CASE("243")
     REQUIRE(h->delims().size() == 1);
     REQUIRE(h->delims().front() == MD::WithPosition{0, 0, 0, 0});
 
-    const auto wd = QDir().absolutePath() + QStringLiteral("/tests/parser/data/");
+    const QString wd = QDir().absolutePath() + QStringLiteral("/tests/parser/data/");
 
     const QString label = QStringLiteral("#reference/") + wd + QStringLiteral("243.md");
 
@@ -1061,10 +1061,10 @@ TEST_CASE("243")
 
 TEST_CASE("244")
 {
-    const auto wd = QDir().absolutePath() + QStringLiteral("/tests/parser/data");
+    const QString wd = QDir().absolutePath() + QStringLiteral("/tests/parser/data");
 
-    const auto fn = wd + QStringLiteral("/244.md");
-    const auto ln = wd + QStringLiteral("/244-1.md");
+    const QString fn = wd + QStringLiteral("/244.md");
+    const QString ln = wd + QStringLiteral("/244-1.md");
 
     const auto fnData = fn.toLocal8Bit();
     const auto lnData = ln.toLocal8Bit();
@@ -1102,11 +1102,11 @@ TEST_CASE("244")
 
 TEST_CASE("244-ref")
 {
-    const auto wd = QDir().absolutePath() + QStringLiteral("/tests/parser/data");
+    const QString wd = QDir().absolutePath() + QStringLiteral("/tests/parser/data");
 
-    const auto fn = wd + QStringLiteral("/244-ref.md");
-    const auto label = QStringLiteral("#ref/") + wd + QStringLiteral("/244-1.md");
-    const auto ln = wd + QStringLiteral("/244-1.md#ref");
+    const QString fn = wd + QStringLiteral("/244-ref.md");
+    const QString label = QStringLiteral("#ref/") + wd + QStringLiteral("/244-1.md");
+    const QString ln = wd + QStringLiteral("/244-1.md#ref");
 
     const auto fnData = fn.toLocal8Bit();
     const auto lnData = ln.toLocal8Bit();

@@ -297,7 +297,7 @@ TEST_CASE("125")
 
     auto doc = parser.parse(QStringLiteral("tests/parser/data/125.md"));
 
-    const auto wd = QDir().absolutePath() + QStringLiteral("/tests/parser/data");
+    const QString wd = QDir().absolutePath() + QStringLiteral("/tests/parser/data");
 
     REQUIRE(doc->isEmpty() == false);
     REQUIRE(doc->items().size() == 2);
@@ -783,7 +783,7 @@ TEST_CASE("133")
     CHECK_POSITIONS(p, 0, 0, 49, 1);
     REQUIRE(p->items().size() == 2);
 
-    const auto wd = QDir().absolutePath() + QStringLiteral("/tests/parser/data");
+    const QString wd = QDir().absolutePath() + QStringLiteral("/tests/parser/data");
 
     {
         REQUIRE(p->items().at(0)->type() == MD::ItemType::Link);
