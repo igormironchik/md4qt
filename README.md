@@ -3,6 +3,10 @@
 	SPDX-License-Identifier: MIT
 -->
 
+> [!WARNING]
+> This repository is archived because all feature development and releases
+> will be made under the KDE umbrella - https://invent.kde.org/libraries/md4qt
+
 <img src="https://kde.org/stuff/clipart/logo/kde-logo-blue-transparent-source.svg" width="20%" align="right">
 
 `md4qt` is a static C++ library for parsing Markdown.
